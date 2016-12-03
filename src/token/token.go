@@ -3,11 +3,13 @@ package token
 // TODO: Replace this with an enum int?
 type TokenType string
 
+// TODO: Add line, column, and filename to token
 type Token struct {
 	Type    TokenType
 	Literal string
 }
 
+// TODO: Add comment token
 const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
