@@ -409,3 +409,20 @@ func TestBuiltinFunctions(t *testing.T) {
 		}
 	}
 }
+
+func TestBuiltinsCantBeOverridden(t *testing.T) {
+	input := `def len = func(x) { x }`
+	evaled := testEval(input)
+	if evaled == nil {
+		t.Fatal("no error object returned")
+	}
+
+	err, ok := evaled.(*object.Error)
+	if !ok {
+		t.Fatalf("object is not Error. got=%T (%+v)", evaled, showError(evaled))
+	}
+
+	if err.Message != "Attempted redeclaration of builtin function 'len'" {
+		t.Errorf("Error has wrong message. got=%q", err.Message)
+	}
+}

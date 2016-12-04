@@ -29,6 +29,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.DefStatement:
+		// Protect builtin functions
+		if builtin := getBuiltin(node.Name.Value); builtin != nil {
+			return newError(
+				"Attempted redeclaration of builtin function '%s'",
+				node.Name.Value,
+			)
+		}
+
 		val := Eval(node.Value, env)
 		if isError(val) {
 			return val
