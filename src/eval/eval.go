@@ -291,10 +291,19 @@ func evalIndexExpression(left, index object.Object) object.Object {
 func evalArrayIndexExpression(array, index object.Object) object.Object {
 	arrObj := array.(*object.Array)
 	idx := index.(*object.Integer).Value
-	max := int64(len(arrObj.Elements) - 1)
+	max := int64(len(arrObj.Elements))
 
-	if idx < 0 || idx > max {
+	if idx > max-1 { // Check upper bound
 		return NULL
+	}
+
+	if idx < 0 { // Check lower bound
+		// Convert a negative index to positive
+		idx = max + idx
+
+		if idx < 0 { // Check lower bound again
+			return NULL
+		}
 	}
 
 	return arrObj.Elements[idx]
