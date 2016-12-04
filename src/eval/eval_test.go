@@ -102,7 +102,7 @@ func TestEvalBooleanExpression(t *testing.T) {
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.Boolean)
 	if !ok {
-		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
+		t.Errorf("object is not Boolean. got=%T (%+v)", obj, showError(obj))
 		return false
 	}
 
@@ -229,6 +229,10 @@ func TestErrorHandling(t *testing.T) {
 			"foobar",
 			"identifier not found: foobar",
 		},
+		{
+			`"Hello" - "World"`,
+			"unknown operator: STRING - STRING",
+		},
 	}
 
 	for _, tt := range tests {
@@ -269,7 +273,7 @@ func TestFunctionObject(t *testing.T) {
 	evaluated := testEval(input)
 	fn, ok := evaluated.(*object.Function)
 	if !ok {
-		t.Fatalf("object is not Function. got=%T (%#v)", evaluated, evaluated)
+		t.Fatalf("object is not Function. got=%T (%#v)", evaluated, showError(evaluated))
 	}
 
 	if len(fn.Parameters) != 1 {
@@ -315,4 +319,59 @@ func TestClosures(t *testing.T) {
         addTwo(2);`
 
 	testIntegerObject(t, testEval(input), 4)
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello World!"`
+	evaluated := testEval(input)
+
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, showError(evaluated))
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello" + " " + "World!"`
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, showError(evaluated))
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func TestStringEquality(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{`"foobar" == "foobar"`, true},
+		{`"foobar" == "foo bar"`, false},
+		{`"foobar" != "foo bar"`, true},
+		{`"foobar" != "foobar"`, false},
+	}
+
+	for _, tt := range tests {
+		testBooleanObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func testStringObject(t *testing.T, got object.Object, expected string) {
+	str, ok := got.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", got, showError(got))
+	}
+
+	if str.Value != expected {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
 }

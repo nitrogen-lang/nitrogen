@@ -17,6 +17,7 @@ const (
 	RETURN_OBJ
 	ERROR_OBJ
 	FUNCTION_OBJ
+	STRING_OBJ
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -26,6 +27,7 @@ var objectTypeNames = map[ObjectType]string{
 	RETURN_OBJ:   "RETURN",
 	ERROR_OBJ:    "ERROR",
 	FUNCTION_OBJ: "FUNCTION",
+	STRING_OBJ:   "STRING",
 }
 
 type Object interface {
@@ -41,6 +43,14 @@ type Integer struct {
 func (i *Integer) Inspect() string  { return strconv.FormatInt(i.Value, 10) }
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) String() string   { return objectTypeNames[INTEGER_OBJ] }
+
+type String struct {
+	Value string
+}
+
+func (s *String) Inspect() string  { return s.Value }
+func (s *String) Type() ObjectType { return STRING_OBJ }
+func (s *String) String() string   { return objectTypeNames[STRING_OBJ] }
 
 type Boolean struct {
 	Value bool
