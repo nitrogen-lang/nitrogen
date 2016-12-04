@@ -256,3 +256,45 @@ func (ce *CallExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
+
+type Array struct {
+	Token    token.Token // the '[' token
+	Elements []Expression
+}
+
+func (a *Array) expressionNode()      {}
+func (a *Array) TokenLiteral() string { return a.Token.Literal }
+func (a *Array) String() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, el := range a.Elements {
+		elements = append(elements, el.String())
+	}
+
+	out.WriteByte('[')
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteByte(']')
+
+	return out.String()
+}
+
+type IndexExpression struct {
+	Token token.Token // The '[' token
+	Left  Expression
+	Index Expression
+}
+
+func (i *IndexExpression) expressionNode()      {}
+func (i *IndexExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteByte('(')
+	out.WriteString(i.Left.String())
+	out.WriteByte('[')
+	out.WriteString(i.Index.String())
+	out.WriteString("])")
+
+	return out.String()
+}

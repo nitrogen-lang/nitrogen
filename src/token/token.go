@@ -38,10 +38,12 @@ const (
 	SEMICOLON = ";"
 
 	// Groups and blocks
-	LPAREN = "("
-	RPAREN = ")"
-	LBRACE = "{"
-	RBRACE = "}"
+	LPAREN  = "("
+	RPAREN  = ")"
+	LBRACE  = "{"
+	RBRACE  = "}"
+	LSQUARE = "["
+	RSQUARE = "]"
 
 	// Keywords
 	FUNCTION = "FUNCTION"

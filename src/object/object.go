@@ -23,6 +23,7 @@ const (
 	FUNCTION_OBJ
 	STRING_OBJ
 	BUILTIN_OBJ
+	ARRAY_OBJ
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -34,6 +35,7 @@ var objectTypeNames = map[ObjectType]string{
 	FUNCTION_OBJ: "FUNCTION",
 	STRING_OBJ:   "STRING",
 	BUILTIN_OBJ:  "BUILTIN",
+	ARRAY_OBJ:    "ARRAY",
 }
 
 type BuiltinFunction func(args ...Object) Object
@@ -119,3 +121,23 @@ type Builtin struct {
 
 func (b *Builtin) Inspect() string  { return "builtin function" }
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+	elements := []string{}
+
+	for _, e := range a.Elements {
+		elements = append(elements, e.Inspect())
+	}
+
+	out.WriteByte('[')
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteByte(']')
+
+	return out.String()
+}
+func (a *Array) Type() ObjectType { return ARRAY_OBJ }
