@@ -10,6 +10,7 @@ type Token struct {
 }
 
 // TODO: Add comment token
+// TODO: Add null token
 const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"

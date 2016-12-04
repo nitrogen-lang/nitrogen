@@ -6,7 +6,9 @@ import (
 	"io"
 	"os"
 
+	"github.com/lfkeitel/nitrogen/src/eval"
 	"github.com/lfkeitel/nitrogen/src/lexer"
+	"github.com/lfkeitel/nitrogen/src/object"
 	"github.com/lfkeitel/nitrogen/src/parser"
 )
 
@@ -20,6 +22,7 @@ func main() {
 
 func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for {
 		fmt.Fprint(out, PROMPT)
@@ -42,8 +45,11 @@ func startRepl(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		result := eval.Eval(program, env)
+		if result != nil {
+			io.WriteString(out, result.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
