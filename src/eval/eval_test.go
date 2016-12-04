@@ -464,3 +464,29 @@ func TestArrayIndexExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestArrayConcatenation(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"[1, 2, 3] + [4, 5]", "[1, 2, 3, 4, 5]"},
+		{"[] + [1, 2]", "[1, 2]"},
+		{"[1, 2] + []", "[1, 2]"},
+		{"[] + []", "[]"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		arr, ok := evaluated.(*object.Array)
+
+		if !ok {
+			t.Fatalf("object is not String. got=%T (%+v)", evaluated, showError(evaluated))
+		}
+
+		if arr.Inspect() != tt.expected {
+			t.Errorf("Array has wrong value. expected=%q, got=%q",
+				tt.expected, arr.Inspect())
+		}
+	}
+}
