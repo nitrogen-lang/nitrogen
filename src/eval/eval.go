@@ -150,7 +150,7 @@ func evalPrefixExpression(op string, right object.Object) object.Object {
 		return evalMinusPreOpExpression(right)
 	}
 
-	return newError("unknown operator: %s%s", op, right.String())
+	return newError("unknown operator: %s%s", op, right.Type())
 }
 
 func evalBangOpExpression(right object.Object) object.Object {
@@ -163,7 +163,7 @@ func evalBangOpExpression(right object.Object) object.Object {
 
 func evalMinusPreOpExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJ {
-		return newError("unknown operator: -%s", right.String())
+		return newError("unknown operator: -%s", right.Type())
 	}
 
 	value := right.(*object.Integer).Value
@@ -181,10 +181,10 @@ func evalInfixExpression(op string, left, right object.Object) object.Object {
 	case op == "!=":
 		return nativeBoolToBooleanObj(left != right)
 	case left.Type() != right.Type():
-		return newError("type mismatch: %s %s %s", left.String(), op, right.String())
+		return newError("type mismatch: %s %s %s", left.Type(), op, right.Type())
 	}
 
-	return newError("unknown operator: %s %s %s", left.String(), op, right.String())
+	return newError("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalIntegerInfixExpression(op string, left, right object.Object) object.Object {
@@ -210,7 +210,7 @@ func evalIntegerInfixExpression(op string, left, right object.Object) object.Obj
 		return nativeBoolToBooleanObj(leftVal != rightVal)
 	}
 
-	return newError("unknown operator: %s %s %s", left.String(), op, right.String())
+	return newError("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalStringInfixExpression(op string, left, right object.Object) object.Object {
@@ -226,7 +226,7 @@ func evalStringInfixExpression(op string, left, right object.Object) object.Obje
 		return nativeBoolToBooleanObj(leftVal != rightVal)
 	}
 
-	return newError("unknown operator: %s %s %s", left.String(), op, right.String())
+	return newError("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
@@ -245,22 +245,26 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 }
 
 func evalIdent(node *ast.Identifier, env *object.Environment) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: %s", node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-	return val
+	if builtin := getBuiltin(node.Value); builtin != nil {
+		return builtin
+	}
+	return newError("identifier not found: %s", node.Value)
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
-		return newError("%s is not a function", fn.String())
+	switch fn := fn.(type) {
+	case *object.Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaled := Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaled)
+	case *object.Builtin:
+		return fn.Fn(args...)
 	}
 
-	extendedEnv := extendFunctionEnv(function, args)
-	evaled := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaled)
+	return newError("%s is not a function", fn.Type())
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {

@@ -10,6 +10,10 @@ import (
 
 type ObjectType int
 
+func (o ObjectType) String() string {
+	return objectTypeNames[o]
+}
+
 const (
 	INTEGER_OBJ ObjectType = iota
 	BOOLEAN_OBJ
@@ -18,6 +22,7 @@ const (
 	ERROR_OBJ
 	FUNCTION_OBJ
 	STRING_OBJ
+	BUILTIN_OBJ
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -28,12 +33,14 @@ var objectTypeNames = map[ObjectType]string{
 	ERROR_OBJ:    "ERROR",
 	FUNCTION_OBJ: "FUNCTION",
 	STRING_OBJ:   "STRING",
+	BUILTIN_OBJ:  "BUILTIN",
 }
+
+type BuiltinFunction func(args ...Object) Object
 
 type Object interface {
 	Type() ObjectType
 	Inspect() string // Returns the value the object represents
-	String() string  // Returns a string of the Object type
 }
 
 type Integer struct {
@@ -42,7 +49,6 @@ type Integer struct {
 
 func (i *Integer) Inspect() string  { return strconv.FormatInt(i.Value, 10) }
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
-func (i *Integer) String() string   { return objectTypeNames[INTEGER_OBJ] }
 
 type String struct {
 	Value string
@@ -50,7 +56,6 @@ type String struct {
 
 func (s *String) Inspect() string  { return s.Value }
 func (s *String) Type() ObjectType { return STRING_OBJ }
-func (s *String) String() string   { return objectTypeNames[STRING_OBJ] }
 
 type Boolean struct {
 	Value bool
@@ -63,13 +68,11 @@ func (b *Boolean) Inspect() string {
 	return "false"
 }
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
-func (b *Boolean) String() string   { return objectTypeNames[BOOLEAN_OBJ] }
 
 type Null struct{}
 
 func (n *Null) Inspect() string  { return "null" }
 func (n *Null) Type() ObjectType { return NULL_OBJ }
-func (n *Null) String() string   { return objectTypeNames[NULL_OBJ] }
 
 type ReturnValue struct {
 	Value Object
@@ -77,7 +80,6 @@ type ReturnValue struct {
 
 func (r *ReturnValue) Inspect() string  { return r.Value.Inspect() }
 func (r *ReturnValue) Type() ObjectType { return RETURN_OBJ }
-func (r *ReturnValue) String() string   { return objectTypeNames[RETURN_OBJ] }
 
 // TODO: Expand with line/column numbers and stack trace
 type Error struct {
@@ -86,7 +88,6 @@ type Error struct {
 
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
-func (e *Error) String() string   { return objectTypeNames[ERROR_OBJ] }
 
 type Function struct {
 	Parameters []*ast.Identifier
@@ -111,4 +112,10 @@ func (f *Function) Inspect() string {
 	return out.String()
 }
 func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
-func (f *Function) String() string   { return objectTypeNames[FUNCTION_OBJ] }
+
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (b *Builtin) Inspect() string  { return "builtin function" }
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
