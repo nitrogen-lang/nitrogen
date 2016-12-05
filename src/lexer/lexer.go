@@ -1,30 +1,41 @@
 package lexer
 
-import "github.com/lfkeitel/nitrogen/src/token"
+import (
+	"bufio"
+	"bytes"
+	"io"
+	"strings"
+
+	"github.com/lfkeitel/nitrogen/src/token"
+)
 
 // TODO: Support Unicode by default
 type Lexer struct {
-	input        string
-	position     int  // current position in input (points to current char)
-	readPosition int  // current reading position in input (after current char)
-	ch           byte // current char under examination
+	input  *bufio.Reader
+	curCh  byte // current char under examination
+	peekCh byte // peek character
 }
 
-// TODO: Support io.Reader
-func New(input string) *Lexer {
-	l := &Lexer{input: input}
+func New(reader io.Reader) *Lexer {
+	l := &Lexer{input: bufio.NewReader(reader)}
+	// Populate both current and peek char
+	l.readChar()
 	l.readChar()
 	return l
 }
 
+func NewString(input string) *Lexer {
+	return New(strings.NewReader(input))
+}
+
 func (l *Lexer) readChar() {
-	if l.readPosition >= len(l.input) {
-		l.ch = 0
-	} else {
-		l.ch = l.input[l.readPosition]
+	l.curCh = l.peekCh
+
+	var err error
+	l.peekCh, err = l.input.ReadByte()
+	if err != nil {
+		l.peekCh = 0
 	}
-	l.position = l.readPosition
-	l.readPosition += 1
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -32,22 +43,22 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.devourWhitespace()
 
-	switch l.ch {
+	switch l.curCh {
 	// Operators
 	case '+':
-		tok = newToken(token.PLUS, l.ch)
+		tok = newToken(token.PLUS, l.curCh)
 	case '-':
-		tok = newToken(token.MINUS, l.ch)
+		tok = newToken(token.MINUS, l.curCh)
 	case '*':
-		tok = newToken(token.ASTERISK, l.ch)
+		tok = newToken(token.ASTERISK, l.curCh)
 	case '/':
-		tok = newToken(token.SLASH, l.ch)
+		tok = newToken(token.SLASH, l.curCh)
 	case '!':
 		if l.peekChar() == '=' {
 			l.readChar()
 			tok = token.Token{Type: token.NOT_EQ, Literal: "!="}
 		} else {
-			tok = newToken(token.BANG, l.ch)
+			tok = newToken(token.BANG, l.curCh)
 		}
 
 	// Equality
@@ -56,34 +67,34 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 			tok = token.Token{Type: token.EQ, Literal: "=="}
 		} else {
-			tok = newToken(token.ASSIGN, l.ch)
+			tok = newToken(token.ASSIGN, l.curCh)
 		}
 	case '<':
-		tok = newToken(token.LT, l.ch)
+		tok = newToken(token.LT, l.curCh)
 	case '>':
-		tok = newToken(token.GT, l.ch)
+		tok = newToken(token.GT, l.curCh)
 
 	// Control characters
 	case ',':
-		tok = newToken(token.COMMA, l.ch)
+		tok = newToken(token.COMMA, l.curCh)
 	case ';':
-		tok = newToken(token.SEMICOLON, l.ch)
+		tok = newToken(token.SEMICOLON, l.curCh)
 	case ':':
-		tok = newToken(token.COLON, l.ch)
+		tok = newToken(token.COLON, l.curCh)
 
 	// Groupings
 	case '(':
-		tok = newToken(token.LPAREN, l.ch)
+		tok = newToken(token.LPAREN, l.curCh)
 	case ')':
-		tok = newToken(token.RPAREN, l.ch)
+		tok = newToken(token.RPAREN, l.curCh)
 	case '{':
-		tok = newToken(token.LBRACE, l.ch)
+		tok = newToken(token.LBRACE, l.curCh)
 	case '}':
-		tok = newToken(token.RBRACE, l.ch)
+		tok = newToken(token.RBRACE, l.curCh)
 	case '[':
-		tok = newToken(token.LSQUARE, l.ch)
+		tok = newToken(token.LSQUARE, l.curCh)
 	case ']':
-		tok = newToken(token.RSQUARE, l.ch)
+		tok = newToken(token.RSQUARE, l.curCh)
 
 	case '"':
 		tok.Literal = l.readString()
@@ -93,17 +104,17 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Type = token.EOF
 
 	default:
-		if isLetter(l.ch) {
+		if isLetter(l.curCh) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
-		} else if isDigit(l.ch) {
+		} else if isDigit(l.curCh) {
 			tok.Literal = l.readNumber()
 			tok.Type = token.INT
 			return tok
 		}
 
-		tok = newToken(token.ILLEGAL, l.ch)
+		tok = newToken(token.ILLEGAL, l.curCh)
 	}
 
 	l.readChar()
@@ -111,44 +122,44 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 func (l *Lexer) peekChar() byte {
-	if l.readPosition >= len(l.input) {
-		return 0
-	}
-	return l.input[l.readPosition]
+	return l.peekCh
 }
 
 func (l *Lexer) readIdentifier() string {
-	position := l.position
-	for isLetter(l.ch) {
+	var ident bytes.Buffer
+	for isLetter(l.curCh) {
+		ident.WriteByte(l.curCh)
 		l.readChar()
 	}
-	return l.input[position:l.position]
+	return ident.String()
 }
 
 // TODO: Support escape sequences, standard Go should be fine, or PHP.
 func (l *Lexer) readString() string {
+	var ident bytes.Buffer
 	l.readChar() // Go past the starting double quote
 
-	position := l.position
-	for l.input[l.position] != '"' {
+	for l.curCh != '"' {
+		ident.WriteByte(l.curCh)
 		l.readChar()
 	}
 
-	return l.input[position:l.position]
+	return ident.String()
 }
 
 // TODO: Support floats, and arbitrary based numbers [base]b[number]
 // base defaults to 10. 8b10 = 8 in octal 16b10 = 16 in hex
 func (l *Lexer) readNumber() string {
-	position := l.position
-	for isDigit(l.ch) {
+	var ident bytes.Buffer
+	for isDigit(l.curCh) {
+		ident.WriteByte(l.curCh)
 		l.readChar()
 	}
-	return l.input[position:l.position]
+	return ident.String()
 }
 
 func (l *Lexer) devourWhitespace() {
-	for isWhitespace(l.ch) {
+	for isWhitespace(l.curCh) {
 		l.readChar()
 	}
 }

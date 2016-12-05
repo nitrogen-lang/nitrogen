@@ -31,6 +31,7 @@ func init() {
 	registerBuiltin("rest", restBuiltin)
 	registerBuiltin("push", pushBuiltin)
 	registerBuiltin("print", printBuiltin)
+	registerBuiltin("println", printlnBuiltin)
 }
 
 func lenBuiltin(args ...object.Object) object.Object {
@@ -118,6 +119,13 @@ func pushBuiltin(args ...object.Object) object.Object {
 }
 
 func printBuiltin(args ...object.Object) object.Object {
+	for _, arg := range args {
+		fmt.Print(arg.Inspect())
+	}
+	return NULL
+}
+
+func printlnBuiltin(args ...object.Object) object.Object {
 	for _, arg := range args {
 		fmt.Println(arg.Inspect())
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -14,10 +15,47 @@ import (
 
 const PROMPT = ">> "
 
+var (
+	interactive bool
+)
+
+func init() {
+	flag.BoolVar(&interactive, "i", false, "Interactive mode")
+}
+
 func main() {
-	fmt.Print("Nitrogen Programming Language\n")
-	fmt.Print("Type in commands at the prompt\n")
-	startRepl(os.Stdin, os.Stdout)
+	flag.Parse()
+
+	if interactive {
+		fmt.Print("Nitrogen Programming Language\n")
+		fmt.Print("Type in commands at the prompt\n")
+		startRepl(os.Stdin, os.Stdout)
+		return
+	}
+
+	if len(os.Args) != 2 {
+		fmt.Print("No file given")
+		os.Exit(1)
+	}
+
+	file, err := os.Open(os.Args[1])
+	if err != nil {
+		fmt.Print(err)
+		os.Exit(1)
+	}
+
+	l := lexer.New(file)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) != 0 {
+		printParserErrors(os.Stdout, p.Errors())
+		os.Exit(1)
+	}
+
+	result := eval.Eval(program, object.NewEnvironment())
+	if result != nil && result != eval.NULL {
+		io.WriteString(os.Stdout, result.Inspect())
+	}
 }
 
 func startRepl(in io.Reader, out io.Writer) {
@@ -36,7 +74,7 @@ func startRepl(in io.Reader, out io.Writer) {
 			return
 		}
 
-		l := lexer.New(line)
+		l := lexer.NewString(line)
 		p := parser.New(l)
 
 		program := p.ParseProgram()
