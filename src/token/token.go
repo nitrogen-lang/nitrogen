@@ -36,6 +36,7 @@ const (
 	// Delimiters
 	COMMA     = ","
 	SEMICOLON = ";"
+	COLON     = ":"
 
 	// Groups and blocks
 	LPAREN  = "("
