@@ -1,6 +1,10 @@
 package eval
 
-import "github.com/lfkeitel/nitrogen/src/object"
+import (
+	"fmt"
+
+	"github.com/lfkeitel/nitrogen/src/object"
+)
 
 var builtins = map[string]*object.Builtin{}
 
@@ -26,6 +30,7 @@ func init() {
 	registerBuiltin("last", lastBuiltin)
 	registerBuiltin("rest", restBuiltin)
 	registerBuiltin("push", pushBuiltin)
+	registerBuiltin("print", printBuiltin)
 }
 
 func lenBuiltin(args ...object.Object) object.Object {
@@ -110,4 +115,11 @@ func pushBuiltin(args ...object.Object) object.Object {
 	newElements[length] = args[1]
 
 	return &object.Array{Elements: newElements}
+}
+
+func printBuiltin(args ...object.Object) object.Object {
+	for _, arg := range args {
+		fmt.Println(arg.Inspect())
+	}
+	return NULL
 }
