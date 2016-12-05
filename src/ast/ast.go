@@ -53,6 +53,14 @@ func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string       { return i.Value }
 
+type NullLiteral struct {
+	Token token.Token // the token.NULL token
+}
+
+func (n *NullLiteral) expressionNode()      {}
+func (n *NullLiteral) TokenLiteral() string { return n.Token.Literal }
+func (n *NullLiteral) String() string       { return n.Token.Literal }
+
 type IntegerLiteral struct {
 	Token token.Token // the token.IDENT token
 	Value int64

@@ -568,3 +568,12 @@ func TestHashIndexExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestNullEval(t *testing.T) {
+	input := `nil`
+	evaluated := testEval(input)
+
+	if evaluated != NULL {
+		t.Fatalf("object is not Null. got=%T (%+v)", evaluated, showError(evaluated))
+	}
+}

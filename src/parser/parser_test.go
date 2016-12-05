@@ -988,3 +988,22 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 		testFunc(value)
 	}
 }
+
+func TestNullLiteral(t *testing.T) {
+	input := "nil"
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	null, ok := stmt.Expression.(*ast.NullLiteral)
+	if !ok {
+		t.Fatalf("exp is not ast.NullLiteral. got=%T", stmt.Expression)
+	}
+
+	if null.String() != "nil" {
+		t.Fatalf("Null value incorrect. Expected nil, got %s", null.String())
+	}
+}

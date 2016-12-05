@@ -24,3 +24,7 @@ def placeMap = {
 println(placeMap["Europe"])
 
 println(push(placeMap["Europe"], "Denmark"))
+
+def thisIsNull = nil
+
+println(thisIsNull)
