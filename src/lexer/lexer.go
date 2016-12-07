@@ -132,8 +132,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
 		} else if isDigit(l.curCh) {
-			tok.Literal = l.readNumber()
-			tok.Type = token.INT
+			tok = l.readNumber()
 			return tok
 		}
 
@@ -170,15 +169,26 @@ func (l *Lexer) readString() string {
 	return ident.String()
 }
 
-// TODO: Support floats, and arbitrary based numbers [base]b[number]
+// TODO: Support arbitrary based numbers [base]b[number]
 // base defaults to 10. 8b10 = 8 in octal 16b10 = 16 in hex
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() token.Token {
 	var ident bytes.Buffer
+	tokenType := token.INT
+
 	for isDigit(l.curCh) {
+		// The parser will handle bad floats
+		if l.curCh == '.' && tokenType == token.INT {
+			tokenType = token.FLOAT
+		}
+
 		ident.WriteByte(l.curCh)
 		l.readChar()
 	}
-	return ident.String()
+
+	return token.Token{
+		Type:    token.TokenType(tokenType),
+		Literal: ident.String(),
+	}
 }
 
 func (l *Lexer) readSingleLineComment() string {
@@ -223,7 +233,7 @@ func isLetter(ch byte) bool {
 }
 
 func isDigit(ch byte) bool {
-	return '0' <= ch && ch <= '9'
+	return ('0' <= ch && ch <= '9') || ch == '.'
 }
 
 func isWhitespace(ch byte) bool {

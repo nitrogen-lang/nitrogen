@@ -32,6 +32,9 @@ func init() {
 	registerBuiltin("push", pushBuiltin)
 	registerBuiltin("print", printBuiltin)
 	registerBuiltin("println", printlnBuiltin)
+
+	registerBuiltin("to_int", toIntBuiltin)
+	registerBuiltin("to_float", toFloatBuiltin)
 }
 
 func lenBuiltin(args ...object.Object) object.Object {
@@ -130,4 +133,34 @@ func printlnBuiltin(args ...object.Object) object.Object {
 		fmt.Println(arg.Inspect())
 	}
 	return NULL
+}
+
+func toIntBuiltin(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.Integer:
+		return arg
+	case *object.Float:
+		return &object.Integer{Value: int64(arg.Value)}
+	}
+
+	return newError("Argument to `to_int` must be FLOAT or INT, got %s", args[0].Type())
+}
+
+func toFloatBuiltin(args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *object.Integer:
+		return &object.Float{Value: float64(arg.Value)}
+	case *object.Float:
+		return arg
+	}
+
+	return newError("Argument to `to_float` must be FLOAT or INT, got %s", args[0].Type())
 }

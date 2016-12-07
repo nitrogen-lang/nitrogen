@@ -35,6 +35,9 @@ func TestNextToken(t *testing.T) {
 		// Single line slash comment
 		/* Multi-line
 comment */
+
+		12.5
+		12.5.7
     `
 
 	tests := []struct {
@@ -144,6 +147,10 @@ comment */
 		{token.COMMENT, "Single line hash comment"},
 		{token.COMMENT, "Single line slash comment"},
 		{token.COMMENT, " Multi-line\ncomment "},
+
+		{token.FLOAT, "12.5"},
+		// Ensure bad floats are lexed, parser handles errors
+		{token.FLOAT, "12.5.7"},
 
 		{token.EOF, ""},
 	}

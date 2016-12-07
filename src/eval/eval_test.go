@@ -36,6 +36,28 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 }
 
+func TestEvalFloatExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"5.5", 5.5},
+		{"10.2", 10.2},
+		{"-5.6", -5.6},
+		{"-10.8", -10.8},
+		{"5.5 + 5.5 + 5.2 + 5.3 - 10.1", 11.4},
+		{"2.5 * 2.2 * 2.3 * 2.1 * 2.4", 63.75599999999999},
+		{"-50.2 + 100.0 + -50.1", -0.30000000000000426},
+		{"5.2 * 2.3 + 10.1", 22.06},
+		{"50.2 / 2.1 * 2.3 + 10.5", 65.48095238095237},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testFloatObject(t, evaluated, tt.expected)
+	}
+}
+
 func testEval(input string) object.Object {
 	l := lexer.NewString(input)
 	p := parser.New(l)
@@ -54,6 +76,21 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 
 	if result.Value != expected {
 		t.Errorf("object has wrong value. got=%d, want=%d",
+			result.Value, expected)
+		return false
+	}
+	return true
+}
+
+func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
+	result, ok := obj.(*object.Float)
+	if !ok {
+		t.Errorf("object is not Float. got=%T (%+v)", obj, showError(obj))
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%g, want=%g",
 			result.Value, expected)
 		return false
 	}

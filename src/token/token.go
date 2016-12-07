@@ -17,6 +17,7 @@ const (
 	// Identifiers & literals
 	IDENT  = "IDENT"  // add, foobar, x, y
 	INT    = "INT"    // 1343546
+	FLOAT  = "FLOAT"  // 12.52
 	STRING = "STRING" // "some text"
 
 	// Operators

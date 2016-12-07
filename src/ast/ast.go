@@ -62,13 +62,22 @@ func (n *NullLiteral) TokenLiteral() string { return n.Token.Literal }
 func (n *NullLiteral) String() string       { return n.Token.Literal }
 
 type IntegerLiteral struct {
-	Token token.Token // the token.IDENT token
+	Token token.Token // the token.INT token
 	Value int64
 }
 
 func (i *IntegerLiteral) expressionNode()      {}
 func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntegerLiteral) String() string       { return i.Token.Literal }
+
+type FloatLiteral struct {
+	Token token.Token // the token.FLOAT token
+	Value float64
+}
+
+func (f *FloatLiteral) expressionNode()      {}
+func (f *FloatLiteral) TokenLiteral() string { return f.Token.Literal }
+func (f *FloatLiteral) String() string       { return f.Token.Literal }
 
 type StringLiteral struct {
 	Token token.Token

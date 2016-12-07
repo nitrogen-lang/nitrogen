@@ -23,10 +23,12 @@ func TestBuiltinsCantBeOverridden(t *testing.T) {
 	}
 }
 
-func testIntErrorObjects(t *testing.T, got object.Object, expected interface{}) {
+func testLiteralErrorObjects(t *testing.T, got object.Object, expected interface{}) {
 	switch expected := expected.(type) {
 	case int:
 		testIntegerObject(t, got, int64(expected))
+	case float64:
+		testFloatObject(t, got, expected)
 	case string:
 		errObj, ok := got.(*object.Error)
 		if !ok {
@@ -55,7 +57,7 @@ func TestBuiltinLenFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testIntErrorObjects(t, testEval(tt.input), tt.expected)
+		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
 	}
 }
 
@@ -71,7 +73,7 @@ func TestBuiltinFirstFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testIntErrorObjects(t, testEval(tt.input), tt.expected)
+		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
 	}
 }
 
@@ -87,7 +89,7 @@ func TestBuiltinLastFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testIntErrorObjects(t, testEval(tt.input), tt.expected)
+		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
 	}
 }
 
@@ -166,5 +168,37 @@ func TestBuiltinPushFunction(t *testing.T) {
 		if errObj.Message != tt.expected {
 			t.Errorf("wrong error message. expected=%q, got=%q", tt.expected, errObj.Message)
 		}
+	}
+}
+
+func TestBuiltinIntConvFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`to_int(23.5)`, 23},
+		{`to_int(1)`, 1},
+		{`to_int("hello world")`, "Argument to `to_int` must be FLOAT or INT, got STRING"},
+		{`to_int([])`, "Argument to `to_int` must be FLOAT or INT, got ARRAY"},
+	}
+
+	for _, tt := range tests {
+		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
+	}
+}
+
+func TestBuiltinFloatConvFunction(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`to_float(23.5)`, 23.5},
+		{`to_float(1)`, 1.0},
+		{`to_float("hello world")`, "Argument to `to_float` must be FLOAT or INT, got STRING"},
+		{`to_float([])`, "Argument to `to_float` must be FLOAT or INT, got ARRAY"},
+	}
+
+	for _, tt := range tests {
+		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
 	}
 }

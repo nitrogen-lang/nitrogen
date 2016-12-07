@@ -18,6 +18,7 @@ func (o ObjectType) String() string {
 
 const (
 	INTEGER_OBJ ObjectType = iota
+	FLOAT_OBJ
 	BOOLEAN_OBJ
 	NULL_OBJ
 	RETURN_OBJ
@@ -31,6 +32,7 @@ const (
 
 var objectTypeNames = map[ObjectType]string{
 	INTEGER_OBJ:  "INTEGER",
+	FLOAT_OBJ:    "FLOAT",
 	BOOLEAN_OBJ:  "BOOLEAN",
 	NULL_OBJ:     "NULL",
 	RETURN_OBJ:   "RETURN",
@@ -55,6 +57,13 @@ type Integer struct {
 
 func (i *Integer) Inspect() string  { return strconv.FormatInt(i.Value, 10) }
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
+
+type Float struct {
+	Value float64
+}
+
+func (f *Float) Inspect() string  { return strconv.FormatFloat(f.Value, 'G', -1, 64) }
+func (f *Float) Type() ObjectType { return FLOAT_OBJ }
 
 type String struct {
 	Value string
