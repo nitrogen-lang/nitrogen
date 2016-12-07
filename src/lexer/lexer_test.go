@@ -15,7 +15,7 @@ func TestNextToken(t *testing.T) {
 		};
 
 		def result = add(five, ten);
-		!-/*5;
+		!-/5*;
 		5 < 10 > 5;
 
 		if (5 < 10) {
@@ -31,6 +31,10 @@ func TestNextToken(t *testing.T) {
 		[1, 2];
 		{"foo": "bar"}
 		nil
+		# Single line hash comment
+		// Single line slash comment
+		/* Multi-line
+comment */
     `
 
 	tests := []struct {
@@ -80,8 +84,8 @@ func TestNextToken(t *testing.T) {
 		{token.BANG, "!"},
 		{token.MINUS, "-"},
 		{token.SLASH, "/"},
-		{token.ASTERISK, "*"},
 		{token.INT, "5"},
+		{token.ASTERISK, "*"},
 		{token.SEMICOLON, ";"},
 
 		{token.INT, "5"},
@@ -136,6 +140,10 @@ func TestNextToken(t *testing.T) {
 		{token.RBRACE, "}"},
 
 		{token.NULL, "nil"},
+
+		{token.COMMENT, "Single line hash comment"},
+		{token.COMMENT, "Single line slash comment"},
+		{token.COMMENT, " Multi-line\ncomment "},
 
 		{token.EOF, ""},
 	}

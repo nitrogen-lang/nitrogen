@@ -52,11 +52,28 @@ func (l *Lexer) NextToken() token.Token {
 	case '*':
 		tok = newToken(token.ASTERISK, l.curCh)
 	case '/':
-		tok = newToken(token.SLASH, l.curCh)
+		if l.peekChar() == '/' {
+			l.readChar()
+			tok = token.Token{
+				Type:    token.COMMENT,
+				Literal: l.readSingleLineComment(),
+			}
+		} else if l.peekChar() == '*' {
+			l.readChar()
+			tok = token.Token{
+				Type:    token.COMMENT,
+				Literal: l.readMultiLineComment(),
+			}
+		} else {
+			tok = newToken(token.SLASH, l.curCh)
+		}
 	case '!':
 		if l.peekChar() == '=' {
 			l.readChar()
-			tok = token.Token{Type: token.NOT_EQ, Literal: "!="}
+			tok = token.Token{
+				Type:    token.NOT_EQ,
+				Literal: "!=",
+			}
 		} else {
 			tok = newToken(token.BANG, l.curCh)
 		}
@@ -65,7 +82,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		if l.peekChar() == '=' {
 			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: "=="}
+			tok = token.Token{
+				Type:    token.EQ,
+				Literal: "==",
+			}
 		} else {
 			tok = newToken(token.ASSIGN, l.curCh)
 		}
@@ -99,6 +119,9 @@ func (l *Lexer) NextToken() token.Token {
 	case '"':
 		tok.Literal = l.readString()
 		tok.Type = token.STRING
+	case '#':
+		tok.Literal = l.readSingleLineComment()
+		tok.Type = token.COMMENT
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -156,6 +179,33 @@ func (l *Lexer) readNumber() string {
 		l.readChar()
 	}
 	return ident.String()
+}
+
+func (l *Lexer) readSingleLineComment() string {
+	var com bytes.Buffer
+	l.readChar() // Go over # or / characters
+
+	for l.curCh != '\n' {
+		com.WriteByte(l.curCh)
+		l.readChar()
+	}
+	return strings.TrimSpace(com.String())
+}
+
+func (l *Lexer) readMultiLineComment() string {
+	var com bytes.Buffer
+	l.readChar() // Go over * character
+
+	for l.curCh != 0 {
+		if l.curCh == '*' && l.peekChar() == '/' {
+			l.readChar() // Skip *
+			break
+		}
+
+		com.WriteByte(l.curCh)
+		l.readChar()
+	}
+	return com.String()
 }
 
 func (l *Lexer) devourWhitespace() {

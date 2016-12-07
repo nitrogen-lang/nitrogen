@@ -9,11 +9,10 @@ type Token struct {
 	Literal string
 }
 
-// TODO: Add comment token
-// TODO: Add null token
 const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
+	COMMENT = "COMMENT"
 
 	// Identifiers & literals
 	IDENT  = "IDENT"  // add, foobar, x, y
