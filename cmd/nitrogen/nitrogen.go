@@ -17,9 +17,11 @@ const PROMPT = ">> "
 
 var (
 	interactive bool
+	scriptFile  string
 )
 
 func init() {
+	flag.StringVar(&scriptFile, "f", "", "Filename to execute")
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
 }
 
@@ -33,12 +35,12 @@ func main() {
 		return
 	}
 
-	if len(os.Args) != 2 {
+	if scriptFile == "" {
 		fmt.Print("No file given")
 		os.Exit(1)
 	}
 
-	file, err := os.Open(os.Args[1])
+	file, err := os.Open(scriptFile)
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
