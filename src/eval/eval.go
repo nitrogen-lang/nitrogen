@@ -185,10 +185,14 @@ func evalPrefixExpression(op string, right object.Object) object.Object {
 }
 
 func evalBangOpExpression(right object.Object) object.Object {
-	// TODO: Maybe make !0 return TRUE?
-	if right == FALSE {
+	if right == FALSE || right == NULL {
 		return TRUE
 	}
+
+	if right.Type() == object.INTEGER_OBJ && right.(*object.Integer).Value == 0 {
+		return TRUE
+	}
+
 	return FALSE
 }
 
@@ -441,7 +445,33 @@ func unwrapReturnValue(obj object.Object) object.Object {
 }
 
 func isTruthy(obj object.Object) bool {
-	return (obj != NULL && obj != FALSE)
+	// Null or false is immediately not true
+	if obj == NULL || obj == FALSE {
+		return false
+	}
+
+	// True is immediately true
+	if obj == TRUE {
+		return true
+	}
+
+	// If the object is an INT, it's truthy if it doesn't equal 0
+	if obj.Type() == object.INTEGER_OBJ {
+		return (obj.(*object.Integer).Value != 0)
+	}
+
+	// Same as above if but with floats
+	if obj.Type() == object.FLOAT_OBJ {
+		return (obj.(*object.Float).Value != 0.0)
+	}
+
+	// Empty string is false, non-empty is true
+	if obj.Type() == object.STRING_OBJ {
+		return (obj.(*object.String).Value != "")
+	}
+
+	// Assume value is false
+	return false
 }
 
 func newError(format string, a ...interface{}) *object.Error {

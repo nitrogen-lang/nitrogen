@@ -8,6 +8,126 @@ import (
 	"github.com/lfkeitel/nitrogen/src/parser"
 )
 
+func testEval(input string) object.Object {
+	l := lexer.NewString(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	env := object.NewEnvironment()
+
+	return Eval(program, env)
+}
+
+// Verification functions
+func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
+	result, ok := obj.(*object.Integer)
+	if !ok {
+		t.Errorf("object is not Integer. expected=%d, got=%T (%+v)",
+			expected,
+			obj,
+			showError(obj),
+		)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%d, want=%d",
+			result.Value, expected)
+		return false
+	}
+	return true
+}
+
+func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
+	result, ok := obj.(*object.Float)
+	if !ok {
+		t.Errorf("object is not Float. expected=%g, got=%T (%+v)",
+			expected,
+			obj,
+			showError(obj),
+		)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%g, want=%g",
+			result.Value, expected)
+		return false
+	}
+	return true
+}
+
+func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
+	result, ok := obj.(*object.Boolean)
+	if !ok {
+		t.Errorf("object is not Boolean. expected=%t, got=%T (%+v)",
+			expected,
+			obj,
+			showError(obj),
+		)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%t, want=%t",
+			result.Value, expected)
+		return false
+	}
+	return true
+}
+
+func testNullObject(t *testing.T, obj object.Object) bool {
+	if obj.Type() != object.NULL_OBJ {
+		t.Errorf("object is not Null. got=%T (%+v)", obj, showError(obj))
+		return false
+	}
+	return true
+}
+
+func testStringObject(t *testing.T, got object.Object, expected string) {
+	str, ok := got.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", got, showError(got))
+	}
+
+	if str.Value != expected {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+func showError(obj object.Object) string {
+	if obj == nil {
+		return "nil"
+	}
+
+	if obj, ok := obj.(*object.Error); ok {
+		return obj.Inspect()
+	}
+	return obj.Type().String()
+}
+
+// Actual test cases
+func TestEvalFloatExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{"5.5", 5.5},
+		{"10.2", 10.2},
+		{"-5.6", -5.6},
+		{"-10.8", -10.8},
+		{"5.5 + 5.5 + 5.2 + 5.3 - 10.1", 11.4},
+		{"2.5 * 2.2 * 2.3 * 2.1 * 2.4", 63.75599999999999},
+		{"-50.2 + 100.0 + -50.1", -0.30000000000000426},
+		{"5.2 * 2.3 + 10.1", 22.06},
+		{"50.2 / 2.1 * 2.3 + 10.5", 65.48095238095237},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testFloatObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -34,78 +154,6 @@ func TestEvalIntegerExpression(t *testing.T) {
 		evaluated := testEval(tt.input)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
-}
-
-func TestEvalFloatExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected float64
-	}{
-		{"5.5", 5.5},
-		{"10.2", 10.2},
-		{"-5.6", -5.6},
-		{"-10.8", -10.8},
-		{"5.5 + 5.5 + 5.2 + 5.3 - 10.1", 11.4},
-		{"2.5 * 2.2 * 2.3 * 2.1 * 2.4", 63.75599999999999},
-		{"-50.2 + 100.0 + -50.1", -0.30000000000000426},
-		{"5.2 * 2.3 + 10.1", 22.06},
-		{"50.2 / 2.1 * 2.3 + 10.5", 65.48095238095237},
-	}
-
-	for _, tt := range tests {
-		evaluated := testEval(tt.input)
-		testFloatObject(t, evaluated, tt.expected)
-	}
-}
-
-func testEval(input string) object.Object {
-	l := lexer.NewString(input)
-	p := parser.New(l)
-	program := p.ParseProgram()
-	env := object.NewEnvironment()
-
-	return Eval(program, env)
-}
-
-func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
-	result, ok := obj.(*object.Integer)
-	if !ok {
-		t.Errorf("object is not Integer. got=%T (%+v)", obj, showError(obj))
-		return false
-	}
-
-	if result.Value != expected {
-		t.Errorf("object has wrong value. got=%d, want=%d",
-			result.Value, expected)
-		return false
-	}
-	return true
-}
-
-func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
-	result, ok := obj.(*object.Float)
-	if !ok {
-		t.Errorf("object is not Float. got=%T (%+v)", obj, showError(obj))
-		return false
-	}
-
-	if result.Value != expected {
-		t.Errorf("object has wrong value. got=%g, want=%g",
-			result.Value, expected)
-		return false
-	}
-	return true
-}
-
-func showError(obj object.Object) string {
-	if obj == nil {
-		return "nil"
-	}
-
-	if obj, ok := obj.(*object.Error); ok {
-		return obj.Inspect()
-	}
-	return obj.Type().String()
 }
 
 func TestEvalBooleanExpression(t *testing.T) {
@@ -140,21 +188,6 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 }
 
-func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
-	result, ok := obj.(*object.Boolean)
-	if !ok {
-		t.Errorf("object is not Boolean. got=%T (%+v)", obj, showError(obj))
-		return false
-	}
-
-	if result.Value != expected {
-		t.Errorf("object has wrong value. got=%t, want=%t",
-			result.Value, expected)
-		return false
-	}
-	return true
-}
-
 func TestBangOperator(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -162,10 +195,13 @@ func TestBangOperator(t *testing.T) {
 	}{
 		{"!true", false},
 		{"!false", true},
-		{"!5", false},
 		{"!!true", true},
 		{"!!false", false},
+		{"!0", true},
+		{"!5", false},
 		{"!!5", true},
+		{"!nil", true},
+		{"!!nil", false},
 	}
 
 	for _, tt := range tests {
@@ -182,10 +218,16 @@ func TestIfElseExpressions(t *testing.T) {
 		{"if (true) { 10 }", 10},
 		{"if (false) { 10 }", nil},
 		{"if (1) { 10 }", 10},
+		{"if (0) { 10 }", nil},
+		{"if (0.0) { 10 }", nil},
 		{"if (1 < 2) { 10 }", 10},
 		{"if (1 > 2) { 10 }", nil},
 		{"if (1 > 2) { 10 } else { 20 }", 20},
 		{"if (1 < 2) { 10 } else { 20 }", 10},
+		{"if (0) { 10 } else { 11 }", 11},
+		{"if (0.0) { 10 } else { 11 }", 11},
+		{"if (\"s\") { 10 }", 10},
+		{"if (\"\") { 10 }", nil},
 	}
 
 	for _, tt := range tests {
@@ -197,10 +239,6 @@ func TestIfElseExpressions(t *testing.T) {
 			testNullObject(t, evaluated)
 		}
 	}
-}
-
-func testNullObject(t *testing.T, obj object.Object) bool {
-	return obj == NULL
 }
 
 func TestReturnStatements(t *testing.T) {
@@ -407,17 +445,6 @@ func TestStringEquality(t *testing.T) {
 
 	for _, tt := range tests {
 		testBooleanObject(t, testEval(tt.input), tt.expected)
-	}
-}
-
-func testStringObject(t *testing.T, got object.Object, expected string) {
-	str, ok := got.(*object.String)
-	if !ok {
-		t.Fatalf("object is not String. got=%T (%+v)", got, showError(got))
-	}
-
-	if str.Value != expected {
-		t.Errorf("String has wrong value. got=%q", str.Value)
 	}
 }
 
