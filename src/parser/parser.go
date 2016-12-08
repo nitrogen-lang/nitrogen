@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/lfkeitel/nitrogen/src/ast"
-	"github.com/lfkeitel/nitrogen/src/lexer"
-	"github.com/lfkeitel/nitrogen/src/token"
+	"github.com/nitrogen-lang/nitrogen/src/ast"
+	"github.com/nitrogen-lang/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 const (

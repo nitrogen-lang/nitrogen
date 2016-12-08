@@ -3,8 +3,8 @@ package eval
 import (
 	"fmt"
 
-	"github.com/lfkeitel/nitrogen/src/ast"
-	"github.com/lfkeitel/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/ast"
+	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
 var (

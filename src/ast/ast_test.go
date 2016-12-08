@@ -3,7 +3,7 @@ package ast
 import (
 	"testing"
 
-	"github.com/lfkeitel/nitrogen/src/token"
+	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 func TestString(t *testing.T) {

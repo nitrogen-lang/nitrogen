@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/lfkeitel/nitrogen/src/ast"
-	"github.com/lfkeitel/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/ast"
+	"github.com/nitrogen-lang/nitrogen/src/lexer"
 )
 
 func TestDefStatements(t *testing.T) {

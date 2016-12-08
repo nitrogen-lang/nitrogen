@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lfkeitel/nitrogen/src/ast"
+	"github.com/nitrogen-lang/nitrogen/src/ast"
 )
 
 type ObjectType int

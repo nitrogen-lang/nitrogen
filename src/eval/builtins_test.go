@@ -3,7 +3,7 @@ package eval
 import (
 	"testing"
 
-	"github.com/lfkeitel/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
 func TestBuiltinsCantBeOverridden(t *testing.T) {

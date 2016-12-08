@@ -7,10 +7,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/lfkeitel/nitrogen/src/eval"
-	"github.com/lfkeitel/nitrogen/src/lexer"
-	"github.com/lfkeitel/nitrogen/src/object"
-	"github.com/lfkeitel/nitrogen/src/parser"
+	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
 const PROMPT = ">> "

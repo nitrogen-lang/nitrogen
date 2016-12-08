@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/lfkeitel/nitrogen/src/token"
+	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 type Node interface {

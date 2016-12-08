@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/lfkeitel/nitrogen/src/token"
+	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 // TODO: Support Unicode by default
