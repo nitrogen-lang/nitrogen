@@ -245,11 +245,13 @@ func (fl *FunctionLiteral) String() string {
 	for _, p := range fl.Parameters {
 		params = append(params, p.String())
 	}
+
 	out.WriteString(fl.TokenLiteral())
-	out.WriteString("(")
+	out.WriteByte('(')
 	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(") ")
+	out.WriteString(") {")
 	out.WriteString(fl.Body.String())
+	out.WriteByte('}')
 	return out.String()
 }
 

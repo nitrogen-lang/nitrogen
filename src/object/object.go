@@ -118,11 +118,12 @@ func (f *Function) Inspect() string {
 		params = append(params, p.String())
 	}
 
-	out.WriteString("fn")
+	out.WriteString("func")
 	out.WriteByte('(')
 	out.WriteString(strings.Join(params, ", "))
-	out.WriteString(") ")
+	out.WriteString(") {")
 	out.WriteString(f.Body.String())
+	out.WriteByte('}')
 
 	return out.String()
 }
