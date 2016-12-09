@@ -641,3 +641,46 @@ func TestNullEval(t *testing.T) {
 		t.Fatalf("object is not Null. got=%T (%+v)", evaluated, showError(evaluated))
 	}
 }
+
+func TestHashAssignEval(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`def m = {"foo": 5}; m["foo"] = 6; m["foo"]`,
+			6,
+		},
+		{
+			`def m = [1, 3]; m[1] = 5; m[1]`,
+			5,
+		},
+		{
+			`n = 34; n`,
+			"Assignment to uninitialized variable n",
+		},
+		{
+			`def n = 0; def p = (n = 34); p`,
+			nil,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch i := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(i))
+		case string:
+			err, ok := evaluated.(*object.Error)
+			if !ok {
+				t.Fatalf("Expected Error, got %T", evaluated)
+			}
+			if err.Message != i {
+				t.Fatalf("Incorrect error, expected %s, got %s", i, err.Message)
+			}
+		default:
+			testNullObject(t, evaluated)
+		}
+	}
+}

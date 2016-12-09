@@ -18,6 +18,7 @@ const (
 	PREFIX          // -x or !x
 	CALL            // myFunction(x)
 	INDEX           // array[index]
+	ASSIGN
 )
 
 var precedences = map[token.TokenType]int{
@@ -31,6 +32,7 @@ var precedences = map[token.TokenType]int{
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
 	token.LSQUARE:  INDEX,
+	token.ASSIGN:   ASSIGN,
 }
 
 type (
@@ -84,6 +86,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LSQUARE, p.parseIndexExpression)
+	p.registerInfix(token.ASSIGN, p.parseAssignmentStatement)
 
 	// Read the first two tokens to populate curToken and peekToken
 	p.nextToken()
@@ -179,6 +182,23 @@ func (p *Parser) parseDefStatement() ast.Statement {
 
 func (p *Parser) parseReturnStatement() ast.Statement {
 	stmt := &ast.ReturnStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
+	stmt := &ast.AssignStatement{
+		Token: p.curToken,
+		Left:  left,
+	}
 
 	p.nextToken()
 

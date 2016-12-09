@@ -119,6 +119,27 @@ func (d *DefStatement) String() string {
 	return out.String()
 }
 
+type AssignStatement struct {
+	Token token.Token // the token.DEF token
+	Left  Expression
+	Value Expression
+}
+
+func (a *AssignStatement) expressionNode()      {}
+func (a *AssignStatement) TokenLiteral() string { return a.Token.Literal }
+func (a *AssignStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(a.Left.String())
+	out.WriteString(" = ")
+	if a.Value != nil {
+		out.WriteString(a.Value.String())
+	}
+	out.WriteByte(';')
+
+	return out.String()
+}
+
 type ReturnStatement struct {
 	Token token.Token // the 'return' token
 	Value Expression

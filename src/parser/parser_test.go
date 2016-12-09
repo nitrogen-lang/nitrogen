@@ -1038,3 +1038,119 @@ func TestNullLiteral(t *testing.T) {
 		t.Fatalf("Null value incorrect. Expected nil, got %s", null.String())
 	}
 }
+
+func TestHashAssignments(t *testing.T) {
+	input := `m["key"] = "value";`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("exp is not ast.AssignStatement. got=%T",
+			stmt.Expression)
+	}
+
+	left, ok := exp.Left.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("left is not ast.IndexExpression. got=%T",
+			exp.Left)
+	}
+
+	if left.Left.String() != "m" {
+		t.Fatalf("left hash ident is not correct. expected=m, got=%s",
+			left.Left.String())
+	}
+
+	if left.Index.String() != "key" {
+		t.Fatalf("left index is not correct. expected=\"key\", got=%q",
+			left.Index.String())
+	}
+
+	if exp.Value.String() != "value" {
+		t.Fatalf("assigment value is not correct. expected=\"value\", got=%q",
+			exp.Value.String())
+	}
+}
+
+func TestArrayAssignments(t *testing.T) {
+	input := `m[0] = "value";`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("exp is not ast.AssignStatement. got=%T",
+			stmt.Expression)
+	}
+
+	left, ok := exp.Left.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("left is not ast.IndexExpression. got=%T",
+			exp.Left)
+	}
+
+	if left.Left.String() != "m" {
+		t.Fatalf("left hash ident is not correct. expected=m, got=%s",
+			left.Left.String())
+	}
+
+	if left.Index.String() != "0" {
+		t.Fatalf("left index is not correct. expected=\"0\", got=%q",
+			left.Index.String())
+	}
+
+	if exp.Value.String() != "value" {
+		t.Fatalf("assigment value is not correct. expected=\"value\", got=%q",
+			exp.Value.String())
+	}
+}
+
+func TestGeneralAssignments(t *testing.T) {
+	input := `variable = "value";`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.AssignStatement)
+	if !ok {
+		t.Fatalf("exp is not ast.AssignStatement. got=%T",
+			stmt.Expression)
+	}
+
+	ident, ok := exp.Left.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("exp is not ast.Identifier. got=%T",
+			stmt.Expression)
+	}
+
+	if ident.Value != "variable" {
+		t.Fatalf("ident is not correct. expected=\"variable\", got=%s",
+			ident.Value)
+	}
+}

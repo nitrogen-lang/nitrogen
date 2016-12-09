@@ -29,19 +29,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.DefStatement:
-		// Protect builtin functions
-		if builtin := getBuiltin(node.Name.Value); builtin != nil {
-			return newError(
-				"Attempted redeclaration of builtin function '%s'",
-				node.Name.Value,
-			)
-		}
-
-		val := Eval(node.Value, env)
-		if isError(val) {
-			return val
-		}
-		env.Set(node.Name.Value, val)
+		return assignIdentValue(node.Name, node.Value, true, env)
+	case *ast.AssignStatement:
+		return evalAssignment(node, env)
 
 	// Expressions
 	case *ast.NullLiteral:
@@ -116,6 +106,117 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	}
 
 	return nil
+}
+
+func evalAssignment(stmt *ast.AssignStatement, env *object.Environment) object.Object {
+	if left, ok := stmt.Left.(*ast.IndexExpression); ok {
+		return assignIndexedValue(left, stmt.Value, env)
+	}
+
+	ident, ok := stmt.Left.(*ast.Identifier)
+	if !ok {
+		return newError("Invalid variable name, expected identifier, got %s",
+			stmt.Left.String())
+	}
+
+	return assignIdentValue(ident, stmt.Value, false, env)
+}
+
+func assignIdentValue(
+	name *ast.Identifier,
+	val ast.Expression,
+	new bool,
+	env *object.Environment) object.Object {
+	// Protect builtin functions
+	if builtin := getBuiltin(name.Value); builtin != nil {
+		return newError(
+			"Attempted redeclaration of builtin function '%s'",
+			name.Value,
+		)
+	}
+
+	if !new {
+		if _, exists := env.Get(name.Value); !exists {
+			return newError("Assignment to uninitialized variable %s", name.Value)
+		}
+	}
+
+	evaled := Eval(val, env)
+	if isError(evaled) {
+		return evaled
+	}
+	env.Set(name.Value, evaled)
+	return NULL
+}
+
+func assignIndexedValue(
+	e *ast.IndexExpression,
+	val ast.Expression,
+	env *object.Environment) object.Object {
+	indexed := Eval(e.Left, env)
+	if isError(indexed) {
+		return indexed
+	}
+
+	index := Eval(e.Index, env)
+	if isError(indexed) {
+		return indexed
+	}
+
+	switch indexed.Type() {
+	case object.ARRAY_OBJ:
+		assignArrayIndex(indexed.(*object.Array), index, val, env)
+	case object.HASH_OBJ:
+		assignHashMapIndex(indexed.(*object.Hash), index, val, env)
+	}
+	return NULL
+}
+
+func assignArrayIndex(
+	array *object.Array,
+	index object.Object,
+	val ast.Expression,
+	env *object.Environment) object.Object {
+
+	in, ok := index.(*object.Integer)
+	if !ok {
+		return newError("Invalid array index type %s", index.(object.Object).Type())
+	}
+
+	value := Eval(val, env)
+	if isError(value) {
+		return value
+	}
+
+	if in.Value < 0 || in.Value > int64(len(array.Elements)-1) {
+		return newError("Index out of bounds: %s", index.Inspect())
+	}
+
+	array.Elements[in.Value] = value
+	return NULL
+}
+
+func assignHashMapIndex(
+	hashmap *object.Hash,
+	index object.Object,
+	val ast.Expression,
+	env *object.Environment) object.Object {
+
+	hashable, ok := index.(object.Hashable)
+	if !ok {
+		return newError("Invalid index type %s", index.Type())
+	}
+
+	value := Eval(val, env)
+	if isError(value) {
+		return value
+	}
+
+	hashmap.Pairs[hashable.HashKey()] = object.HashPair{
+		Key:   index.(object.Object),
+		Value: value,
+	}
+	return NULL
 }
 
 func evalProgram(p *ast.Program, env *object.Environment) object.Object {
@@ -341,7 +442,6 @@ func evalIdent(node *ast.Identifier, env *object.Environment) object.Object {
 }
 
 func evalIndexExpression(left, index object.Object) object.Object {
-	// TODO: Add string indexing
 	switch {
 	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
 		return evalArrayIndexExpression(left, index)

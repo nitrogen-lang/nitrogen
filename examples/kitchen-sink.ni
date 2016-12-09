@@ -73,6 +73,16 @@ println(placeMap["Europe"]);
 // does not change the value of placeMap["Europe"].
 println(push(placeMap["Europe"], "Denmark"));
 
+// But we can reassign keys and array indices
+placeMap["Europe"] = push(placeMap["Europe"], "Norway");
+println(placeMap["Europe"]);
+
+// We can add new values to a map
+placeMap["Africa"] = ["Egypt", "South Africa", "Madagascar"];
+println(placeMap["Africa"]);
+
+println(placeMap);
+
 // And nil (null) for all your null needs
 def thisIsNull = nil;
 
