@@ -81,6 +81,9 @@ println(placeMap["Europe"]);
 placeMap["Africa"] = ["Egypt", "South Africa", "Madagascar"];
 println(placeMap["Africa"]);
 
+placeMap["Africa"][1] = "Ethiopia";
+println(placeMap["Africa"]);
+
 println(placeMap);
 
 // And nil (null) for all your null needs
