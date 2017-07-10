@@ -1154,3 +1154,45 @@ func TestGeneralAssignments(t *testing.T) {
 			ident.Value)
 	}
 }
+
+func TestFunctionSugar(t *testing.T) {
+	input := `func hello(place) {
+        return "Hello, " + place;
+    }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+			len(program.Statements))
+	}
+
+	stmt := program.Statements[0]
+	if !testDefStatement(t, stmt, "hello") {
+		return
+	}
+
+	val := stmt.(*ast.DefStatement).Value
+	if _, ok := val.(*ast.FunctionLiteral); !ok {
+		t.Fatalf("func sugar invalid, no function literal. got=%T", val)
+	}
+}
+
+func TestLetFuncSugarStatement(t *testing.T) {
+	input := `let hello = func hello_(place) {
+        return "Hello, " + place;
+    }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	p.ParseProgram()
+	if len(p.Errors()) == 0 {
+		t.Fatalf("let with func sugar expected to fail, but didn't")
+	}
+	if p.Errors()[0] != "incorrect next token. Expected (, got IDENT" {
+		t.Fatalf("incorrect error. got \"%s\"", p.Errors()[0])
+	}
+}

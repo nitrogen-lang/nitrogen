@@ -44,8 +44,11 @@ type Parser struct {
 	l      *lexer.Lexer
 	errors []string
 
+	lastToken token.Token
 	curToken  token.Token
 	peekToken token.Token
+
+	insertedTokens []token.Token
 
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
@@ -53,8 +56,9 @@ type Parser struct {
 
 func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:              l,
+		errors:         []string{},
+		insertedTokens: make([]token.Token, 0, 5),
 	}
 
 	// Prefix parsing functions
@@ -121,8 +125,20 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 }
 
 func (p *Parser) nextToken() {
+	p.lastToken = p.curToken
 	p.curToken = p.peekToken
-	p.peekToken = p.l.NextToken()
+
+	if len(p.insertedTokens) > 0 {
+		p.peekToken = p.insertedTokens[len(p.insertedTokens)-1]
+		p.insertedTokens = p.insertedTokens[:len(p.insertedTokens)-1]
+	} else {
+		p.peekToken = p.l.NextToken()
+	}
+}
+
+func (p *Parser) insertToken(t token.Token) {
+	p.insertedTokens = append(p.insertedTokens, p.peekToken)
+	p.peekToken = t
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
@@ -152,6 +168,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDefStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.FUNCTION:
+		return p.parseFuncDefStatement()
 	}
 	return p.parseExpressionStatement()
 }
@@ -169,6 +187,31 @@ func (p *Parser) parseDefStatement() ast.Statement {
 		return nil
 	}
 
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseFuncDefStatement() ast.Statement {
+	if !p.peekTokenIs(token.IDENT) {
+		return p.parseExpressionStatement()
+	}
+
+	fToken := p.curToken
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	stmt := &ast.DefStatement{Token: token.Token{Type: token.LookupIdent("let"), Literal: "let"}}
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	p.insertToken(fToken)
 	p.nextToken()
 
 	stmt.Value = p.parseExpression(LOWEST)

@@ -22,6 +22,10 @@ let hello = func(place) {
     return "Hello, " + place;
 }
 
+func hello_(place) {
+     return "Hello2, " + place;
+}
+
 // Here we assign the output of calling hello()
 let helloWorld = hello("World!");
 
@@ -34,6 +38,7 @@ let helloWorld = hello("World!");
 // "println" will print all arguments with a newline after each
 // The similarly named function "print" will print all arguments without a newline.
 println(helloWorld);
+println(hello_("Earth!"));
 
 /*
  * Nitrogen supports simple if statements
