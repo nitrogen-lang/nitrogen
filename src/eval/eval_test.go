@@ -340,10 +340,10 @@ func TestDefStatements(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{"def a = 5; a;", 5},
-		{"def a = 5 * 5; a;", 25},
-		{"def a = 5; def b = a; b;", 5},
-		{"def a = 5; def b = a; def c = a + b + 5; c;", 15},
+		{"let a = 5; a;", 5},
+		{"let a = 5 * 5; a;", 25},
+		{"let a = 5; let b = a; b;", 5},
+		{"let a = 5; let b = a; let c = a + b + 5; c;", 15},
 	}
 
 	for _, tt := range tests {
@@ -379,11 +379,11 @@ func TestFunctionApplication(t *testing.T) {
 		input    string
 		expected int64
 	}{
-		{"def identity = func(x) { x; }; identity(5);", 5},
-		{"def identity = func(x) { return x; }; identity(5);", 5},
-		{"def double = func(x) { x * 2; }; double(5);", 10},
-		{"def add = func(x, y) { x + y; }; add(5, 5);", 10},
-		{"def add = func(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+		{"let identity = func(x) { x; }; identity(5);", 5},
+		{"let identity = func(x) { return x; }; identity(5);", 5},
+		{"let double = func(x) { x * 2; }; double(5);", 10},
+		{"let add = func(x, y) { x + y; }; add(5, 5);", 10},
+		{"let add = func(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
 		{"func(x) { x; }(5)", 5},
 	}
 
@@ -394,11 +394,11 @@ func TestFunctionApplication(t *testing.T) {
 
 func TestClosures(t *testing.T) {
 	input := `
-        def newAdder = func(x) {
+        let newAdder = func(x) {
             func(y) { x + y };
         };
 
-        def addTwo = newAdder(2);
+        let addTwo = newAdder(2);
         addTwo(2);`
 
 	testIntegerObject(t, testEval(input), 4)
@@ -485,7 +485,7 @@ func TestArrayIndexExpressions(t *testing.T) {
 			3,
 		},
 		{
-			"def i = 0; [1][i];",
+			"let i = 0; [1][i];",
 			1,
 		},
 		{
@@ -493,15 +493,15 @@ func TestArrayIndexExpressions(t *testing.T) {
 			3,
 		},
 		{
-			"def myArray = [1, 2, 3]; myArray[2];",
+			"let myArray = [1, 2, 3]; myArray[2];",
 			3,
 		},
 		{
-			"def myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+			"let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
 			6,
 		},
 		{
-			"def myArray = [1, 2, 3]; def i = myArray[0]; myArray[i]",
+			"let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
 			2,
 		},
 		{
@@ -560,7 +560,7 @@ func TestArrayConcatenation(t *testing.T) {
 }
 
 func TestHashLiterals(t *testing.T) {
-	input := `def two = "two";
+	input := `let two = "two";
 		{
 			"one": 10 - 9,
 			two: 1 + 1,
@@ -608,7 +608,7 @@ func TestHashIndexExpressions(t *testing.T) {
 			nil,
 		},
 		{
-			`def key = "foo"; {"foo": 5}[key]`,
+			`let key = "foo"; {"foo": 5}[key]`,
 			5,
 		},
 		{
@@ -648,11 +648,11 @@ func TestHashAssignEval(t *testing.T) {
 		expected interface{}
 	}{
 		{
-			`def m = {"foo": 5}; m["foo"] = 6; m["foo"]`,
+			`let m = {"foo": 5}; m["foo"] = 6; m["foo"]`,
 			6,
 		},
 		{
-			`def m = [1, 3]; m[1] = 5; m[1]`,
+			`let m = [1, 3]; m[1] = 5; m[1]`,
 			5,
 		},
 		{
@@ -660,7 +660,7 @@ func TestHashAssignEval(t *testing.T) {
 			"Assignment to uninitialized variable n",
 		},
 		{
-			`def n = 0; def p = (n = 34); p`,
+			`let n = 0; let p = (n = 34); p`,
 			nil,
 		},
 	}

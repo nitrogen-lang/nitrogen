@@ -7,7 +7,7 @@ import (
 )
 
 func TestBuiltinsCantBeOverridden(t *testing.T) {
-	input := `def len = func(x) { x }`
+	input := `let len = func(x) { x }`
 	evaled := testEval(input)
 	if evaled == nil {
 		t.Fatal("no error object returned")

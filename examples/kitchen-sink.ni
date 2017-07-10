@@ -18,12 +18,12 @@ print("Function: ", func(x, y) { x + y; x * y; });
 println("");
 
 // Here we define the variable "hello" and assign it a function
-def hello = func(place) {
+let hello = func(place) {
     return "Hello, " + place;
 }
 
 // Here we assign the output of calling hello()
-def helloWorld = hello("World!");
+let helloWorld = hello("World!");
 
 /*
  * Nitrogen features many builtin functions that are implemented directly in the
@@ -55,14 +55,14 @@ if (helloWorld == "Hello, World!") {
 }
 
 // Arrays may be arbitrarily long and contain any variable type
-def places = ["America", "Africa", "Europe"];
+let places = ["America", "Africa", "Europe"];
 
 // Like any proper language, Nitrogen is zero-based
 println(hello(places[1]));
 
 // Hash maps are also supported. Keys can be either strings or ints.
 // Values can be of any type.
-def placeMap = {
+let placeMap = {
     "America": ["USA", "Canada", "Mexico"],
     "Europe": ["Germany", "France", "Spain"]
 };
@@ -87,6 +87,6 @@ println(placeMap["Africa"]);
 println(placeMap);
 
 // And nil (null) for all your null needs
-def thisIsNull = nil;
+let thisIsNull = nil;
 
 println(thisIsNull);

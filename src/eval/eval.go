@@ -213,7 +213,7 @@ func assignHashMapIndex(
 	}
 
 	hashmap.Pairs[hashable.HashKey()] = object.HashPair{
-		Key:   index.(object.Object),
+		Key:   index,
 		Value: value,
 	}
 	return NULL

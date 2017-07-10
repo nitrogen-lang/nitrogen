@@ -14,9 +14,9 @@ func TestDefStatements(t *testing.T) {
 		expectedIdentifier string
 		expectedValue      interface{}
 	}{
-		{"def x = 5;", "x", 5},
-		{"def y = true;", "y", true},
-		{"def foobar = y", "foobar", "y"},
+		{"let x = 5;", "x", 5},
+		{"let y = true;", "y", true},
+		{"let foobar = y", "foobar", "y"},
 	}
 
 	for _, tt := range tests {
@@ -715,7 +715,7 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 }
 
 func testDefStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "def" {
+	if s.TokenLiteral() != "let" {
 		t.Errorf("s.TokenLiteral not 'let'. got=%q", s.TokenLiteral())
 		return false
 	}

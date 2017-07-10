@@ -108,7 +108,7 @@ func (d *DefStatement) TokenLiteral() string { return d.Token.Literal }
 func (d *DefStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("def ")
+	out.WriteString("let ")
 	out.WriteString(d.Name.String())
 	out.WriteString(" = ")
 	if d.Value != nil {

@@ -1,3 +1,3 @@
-def string = "Hello, world!"
+let string = "Hello, world!"
 
 print(string)

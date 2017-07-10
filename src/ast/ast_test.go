@@ -10,7 +10,7 @@ func TestString(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&DefStatement{
-				Token: token.Token{Type: token.DEF, Literal: "def"},
+				Token: token.Token{Type: token.DEF, Literal: "let"},
 				Name: &Identifier{
 					Token: token.Token{Type: token.IDENT, Literal: "myVar"},
 					Value: "myVar",
@@ -23,7 +23,7 @@ func TestString(t *testing.T) {
 		},
 	}
 
-	if program.String() != "def myVar = anotherVar;" {
+	if program.String() != "let myVar = anotherVar;" {
 		t.Errorf("program.String() wrong. Got %q", program.String())
 	}
 }
