@@ -44,7 +44,7 @@ var objectTypeNames = map[ObjectType]string{
 	HASH_OBJ:     "MAP",
 }
 
-type BuiltinFunction func(args ...Object) Object
+type BuiltinFunction func(env *Environment, args ...Object) Object
 
 type Object interface {
 	Type() ObjectType

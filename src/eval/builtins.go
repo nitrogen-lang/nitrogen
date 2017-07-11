@@ -32,12 +32,13 @@ func init() {
 	registerBuiltin("push", pushBuiltin)
 	registerBuiltin("print", printBuiltin)
 	registerBuiltin("println", printlnBuiltin)
+	registerBuiltin("printenv", printEnvBuiltin)
 
 	registerBuiltin("to_int", toIntBuiltin)
 	registerBuiltin("to_float", toFloatBuiltin)
 }
 
-func lenBuiltin(args ...object.Object) object.Object {
+func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -52,7 +53,7 @@ func lenBuiltin(args ...object.Object) object.Object {
 	return newError("Unsupported type %s", args[0].Type())
 }
 
-func firstBuiltin(args ...object.Object) object.Object {
+func firstBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -68,7 +69,7 @@ func firstBuiltin(args ...object.Object) object.Object {
 	return NULL
 }
 
-func lastBuiltin(args ...object.Object) object.Object {
+func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -85,7 +86,7 @@ func lastBuiltin(args ...object.Object) object.Object {
 	return NULL
 }
 
-func restBuiltin(args ...object.Object) object.Object {
+func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -104,7 +105,7 @@ func restBuiltin(args ...object.Object) object.Object {
 	return NULL
 }
 
-func pushBuiltin(args ...object.Object) object.Object {
+func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 2 {
 		return newError("Incorrect number of arguments. Got %d, expected 2", len(args))
 	}
@@ -121,21 +122,21 @@ func pushBuiltin(args ...object.Object) object.Object {
 	return &object.Array{Elements: newElements}
 }
 
-func printBuiltin(args ...object.Object) object.Object {
+func printBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	for _, arg := range args {
 		fmt.Print(arg.Inspect())
 	}
 	return NULL
 }
 
-func printlnBuiltin(args ...object.Object) object.Object {
+func printlnBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	for _, arg := range args {
 		fmt.Println(arg.Inspect())
 	}
 	return NULL
 }
 
-func toIntBuiltin(args ...object.Object) object.Object {
+func toIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -150,7 +151,7 @@ func toIntBuiltin(args ...object.Object) object.Object {
 	return newError("Argument to `to_int` must be FLOAT or INT, got %s", args[0].Type())
 }
 
-func toFloatBuiltin(args ...object.Object) object.Object {
+func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return newError("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}

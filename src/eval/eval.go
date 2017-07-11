@@ -98,7 +98,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return args[0]
 		}
 
-		return applyFunction(function, args)
+		return applyFunction(function, args, env)
 	case *ast.IndexExpression:
 		left := Eval(node.Left, env)
 		if isError(left) {
@@ -561,7 +561,7 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 	return &object.Hash{Pairs: pairs}
 }
 
-func applyFunction(fn object.Object, args []object.Object) object.Object {
+func applyFunction(fn object.Object, args []object.Object, env *object.Environment) object.Object {
 	switch fn := fn.(type) {
 	case *object.Function:
 		if len(fn.Parameters) != len(args) {
@@ -571,7 +571,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		evaled := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaled)
 	case *object.Builtin:
-		return fn.Fn(args...)
+		return fn.Fn(env, args...)
 	}
 
 	return newError("%s is not a function", fn.Type())
