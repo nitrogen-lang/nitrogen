@@ -149,7 +149,7 @@ func (l *Lexer) peekChar() byte {
 
 func (l *Lexer) readIdentifier() string {
 	var ident bytes.Buffer
-	for isLetter(l.curCh) {
+	for isLetter(l.curCh) || isDigit(l.curCh) {
 		ident.WriteByte(l.curCh)
 		l.readChar()
 	}
