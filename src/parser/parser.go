@@ -125,6 +125,13 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 }
 
 func (p *Parser) nextToken() {
+	p.advanceToken()
+	for p.curTokenIs(token.COMMENT) {
+		p.advanceToken()
+	}
+}
+
+func (p *Parser) advanceToken() {
 	p.lastToken = p.curToken
 	p.curToken = p.peekToken
 
@@ -146,12 +153,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 	program.Statements = []ast.Statement{}
 
 	for p.curToken.Type != token.EOF {
-		// Comments are purely for the programmer, destroy them all
-		if p.curToken.Type == token.COMMENT {
-			p.nextToken()
-			continue
-		}
-
 		stmt := p.parseStatement()
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
