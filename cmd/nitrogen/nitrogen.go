@@ -56,7 +56,12 @@ func main() {
 
 	result := eval.Eval(program, object.NewEnvironment())
 	if result != nil && result != eval.NULL {
-		io.WriteString(os.Stdout, result.Inspect())
+		os.Stdout.WriteString(result.Inspect())
+		os.Stdout.WriteString("\n")
+
+		if _, ok := result.(*object.Error); ok {
+			os.Exit(1)
+		}
 	}
 }
 
