@@ -1,6 +1,9 @@
 package object
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	constError        = errors.New("constant can't not be changed")
@@ -32,6 +35,21 @@ func NewEnclosedEnv(outer *Environment) *Environment {
 	env := NewEnvironment()
 	env.parent = outer
 	return env
+}
+
+func (e *Environment) Print(indent string) {
+	for k, v := range e.store {
+		fmt.Printf("%s%s = %s\n%s%sConst: %t\n", indent, k, v.v.Inspect(), indent, indent, v.readonly)
+	}
+
+	if e.parent != nil {
+		if e.parent.parent == nil {
+			fmt.Printf("\n%sGlobal:\n", indent)
+		} else {
+			fmt.Printf("\n%sParent:\n", indent)
+		}
+		e.parent.Print(indent + "  ")
+	}
 }
 
 func (e *Environment) Get(name string) (Object, bool) {

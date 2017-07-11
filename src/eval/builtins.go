@@ -165,3 +165,8 @@ func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Objec
 
 	return newError("Argument to `to_float` must be FLOAT or INT, got %s", args[0].Type())
 }
+
+func printEnvBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	env.Print("")
+	return NULL
+}

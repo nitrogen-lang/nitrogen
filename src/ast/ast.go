@@ -251,8 +251,17 @@ func (bs *BlockStatement) statementNode()       {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
-	for _, s := range bs.Statements {
-		out.WriteString(s.String())
+	l := len(bs.Statements) - 1
+	for i, s := range bs.Statements {
+		str := s.String()
+		out.WriteString(str)
+		if str[len(str)-1] != ';' {
+			out.WriteByte(';')
+		}
+
+		if i < l {
+			out.WriteByte(' ')
+		}
 	}
 	return out.String()
 }
