@@ -84,6 +84,7 @@ func TestReturnStatements(t *testing.T) {
 		{"return 5;", 5},
 		{"return true;", true},
 		{"return foobar;", "foobar"},
+		{"return;", nil},
 	}
 
 	for _, tt := range tests {
@@ -106,7 +107,7 @@ func TestReturnStatements(t *testing.T) {
 			t.Fatalf("returnStmt.TokenLiteral not 'return', got %q",
 				returnStmt.TokenLiteral())
 		}
-		if testLiteralExpression(t, returnStmt.Value, tt.expectedValue) {
+		if !testLiteralExpression(t, returnStmt.Value, tt.expectedValue) {
 			return
 		}
 	}
@@ -845,9 +846,16 @@ func testLiteralExpression(
 		return testIdentifier(t, exp, v)
 	case bool:
 		return testBooleanLiteral(t, exp, v)
+	case nil:
+		return testNullLiteral(t, exp)
 	}
 	t.Errorf("type of exp not handled. got=%T", exp)
 	return false
+}
+
+func testNullLiteral(t *testing.T, nl ast.Expression) bool {
+	_, ok := nl.(*ast.NullLiteral)
+	return ok
 }
 
 func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {

@@ -13,6 +13,7 @@ const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 	COMMENT = "COMMENT"
+	EOL     = "EOL" // End of Line
 
 	// Identifiers & literals
 	IDENT  = "IDENT"  // add, foobar, x, y

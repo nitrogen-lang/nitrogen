@@ -164,6 +164,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
+	case token.EOF:
+		p.addError("This is bad. There's a syntax error somewhere that isn't patched. Check semicolons.")
+		return nil
 	case token.DEF:
 		fallthrough
 	case token.CONST:
@@ -212,7 +215,7 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 		return nil
 	}
 
-	stmt := &ast.DefStatement{Token: token.Token{Type: token.LookupIdent("let"), Literal: "let"}}
+	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	p.insertToken(fToken)
@@ -231,6 +234,11 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
 	p.nextToken()
+	if p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+		stmt.Value = &ast.NullLiteral{Token: createKeywordToken("null")}
+		return stmt
+	}
 
 	stmt.Value = p.parseExpression(LOWEST)
 
@@ -415,7 +423,9 @@ func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
 		}
-		p.nextToken()
+		if !p.curTokenIs(token.RBRACE) {
+			p.nextToken()
+		}
 	}
 
 	return block
@@ -575,4 +585,11 @@ func (p *Parser) curPrecedence() int {
 		return p
 	}
 	return LOWEST
+}
+
+func createKeywordToken(keyword string) token.Token {
+	return token.Token{
+		Type:    token.LookupIdent(keyword),
+		Literal: keyword,
+	}
 }

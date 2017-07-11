@@ -11,9 +11,10 @@ import (
 
 // TODO: Support Unicode by default
 type Lexer struct {
-	input  *bufio.Reader
-	curCh  byte // current char under examination
-	peekCh byte // peek character
+	input     *bufio.Reader
+	curCh     byte // current char under examination
+	peekCh    byte // peek character
+	lastToken token.Token
 }
 
 func New(reader io.Reader) *Lexer {
@@ -44,6 +45,13 @@ func (l *Lexer) NextToken() token.Token {
 	l.devourWhitespace()
 
 	switch l.curCh {
+	/*	case '\n':
+		if l.lastToken.Type == token.EOL {
+			l.readChar()
+			return l.NextToken()
+		}
+		tok = newToken(token.EOL, l.curCh) */
+
 	// Operators
 	case '+':
 		tok = newToken(token.PLUS, l.curCh)
@@ -130,9 +138,11 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.curCh) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
+			l.lastToken = tok
 			return tok
 		} else if isDigit(l.curCh) {
 			tok = l.readNumber()
+			l.lastToken = tok
 			return tok
 		}
 
@@ -140,6 +150,7 @@ func (l *Lexer) NextToken() token.Token {
 	}
 
 	l.readChar()
+	l.lastToken = tok
 	return tok
 }
 
