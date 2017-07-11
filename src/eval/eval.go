@@ -79,6 +79,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIfExpression(node, env)
 	case *ast.FunctionLiteral:
 		return &object.Function{
+			Name:       node.Name,
 			Parameters: node.Parameters,
 			Body:       node.Body,
 			Env:        env,
@@ -86,6 +87,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.CallExpression:
 		function := Eval(node.Function, env)
 		if isError(function) {
+			if ident, ok := node.Function.(*ast.Identifier); ok {
+				return newError("function not found: %s", ident.Value)
+			}
 			return function
 		}
 

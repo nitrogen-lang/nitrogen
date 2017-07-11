@@ -259,6 +259,7 @@ func (bs *BlockStatement) String() string {
 
 type FunctionLiteral struct {
 	Token      token.Token // The 'func' token
+	Name       string
 	Parameters []*Identifier
 	Body       *BlockStatement
 }
@@ -273,6 +274,8 @@ func (fl *FunctionLiteral) String() string {
 	}
 
 	out.WriteString(fl.TokenLiteral())
+	out.WriteByte(' ')
+	out.WriteString(fl.Name)
 	out.WriteByte('(')
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") {")

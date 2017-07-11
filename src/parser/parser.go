@@ -199,6 +199,10 @@ func (p *Parser) parseDefStatement() ast.Statement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
+	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		fun.Name = stmt.Name.String()
+	}
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -223,6 +227,10 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	p.nextToken()
 
 	stmt.Value = p.parseExpression(LOWEST)
+
+	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		fun.Name = stmt.Name.String()
+	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
