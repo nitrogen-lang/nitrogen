@@ -8,7 +8,7 @@ import (
 
 func TestNextToken(t *testing.T) {
 	input := `let five = 5;
-        let ten = 10;
+        always ten = 10;
 
         let ten10 = 10;
 
@@ -52,7 +52,7 @@ comment */
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
 
-		{token.DEF, "let"},
+		{token.CONST, "always"},
 		{token.IDENT, "ten"},
 		{token.ASSIGN, "="},
 		{token.INT, "10"},

@@ -22,12 +22,22 @@ let hello = func(place) {
     return "Hello, " + place;
 }
 
+// Syntax sugar for the above
 func hello2(place) {
      return "Hello2, " + place;
 }
 
 // Here we assign the output of calling hello()
 let helloWorld = hello("World!");
+
+// And constants
+always helloWorld2 = hello("Mars!");
+
+// The following code would fail since a constant can't be reassigned
+// helloWorld2 = "Something else";
+
+// Also, constants must be an int, float, string, bool or null. Arrays, hashmaps or
+// other types aren't allowed as constants.
 
 /*
  * Nitrogen features many builtin functions that are implemented directly in the
@@ -39,6 +49,7 @@ let helloWorld = hello("World!");
 // The similarly named function "print" will print all arguments without a newline.
 println(helloWorld);
 println(hello2("Earth!"));
+println(helloWorld2);
 
 /*
  * Nitrogen supports simple if statements

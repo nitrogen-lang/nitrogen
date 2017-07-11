@@ -42,6 +42,40 @@ func TestDefStatements(t *testing.T) {
 	}
 }
 
+func TestConstStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		expectedValue      interface{}
+	}{
+		{"always x = 5;", "x", 5},
+		{"always y = true;", "y", true},
+		{"always foobar = y", "foobar", "y"},
+	}
+
+	for _, tt := range tests {
+		l := lexer.NewString(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0]
+		if !testConstStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		val := stmt.(*ast.DefStatement).Value
+		if !testLiteralExpression(t, val, tt.expectedValue) {
+			return
+		}
+	}
+}
+
 func TestReturnStatements(t *testing.T) {
 	tests := []struct {
 		input         string
@@ -726,6 +760,10 @@ func testDefStatement(t *testing.T, s ast.Statement, name string) bool {
 		return false
 	}
 
+	if letStmt.Const {
+		t.Fatalf("constStmt.Const is true")
+	}
+
 	if letStmt.Name.Value != name {
 		t.Errorf("letStmt.Name.Value not '%s'. got=%s", name, letStmt.Name.Value)
 		return false
@@ -733,6 +771,35 @@ func testDefStatement(t *testing.T, s ast.Statement, name string) bool {
 
 	if letStmt.Name.TokenLiteral() != name {
 		t.Errorf("s.Name not '%s'. got=%s", name, letStmt.Name)
+		return false
+	}
+
+	return true
+}
+
+func testConstStatement(t *testing.T, s ast.Statement, name string) bool {
+	if s.TokenLiteral() != "always" {
+		t.Fatalf("s.TokenLiteral not 'always'. got=%q", s.TokenLiteral())
+		return false
+	}
+
+	constStmt, ok := s.(*ast.DefStatement)
+	if !ok {
+		t.Fatalf("s not *ast.ConstStatement. got=%T", s)
+		return false
+	}
+
+	if !constStmt.Const {
+		t.Fatalf("constStmt.Const is false")
+	}
+
+	if constStmt.Name.Value != name {
+		t.Fatalf("constStmt.Name.Value not '%s'. got=%s", name, constStmt.Name.Value)
+		return false
+	}
+
+	if constStmt.Name.TokenLiteral() != name {
+		t.Fatalf("s.Name not '%s'. got=%s", name, constStmt.Name)
 		return false
 	}
 

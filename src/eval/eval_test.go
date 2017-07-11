@@ -351,6 +351,42 @@ func TestDefStatements(t *testing.T) {
 	}
 }
 
+func TestAlwaysStatements(t *testing.T) {
+	evaled := testEval("always a = 5; a;")
+	testIntegerObject(t, evaled, 5)
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"always a = 5; a = 6;",
+			"Assignment to declared constant a",
+		},
+		{
+			"always a = 5; let a = 6;",
+			"Assignment to declared constant a",
+		},
+		{
+			"always a = [5, 6, 7];",
+			"Constants must be int, float, string, bool or null",
+		},
+	}
+
+	for _, test := range tests {
+		evaled = testEval(test.input)
+		errObj, ok := evaled.(*object.Error)
+
+		if !ok {
+			t.Fatalf("expected error redeclaring const. got=%T(%+v)", evaled, evaled)
+		}
+
+		if errObj.Message != test.expected {
+			t.Fatalf("wronte error message. expected %q, got %q", errObj.Message, test.expected)
+		}
+	}
+}
+
 func TestFunctionObject(t *testing.T) {
 	input := "func(x) { x + 2; };"
 	evaluated := testEval(input)

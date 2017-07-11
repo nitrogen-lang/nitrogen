@@ -99,6 +99,7 @@ func (b *Boolean) String() string       { return b.Token.Literal }
 
 type DefStatement struct {
 	Token token.Token // the token.DEF token
+	Const bool
 	Name  *Identifier
 	Value Expression
 }
@@ -108,7 +109,11 @@ func (d *DefStatement) TokenLiteral() string { return d.Token.Literal }
 func (d *DefStatement) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("let ")
+	if d.Const {
+		out.WriteString("always ")
+	} else {
+		out.WriteString("let ")
+	}
 	out.WriteString(d.Name.String())
 	out.WriteString(" = ")
 	if d.Value != nil {
@@ -253,7 +258,7 @@ func (bs *BlockStatement) String() string {
 }
 
 type FunctionLiteral struct {
-	Token      token.Token // The 'fn' token
+	Token      token.Token // The 'func' token
 	Parameters []*Identifier
 	Body       *BlockStatement
 }

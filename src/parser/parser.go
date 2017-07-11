@@ -165,6 +165,8 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.DEF:
+		fallthrough
+	case token.CONST:
 		return p.parseDefStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
@@ -176,6 +178,8 @@ func (p *Parser) parseStatement() ast.Statement {
 
 func (p *Parser) parseDefStatement() ast.Statement {
 	stmt := &ast.DefStatement{Token: p.curToken}
+
+	stmt.Const = p.curTokenIs(token.CONST)
 
 	if !p.expectPeek(token.IDENT) {
 		return nil

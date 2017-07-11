@@ -29,6 +29,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.DefStatement:
+		if node.Const {
+			return assignConstIdentValue(node.Name, node.Value, env)
+		}
 		return assignIdentValue(node.Name, node.Value, true, env)
 	case *ast.AssignStatement:
 		return evalAssignment(node, env)
@@ -141,11 +144,47 @@ func assignIdentValue(
 		}
 	}
 
+	if env.IsConst(name.Value) {
+		return newError("Assignment to declared constant %s", name.Value)
+	}
+
 	evaled := Eval(val, env)
 	if isError(evaled) {
 		return evaled
 	}
+
+	// Ignore error since we check for consant above
 	env.Set(name.Value, evaled)
+	return NULL
+}
+
+func assignConstIdentValue(
+	name *ast.Identifier,
+	val ast.Expression,
+	env *object.Environment) object.Object {
+	// Protect builtin functions
+	if builtin := getBuiltin(name.Value); builtin != nil {
+		return newError(
+			"Attempted redeclaration of builtin function '%s'",
+			name.Value,
+		)
+	}
+
+	if env.IsConst(name.Value) {
+		return newError("Assignment to declared constant %s", name.Value)
+	}
+
+	evaled := Eval(val, env)
+	if isError(evaled) {
+		return evaled
+	}
+
+	if !objectIs(evaled, object.INTEGER_OBJ, object.FLOAT_OBJ, object.STRING_OBJ, object.NULL_OBJ, object.BOOLEAN_OBJ) {
+		return newError("Constants must be int, float, string, bool or null")
+	}
+
+	// Ignore error since we check above
+	env.SetConst(name.Value, evaled)
 	return NULL
 }
 
@@ -584,4 +623,13 @@ func isError(obj object.Object) bool {
 
 func typesEqualTo(t object.ObjectType, a, b object.Object) bool {
 	return (a.Type() == t && b.Type() == t)
+}
+
+func objectIs(o object.Object, t ...object.ObjectType) bool {
+	for _, ot := range t {
+		if o.Type() == ot {
+			return true
+		}
+	}
+	return false
 }
