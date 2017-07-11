@@ -138,7 +138,7 @@ func assignIdentValue(
 		)
 	}
 
-	if !new {
+	if !new { // Variables must be declared before use
 		if _, exists := env.Get(name.Value); !exists {
 			return newError("Assignment to uninitialized variable %s", name.Value)
 		}
@@ -154,7 +154,11 @@ func assignIdentValue(
 	}
 
 	// Ignore error since we check for consant above
-	env.Set(name.Value, evaled)
+	if new {
+		env.Create(name.Value, evaled)
+	} else {
+		env.Set(name.Value, evaled)
+	}
 	return NULL
 }
 
@@ -170,8 +174,8 @@ func assignConstIdentValue(
 		)
 	}
 
-	if env.IsConst(name.Value) {
-		return newError("Assignment to declared constant %s", name.Value)
+	if _, exists := env.Get(name.Value); exists { // Constants can't redeclare an existing var
+		return newError("Can't assign constant to variable `%s`", name.Value)
 	}
 
 	evaled := Eval(val, env)
@@ -184,7 +188,7 @@ func assignConstIdentValue(
 	}
 
 	// Ignore error since we check above
-	env.SetConst(name.Value, evaled)
+	env.CreateConst(name.Value, evaled)
 	return NULL
 }
 
@@ -570,7 +574,7 @@ func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviro
 	env := object.NewEnclosedEnv(fn.Env)
 
 	for i, param := range fn.Parameters {
-		env.Set(param.Value, args[i])
+		env.Create(param.Value, args[i])
 	}
 
 	return env

@@ -3,7 +3,9 @@ package object
 import "errors"
 
 var (
-	constError = errors.New("constant can't not be changed")
+	constError        = errors.New("constant can't not be changed")
+	errAlreadyDefined = errors.New("symbol already defined")
+	errNotDefined     = errors.New("symbol not defined")
 )
 
 func IsConstErr(e error) bool {
@@ -56,7 +58,7 @@ func (e *Environment) IsConst(name string) bool {
 	return false
 }
 
-func (e *Environment) isConst(name string) bool {
+func (e *Environment) isLocalConst(name string) bool {
 	obj, ok := e.store[name]
 	if ok {
 		return obj.readonly
@@ -64,23 +66,41 @@ func (e *Environment) isConst(name string) bool {
 	return false
 }
 
-func (e *Environment) Set(name string, val Object) (Object, error) {
-	if e.isConst(name) {
-		return nil, constError
+func (e *Environment) Create(name string, val Object) (Object, error) {
+	if _, exists := e.store[name]; exists {
+		return nil, errAlreadyDefined
 	}
 
-	e.store[name] = &eco{v: val}
-	return val, nil
+	return e.setLocal(name, val)
 }
 
-func (e *Environment) SetConst(name string, val Object) (Object, error) {
-	if e.isConst(name) {
-		return nil, constError
+func (e *Environment) CreateConst(name string, val Object) (Object, error) {
+	if _, exists := e.store[name]; exists {
+		return nil, errAlreadyDefined
 	}
 
 	e.store[name] = &eco{
 		v:        val,
 		readonly: true,
 	}
+	return val, nil
+}
+
+func (e *Environment) Set(name string, val Object) (Object, error) {
+	if v, exists := e.store[name]; exists {
+		if v.readonly {
+			return nil, constError
+		}
+		return e.setLocal(name, val)
+	}
+
+	if e.parent != nil {
+		return e.parent.Set(name, val)
+	}
+	return nil, errNotDefined
+}
+
+func (e *Environment) setLocal(name string, val Object) (Object, error) {
+	e.store[name] = &eco{v: val}
 	return val, nil
 }
