@@ -560,6 +560,9 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 func applyFunction(fn object.Object, args []object.Object) object.Object {
 	switch fn := fn.(type) {
 	case *object.Function:
+		if len(fn.Parameters) != len(args) {
+			return newError("Not enough parameters to call function %s", fn.Name)
+		}
 		extendedEnv := extendFunctionEnv(fn, args)
 		evaled := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaled)
