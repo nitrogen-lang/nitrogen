@@ -157,6 +157,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
+		if len(p.errors) > 0 {
+			return program
+		}
 		p.nextToken()
 	}
 
