@@ -168,9 +168,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.EOF:
-		p.addError("This is bad. There's a syntax error somewhere that isn't patched. Check semicolons.")
-		return nil
 	case token.DEF:
 		fallthrough
 	case token.CONST:
@@ -247,7 +244,6 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 
 	p.nextToken()
 	if p.curTokenIs(token.SEMICOLON) {
-		p.nextToken()
 		stmt.Value = &ast.NullLiteral{Token: createKeywordToken("null")}
 		return stmt
 	}
@@ -435,9 +431,7 @@ func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
 		}
-		if !p.curTokenIs(token.RBRACE) {
-			p.nextToken()
-		}
+		p.nextToken()
 	}
 
 	return block
