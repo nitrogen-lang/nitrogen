@@ -393,10 +393,8 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-	p.nextToken()
-	expression.Condition = p.parseExpression(LOWEST)
-
-	if !p.expectPeek(token.RPAREN) {
+	expression.Condition = p.parseGroupedExpression()
+	if expression.Condition == nil {
 		return nil
 	}
 
