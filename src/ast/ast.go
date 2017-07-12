@@ -233,11 +233,13 @@ func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("if")
 	out.WriteString(ie.Condition.String())
-	out.WriteString(" ")
+	out.WriteString(" {")
 	out.WriteString(ie.Consequence.String())
+	out.WriteByte('}')
 	if ie.Alternative != nil {
-		out.WriteString("else ")
+		out.WriteString(" else {")
 		out.WriteString(ie.Alternative.String())
+		out.WriteByte('}')
 	}
 	return out.String()
 }
