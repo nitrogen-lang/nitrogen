@@ -44,6 +44,12 @@ var objectTypeNames = map[ObjectType]string{
 	HASH_OBJ:     "MAP",
 }
 
+var (
+	NULL  = &Null{}
+	TRUE  = &Boolean{Value: true}
+	FALSE = &Boolean{Value: false}
+)
+
 type BuiltinFunction func(env *Environment, args ...Object) Object
 
 type Object interface {
@@ -201,4 +207,8 @@ func (h *Hash) Inspect() string {
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteByte('}')
 	return out.String()
+}
+
+func NewError(format string, a ...interface{}) *Error {
+	return &Error{Message: fmt.Sprintf(format, a...)}
 }

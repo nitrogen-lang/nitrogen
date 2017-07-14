@@ -11,6 +11,8 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
+
+	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
 
 const PROMPT = ">> "
@@ -55,7 +57,7 @@ func main() {
 	}
 
 	result := eval.Eval(program, object.NewEnvironment())
-	if result != nil && result != eval.NULL {
+	if result != nil && result != object.NULL {
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.WriteString("\n")
 
