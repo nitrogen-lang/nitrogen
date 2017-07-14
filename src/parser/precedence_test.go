@@ -78,6 +78,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"true == true", true, "==", true},
 		{"true != false", true, "!=", false},
 		{"false == false", false, "==", false},
+		{"6 % 3", 6, "%", 3},
 	}
 
 	for _, tt := range infixTests {
@@ -220,6 +221,14 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{
 			"add(a * b[2], b[1], 2 * [1, 2][1])",
 			"add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+		},
+		{
+			"6 % 3 + 4",
+			"((6 % 3) + 4)",
+		},
+		{
+			"6 % 3 * 4",
+			"((6 % 3) * 4)",
 		},
 	}
 

@@ -14,6 +14,8 @@ func TestNextToken(t *testing.T) {
 
         ident2
 
+        6 % 3
+
 		let add = func(x, y) {
 			x + y;
 		};
@@ -65,6 +67,11 @@ comment */
 
 		// Test numbers in ident name
 		{token.IDENT, "ident2"},
+
+		// Modulo
+		{token.INT, "6"},
+		{token.MODULUS, "%"},
+		{token.INT, "3"},
 
 		{token.DEF, "let"},
 		{token.IDENT, "add"},

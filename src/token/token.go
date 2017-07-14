@@ -28,6 +28,7 @@ const (
 	BANG     = "!"
 	ASTERISK = "*"
 	SLASH    = "/"
+	MODULUS  = "%"
 
 	LT     = "<"
 	GT     = ">"
