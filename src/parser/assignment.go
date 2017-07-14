@@ -3,7 +3,7 @@ package parser
 import (
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
-) 
+)
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {

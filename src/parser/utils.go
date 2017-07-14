@@ -2,7 +2,7 @@ package parser
 
 import (
 	"github.com/nitrogen-lang/nitrogen/src/token"
-) 
+)
 
 func (p *Parser) curTokenIs(t token.TokenType) bool {
 	return p.curToken.Type == t

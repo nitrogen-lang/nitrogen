@@ -3,8 +3,8 @@ package eval
 import (
 	"fmt"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
 func init() {

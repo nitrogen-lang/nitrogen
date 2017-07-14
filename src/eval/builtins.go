@@ -20,4 +20,4 @@ func getBuiltin(name string) object.Object {
 		return builtin
 	}
 	return nil
-} 
+}

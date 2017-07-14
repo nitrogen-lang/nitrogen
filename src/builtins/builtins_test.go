@@ -3,10 +3,10 @@ package eval
 import (
 	"testing"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/lexer"
-	"github.com/nitrogen-lang/nitrogen/src/parser"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
 func testEval(input string) object.Object {
