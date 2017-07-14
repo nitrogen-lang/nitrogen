@@ -6,16 +6,11 @@
  */
 
 // Primitive types:
-print("Integer: ", 4);
-println("");
-print("Float: ", 3.14);
-println("");
-print("Boolean: ", true);
-println("");
-print("String: ", "This is a string");
-println("");
-print("Function: ", func(x, y) { x + y; x * y; });
-println("");
+println("Integer: ", 4);
+println("Float: ", 3.14);
+println("Boolean: ", true);
+println("String: ", "This is a string");
+println("Function: ", func(x, y) { x + y; x * y; });
 
 // Here we define the variable "hello" and assign it a function
 let hello = func(place) {

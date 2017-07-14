@@ -21,9 +21,8 @@ func printBuiltin(env *object.Environment, args ...object.Object) object.Object 
 }
 
 func printlnBuiltin(env *object.Environment, args ...object.Object) object.Object {
-	for _, arg := range args {
-		fmt.Println(arg.Inspect())
-	}
+	printBuiltin(env, args...)
+	fmt.Print("\n")
 	return object.NULL
 }
 
