@@ -11,6 +11,7 @@ func init() {
 	eval.RegisterBuiltin("last", lastBuiltin)
 	eval.RegisterBuiltin("rest", restBuiltin)
 	eval.RegisterBuiltin("push", pushBuiltin)
+	eval.RegisterBuiltin("hashMerge", hashMergeBuiltin)
 }
 
 func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
@@ -23,6 +24,8 @@ func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
 		return &object.Integer{Value: int64(len(arg.Value))}
 	case *object.Array:
 		return &object.Integer{Value: int64(len(arg.Elements))}
+	case *object.Null:
+		return &object.Integer{Value: 0}
 	}
 
 	return object.NewError("Unsupported type %s", args[0].Type())
@@ -95,4 +98,37 @@ func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	newElements[length] = args[1]
 
 	return &object.Array{Elements: newElements}
+}
+
+func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	if len(args) < 2 {
+		return object.NewError("hashMerge requires at least 2 arguments. Got %d", len(args))
+	}
+
+	if !object.ObjectsAre(object.HASH_OBJ, args[:2]...) {
+		return object.NewError("First two arguments must be maps")
+	}
+
+	overwrite := true
+	if len(args) > 2 {
+		if args[2].Type() == object.BOOLEAN_OBJ {
+			overwrite = args[2].(*object.Boolean).Value
+		}
+	}
+
+	newMap := &object.Hash{
+		Pairs: make(map[object.HashKey]object.HashPair),
+	}
+
+	for k, v := range args[0].(*object.Hash).Pairs {
+		newMap.Pairs[k] = v
+	}
+
+	for k, v := range args[1].(*object.Hash).Pairs {
+		if _, exists := newMap.Pairs[k]; !exists || (exists && overwrite) {
+			newMap.Pairs[k] = v
+		}
+	}
+
+	return newMap
 }

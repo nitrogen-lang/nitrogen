@@ -18,6 +18,7 @@ func TestBuiltinLenFunction(t *testing.T) {
 		{`len("one", "two")`, "Incorrect number of arguments. Got 2, expected 1"},
 		{`len([1, 2, 3])`, 3},
 		{`len([])`, 0},
+		{`len(nil)`, 0},
 	}
 
 	for _, tt := range tests {
@@ -119,6 +120,44 @@ func TestBuiltinPushFunction(t *testing.T) {
 			if arrObj.Inspect() != tt.expected {
 				t.Errorf("Incorrect array. Expected=%s, got=%s",
 					tt.expected, arrObj.Inspect())
+			}
+			continue
+		}
+
+		errObj, ok := got.(*object.Error)
+		if !ok {
+			t.Errorf("object is not Error. got=%T (%+v)", got, showError(got))
+			continue
+		}
+
+		if errObj.Message != tt.expected {
+			t.Errorf("wrong error message. expected=%q, got=%q", tt.expected, errObj.Message)
+		}
+	}
+}
+
+func TestBuiltinHashMerge(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`hashMerge({"key": "value"}, {"key2": "value2"})`, `{key: value, key2: value2}`},
+		{`hashMerge({"key2": "value"}, {"key2": "value2"})`, `{key2: value2}`},       // Test overwrite
+		{`hashMerge({"key2": "value"}, {"key2": "value2"}, false)`, `{key2: value}`}, // Test no overwrite
+		{`hashMerge()`, "hashMerge requires at least 2 arguments. Got 0"},
+		{`hashMerge({"key": "value"}, 10)`, "First two arguments must be maps"},
+		{`hashMerge(10, {"key": "value"})`, "First two arguments must be maps"},
+	}
+
+	for _, tt := range tests {
+		got := testEval(tt.input)
+
+		if hashObj, ok := got.(*object.Hash); ok {
+			inspect := hashObj.Inspect()
+			if inspect != tt.expected {
+				t.Log("This test needs fixed. Go's maps aren't in guaranteed order and may shift around. This causes the test to fail randomly.")
+				t.Errorf("Incorrect hash map. Expected='%s', got='%s'",
+					tt.expected, inspect)
 			}
 			continue
 		}
