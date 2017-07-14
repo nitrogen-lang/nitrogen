@@ -44,7 +44,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return &object.Array{Elements: elements}
 	case *ast.Boolean:
-		return nativeBoolToBooleanObj(node.Value)
+		return object.NativeBoolToBooleanObj(node.Value)
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
 

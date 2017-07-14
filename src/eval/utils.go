@@ -4,13 +4,6 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-func nativeBoolToBooleanObj(input bool) *object.Boolean {
-	if input {
-		return object.TRUE
-	}
-	return object.FALSE
-}
-
 func unwrapReturnValue(obj object.Object) object.Object {
 	if returnValue, ok := obj.(*object.ReturnValue); ok {
 		return returnValue.Value
