@@ -8,6 +8,15 @@ import (
 func init() {
 	eval.RegisterBuiltin("to_int", toIntBuiltin)
 	eval.RegisterBuiltin("to_float", toFloatBuiltin)
+
+	eval.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FLOAT_OBJ))
+	eval.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.INTEGER_OBJ))
+	eval.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BOOLEAN_OBJ))
+	eval.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NULL_OBJ))
+	eval.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FUNCTION_OBJ))
+	eval.RegisterBuiltin("isString", makeIsTypeBuiltin(object.STRING_OBJ))
+	eval.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ARRAY_OBJ))
+	eval.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HASH_OBJ))
 }
 
 func toIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
@@ -38,4 +47,14 @@ func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Objec
 	}
 
 	return object.NewError("Argument to `to_float` must be FLOAT or INT, got %s", args[0].Type())
+}
+
+func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
+	return func(env *object.Environment, args ...object.Object) object.Object {
+		if len(args) != 1 {
+			return object.NewError("Type check requires one argument. Got %d", len(args))
+		}
+
+		return object.NativeBoolToBooleanObj(args[0].Type() == t)
+	}
 }

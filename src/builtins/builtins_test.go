@@ -57,6 +57,25 @@ func testFloatObject(t *testing.T, obj object.Object, expected float64) bool {
 	return true
 }
 
+func testBoolObject(t *testing.T, obj object.Object, expected bool) bool {
+	result, ok := obj.(*object.Boolean)
+	if !ok {
+		t.Errorf("object is not Bool. expected=%t, got=%T (%+v)",
+			expected,
+			obj,
+			showError(obj),
+		)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%t, want=%t",
+			result.Value, expected)
+		return false
+	}
+	return true
+}
+
 func showError(obj object.Object) string {
 	if obj == nil {
 		return "nil"
@@ -91,6 +110,8 @@ func testLiteralErrorObjects(t *testing.T, got object.Object, expected interface
 		testIntegerObject(t, got, int64(expected))
 	case float64:
 		testFloatObject(t, got, expected)
+	case bool:
+		testBoolObject(t, got, expected)
 	case string:
 		errObj, ok := got.(*object.Error)
 		if !ok {

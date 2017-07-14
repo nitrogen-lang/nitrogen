@@ -35,3 +35,31 @@ func TestBuiltinFloatConvFunction(t *testing.T) {
 		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
 	}
 }
+
+func TestIsBuiltins(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`isFloat(3.14159)`, true},
+		{`isFloat(3)`, false},
+		{`isInt(3)`, true},
+		{`isInt(3.14159)`, false},
+		{`isBool(true)`, true},
+		{`isBool(false)`, true},
+		{`isNull(nil)`, true},
+		{`isNull("nil")`, false},
+		{`isFunc(func() { 10; })`, true},
+		{`isFunc(10)`, false},
+		{`isString("Hello")`, true},
+		{`isString(10)`, false},
+		{`isArray([10, "true", false])`, true},
+		{`isArray("array")`, false},
+		{`isMap({"key": "value"})`, true},
+		{`isMap("array")`, false},
+	}
+
+	for _, tt := range tests {
+		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
+	}
+}

@@ -90,6 +90,13 @@ func (b *Boolean) Inspect() string {
 }
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 
+func NativeBoolToBooleanObj(input bool) *Boolean {
+	if input {
+		return TRUE
+	}
+	return FALSE
+}
+
 type Null struct{}
 
 func (n *Null) Inspect() string  { return "nil" }
