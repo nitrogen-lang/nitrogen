@@ -17,4 +17,14 @@ func fib(x) {
      return fib(x-1) + fib(x-2);
 }
 
-println(fib(10));
+func main() {
+    let fibTest = fib(10);
+    if (fibTest != 55) {
+        println("Fibonacci is broken!");
+        print("Got: ");
+        print(fibTest);
+        print(", Expected: 55");
+    }
+}
+
+main();
