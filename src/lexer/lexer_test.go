@@ -10,7 +10,9 @@ func TestNextToken(t *testing.T) {
 	input := `let five = 5;
         always ten = 10;
 
-        let ten10 = 10;
+        世界
+
+        ident2
 
 		let add = func(x, y) {
 			x + y;
@@ -58,11 +60,11 @@ comment */
 		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
 
-		{token.DEF, "let"},
-		{token.IDENT, "ten10"},
-		{token.ASSIGN, "="},
-		{token.INT, "10"},
-		{token.SEMICOLON, ";"},
+		// Test UTF-8 processing
+		{token.IDENT, "世界"},
+
+		// Test numbers in ident name
+		{token.IDENT, "ident2"},
 
 		{token.DEF, "let"},
 		{token.IDENT, "add"},

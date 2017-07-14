@@ -5,23 +5,23 @@ import (
 	"bytes"
 	"io"
 	"strings"
+	"unicode"
 
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
-// TODO: Support Unicode by default
 type Lexer struct {
 	input     *bufio.Reader
-	curCh     byte // current char under examination
-	peekCh    byte // peek character
+	curCh     rune // current char under examination
+	peekCh    rune // peek character
 	lastToken token.Token
 }
 
 func New(reader io.Reader) *Lexer {
 	l := &Lexer{input: bufio.NewReader(reader)}
 	// Populate both current and peek char
-	l.readChar()
-	l.readChar()
+	l.readRune()
+	l.readRune()
 	return l
 }
 
@@ -29,11 +29,11 @@ func NewString(input string) *Lexer {
 	return New(strings.NewReader(input))
 }
 
-func (l *Lexer) readChar() {
+func (l *Lexer) readRune() {
 	l.curCh = l.peekCh
 
 	var err error
-	l.peekCh, err = l.input.ReadByte()
+	l.peekCh, _, err = l.input.ReadRune()
 	if err != nil {
 		l.peekCh = 0
 	}
@@ -61,13 +61,13 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.ASTERISK, l.curCh)
 	case '/':
 		if l.peekChar() == '/' {
-			l.readChar()
+			l.readRune()
 			tok = token.Token{
 				Type:    token.COMMENT,
 				Literal: l.readSingleLineComment(),
 			}
 		} else if l.peekChar() == '*' {
-			l.readChar()
+			l.readRune()
 			tok = token.Token{
 				Type:    token.COMMENT,
 				Literal: l.readMultiLineComment(),
@@ -77,7 +77,7 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case '!':
 		if l.peekChar() == '=' {
-			l.readChar()
+			l.readRune()
 			tok = token.Token{
 				Type:    token.NOT_EQ,
 				Literal: "!=",
@@ -89,7 +89,7 @@ func (l *Lexer) NextToken() token.Token {
 	// Equality
 	case '=':
 		if l.peekChar() == '=' {
-			l.readChar()
+			l.readRune()
 			tok = token.Token{
 				Type:    token.EQ,
 				Literal: "==",
@@ -149,20 +149,20 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.ILLEGAL, l.curCh)
 	}
 
-	l.readChar()
+	l.readRune()
 	l.lastToken = tok
 	return tok
 }
 
-func (l *Lexer) peekChar() byte {
+func (l *Lexer) peekChar() rune {
 	return l.peekCh
 }
 
 func (l *Lexer) readIdentifier() string {
 	var ident bytes.Buffer
-	for isLetter(l.curCh) || isDigit(l.curCh) {
-		ident.WriteByte(l.curCh)
-		l.readChar()
+	for isIdent(l.curCh) || isDigit(l.curCh) {
+		ident.WriteRune(l.curCh)
+		l.readRune()
 	}
 	return ident.String()
 }
@@ -170,11 +170,11 @@ func (l *Lexer) readIdentifier() string {
 // TODO: Support escape sequences, standard Go should be fine, or PHP.
 func (l *Lexer) readString() string {
 	var ident bytes.Buffer
-	l.readChar() // Go past the starting double quote
+	l.readRune() // Go past the starting double quote
 
 	for l.curCh != '"' {
-		ident.WriteByte(l.curCh)
-		l.readChar()
+		ident.WriteRune(l.curCh)
+		l.readRune()
 	}
 
 	return ident.String()
@@ -192,8 +192,8 @@ func (l *Lexer) readNumber() token.Token {
 			tokenType = token.FLOAT
 		}
 
-		ident.WriteByte(l.curCh)
-		l.readChar()
+		ident.WriteRune(l.curCh)
+		l.readRune()
 	}
 
 	return token.Token{
@@ -204,49 +204,56 @@ func (l *Lexer) readNumber() token.Token {
 
 func (l *Lexer) readSingleLineComment() string {
 	var com bytes.Buffer
-	l.readChar() // Go over # or / characters
+	l.readRune() // Go over # or / characters
 
 	for l.curCh != '\n' {
-		com.WriteByte(l.curCh)
-		l.readChar()
+		com.WriteRune(l.curCh)
+		l.readRune()
 	}
 	return strings.TrimSpace(com.String())
 }
 
 func (l *Lexer) readMultiLineComment() string {
 	var com bytes.Buffer
-	l.readChar() // Go over * character
+	l.readRune() // Go over * character
 
 	for l.curCh != 0 {
 		if l.curCh == '*' && l.peekChar() == '/' {
-			l.readChar() // Skip *
+			l.readRune() // Skip *
 			break
 		}
 
-		com.WriteByte(l.curCh)
-		l.readChar()
+		com.WriteRune(l.curCh)
+		l.readRune()
 	}
 	return com.String()
 }
 
 func (l *Lexer) devourWhitespace() {
 	for isWhitespace(l.curCh) {
-		l.readChar()
+		l.readRune()
 	}
 }
 
-func newToken(tokenType token.TokenType, ch byte) token.Token {
+func newToken(tokenType token.TokenType, ch rune) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
-func isLetter(ch byte) bool {
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+// Identifiers must start with a letter
+func isLetter(ch rune) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || unicode.IsLetter(ch)
 }
 
-func isDigit(ch byte) bool {
+// After the first letter, an ident can be a letter or number
+func isIdent(ch rune) bool {
+	return isLetter(ch) || (ch != '.' && isDigit(ch)) // A period is not a valid identifier name
+}
+
+// Only Latin numbers
+func isDigit(ch rune) bool {
 	return ('0' <= ch && ch <= '9') || ch == '.'
 }
 
-func isWhitespace(ch byte) bool {
+func isWhitespace(ch rune) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
 }
