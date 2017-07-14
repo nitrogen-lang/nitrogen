@@ -44,16 +44,3 @@ func isTruthy(obj object.Object) bool {
 func isError(obj object.Object) bool {
 	return (obj != nil && obj.Type() == object.ERROR_OBJ)
 }
-
-func typesEqualTo(t object.ObjectType, a, b object.Object) bool {
-	return (a.Type() == t && b.Type() == t)
-}
-
-func objectIs(o object.Object, t ...object.ObjectType) bool {
-	for _, ot := range t {
-		if o.Type() == ot {
-			return true
-		}
-	}
-	return false
-}

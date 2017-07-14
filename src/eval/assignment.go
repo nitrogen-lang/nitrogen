@@ -77,7 +77,7 @@ func assignConstIdentValue(
 		return evaled
 	}
 
-	if !objectIs(evaled, object.INTEGER_OBJ, object.FLOAT_OBJ, object.STRING_OBJ, object.NULL_OBJ, object.BOOLEAN_OBJ) {
+	if !object.ObjectIs(evaled, object.INTEGER_OBJ, object.FLOAT_OBJ, object.STRING_OBJ, object.NULL_OBJ, object.BOOLEAN_OBJ) {
 		return object.NewError("Constants must be int, float, string, bool or null")
 	}
 

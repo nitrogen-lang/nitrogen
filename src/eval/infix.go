@@ -8,13 +8,13 @@ func evalInfixExpression(op string, left, right object.Object) object.Object {
 	switch {
 	case left.Type() != right.Type():
 		return object.NewError("type mismatch: %s %s %s", left.Type(), op, right.Type())
-	case typesEqualTo(object.INTEGER_OBJ, left, right):
+	case object.ObjectsAre(object.INTEGER_OBJ, left, right):
 		return evalIntegerInfixExpression(op, left, right)
-	case typesEqualTo(object.FLOAT_OBJ, left, right):
+	case object.ObjectsAre(object.FLOAT_OBJ, left, right):
 		return evalFloatInfixExpression(op, left, right)
-	case typesEqualTo(object.STRING_OBJ, left, right):
+	case object.ObjectsAre(object.STRING_OBJ, left, right):
 		return evalStringInfixExpression(op, left, right)
-	case typesEqualTo(object.ARRAY_OBJ, left, right):
+	case object.ObjectsAre(object.ARRAY_OBJ, left, right):
 		return evalArrayInfixExpression(op, left, right)
 	case op == "==":
 		return object.NativeBoolToBooleanObj(left == right)

@@ -58,3 +58,21 @@ func TestClosures(t *testing.T) {
 
 	testIntegerObject(t, testEval(input), 4)
 }
+
+func TestExtraArgs(t *testing.T) {
+	input := `func extra(a) { args[0]; } extra(1, 2)`
+	testIntegerObject(t, testEval(input), 2)
+}
+
+func TestExtraArgsError(t *testing.T) {
+	input := `func extra(a) { args = 5; } extra(1, 2)`
+	evaled := testEval(input)
+	errObj, ok := evaled.(*object.Error)
+	if !ok {
+		t.Fatalf("Expected error, got %#v", evaled)
+	}
+
+	if errObj.Message != "Assignment to declared constant args" {
+		t.Fatalf("Incorrect error message. Got '%s'", errObj.Message)
+	}
+}

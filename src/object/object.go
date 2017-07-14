@@ -219,3 +219,21 @@ func (h *Hash) Inspect() string {
 func NewError(format string, a ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, a...)}
 }
+
+func ObjectsAre(t ObjectType, o ...Object) bool {
+	for _, obj := range o {
+		if obj.Type() != t {
+			return false
+		}
+	}
+	return true
+}
+
+func ObjectIs(o Object, t ...ObjectType) bool {
+	for _, ot := range t {
+		if o.Type() == ot {
+			return true
+		}
+	}
+	return false
+}
