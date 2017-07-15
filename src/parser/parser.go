@@ -118,7 +118,7 @@ func (p *Parser) addError(format string, args ...interface{}) {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	p.addError("incorrect next token. Expected %s, got %s", t, p.peekToken.Type)
+	p.addError("incorrect next token. Expected %q, got %q", t, p.peekToken.Type)
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {

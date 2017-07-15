@@ -69,14 +69,17 @@ comment */
 
 		// Test UTF-8 processing
 		{token.IDENT, "世界"},
+		{token.SEMICOLON, ";"},
 
 		// Test numbers in ident name
 		{token.IDENT, "ident2"},
+		{token.SEMICOLON, ";"},
 
 		// Modulo
 		{token.INT, "6"},
 		{token.MODULUS, "%"},
 		{token.INT, "3"},
+		{token.SEMICOLON, ";"},
 
 		{token.DEF, "let"},
 		{token.IDENT, "add"},
@@ -137,6 +140,7 @@ comment */
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 
 		{token.INT, "10"},
 		{token.EQ, "=="},
@@ -149,7 +153,9 @@ comment */
 		{token.SEMICOLON, ";"},
 
 		{token.STRING, "foobar"},
+		{token.SEMICOLON, ";"},
 		{token.STRING, "foo bar"},
+		{token.SEMICOLON, ";"},
 
 		{token.LSQUARE, "["},
 		{token.INT, "1"},
@@ -163,8 +169,10 @@ comment */
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 
 		{token.NULL, "nil"},
+		{token.SEMICOLON, ";"},
 
 		{token.COMMENT, "Single line hash comment"},
 		{token.COMMENT, "Single line slash comment"},
@@ -178,7 +186,9 @@ comment */
 		{token.SEMICOLON, ";"},
 
 		{token.STRING, "\n\r\t\v\f\\\"\b\\' Hello"},
+		{token.SEMICOLON, ";"},
 		{token.STRING, `\n\r\t\v\f\\\"\b' Hello`},
+		{token.SEMICOLON, ";"},
 
 		{token.INT, "0x2F54a"},
 		{token.SEMICOLON, ";"},

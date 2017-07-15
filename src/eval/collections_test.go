@@ -123,7 +123,7 @@ func TestHashLiterals(t *testing.T) {
 			"one": 10 - 9,
 			two: 1 + 1,
 			"thr" + "ee": 6 / 2,
-			4: 4
+			4: 4,
 		}`
 
 	evaluated := testEval(input, t)

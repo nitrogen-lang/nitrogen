@@ -42,15 +42,16 @@ func (l *Lexer) readRune() {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
-	l.devourWhitespace()
+	l.devourWhitespaceNotNewLine()
 
 	switch l.curCh {
-	/*	case '\n':
-		if l.lastToken.Type == token.EOL {
-			l.readChar()
+	case '\n':
+		if l.needSemicolon() {
+			tok = newToken(token.SEMICOLON, ';')
+		} else {
+			l.devourWhitespace()
 			return l.NextToken()
 		}
-		tok = newToken(token.EOL, l.curCh) */
 
 	// Operators
 	case '+':
@@ -134,8 +135,12 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.ILLEGAL, l.curCh)
 		}
 	case 0:
-		tok.Literal = ""
-		tok.Type = token.EOF
+		if l.needSemicolon() {
+			tok = newToken(token.SEMICOLON, ';')
+		} else {
+			tok.Literal = ""
+			tok.Type = token.EOF
+		}
 
 	default:
 		if isLetter(l.curCh) {
@@ -159,6 +164,19 @@ func (l *Lexer) NextToken() token.Token {
 
 func (l *Lexer) peekChar() rune {
 	return l.peekCh
+}
+
+func (l *Lexer) needSemicolon() bool {
+	return l.lastTokenWas(
+		token.IDENT,
+		token.INT,
+		token.FLOAT,
+		token.STRING,
+		token.NULL,
+		token.RETURN,
+		token.RPAREN,
+		token.RSQUARE,
+		token.RBRACE)
 }
 
 func (l *Lexer) readIdentifier() string {
@@ -316,6 +334,12 @@ func (l *Lexer) devourWhitespace() {
 	}
 }
 
+func (l *Lexer) devourWhitespaceNotNewLine() {
+	for l.curCh != '\n' && isWhitespace(l.curCh) {
+		l.readRune()
+	}
+}
+
 func newToken(tokenType token.TokenType, ch rune) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
@@ -341,4 +365,13 @@ func isHexDigit(ch rune) bool {
 
 func isWhitespace(ch rune) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
+}
+
+func (l *Lexer) lastTokenWas(types ...token.TokenType) bool {
+	for _, t := range types {
+		if l.lastToken.Type == t {
+			return true
+		}
+	}
+	return false
 }

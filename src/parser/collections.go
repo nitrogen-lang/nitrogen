@@ -29,6 +29,7 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 		hash.Pairs[key] = value
 
 		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			p.addError("Invalid hash literal")
 			return nil
 		}
 	}

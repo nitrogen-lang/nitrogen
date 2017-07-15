@@ -149,8 +149,26 @@ func TestLetFuncSugarStatement(t *testing.T) {
 	if len(p.Errors()) == 0 {
 		t.Fatalf("let with func sugar expected to fail, but didn't")
 	}
-	if p.Errors()[0] != "incorrect next token. Expected (, got IDENT" {
+	if p.Errors()[0] != "incorrect next token. Expected \"(\", got \"IDENT\"" {
 		t.Fatalf("incorrect error. got \"%s\"", p.Errors()[0])
+	}
+}
+
+func TestNullReturn(t *testing.T) {
+	input := `func hello(place) {
+        return
+    }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) > 0 {
+		t.Fatalf("null return returned error: %s", p.Errors()[0])
+	}
+
+	astString := program.String()
+	if astString != "func hello(place) {return null;}" {
+		t.Fatalf("Incorrect null return parsing. Got %q", astString)
 	}
 }
 
