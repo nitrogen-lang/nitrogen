@@ -75,7 +75,7 @@ println(hello(places[1]));
 // Values can be of any type.
 let placeMap = {
     "America": ["USA", "Canada", "Mexico"],
-    "Europe": ["Germany", "France", "Spain"]
+    "Europe": ["Germany", "France", "Spain"],
 };
 
 println(placeMap["Europe"]);
