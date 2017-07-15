@@ -1,5 +1,10 @@
 # Nitrogen Documentation
 
+Here you will find documentation for the language syntax, as well as the standard library:
+
+- [Language](language.md)
+- [Standard Library](stdlib)
+
 ## Function Notation
 
 Throughout the documentation, you will find several function definitions. The following syntax is used to denote the number and type
@@ -14,7 +19,7 @@ of any function arguments as well as return types:
 - Multiple types are denoted using pipes or the generic type "T":
   - `func print(in...: T)` - Print takes 1 or more arguments of any type
   - `func calc(op: string, nums...: string|int): int` - This function takes one argument of type string plus one or more arguments of type string OR int. The function returns an int.
-- Multiple arguments with the same time next to each other don't need to specify type:
+- Multiple arguments with the same type next to each other don't need to specify type:
   - `func hashMerge(map1, map2: map): map` - hashMerge takes two maps. Since they're the same type, the type only needs to be on the last argument.
 - Optional arguments are denoted with square braces:
-  - `func hashMerge(map1, map2: map, [overwrite: bool]): map` - hashMerge takes two maps and an optional boolean argument.
+  - `func hashMerge(map1, map2: map[, overwrite: bool]): map` - hashMerge takes two maps and an optional boolean argument.
