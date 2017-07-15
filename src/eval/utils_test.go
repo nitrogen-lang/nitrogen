@@ -8,10 +8,13 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
-func testEval(input string) object.Object {
+func testEval(input string, t *testing.T) object.Object {
 	l := lexer.NewString(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
+	if len(p.Errors()) > 1 {
+		t.Fatal(p.Errors()[0])
+	}
 	env := object.NewEnvironment()
 
 	return Eval(program, env)

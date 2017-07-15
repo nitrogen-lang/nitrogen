@@ -31,7 +31,7 @@ func TestEvalBooleanExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
@@ -53,7 +53,7 @@ func TestBangOperator(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
 }
@@ -79,7 +79,7 @@ func TestIfElseExpressions(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		integer, ok := tt.expected.(int)
 		if ok {
 			testIntegerObject(t, evaluated, int64(integer))

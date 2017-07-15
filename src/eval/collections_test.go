@@ -8,7 +8,7 @@ import (
 
 func TestArrayLiterals(t *testing.T) {
 	input := "[1, 2 * 2, 3 + 3]"
-	evaluated := testEval(input)
+	evaluated := testEval(input, t)
 
 	result, ok := evaluated.(*object.Array)
 	if !ok {
@@ -81,7 +81,7 @@ func TestArrayIndexExpressions(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		integer, ok := tt.expected.(int)
 		if ok {
 			testIntegerObject(t, evaluated, int64(integer))
@@ -103,7 +103,7 @@ func TestArrayConcatenation(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		arr, ok := evaluated.(*object.Array)
 
 		if !ok {
@@ -126,7 +126,7 @@ func TestHashLiterals(t *testing.T) {
 			4: 4
 		}`
 
-	evaluated := testEval(input)
+	evaluated := testEval(input, t)
 	result, ok := evaluated.(*object.Hash)
 	if !ok {
 		t.Fatalf("Eval didn't return Hash. got=%T (%+v)", evaluated, showError(evaluated))
@@ -180,7 +180,7 @@ func TestHashIndexExpressions(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		integer, ok := tt.expected.(int)
 
 		if ok {

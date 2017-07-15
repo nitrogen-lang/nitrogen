@@ -18,12 +18,12 @@ func TestDefStatements(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testIntegerObject(t, testEval(tt.input), tt.expected)
+		testIntegerObject(t, testEval(tt.input, t), tt.expected)
 	}
 }
 
 func TestAlwaysStatements(t *testing.T) {
-	evaled := testEval("always a = 5; a;")
+	evaled := testEval("always a = 5; a;", t)
 	testIntegerObject(t, evaled, 5)
 
 	tests := []struct {
@@ -45,7 +45,7 @@ func TestAlwaysStatements(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		evaled = testEval(test.input)
+		evaled = testEval(test.input, t)
 		errObj, ok := evaled.(*object.Error)
 
 		if !ok {
@@ -82,7 +82,7 @@ func TestHashAssignEval(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 
 		switch i := tt.expected.(type) {
 		case int:

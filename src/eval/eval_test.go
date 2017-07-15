@@ -8,7 +8,7 @@ import (
 
 func TestNullEval(t *testing.T) {
 	input := `nil`
-	evaluated := testEval(input)
+	evaluated := testEval(input, t)
 
 	if evaluated != object.NULL {
 		t.Fatalf("object is not Null. got=%T (%+v)", evaluated, showError(evaluated))
@@ -33,7 +33,7 @@ func TestEvalFloatExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		testFloatObject(t, evaluated, tt.expected)
 	}
 }
@@ -64,7 +64,7 @@ func TestEvalIntegerExpression(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -88,7 +88,7 @@ func TestReturnStatements(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		testIntegerObject(t, evaluated, tt.expected)
 	}
 }
@@ -147,7 +147,7 @@ func TestErrorHandling(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		evaluated := testEval(tt.input)
+		evaluated := testEval(tt.input, t)
 		errObj, ok := evaluated.(*object.Error)
 
 		if !ok {
@@ -165,7 +165,7 @@ func TestErrorHandling(t *testing.T) {
 
 func TestStringLiteral(t *testing.T) {
 	input := `"Hello World!"`
-	evaluated := testEval(input)
+	evaluated := testEval(input, t)
 
 	str, ok := evaluated.(*object.String)
 	if !ok {
@@ -179,7 +179,7 @@ func TestStringLiteral(t *testing.T) {
 
 func TestStringConcatenation(t *testing.T) {
 	input := `"Hello" + " " + "World!"`
-	evaluated := testEval(input)
+	evaluated := testEval(input, t)
 	str, ok := evaluated.(*object.String)
 
 	if !ok {
@@ -203,6 +203,6 @@ func TestStringEquality(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testBooleanObject(t, testEval(tt.input), tt.expected)
+		testBooleanObject(t, testEval(tt.input, t), tt.expected)
 	}
 }

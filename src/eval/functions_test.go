@@ -8,7 +8,7 @@ import (
 
 func TestFunctionObject(t *testing.T) {
 	input := "func(x) { x + 2; };"
-	evaluated := testEval(input)
+	evaluated := testEval(input, t)
 	fn, ok := evaluated.(*object.Function)
 	if !ok {
 		t.Fatalf("object is not Function. got=%T (%#v)", evaluated, showError(evaluated))
@@ -43,7 +43,7 @@ func TestFunctionApplication(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testIntegerObject(t, testEval(tt.input), tt.expected)
+		testIntegerObject(t, testEval(tt.input, t), tt.expected)
 	}
 }
 
@@ -56,17 +56,17 @@ func TestClosures(t *testing.T) {
         let addTwo = newAdder(2);
         addTwo(2);`
 
-	testIntegerObject(t, testEval(input), 4)
+	testIntegerObject(t, testEval(input, t), 4)
 }
 
 func TestExtraArgs(t *testing.T) {
 	input := `func extra(a) { args[0]; } extra(1, 2)`
-	testIntegerObject(t, testEval(input), 2)
+	testIntegerObject(t, testEval(input, t), 2)
 }
 
 func TestExtraArgsError(t *testing.T) {
 	input := `func extra(a) { args = 5; } extra(1, 2)`
-	evaled := testEval(input)
+	evaled := testEval(input, t)
 	errObj, ok := evaled.(*object.Error)
 	if !ok {
 		t.Fatalf("Expected error, got %#v", evaled)
