@@ -126,6 +126,13 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.readRawString()
 	case '#':
 		tok = l.readSingleLineComment()
+	case '\\':
+		if l.peekCh == 'x' {
+			l.readRune()
+			tok = l.readNumber()
+		} else {
+			tok = newToken(token.ILLEGAL, l.curCh)
+		}
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -229,25 +236,42 @@ func (l *Lexer) readRawString() token.Token {
 	}
 }
 
-// TODO: Support arbitrary based numbers [base]b[number]
-// base defaults to 10. 8b10 = 8 in octal 16b10 = 16 in hex
 func (l *Lexer) readNumber() token.Token {
-	var ident bytes.Buffer
+	var number bytes.Buffer
+	base := ""
 	tokenType := token.INT
 
-	for isDigit(l.curCh) {
-		// The parser will handle bad floats
-		if l.curCh == '.' && tokenType == token.INT {
+	if l.curCh == 'x' {
+		base = "0x"
+		l.readRune()
+	}
+
+	if l.curCh == '.' {
+		l.readRune()
+		return token.Token{
+			Type:    token.ILLEGAL,
+			Literal: "Invalid float literal",
+		}
+	}
+
+	for isDigit(l.curCh) || isHexDigit(l.curCh) {
+		if l.curCh == '.' {
+			if tokenType != token.INT {
+				return token.Token{
+					Type:    token.ILLEGAL,
+					Literal: "Invalid float literal",
+				}
+			}
 			tokenType = token.FLOAT
 		}
 
-		ident.WriteRune(l.curCh)
+		number.WriteRune(l.curCh)
 		l.readRune()
 	}
 
 	return token.Token{
 		Type:    token.TokenType(tokenType),
-		Literal: ident.String(),
+		Literal: base + number.String(),
 	}
 }
 
@@ -309,6 +333,10 @@ func isIdent(ch rune) bool {
 // Only Latin numbers
 func isDigit(ch rune) bool {
 	return ('0' <= ch && ch <= '9') || ch == '.'
+}
+
+func isHexDigit(ch rune) bool {
+	return ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F')
 }
 
 func isWhitespace(ch rune) bool {

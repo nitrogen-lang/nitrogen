@@ -47,6 +47,8 @@ comment */
 
         "\n\r\t\v\f\\\"\b\' Hello"
         '\n\r\t\v\f\\\"\b\' Hello'
+
+        \x2F54a
     `
 
 	tests := []struct {
@@ -169,12 +171,17 @@ comment */
 		{token.COMMENT, " Multi-line\ncomment "},
 
 		{token.FLOAT, "12.5"},
-		// Ensure bad floats are lexed, parser handles errors
-		{token.FLOAT, "12.5.7"},
+		{token.SEMICOLON, ";"},
+		{token.ILLEGAL, "Invalid float literal"},
+		{token.ILLEGAL, "Invalid float literal"},
+		{token.INT, "7"},
+		{token.SEMICOLON, ";"},
 
 		{token.STRING, "\n\r\t\v\f\\\"\b\\' Hello"},
 		{token.STRING, `\n\r\t\v\f\\\"\b' Hello`},
 
+		{token.INT, "0x2F54a"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 
@@ -184,8 +191,8 @@ comment */
 		tok := l.NextToken()
 
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. Expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
+			t.Fatalf("tests[%d] - tokentype wrong. Expected=%q, %q, got=%q",
+				i, tt.expectedType, tt.expectedLiteral, tok.Type)
 		}
 
 		if tok.Literal != tt.expectedLiteral {
