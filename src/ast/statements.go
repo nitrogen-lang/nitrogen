@@ -43,6 +43,10 @@ type DefStatement struct {
 func (d *DefStatement) statementNode()       {}
 func (d *DefStatement) TokenLiteral() string { return d.Token.Literal }
 func (d *DefStatement) String() string {
+	if _, ok := d.Value.(*FunctionLiteral); ok {
+		return d.Value.String()
+	}
+
 	var out bytes.Buffer
 
 	if d.Const {
