@@ -141,7 +141,6 @@ func TestBuiltinHashMerge(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`hashMerge({"key": "value"}, {"key2": "value2"})`, `{key: value, key2: value2}`},
 		{`hashMerge({"key2": "value"}, {"key2": "value2"})`, `{key2: value2}`},       // Test overwrite
 		{`hashMerge({"key2": "value"}, {"key2": "value2"}, false)`, `{key2: value}`}, // Test no overwrite
 		{`hashMerge()`, "hashMerge requires at least 2 arguments. Got 0"},
@@ -155,7 +154,6 @@ func TestBuiltinHashMerge(t *testing.T) {
 		if hashObj, ok := got.(*object.Hash); ok {
 			inspect := hashObj.Inspect()
 			if inspect != tt.expected {
-				t.Log("This test needs fixed. Go's maps aren't in guaranteed order and may shift around. This causes the test to fail randomly.")
 				t.Errorf("Incorrect hash map. Expected='%s', got='%s'",
 					tt.expected, inspect)
 			}
@@ -170,6 +168,31 @@ func TestBuiltinHashMerge(t *testing.T) {
 
 		if errObj.Message != tt.expected {
 			t.Errorf("wrong error message. expected=%q, got=%q", tt.expected, errObj.Message)
+		}
+	}
+}
+
+func TestBuiltinHashMergeSpecial(t *testing.T) {
+	evaled := testEval(`hashMerge({"key": "value"}, {"key2": "value2"})`)
+	hashObj, ok := evaled.(*object.Hash)
+	if !ok {
+		t.Fatalf("Got error during hashMerge: %#v", evaled)
+	}
+
+	expected := map[object.HashKey]string{
+		(&object.String{Value: "key"}).HashKey():  "value",
+		(&object.String{Value: "key2"}).HashKey(): "value2",
+	}
+
+	for k, v := range expected {
+		val, exists := hashObj.Pairs[k]
+		if !exists {
+			t.Fatalf("Map missing key %q", k)
+		}
+
+		valStr := val.Value.(*object.String).Value
+		if valStr != v {
+			t.Fatalf("Incorrect map value for key %q: %q", k, v)
 		}
 	}
 }
