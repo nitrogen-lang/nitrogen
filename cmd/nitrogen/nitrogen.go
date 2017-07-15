@@ -20,11 +20,13 @@ const PROMPT = ">> "
 var (
 	interactive bool
 	scriptFile  string
+	printAst    bool
 )
 
 func init() {
 	flag.StringVar(&scriptFile, "f", "", "Filename to execute")
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
+	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 }
 
 func main() {
@@ -53,6 +55,11 @@ func main() {
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {
 		printParserErrors(os.Stdout, p.Errors())
+		os.Exit(1)
+	}
+
+	if printAst {
+		fmt.Println(program.String())
 		os.Exit(1)
 	}
 
