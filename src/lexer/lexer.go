@@ -64,16 +64,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '/':
 		if l.peekChar() == '/' {
 			l.readRune()
-			tok = token.Token{
-				Type:    token.COMMENT,
-				Literal: l.readSingleLineComment(),
-			}
+			tok = l.readSingleLineComment()
 		} else if l.peekChar() == '*' {
 			l.readRune()
-			tok = token.Token{
-				Type:    token.COMMENT,
-				Literal: l.readMultiLineComment(),
-			}
+			tok = l.readMultiLineComment()
 		} else {
 			tok = newToken(token.SLASH, l.curCh)
 		}
@@ -127,11 +121,11 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.RSQUARE, l.curCh)
 
 	case '"':
-		tok.Literal = l.readString()
-		tok.Type = token.STRING
+		tok = l.readString()
+	case '\'':
+		tok = l.readRawString()
 	case '#':
-		tok.Literal = l.readSingleLineComment()
-		tok.Type = token.COMMENT
+		tok = l.readSingleLineComment()
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -169,17 +163,70 @@ func (l *Lexer) readIdentifier() string {
 	return ident.String()
 }
 
-// TODO: Support escape sequences, standard Go should be fine, or PHP.
-func (l *Lexer) readString() string {
+func (l *Lexer) readString() token.Token {
 	var ident bytes.Buffer
 	l.readRune() // Go past the starting double quote
 
 	for l.curCh != '"' {
+		if l.curCh == '\n' {
+			return token.Token{
+				Literal: "Newline not allowed in string",
+				Type:    token.ILLEGAL,
+			}
+		}
+
+		if l.curCh == '\\' {
+			l.readRune()
+			switch l.curCh {
+			case 'b': // backspace
+				ident.WriteRune('\b')
+			case 'n': // newline
+				ident.WriteRune('\n')
+			case 'r': // carriage return
+				ident.WriteRune('\r')
+			case 't': // horizontal tab
+				ident.WriteRune('\t')
+			case 'v': // vertical tab
+				ident.WriteRune('\v')
+			case 'f': // form feed
+				ident.WriteRune('\f')
+			case '\\': // back slash
+				ident.WriteRune('\\')
+			case '"': // double quote
+				ident.WriteRune('"')
+			default:
+				ident.WriteByte('\\')
+				ident.WriteRune(l.curCh)
+			}
+			l.readRune()
+			continue
+		}
 		ident.WriteRune(l.curCh)
 		l.readRune()
 	}
 
-	return ident.String()
+	return token.Token{
+		Literal: ident.String(),
+		Type:    token.STRING,
+	}
+}
+
+func (l *Lexer) readRawString() token.Token {
+	var ident bytes.Buffer
+	l.readRune() // Go past the starting double quote
+
+	for l.curCh != '\'' {
+		if l.curCh == '\\' && l.peekCh == '\'' {
+			l.readRune() // Go past backslash so the next line will write a single quote
+		}
+		ident.WriteRune(l.curCh)
+		l.readRune()
+	}
+
+	return token.Token{
+		Literal: ident.String(),
+		Type:    token.STRING,
+	}
 }
 
 // TODO: Support arbitrary based numbers [base]b[number]
@@ -204,7 +251,7 @@ func (l *Lexer) readNumber() token.Token {
 	}
 }
 
-func (l *Lexer) readSingleLineComment() string {
+func (l *Lexer) readSingleLineComment() token.Token {
 	var com bytes.Buffer
 	l.readRune() // Go over # or / characters
 
@@ -212,10 +259,14 @@ func (l *Lexer) readSingleLineComment() string {
 		com.WriteRune(l.curCh)
 		l.readRune()
 	}
-	return strings.TrimSpace(com.String())
+
+	return token.Token{
+		Literal: strings.TrimSpace(com.String()),
+		Type:    token.COMMENT,
+	}
 }
 
-func (l *Lexer) readMultiLineComment() string {
+func (l *Lexer) readMultiLineComment() token.Token {
 	var com bytes.Buffer
 	l.readRune() // Go over * character
 
@@ -228,7 +279,11 @@ func (l *Lexer) readMultiLineComment() string {
 		com.WriteRune(l.curCh)
 		l.readRune()
 	}
-	return com.String()
+
+	return token.Token{
+		Literal: com.String(),
+		Type:    token.COMMENT,
+	}
 }
 
 func (l *Lexer) devourWhitespace() {

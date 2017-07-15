@@ -44,6 +44,9 @@ comment */
 
 		12.5
 		12.5.7
+
+        "\n\r\t\v\f\\\"\b\' Hello"
+        '\n\r\t\v\f\\\"\b\' Hello'
     `
 
 	tests := []struct {
@@ -168,6 +171,9 @@ comment */
 		{token.FLOAT, "12.5"},
 		// Ensure bad floats are lexed, parser handles errors
 		{token.FLOAT, "12.5.7"},
+
+		{token.STRING, "\n\r\t\v\f\\\"\b\\' Hello"},
+		{token.STRING, `\n\r\t\v\f\\\"\b' Hello`},
 
 		{token.EOF, ""},
 	}

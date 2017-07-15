@@ -102,6 +102,6 @@ func startRepl(in io.Reader, out io.Writer) {
 
 func printParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
-		fmt.Fprintf(out, "\t%s\n", msg)
+		fmt.Fprintf(out, "ERROR: %s\n", msg)
 	}
 }

@@ -130,6 +130,11 @@ func (p *Parser) nextToken() {
 	for p.curTokenIs(token.COMMENT) {
 		p.advanceToken()
 	}
+
+	if p.curTokenIs(token.ILLEGAL) {
+		p.addError(p.curToken.Literal)
+		p.nextToken()
+	}
 }
 
 func (p *Parser) advanceToken() {
