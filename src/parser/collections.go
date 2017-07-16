@@ -28,6 +28,11 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 
 		hash.Pairs[key] = value
 
+		if p.peekToken.Type == token.SEMICOLON {
+			p.addErrorWithPos("Hash pairs must end with a comma")
+			return nil
+		}
+
 		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
 			p.addError("Invalid hash literal")
 			return nil

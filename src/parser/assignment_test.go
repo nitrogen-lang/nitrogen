@@ -149,8 +149,8 @@ func TestLetFuncSugarStatement(t *testing.T) {
 	if len(p.Errors()) == 0 {
 		t.Fatalf("let with func sugar expected to fail, but didn't")
 	}
-	if p.Errors()[0] != "incorrect next token. Expected \"(\", got \"IDENT\"" {
-		t.Fatalf("incorrect error. got \"%s\"", p.Errors()[0])
+	if p.Errors()[0] != "<1,18> Incorrect next token. Expected \"(\", got \"IDENT\"" {
+		t.Fatalf("Incorrect error. got \"%s\"", p.Errors()[0])
 	}
 }
 

@@ -117,12 +117,22 @@ func (p *Parser) addError(format string, args ...interface{}) {
 	p.errors = append(p.errors, msg)
 }
 
+func (p *Parser) addErrorWithPos(format string, args ...interface{}) {
+	if len(args) > 0 {
+		args = append([]interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}, args)
+	} else {
+		args = []interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}
+	}
+	msg := fmt.Sprintf("<%d,%d> "+format, args...)
+	p.errors = append(p.errors, msg)
+}
+
 func (p *Parser) peekError(t token.TokenType) {
-	p.addError("incorrect next token. Expected %q, got %q", t, p.peekToken.Type)
+	p.addError("<%d,%d> Incorrect next token. Expected %q, got %q", p.peekToken.Pos.Line, p.peekToken.Pos.Col, t, p.peekToken.Type)
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	p.addError("invalid prefix: %s", t)
+	p.addError("<%d,%d> Invalid prefix: %s", p.curToken.Pos.Line, p.curToken.Pos.Col, t)
 }
 
 func (p *Parser) nextToken() {

@@ -285,7 +285,7 @@ func TestInvalidHashLiteralMultiLine(t *testing.T) {
 		t.Fatalf("No errors for invalid hash literal, missing comma")
 	}
 
-	if p.Errors()[0] != "incorrect next token. Expected \",\", got \";\"" {
+	if p.Errors()[0] != "<4,26> Hash pairs must end with a comma" {
 		t.Fatalf("Incorrect error message. Got %q", p.Errors()[0])
 	}
 }

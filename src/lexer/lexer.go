@@ -15,6 +15,8 @@ type Lexer struct {
 	curCh     rune // current char under examination
 	peekCh    rune // peek character
 	lastToken token.Token
+
+	line, col int
 }
 
 func New(reader io.Reader) *Lexer {
@@ -22,6 +24,8 @@ func New(reader io.Reader) *Lexer {
 	// Populate both current and peek char
 	l.readRune()
 	l.readRune()
+	l.col = 1
+	l.line = 1
 	return l
 }
 
@@ -36,7 +40,20 @@ func (l *Lexer) readRune() {
 	l.peekCh, _, err = l.input.ReadRune()
 	if err != nil {
 		l.peekCh = 0
+		return
 	}
+	l.col++
+}
+
+func makePos(line, col int) token.Position {
+	return token.Position{
+		Line: line,
+		Col:  col,
+	}
+}
+
+func (l *Lexer) curPosition() token.Position {
+	return makePos(l.line, l.col)
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -47,7 +64,8 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.curCh {
 	case '\n':
 		if l.needSemicolon() {
-			tok = newToken(token.SEMICOLON, ';')
+			tok = l.newToken(token.SEMICOLON, ';')
+			l.resetPos()
 		} else {
 			l.devourWhitespace()
 			return l.NextToken()
@@ -55,22 +73,23 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Operators
 	case '+':
-		tok = newToken(token.PLUS, l.curCh)
+		tok = l.newToken(token.PLUS, l.curCh)
 	case '-':
-		tok = newToken(token.MINUS, l.curCh)
+		tok = l.newToken(token.MINUS, l.curCh)
 	case '*':
-		tok = newToken(token.ASTERISK, l.curCh)
+		tok = l.newToken(token.ASTERISK, l.curCh)
 	case '%':
-		tok = newToken(token.MODULUS, l.curCh)
+		tok = l.newToken(token.MODULUS, l.curCh)
 	case '/':
 		if l.peekChar() == '/' {
 			l.readRune()
 			tok = l.readSingleLineComment()
+			l.resetPos()
 		} else if l.peekChar() == '*' {
 			l.readRune()
 			tok = l.readMultiLineComment()
 		} else {
-			tok = newToken(token.SLASH, l.curCh)
+			tok = l.newToken(token.SLASH, l.curCh)
 		}
 	case '!':
 		if l.peekChar() == '=' {
@@ -78,9 +97,11 @@ func (l *Lexer) NextToken() token.Token {
 			tok = token.Token{
 				Type:    token.NOT_EQ,
 				Literal: "!=",
+				Pos:     l.curPosition(),
 			}
+			tok.Pos.Col -= 1
 		} else {
-			tok = newToken(token.BANG, l.curCh)
+			tok = l.newToken(token.BANG, l.curCh)
 		}
 
 	// Equality
@@ -90,36 +111,38 @@ func (l *Lexer) NextToken() token.Token {
 			tok = token.Token{
 				Type:    token.EQ,
 				Literal: "==",
+				Pos:     l.curPosition(),
 			}
+			tok.Pos.Col -= 1
 		} else {
-			tok = newToken(token.ASSIGN, l.curCh)
+			tok = l.newToken(token.ASSIGN, l.curCh)
 		}
 	case '<':
-		tok = newToken(token.LT, l.curCh)
+		tok = l.newToken(token.LT, l.curCh)
 	case '>':
-		tok = newToken(token.GT, l.curCh)
+		tok = l.newToken(token.GT, l.curCh)
 
 	// Control characters
 	case ',':
-		tok = newToken(token.COMMA, l.curCh)
+		tok = l.newToken(token.COMMA, l.curCh)
 	case ';':
-		tok = newToken(token.SEMICOLON, l.curCh)
+		tok = l.newToken(token.SEMICOLON, l.curCh)
 	case ':':
-		tok = newToken(token.COLON, l.curCh)
+		tok = l.newToken(token.COLON, l.curCh)
 
 	// Groupings
 	case '(':
-		tok = newToken(token.LPAREN, l.curCh)
+		tok = l.newToken(token.LPAREN, l.curCh)
 	case ')':
-		tok = newToken(token.RPAREN, l.curCh)
+		tok = l.newToken(token.RPAREN, l.curCh)
 	case '{':
-		tok = newToken(token.LBRACE, l.curCh)
+		tok = l.newToken(token.LBRACE, l.curCh)
 	case '}':
-		tok = newToken(token.RBRACE, l.curCh)
+		tok = l.newToken(token.RBRACE, l.curCh)
 	case '[':
-		tok = newToken(token.LSQUARE, l.curCh)
+		tok = l.newToken(token.LSQUARE, l.curCh)
 	case ']':
-		tok = newToken(token.RSQUARE, l.curCh)
+		tok = l.newToken(token.RSQUARE, l.curCh)
 
 	case '"':
 		tok = l.readString()
@@ -127,23 +150,27 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.readRawString()
 	case '#':
 		tok = l.readSingleLineComment()
+		l.resetPos()
 	case '\\':
 		if l.peekCh == 'x' {
 			l.readRune()
 			tok = l.readNumber()
 		} else {
-			tok = newToken(token.ILLEGAL, l.curCh)
+			tok = l.newToken(token.ILLEGAL, l.curCh)
 		}
 	case 0:
 		if l.needSemicolon() {
-			tok = newToken(token.SEMICOLON, ';')
+			tok = l.newToken(token.SEMICOLON, ';')
+			l.resetPos()
 		} else {
 			tok.Literal = ""
 			tok.Type = token.EOF
+			tok.Pos = l.curPosition()
 		}
 
 	default:
 		if isLetter(l.curCh) {
+			tok.Pos = l.curPosition()
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			l.lastToken = tok
@@ -154,7 +181,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		}
 
-		tok = newToken(token.ILLEGAL, l.curCh)
+		tok = l.newToken(token.ILLEGAL, l.curCh)
 	}
 
 	l.readRune()
@@ -164,6 +191,11 @@ func (l *Lexer) NextToken() token.Token {
 
 func (l *Lexer) peekChar() rune {
 	return l.peekCh
+}
+
+func (l *Lexer) resetPos() {
+	l.line++
+	l.col = 0
 }
 
 func (l *Lexer) needSemicolon() bool {
@@ -176,7 +208,7 @@ func (l *Lexer) needSemicolon() bool {
 		token.RETURN,
 		token.RPAREN,
 		token.RSQUARE,
-		token.RBRACE)
+		token.RBRACE) && !l.lastTokenWas(token.SEMICOLON)
 }
 
 func (l *Lexer) readIdentifier() string {
@@ -190,6 +222,7 @@ func (l *Lexer) readIdentifier() string {
 
 func (l *Lexer) readString() token.Token {
 	var ident bytes.Buffer
+	pos := l.curPosition()
 	l.readRune() // Go past the starting double quote
 
 	for l.curCh != '"' {
@@ -197,6 +230,7 @@ func (l *Lexer) readString() token.Token {
 			return token.Token{
 				Literal: "Newline not allowed in string",
 				Type:    token.ILLEGAL,
+				Pos:     l.curPosition(),
 			}
 		}
 
@@ -233,11 +267,13 @@ func (l *Lexer) readString() token.Token {
 	return token.Token{
 		Literal: ident.String(),
 		Type:    token.STRING,
+		Pos:     pos,
 	}
 }
 
 func (l *Lexer) readRawString() token.Token {
 	var ident bytes.Buffer
+	pos := l.curPosition()
 	l.readRune() // Go past the starting double quote
 
 	for l.curCh != '\'' {
@@ -251,16 +287,19 @@ func (l *Lexer) readRawString() token.Token {
 	return token.Token{
 		Literal: ident.String(),
 		Type:    token.STRING,
+		Pos:     pos,
 	}
 }
 
 func (l *Lexer) readNumber() token.Token {
 	var number bytes.Buffer
+	pos := l.curPosition()
 	base := ""
 	tokenType := token.INT
 
 	if l.curCh == 'x' {
 		base = "0x"
+		pos.Col-- // Correct for initial \
 		l.readRune()
 	}
 
@@ -269,6 +308,7 @@ func (l *Lexer) readNumber() token.Token {
 		return token.Token{
 			Type:    token.ILLEGAL,
 			Literal: "Invalid float literal",
+			Pos:     pos,
 		}
 	}
 
@@ -278,6 +318,7 @@ func (l *Lexer) readNumber() token.Token {
 				return token.Token{
 					Type:    token.ILLEGAL,
 					Literal: "Invalid float literal",
+					Pos:     pos,
 				}
 			}
 			tokenType = token.FLOAT
@@ -290,11 +331,16 @@ func (l *Lexer) readNumber() token.Token {
 	return token.Token{
 		Type:    token.TokenType(tokenType),
 		Literal: base + number.String(),
+		Pos:     pos,
 	}
 }
 
 func (l *Lexer) readSingleLineComment() token.Token {
 	var com bytes.Buffer
+	pos := l.curPosition()
+	if l.curCh == '/' {
+		pos.Col-- // Correct column for inital /
+	}
 	l.readRune() // Go over # or / characters
 
 	for l.curCh != '\n' {
@@ -305,17 +351,24 @@ func (l *Lexer) readSingleLineComment() token.Token {
 	return token.Token{
 		Literal: strings.TrimSpace(com.String()),
 		Type:    token.COMMENT,
+		Pos:     pos,
 	}
 }
 
 func (l *Lexer) readMultiLineComment() token.Token {
 	var com bytes.Buffer
+	pos := l.curPosition()
+	pos.Col--    // Correct column for initial /
 	l.readRune() // Go over * character
 
 	for l.curCh != 0 {
 		if l.curCh == '*' && l.peekChar() == '/' {
 			l.readRune() // Skip *
 			break
+		}
+
+		if l.curCh == '\n' {
+			l.resetPos()
 		}
 
 		com.WriteRune(l.curCh)
@@ -325,23 +378,31 @@ func (l *Lexer) readMultiLineComment() token.Token {
 	return token.Token{
 		Literal: com.String(),
 		Type:    token.COMMENT,
+		Pos:     pos,
 	}
 }
 
 func (l *Lexer) devourWhitespace() {
-	for isWhitespace(l.curCh) {
+	for l.isWhitespace(l.curCh) {
+		if l.curCh == '\n' {
+			l.resetPos()
+		}
 		l.readRune()
 	}
 }
 
 func (l *Lexer) devourWhitespaceNotNewLine() {
-	for l.curCh != '\n' && isWhitespace(l.curCh) {
+	for l.curCh != '\n' && l.isWhitespace(l.curCh) {
 		l.readRune()
 	}
 }
 
-func newToken(tokenType token.TokenType, ch rune) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
+func (l *Lexer) newToken(tokenType token.TokenType, ch rune) token.Token {
+	return token.Token{
+		Type:    tokenType,
+		Literal: string(ch),
+		Pos:     l.curPosition(),
+	}
 }
 
 // Identifiers must start with a letter
@@ -363,7 +424,7 @@ func isHexDigit(ch rune) bool {
 	return ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F')
 }
 
-func isWhitespace(ch rune) bool {
+func (l *Lexer) isWhitespace(ch rune) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
 }
 

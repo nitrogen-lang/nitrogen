@@ -3,10 +3,15 @@ package token
 // TODO: Replace this with an enum int?
 type TokenType string
 
-// TODO: Add line, column, and filename to token
+type Position struct {
+	Line, Col int
+}
+
+// TODO: Add filename to token
 type Token struct {
 	Type    TokenType
 	Literal string
+	Pos     Position
 }
 
 const (
