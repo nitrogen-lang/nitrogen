@@ -37,19 +37,16 @@ func main() {
 		return
 	}
 
-	scriptFile := flag.Arg(0)
-	if scriptFile == "" {
+	if len(flag.Args()) == 0 {
 		fmt.Print("No file given")
 		os.Exit(1)
 	}
 
-	file, err := os.Open(scriptFile)
+	l, err := lexer.NewFileList(flag.Args())
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-
-	l := lexer.New(file)
 	p := parser.New(l)
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {

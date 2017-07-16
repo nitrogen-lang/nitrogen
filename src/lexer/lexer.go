@@ -3,7 +3,9 @@ package lexer
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
+	"os"
 	"strings"
 	"unicode"
 
@@ -16,6 +18,7 @@ type Lexer struct {
 	peekCh    rune // peek character
 	lastToken token.Token
 
+	fileList  []string
 	line, col int
 }
 
@@ -29,19 +32,59 @@ func New(reader io.Reader) *Lexer {
 	return l
 }
 
+func NewFileList(files []string) (*Lexer, error) {
+	l := &Lexer{fileList: files}
+	if err := l.loadFile(); err != nil {
+		return nil, err
+	}
+	l.readRune()
+	l.readRune()
+	l.col = 1
+	l.line = 1
+	return l, nil
+}
+
 func NewString(input string) *Lexer {
 	return New(strings.NewReader(input))
 }
 
-func (l *Lexer) readRune() {
-	l.curCh = l.peekCh
+var errFailedLoadingFile = errors.New("Failed to open file")
 
-	var err error
-	l.peekCh, _, err = l.input.ReadRune()
+func (l *Lexer) loadFile() error {
+	if len(l.fileList) == 0 {
+		panic("No more files to load")
+	}
+
+	nextFile := l.fileList[0]
+	l.fileList = l.fileList[1:]
+
+	file, err := os.Open(nextFile)
 	if err != nil {
+		return errFailedLoadingFile
+	}
+
+	l.input = bufio.NewReader(file)
+	return nil
+}
+
+func (l *Lexer) readRune() {
+	oldPeek := l.peekCh
+
+	newPeek, _, err := l.input.ReadRune()
+	if err != nil {
+		if len(l.fileList) > 0 {
+			if err := l.loadFile(); err != nil {
+				panic("Failed opening file")
+			}
+			l.readRune()
+			return
+		}
 		l.peekCh = 0
+		l.curCh = oldPeek
 		return
 	}
+	l.curCh = oldPeek
+	l.peekCh = newPeek
 	l.col++
 }
 
