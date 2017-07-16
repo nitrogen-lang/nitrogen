@@ -63,6 +63,28 @@ func (i *InfixExpression) String() string {
 	return out.String()
 }
 
+type CompareExpression struct {
+	Token token.Token // and, or
+	Left  Expression
+	Right Expression
+}
+
+func (i *CompareExpression) expressionNode()      {}
+func (i *CompareExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *CompareExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteByte('(')
+	out.WriteString(i.Left.String())
+	out.WriteByte(' ')
+	out.WriteString(i.Token.Literal)
+	out.WriteByte(' ')
+	out.WriteString(i.Right.String())
+	out.WriteByte(')')
+
+	return out.String()
+}
+
 type IfExpression struct {
 	Token       token.Token // The 'if' token
 	Condition   Expression

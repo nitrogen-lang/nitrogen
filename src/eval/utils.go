@@ -41,6 +41,21 @@ func isTruthy(obj object.Object) bool {
 	return false
 }
 
+// The first value is obj expressed as boolean
+// The second is if obj is a valid bool-like object
+func convertToBoolean(obj object.Object) (bool, bool) {
+	isValid := object.ObjectIs(
+		obj,
+		object.BOOLEAN_OBJ,
+		object.INTEGER_OBJ,
+		object.FLOAT_OBJ,
+		object.STRING_OBJ,
+		object.NULL_OBJ,
+	)
+
+	return isTruthy(obj), isValid
+}
+
 func isError(obj object.Object) bool {
 	return (obj != nil && obj.Type() == object.ERROR_OBJ)
 }

@@ -35,3 +35,14 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	return expression
 }
+
+func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
+	c := p.curToken
+	p.nextToken() // Go over OR, AND
+
+	return &ast.CompareExpression{
+		Token: c,
+		Left:  left,
+		Right: p.parseExpression(LOWEST),
+	}
+}

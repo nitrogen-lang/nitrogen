@@ -84,6 +84,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	// Conditionals
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
+	case *ast.CompareExpression:
+		return evalCompareExpression(node, env)
 
 	// Functions
 	case *ast.FunctionLiteral:

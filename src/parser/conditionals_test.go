@@ -151,3 +151,63 @@ func TestIfElseExpression(t *testing.T) {
 		return
 	}
 }
+
+func TestOrExpression(t *testing.T) {
+	input := `true or 0`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.CompareExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.CompareExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if exp.String() != "(true or 0)" {
+		t.Fatalf("Incorrect `or` expression. Got %q", exp.String())
+	}
+}
+
+func TestAndExpression(t *testing.T) {
+	input := `true and 0`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.CompareExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.CompareExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if exp.String() != "(true and 0)" {
+		t.Fatalf("Incorrect `and` expression. Got %q", exp.String())
+	}
+}

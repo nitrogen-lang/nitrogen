@@ -20,6 +20,8 @@ func evalInfixExpression(op string, left, right object.Object) object.Object {
 		return object.NativeBoolToBooleanObj(left == right)
 	case op == "!=":
 		return object.NativeBoolToBooleanObj(left != right)
+	case object.ObjectsAre(object.BOOLEAN_OBJ, left, right):
+		return evalBoolInfixExpression(op, left, right)
 	}
 
 	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
@@ -107,6 +109,20 @@ func evalArrayInfixExpression(op string, left, right object.Object) object.Objec
 		copy(newElements, leftVal.Elements)
 		copy(newElements[leftLen:], rightVal.Elements)
 		return &object.Array{Elements: newElements}
+	}
+
+	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+}
+
+func evalBoolInfixExpression(op string, left, right object.Object) object.Object {
+	leftVal := left.(*object.Boolean).Value
+	rightVal := right.(*object.Boolean).Value
+
+	switch op {
+	case "or":
+		return object.NativeBoolToBooleanObj(leftVal || rightVal)
+	case "and":
+		return object.NativeBoolToBooleanObj(leftVal && rightVal)
 	}
 
 	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())

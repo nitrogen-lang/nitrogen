@@ -176,3 +176,48 @@ let myFunc = func myFunc(thing) { println(thing) } // This is bad
 
 myFunc("Some variable")
 ```
+
+## If Expressions
+
+If expressions in Nitrogen are very similar to other languages:
+
+```
+if (condition) {
+    ... do stuff
+} else {
+    ... do other stuff
+}
+```
+
+Nitrogen supports standard comparison operators:
+
+- `==`: Equal
+- `!=`: Not equal
+- `>`: Greater than
+- `<`: Less than
+
+An expression can be prefixed with the bang operator to negate it:
+
+```
+!true == false
+```
+
+Compound comparisons are also possible with the keywords `and` and `or`:
+
+```
+if (a == b or a == c) {
+    ... do stuff
+}
+
+if (a == b and b == c) {
+    ... then a == c
+}
+```
+
+Conditions can be groups to change the order or precidence:
+
+```
+if (a == b or (a == c and a == d)) {
+    ... do more stuff
+}
+```
