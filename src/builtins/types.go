@@ -12,6 +12,9 @@ func init() {
 	eval.RegisterBuiltin("toFloat", toFloatBuiltin)
 	eval.RegisterBuiltin("toString", toStringBuiltin)
 
+	eval.RegisterBuiltin("parseInt", parseIntBuiltin)
+	eval.RegisterBuiltin("parseFloat", parseFloatBuiltin)
+
 	eval.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FLOAT_OBJ))
 	eval.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.INTEGER_OBJ))
 	eval.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BOOLEAN_OBJ))
@@ -66,7 +69,7 @@ func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
 
 func toStringBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("to_string expects 1 argument. Got %d", len(args))
+		return object.NewError("toString expects 1 argument. Got %d", len(args))
 	}
 
 	converted := ""
@@ -85,4 +88,40 @@ func toStringBuiltin(env *object.Environment, args ...object.Object) object.Obje
 	}
 
 	return &object.String{Value: converted}
+}
+
+func parseIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return object.NewError("parseInt expects 1 argument. Got %d", len(args))
+	}
+
+	str, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewError("parseInt expected a string, got %s", args[0].Type().String())
+	}
+
+	i, err := strconv.ParseInt(str.Value, 10, 64)
+	if err != nil {
+		return object.NULL
+	}
+
+	return &object.Integer{Value: i}
+}
+
+func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return object.NewError("parseFloat expects 1 argument. Got %d", len(args))
+	}
+
+	str, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewError("parseFloat expected a string, got %s", args[0].Type().String())
+	}
+
+	f, err := strconv.ParseFloat(str.Value, 64)
+	if err != nil {
+		return object.NULL
+	}
+
+	return &object.Float{Value: f}
 }

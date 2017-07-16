@@ -18,3 +18,11 @@ Convert a number to a float.
 ## isMap(in: T): bool
 
 Return if a variable is a specific type.
+
+## parseInt(in: string): int|nil
+
+Attempts to parse the given string as an integer. If parsing fails, nil is returned.
+
+## parseFloat(in: string): float|nil
+
+Same as parseInt() but with floats.

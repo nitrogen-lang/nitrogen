@@ -94,3 +94,83 @@ func TestToStringBuiltin(t *testing.T) {
 		}
 	}
 }
+
+func TestParseIntBuiltin(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		{`parseInt("5")`, 5},
+		{`parseInt("-5")`, -5},
+		{`parseInt("5.6")`, 0},
+		{`parseInt("Hello")`, 0},
+		{`parseInt(true)`, -1},
+	}
+
+	for i, tt := range tests {
+		evaled := testEval(tt.input)
+
+		if tt.expected == 0 {
+			if evaled != object.NULL {
+				t.Fatalf("Expected nil, got %#v", evaled)
+			}
+			continue
+		}
+
+		if tt.expected == -1 {
+			if evaled.Type() != object.ERROR_OBJ {
+				t.Fatalf("Expected error, got %#v", evaled)
+			}
+			continue
+		}
+
+		io, ok := evaled.(*object.Integer)
+		if !ok {
+			t.Fatalf("%d: Expected int, got %#v", i+1, evaled)
+		}
+
+		if io.Value != tt.expected {
+			t.Fatalf("%d: toInt failed. Expected `%s`, got `%s`", i+1, tt.expected, io.Value)
+		}
+	}
+}
+
+func TestParseFloatBuiltin(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected float64
+	}{
+		{`parseFloat("5")`, 5.0},
+		{`parseFloat("-5")`, -5.0},
+		{`parseFloat("5.6")`, 5.6},
+		{`parseFloat("Hello")`, 0},
+		{`parseFloat(true)`, -1},
+	}
+
+	for i, tt := range tests {
+		evaled := testEval(tt.input)
+
+		if tt.expected == 0 {
+			if evaled != object.NULL {
+				t.Fatalf("Expected nil, got %#v", evaled)
+			}
+			continue
+		}
+
+		if tt.expected == -1 {
+			if evaled.Type() != object.ERROR_OBJ {
+				t.Fatalf("Expected error, got %#v", evaled)
+			}
+			continue
+		}
+
+		io, ok := evaled.(*object.Float)
+		if !ok {
+			t.Fatalf("%d: Expected float, got %#v", i+1, evaled)
+		}
+
+		if io.Value != tt.expected {
+			t.Fatalf("%d: toFloat failed. Expected `%s`, got `%s`", i+1, tt.expected, io.Value)
+		}
+	}
+}
