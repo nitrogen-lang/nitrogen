@@ -148,8 +148,8 @@ func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 
 func (p *Parser) nextToken() {
 	p.advanceToken()
-	for p.curTokenIs(token.Comment) {
-		p.advanceToken()
+	for p.peekTokenIs(token.Comment) {
+		p.advancePeekToken()
 	}
 
 	if p.curTokenIs(token.Illegal) {
@@ -161,7 +161,10 @@ func (p *Parser) nextToken() {
 func (p *Parser) advanceToken() {
 	p.lastToken = p.curToken
 	p.curToken = p.peekToken
+	p.advancePeekToken()
+}
 
+func (p *Parser) advancePeekToken() {
 	if len(p.insertedTokens) > 0 {
 		p.peekToken = p.insertedTokens[len(p.insertedTokens)-1]
 		p.insertedTokens = p.insertedTokens[:len(p.insertedTokens)-1]
