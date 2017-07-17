@@ -7,13 +7,13 @@ import (
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
-	case token.DEF:
+	case token.Let:
 		fallthrough
-	case token.CONST:
+	case token.Always:
 		return p.parseDefStatement()
-	case token.RETURN:
+	case token.Return:
 		return p.parseReturnStatement()
-	case token.FUNCTION:
+	case token.Function:
 		return p.parseFuncDefStatement()
 	}
 	return p.parseExpressionStatement()
@@ -22,27 +22,27 @@ func (p *Parser) parseStatement() ast.Statement {
 func (p *Parser) parseDefStatement() ast.Statement {
 	stmt := &ast.DefStatement{Token: p.curToken}
 
-	stmt.Const = p.curTokenIs(token.CONST)
+	stmt.Const = p.curTokenIs(token.Always)
 
-	if !p.expectPeek(token.IDENT) {
+	if !p.expectPeek(token.Identifier) {
 		return nil
 	}
 
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
-	if !p.expectPeek(token.ASSIGN) {
+	if !p.expectPeek(token.Assign) {
 		return nil
 	}
 
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(LOWEST)
+	stmt.Value = p.parseExpression(priLowest)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
 	}
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -53,14 +53,14 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
 	p.nextToken()
-	if p.curTokenIs(token.SEMICOLON) {
+	if p.curTokenIs(token.Semicolon) {
 		stmt.Value = &ast.NullLiteral{Token: createKeywordToken("null")}
 		return stmt
 	}
 
-	stmt.Value = p.parseExpression(LOWEST)
+	stmt.Value = p.parseExpression(priLowest)
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -68,12 +68,12 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 }
 
 func (p *Parser) parseFuncDefStatement() ast.Statement {
-	if !p.peekTokenIs(token.IDENT) {
+	if !p.peekTokenIs(token.Identifier) {
 		return p.parseExpressionStatement()
 	}
 
 	fToken := p.curToken
-	if !p.expectPeek(token.IDENT) {
+	if !p.expectPeek(token.Identifier) {
 		return nil
 	}
 
@@ -83,13 +83,13 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	p.insertToken(fToken)
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(LOWEST)
+	stmt.Value = p.parseExpression(priLowest)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
 	}
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 
@@ -104,9 +104,9 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(LOWEST)
+	stmt.Value = p.parseExpression(priLowest)
 
-	if p.peekTokenIs(token.SEMICOLON) {
+	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}
 

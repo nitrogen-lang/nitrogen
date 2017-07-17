@@ -8,7 +8,7 @@ import (
 func (p *Parser) parseIfExpression() ast.Expression {
 	expression := &ast.IfExpression{Token: p.curToken}
 
-	if !p.expectPeek(token.LPAREN) {
+	if !p.expectPeek(token.LParen) {
 		return nil
 	}
 
@@ -17,16 +17,16 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
-	if !p.expectPeek(token.LBRACE) {
+	if !p.expectPeek(token.LBrace) {
 		return nil
 	}
 
 	expression.Consequence = p.parseBlockStatements()
 
-	if p.peekTokenIs(token.ELSE) {
+	if p.peekTokenIs(token.Else) {
 		p.nextToken()
 
-		if !p.expectPeek(token.LBRACE) {
+		if !p.expectPeek(token.LBrace) {
 			return nil
 		}
 
@@ -43,6 +43,6 @@ func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
 	return &ast.CompareExpression{
 		Token: c,
 		Left:  left,
-		Right: p.parseExpression(LOWEST),
+		Right: p.parseExpression(priLowest),
 	}
 }

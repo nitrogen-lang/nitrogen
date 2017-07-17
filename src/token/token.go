@@ -1,8 +1,11 @@
 package token
 
-// TODO: Replace this with an enum int?
-type TokenType string
+import "strconv"
 
+type TokenType int
+
+// Position represents the line and column number where a token starts
+// in a source file.
 type Position struct {
 	Line, Col int
 }
@@ -14,76 +17,135 @@ type Token struct {
 	Pos     Position
 }
 
+// All tokens in Nitrogen
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
-	COMMENT = "COMMENT"
-	EOL     = "EOL" // End of Line
+	Illegal TokenType = iota + 1
+	EOF
+	Comment
+	EOL
 
 	// Identifiers & literals
-	IDENT  = "IDENT"  // add, foobar, x, y
-	INT    = "INT"    // 1343546
-	FLOAT  = "FLOAT"  // 12.52
-	STRING = "STRING" // "some text"
+	Identifier
+	Integer
+	Float
+	String
 
 	// Operators
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-	MODULUS  = "%"
+	Assign
+	Plus
+	Dash
+	Bang
+	Asterisk
+	Slash
+	Modulo
 
-	LT     = "<"
-	GT     = ">"
-	EQ     = "=="
-	NOT_EQ = "!="
+	LessThan
+	GreaterThan
+	Equal
+	NotEqual
 
 	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-	COLON     = ":"
+	Comma
+	Semicolon
+	Colon
 
 	// Groups and blocks
-	LPAREN  = "("
-	RPAREN  = ")"
-	LBRACE  = "{"
-	RBRACE  = "}"
-	LSQUARE = "["
-	RSQUARE = "]"
+	LParen
+	RParen
+	LBrace
+	RBrace
+	LSquare
+	RSquare
 
 	// Keywords
-	FUNCTION = "FUNCTION"
-	DEF      = "DEF"
-	CONST    = "ALWAYS"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
-	NULL     = "NULL"
-	AND      = "AND"
-	OR       = "OR"
+	keywordBeg
+	LAnd
+	LOr
+
+	Function
+	Let
+	Always
+	True
+	False
+	If
+	Else
+	Return
+	Nil
+	keywordEnd
 )
 
-var keywords = map[string]TokenType{
-	"func":   FUNCTION,
-	"let":    DEF,
-	"always": CONST,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
-	"nil":    NULL,
-	"and":    AND,
-	"or":     OR,
+var tokens = [...]string{
+	Illegal: "ILLEGAL",
+	EOF:     "EOF",
+	Comment: "COMMENT",
+	EOL:     "EOL",
+
+	// Identifiers & literals
+	Identifier: "IDENT",
+	Integer:    "INT",
+	Float:      "FLOAT",
+	String:     "STRING",
+
+	// Operators
+	Assign:   "=",
+	Plus:     "+",
+	Dash:     "-",
+	Bang:     "!",
+	Asterisk: "*",
+	Slash:    "/",
+	Modulo:   "%",
+
+	LessThan:    "<",
+	GreaterThan: ">",
+	Equal:       "==",
+	NotEqual:    "!=",
+
+	// Delimiters
+	Comma:     ",",
+	Semicolon: ";",
+	Colon:     ":",
+
+	// Groups and blocks
+	LParen:  "(",
+	RParen:  ")",
+	LBrace:  "{",
+	RBrace:  "}",
+	LSquare: "[",
+	RSquare: "]",
+
+	// Keywords
+	Function: "func",
+	Let:      "let",
+	Always:   "always",
+	True:     "true",
+	False:    "false",
+	If:       "if",
+	Else:     "else",
+	Return:   "return",
+	Nil:      "nil",
+	LAnd:     "and",
+	LOr:      "or",
+}
+
+var keywords map[string]TokenType
+
+func init() {
+	keywords = make(map[string]TokenType)
+	for i := keywordBeg + 1; i < keywordEnd; i++ {
+		keywords[tokens[i]] = i
+	}
 }
 
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
-	return IDENT
+	return Identifier
+}
+
+func (t TokenType) String() string {
+	if 0 <= t && t < TokenType(len(tokens)) {
+		return tokens[t]
+	}
+	return "token(" + strconv.Itoa(int(t)) + ")"
 }

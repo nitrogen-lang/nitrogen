@@ -107,7 +107,7 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.curCh {
 	case '\n':
 		if l.needSemicolon() {
-			tok = l.newToken(token.SEMICOLON, ';')
+			tok = l.newToken(token.Semicolon, ';')
 			l.resetPos()
 		} else {
 			l.devourWhitespace()
@@ -116,13 +116,13 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Operators
 	case '+':
-		tok = l.newToken(token.PLUS, l.curCh)
+		tok = l.newToken(token.Plus, l.curCh)
 	case '-':
-		tok = l.newToken(token.MINUS, l.curCh)
+		tok = l.newToken(token.Dash, l.curCh)
 	case '*':
-		tok = l.newToken(token.ASTERISK, l.curCh)
+		tok = l.newToken(token.Asterisk, l.curCh)
 	case '%':
-		tok = l.newToken(token.MODULUS, l.curCh)
+		tok = l.newToken(token.Modulo, l.curCh)
 	case '/':
 		if l.peekChar() == '/' {
 			l.readRune()
@@ -132,19 +132,19 @@ func (l *Lexer) NextToken() token.Token {
 			l.readRune()
 			tok = l.readMultiLineComment()
 		} else {
-			tok = l.newToken(token.SLASH, l.curCh)
+			tok = l.newToken(token.Slash, l.curCh)
 		}
 	case '!':
 		if l.peekChar() == '=' {
 			l.readRune()
 			tok = token.Token{
-				Type:    token.NOT_EQ,
+				Type:    token.NotEqual,
 				Literal: "!=",
 				Pos:     l.curPosition(),
 			}
 			tok.Pos.Col -= 1
 		} else {
-			tok = l.newToken(token.BANG, l.curCh)
+			tok = l.newToken(token.Bang, l.curCh)
 		}
 
 	// Equality
@@ -152,40 +152,40 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			l.readRune()
 			tok = token.Token{
-				Type:    token.EQ,
+				Type:    token.Equal,
 				Literal: "==",
 				Pos:     l.curPosition(),
 			}
 			tok.Pos.Col -= 1
 		} else {
-			tok = l.newToken(token.ASSIGN, l.curCh)
+			tok = l.newToken(token.Assign, l.curCh)
 		}
 	case '<':
-		tok = l.newToken(token.LT, l.curCh)
+		tok = l.newToken(token.LessThan, l.curCh)
 	case '>':
-		tok = l.newToken(token.GT, l.curCh)
+		tok = l.newToken(token.GreaterThan, l.curCh)
 
 	// Control characters
 	case ',':
-		tok = l.newToken(token.COMMA, l.curCh)
+		tok = l.newToken(token.Comma, l.curCh)
 	case ';':
-		tok = l.newToken(token.SEMICOLON, l.curCh)
+		tok = l.newToken(token.Semicolon, l.curCh)
 	case ':':
-		tok = l.newToken(token.COLON, l.curCh)
+		tok = l.newToken(token.Colon, l.curCh)
 
 	// Groupings
 	case '(':
-		tok = l.newToken(token.LPAREN, l.curCh)
+		tok = l.newToken(token.LParen, l.curCh)
 	case ')':
-		tok = l.newToken(token.RPAREN, l.curCh)
+		tok = l.newToken(token.RParen, l.curCh)
 	case '{':
-		tok = l.newToken(token.LBRACE, l.curCh)
+		tok = l.newToken(token.LBrace, l.curCh)
 	case '}':
-		tok = l.newToken(token.RBRACE, l.curCh)
+		tok = l.newToken(token.RBrace, l.curCh)
 	case '[':
-		tok = l.newToken(token.LSQUARE, l.curCh)
+		tok = l.newToken(token.LSquare, l.curCh)
 	case ']':
-		tok = l.newToken(token.RSQUARE, l.curCh)
+		tok = l.newToken(token.RSquare, l.curCh)
 
 	case '"':
 		tok = l.readString()
@@ -199,11 +199,11 @@ func (l *Lexer) NextToken() token.Token {
 			l.readRune()
 			tok = l.readNumber()
 		} else {
-			tok = l.newToken(token.ILLEGAL, l.curCh)
+			tok = l.newToken(token.Illegal, l.curCh)
 		}
 	case 0:
 		if l.needSemicolon() {
-			tok = l.newToken(token.SEMICOLON, ';')
+			tok = l.newToken(token.Semicolon, ';')
 			l.resetPos()
 		} else {
 			tok.Literal = ""
@@ -224,7 +224,7 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		}
 
-		tok = l.newToken(token.ILLEGAL, l.curCh)
+		tok = l.newToken(token.Illegal, l.curCh)
 	}
 
 	l.readRune()
@@ -243,15 +243,15 @@ func (l *Lexer) resetPos() {
 
 func (l *Lexer) needSemicolon() bool {
 	return l.lastTokenWas(
-		token.IDENT,
-		token.INT,
-		token.FLOAT,
-		token.STRING,
-		token.NULL,
-		token.RETURN,
-		token.RPAREN,
-		token.RSQUARE,
-		token.RBRACE) && !l.lastTokenWas(token.SEMICOLON)
+		token.Identifier,
+		token.Integer,
+		token.Float,
+		token.String,
+		token.Nil,
+		token.Return,
+		token.RParen,
+		token.RSquare,
+		token.RBrace) && !l.lastTokenWas(token.Semicolon)
 }
 
 func (l *Lexer) readIdentifier() string {
@@ -272,7 +272,7 @@ func (l *Lexer) readString() token.Token {
 		if l.curCh == '\n' {
 			return token.Token{
 				Literal: "Newline not allowed in string",
-				Type:    token.ILLEGAL,
+				Type:    token.Illegal,
 				Pos:     l.curPosition(),
 			}
 		}
@@ -309,7 +309,7 @@ func (l *Lexer) readString() token.Token {
 
 	return token.Token{
 		Literal: ident.String(),
-		Type:    token.STRING,
+		Type:    token.String,
 		Pos:     pos,
 	}
 }
@@ -329,7 +329,7 @@ func (l *Lexer) readRawString() token.Token {
 
 	return token.Token{
 		Literal: ident.String(),
-		Type:    token.STRING,
+		Type:    token.String,
 		Pos:     pos,
 	}
 }
@@ -338,7 +338,7 @@ func (l *Lexer) readNumber() token.Token {
 	var number bytes.Buffer
 	pos := l.curPosition()
 	base := ""
-	tokenType := token.INT
+	tokenType := token.Integer
 
 	if l.curCh == 'x' {
 		base = "0x"
@@ -349,7 +349,7 @@ func (l *Lexer) readNumber() token.Token {
 	if l.curCh == '.' {
 		l.readRune()
 		return token.Token{
-			Type:    token.ILLEGAL,
+			Type:    token.Illegal,
 			Literal: "Invalid float literal",
 			Pos:     pos,
 		}
@@ -357,14 +357,14 @@ func (l *Lexer) readNumber() token.Token {
 
 	for isDigit(l.curCh) || isHexDigit(l.curCh) {
 		if l.curCh == '.' {
-			if tokenType != token.INT {
+			if tokenType != token.Integer {
 				return token.Token{
-					Type:    token.ILLEGAL,
+					Type:    token.Illegal,
 					Literal: "Invalid float literal",
 					Pos:     pos,
 				}
 			}
-			tokenType = token.FLOAT
+			tokenType = token.Float
 		}
 
 		number.WriteRune(l.curCh)
@@ -393,7 +393,7 @@ func (l *Lexer) readSingleLineComment() token.Token {
 
 	return token.Token{
 		Literal: strings.TrimSpace(com.String()),
-		Type:    token.COMMENT,
+		Type:    token.Comment,
 		Pos:     pos,
 	}
 }
@@ -420,7 +420,7 @@ func (l *Lexer) readMultiLineComment() token.Token {
 
 	return token.Token{
 		Literal: com.String(),
-		Type:    token.COMMENT,
+		Type:    token.Comment,
 		Pos:     pos,
 	}
 }

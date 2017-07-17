@@ -33,10 +33,10 @@ func evalCompareExpression(node *ast.CompareExpression, env *object.Environment)
 	}
 
 	// Short circuit if possible
-	if node.Token.Type == token.OR && lBool {
+	if node.Token.Type == token.LOr && lBool {
 		return object.TRUE
 	}
-	if node.Token.Type == token.AND && !lBool {
+	if node.Token.Type == token.LAnd && !lBool {
 		return object.FALSE
 	}
 

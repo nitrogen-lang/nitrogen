@@ -26,14 +26,14 @@ func (p *Parser) peekPrecedence() int {
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
 	}
-	return LOWEST
+	return priLowest
 }
 
 func (p *Parser) curPrecedence() int {
 	if p, ok := precedences[p.curToken.Type]; ok {
 		return p
 	}
-	return LOWEST
+	return priLowest
 }
 
 func createKeywordToken(keyword string) token.Token {

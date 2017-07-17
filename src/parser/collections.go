@@ -7,7 +7,7 @@ import (
 
 func (p *Parser) parseArrayLiteral() ast.Expression {
 	array := &ast.Array{Token: p.curToken}
-	array.Elements = p.parseExpressionList(token.RSQUARE)
+	array.Elements = p.parseExpressionList(token.RSquare)
 	return array
 }
 
@@ -15,31 +15,31 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	hash := &ast.HashLiteral{Token: p.curToken}
 	hash.Pairs = make(map[ast.Expression]ast.Expression)
 
-	for !p.peekTokenIs(token.RBRACE) {
+	for !p.peekTokenIs(token.RBrace) {
 		p.nextToken()
-		key := p.parseExpression(LOWEST)
+		key := p.parseExpression(priLowest)
 
-		if !p.expectPeek(token.COLON) {
+		if !p.expectPeek(token.Colon) {
 			return nil
 		}
 
 		p.nextToken()
-		value := p.parseExpression(LOWEST)
+		value := p.parseExpression(priLowest)
 
 		hash.Pairs[key] = value
 
-		if p.peekToken.Type == token.SEMICOLON {
+		if p.peekToken.Type == token.Semicolon {
 			p.addErrorWithPos("Hash pairs must end with a comma")
 			return nil
 		}
 
-		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+		if !p.peekTokenIs(token.RBrace) && !p.expectPeek(token.Comma) {
 			p.addError("Invalid hash literal")
 			return nil
 		}
 	}
 
-	if !p.expectPeek(token.RBRACE) {
+	if !p.expectPeek(token.RBrace) {
 		return nil
 	}
 
@@ -50,9 +50,9 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
 	p.nextToken()
 
-	exp.Index = p.parseExpression(LOWEST)
+	exp.Index = p.parseExpression(priLowest)
 
-	if !p.expectPeek(token.RSQUARE) {
+	if !p.expectPeek(token.RSquare) {
 		return nil
 	}
 	return exp

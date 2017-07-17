@@ -161,6 +161,7 @@ func TestOrExpression(t *testing.T) {
 	checkParserErrors(t, p)
 
 	if len(program.Statements) != 1 {
+		t.Log(program.String())
 		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
 			1, len(program.Statements))
 	}
