@@ -41,6 +41,8 @@ const (
 
 	LessThan
 	GreaterThan
+	LessThanEq
+	GreaterThanEq
 	Equal
 	NotEqual
 
@@ -98,10 +100,12 @@ var tokens = [...]string{
 	Slash:    "/",
 	Modulo:   "%",
 
-	LessThan:    "<",
-	GreaterThan: ">",
-	Equal:       "==",
-	NotEqual:    "!=",
+	LessThan:      "<",
+	GreaterThan:   ">",
+	LessThanEq:    "<=",
+	GreaterThanEq: ">=",
+	Equal:         "==",
+	NotEqual:      "!=",
 
 	// Delimiters
 	Comma:     ",",

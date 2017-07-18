@@ -22,20 +22,22 @@ const (
 )
 
 var precedences = map[token.TokenType]int{
-	token.LAnd:        priCompare,
-	token.LOr:         priCompare,
-	token.Equal:       priEquals,
-	token.NotEqual:    priEquals,
-	token.LessThan:    priLessGreater,
-	token.GreaterThan: priLessGreater,
-	token.Plus:        priSum,
-	token.Dash:        priSum,
-	token.Slash:       priProduct,
-	token.Asterisk:    priProduct,
-	token.Modulo:      priProduct,
-	token.LParen:      priCall,
-	token.LSquare:     priIndex,
-	token.Assign:      priAssign,
+	token.LAnd:          priCompare,
+	token.LOr:           priCompare,
+	token.Equal:         priEquals,
+	token.NotEqual:      priEquals,
+	token.LessThanEq:    priEquals,
+	token.GreaterThanEq: priEquals,
+	token.LessThan:      priLessGreater,
+	token.GreaterThan:   priLessGreater,
+	token.Plus:          priSum,
+	token.Dash:          priSum,
+	token.Slash:         priProduct,
+	token.Asterisk:      priProduct,
+	token.Modulo:        priProduct,
+	token.LParen:        priCall,
+	token.LSquare:       priIndex,
+	token.Assign:        priAssign,
 }
 
 type (
@@ -90,6 +92,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.Modulo, p.parseInfixExpression)
 	p.registerInfix(token.Equal, p.parseInfixExpression)
 	p.registerInfix(token.NotEqual, p.parseInfixExpression)
+	p.registerInfix(token.LessThanEq, p.parseInfixExpression)
+	p.registerInfix(token.GreaterThanEq, p.parseInfixExpression)
 	p.registerInfix(token.LessThan, p.parseInfixExpression)
 	p.registerInfix(token.GreaterThan, p.parseInfixExpression)
 	p.registerInfix(token.LAnd, p.parseCompareExpression)

@@ -136,13 +136,12 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case '!':
 		if l.peekChar() == '=' {
-			l.readRune()
 			tok = token.Token{
 				Type:    token.NotEqual,
 				Literal: "!=",
 				Pos:     l.curPosition(),
 			}
-			tok.Pos.Col -= 1
+			l.readRune()
 		} else {
 			tok = l.newToken(token.Bang, l.curCh)
 		}
@@ -150,20 +149,37 @@ func (l *Lexer) NextToken() token.Token {
 	// Equality
 	case '=':
 		if l.peekChar() == '=' {
-			l.readRune()
 			tok = token.Token{
 				Type:    token.Equal,
 				Literal: "==",
 				Pos:     l.curPosition(),
 			}
-			tok.Pos.Col -= 1
+			l.readRune()
 		} else {
 			tok = l.newToken(token.Assign, l.curCh)
 		}
 	case '<':
-		tok = l.newToken(token.LessThan, l.curCh)
+		if l.peekChar() == '=' {
+			tok = token.Token{
+				Type:    token.LessThanEq,
+				Literal: "<=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.LessThan, l.curCh)
+		}
 	case '>':
-		tok = l.newToken(token.GreaterThan, l.curCh)
+		if l.peekChar() == '=' {
+			tok = token.Token{
+				Type:    token.GreaterThanEq,
+				Literal: ">=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.GreaterThan, l.curCh)
+		}
 
 	// Control characters
 	case ',':
