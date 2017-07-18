@@ -221,3 +221,70 @@ if (a == b or (a == c and a == d)) {
     ... do more stuff
 }
 ```
+
+## For loops
+
+Nitrogen supports a version of the traditional C for loop:
+
+```
+for (i = 0; i < 10; i + 1) {
+    println(i)
+}
+```
+
+A for loop has three parts in the header. An initializer which is ran before the loop starts, a condition which is evaluated before each
+iteration, and an iterator which is ran after the body but before the next condition check.
+
+The initializer must be an assign statement. The keyword `let` is not needed. The condition needs to return a boolean value. See Nitrogen's
+boolean logic for what constitutes as true/false. The iterator should be an assign or other expression. If it's not an assign statment, the
+value of the iterator will be assigned to the initialized identifier. For example, in the above for loop, since the iterator isn't assigning
+the value of `i + 1` to a variable, it will automatically be assigned to `i`. The assignment to i has nothing to do with i in the iterator,
+but because i is in the initalizer.
+
+Only one variable can be assigned in the initializer.
+
+### Loop control
+
+The statements `continue` and `break` can be used to control a loop. `continue` will stop executing the body and begin the next iteration.
+`break` will stop the loop completely and continue execution after the loop body.
+
+### Looping over arrays/maps
+
+Loops over arrays can be done by using the length of the array and then getting the value from the array by index.
+
+```
+let arr = ["one", "two", "three"]
+
+for (i = 0; i < len(arr); i + 1) {
+    println(arr[i])
+}
+
+// Outputs:
+//  one
+//  two
+//  three
+```
+
+Hash maps can be iterated over by getting the map keys with `hashKeys()` and then iterating over the returned array like above.
+
+```
+let map = {
+    "key1": "value1",
+    "key2": "value2",
+    "key3": "value3",
+    "key4": "value4",
+}
+
+let keys = hashKeys(map)
+
+for (i = 0; i < len(keys); i + 1) {
+    ley key = keys[i]
+    println(key, ": ", map[key])
+}
+
+// Output:
+//  key1: value1
+//  key2: value2
+//  key3: value3
+//  key4: value4
+```

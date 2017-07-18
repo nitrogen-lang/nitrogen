@@ -53,6 +53,8 @@ comment */
 or
 
 and
+
+for
 `
 
 	tests := []struct {
@@ -202,7 +204,9 @@ and
 
 		{token.LAnd, "and", makePos(45, 1)},
 
-		{token.EOF, "", makePos(46, 0)},
+		{token.For, "for", makePos(47, 1)},
+
+		{token.EOF, "", makePos(48, 0)},
 	}
 
 	l := NewString(input)

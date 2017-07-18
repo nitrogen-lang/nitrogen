@@ -1,4 +1,4 @@
-package eval
+package builtins
 
 import (
 	"github.com/nitrogen-lang/nitrogen/src/eval"

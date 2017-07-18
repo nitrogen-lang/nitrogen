@@ -21,6 +21,60 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 	return object.NULL
 }
 
+func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Object {
+	scope := object.NewEnclosedEnv(env)
+
+	init := Eval(loop.Init, scope)
+	if isError(init) {
+		return init
+	}
+
+	// If the iterator is not an assignment, generate one using the ident from the initializer
+	if _, ok := loop.Iter.(*ast.AssignStatement); !ok {
+		loop.Iter = &ast.AssignStatement{
+			Left:  loop.Init.Name,
+			Value: loop.Iter,
+		}
+	}
+
+	for {
+		// Check loop condition
+		condition := Eval(loop.Condition, scope)
+		if isError(condition) {
+			return condition
+		}
+		if !isTruthy(condition) {
+			break
+		}
+
+		// Execute body
+		body := Eval(loop.Body, scope)
+		if isError(body) {
+			return body
+		}
+
+		// Return if necessary
+		rt := body.Type()
+		if rt == object.RETURN_OBJ {
+			return body
+		}
+
+		// Break if necessary, continue automatically
+		if rt == object.LOOP_CONTROL_OBJ {
+			if !body.(*object.LoopControl).Continue {
+				break
+			}
+		}
+
+		// Execute iterator
+		iter := Eval(loop.Iter, scope)
+		if isError(iter) {
+			return iter
+		}
+	}
+	return object.NULL
+}
+
 func evalCompareExpression(node *ast.CompareExpression, env *object.Environment) object.Object {
 	left := Eval(node.Left, env)
 	if isError(left) {

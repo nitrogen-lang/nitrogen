@@ -212,3 +212,40 @@ func TestAndExpression(t *testing.T) {
 		t.Fatalf("Incorrect `and` expression. Got %q", exp.String())
 	}
 }
+
+func TestForLoop(t *testing.T) {
+	input := `for (i = 0; i < 10; i + 1) {
+    print(i)
+}`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	if !ok {
+		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
+	}
+
+	if fl.Init.String() != "let i = 0;" {
+		t.Fatalf("Incorrect initializer. Got %s", fl.Init.String())
+	}
+
+	if fl.Condition.String() != "(i < 10)" {
+		t.Fatalf("Incorrect condition. Got %s", fl.Condition.String())
+	}
+
+	if fl.Iter.String() != "(i + 1)" {
+		t.Fatalf("Incorrect iterator. Got %s", fl.Iter.String())
+	}
+
+	if len(fl.Body.Statements) != 1 {
+		t.Fatalf("Incorrect number of body statements. Expected 1, got %d", len(fl.Body.Statements))
+	}
+}

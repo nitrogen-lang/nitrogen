@@ -28,6 +28,7 @@ const (
 	BUILTIN_OBJ
 	ARRAY_OBJ
 	HASH_OBJ
+	LOOP_CONTROL_OBJ
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -214,6 +215,18 @@ func (h *Hash) Inspect() string {
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteByte('}')
 	return out.String()
+}
+
+type LoopControl struct {
+	Continue bool
+}
+
+func (lc *LoopControl) Type() ObjectType { return LOOP_CONTROL_OBJ }
+func (lc *LoopControl) Inspect() string {
+	if lc.Continue {
+		return "continue"
+	}
+	return "break"
 }
 
 func NewError(format string, a ...interface{}) *Error {

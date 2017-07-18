@@ -141,3 +141,38 @@ func (bs *BlockStatement) String() string {
 	}
 	return out.String()
 }
+
+type ForLoopStatement struct {
+	Init      *DefStatement
+	Condition Expression
+	Iter      Expression
+	Body      *BlockStatement
+}
+
+func (fl *ForLoopStatement) statementNode()       {}
+func (fl *ForLoopStatement) TokenLiteral() string { return "for" }
+func (fl *ForLoopStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("for (")
+	out.WriteString(fl.Init.String())
+	out.WriteString("; ")
+	out.WriteString(fl.Condition.String())
+	out.WriteString("; ")
+	out.WriteString(fl.Iter.String())
+	out.WriteString(") {")
+	out.WriteString(fl.Body.String())
+	out.WriteByte('}')
+	return out.String()
+}
+
+type ContinueStatement struct{}
+
+func (c *ContinueStatement) statementNode()       {}
+func (c *ContinueStatement) TokenLiteral() string { return "continue" }
+func (c *ContinueStatement) String() string       { return "continue" }
+
+type BreakStatement struct{}
+
+func (b *BreakStatement) statementNode()       {}
+func (b *BreakStatement) TokenLiteral() string { return "break" }
+func (b *BreakStatement) String() string       { return "break" }

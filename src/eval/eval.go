@@ -86,6 +86,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIfExpression(node, env)
 	case *ast.CompareExpression:
 		return evalCompareExpression(node, env)
+	case *ast.ForLoopStatement:
+		return evalForLoop(node, env)
+	case *ast.ContinueStatement:
+		return &object.LoopControl{Continue: true}
+	case *ast.BreakStatement:
+		return &object.LoopControl{Continue: false}
 
 	// Functions
 	case *ast.FunctionLiteral:
@@ -140,7 +146,7 @@ func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) obj
 
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_OBJ || rt == object.ERROR_OBJ {
+			if rt == object.RETURN_OBJ || rt == object.ERROR_OBJ || rt == object.LOOP_CONTROL_OBJ {
 				return result
 			}
 		}

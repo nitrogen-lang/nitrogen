@@ -71,6 +71,9 @@ const (
 	Else
 	Return
 	Nil
+	For
+	Continue
+	Break
 	keywordEnd
 )
 
@@ -125,6 +128,9 @@ var tokens = [...]string{
 	Nil:      "nil",
 	LAnd:     "and",
 	LOr:      "or",
+	For:      "for",
+	Continue: "continue",
+	Break:    "break",
 }
 
 var keywords map[string]TokenType
