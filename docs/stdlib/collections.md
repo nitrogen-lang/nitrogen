@@ -26,3 +26,8 @@ Returns a new map with the key-value pairs of map1 combined with those of map2. 
 map. If the overwrite flag is true, or not provided, keys in map2 with the same name as those in map1
 will overwrite the value in map1 with that in map2. If overwrite is false, any duplicate key is
 simply ignored. Note, neither input map is modified during the operation.
+
+## hashKeys(in: map): array
+
+Creates and returns an array with the keys of the given map. ***NOTE***: Programmers should NOT rely
+on the order of hash map keys. They are not guaranteed to be in a specific order.

@@ -12,6 +12,7 @@ func init() {
 	eval.RegisterBuiltin("rest", restBuiltin)
 	eval.RegisterBuiltin("push", pushBuiltin)
 	eval.RegisterBuiltin("hashMerge", hashMergeBuiltin)
+	eval.RegisterBuiltin("hashKeys", hashKeysBuiltin)
 }
 
 func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
@@ -131,4 +132,25 @@ func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Obj
 	}
 
 	return newMap
+}
+
+func hashKeysBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	if ac := checkArgs("hashKeys", 1, args...); ac != nil {
+		return ac
+	}
+
+	hash, ok := args[0].(*object.Hash)
+	if !ok {
+		return object.NewError("hashKeys expects a hash map")
+	}
+
+	arr := &object.Array{
+		Elements: make([]object.Object, 0, len(hash.Pairs)),
+	}
+
+	for _, pair := range hash.Pairs {
+		arr.Elements = append(arr.Elements, pair.Key)
+	}
+
+	return arr
 }

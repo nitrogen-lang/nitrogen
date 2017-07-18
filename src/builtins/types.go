@@ -15,6 +15,8 @@ func init() {
 	eval.RegisterBuiltin("parseInt", parseIntBuiltin)
 	eval.RegisterBuiltin("parseFloat", parseFloatBuiltin)
 
+	eval.RegisterBuiltin("varType", varTypeBuiltin)
+	eval.RegisterBuiltin("isDefined", isDefinedBuiltin)
 	eval.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FLOAT_OBJ))
 	eval.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.INTEGER_OBJ))
 	eval.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BOOLEAN_OBJ))
@@ -65,6 +67,10 @@ func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
 
 		return object.NativeBoolToBooleanObj(args[0].Type() == t)
 	}
+}
+
+func varTypeBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	return &object.String{Value: args[0].Type().String()}
 }
 
 func toStringBuiltin(env *object.Environment, args ...object.Object) object.Object {
@@ -124,4 +130,18 @@ func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Ob
 	}
 
 	return &object.Float{Value: f}
+}
+
+func isDefinedBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	if ac := checkArgs("isDefined", 1, args...); ac != nil {
+		return ac
+	}
+
+	ident, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewError("isDefined expects a string, got %s", args[0].Type().String())
+	}
+
+	_, ok = env.Get(ident.Value)
+	return object.NativeBoolToBooleanObj(ok)
 }

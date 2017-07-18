@@ -26,3 +26,11 @@ Attempts to parse the given string as an integer. If parsing fails, nil is retur
 ## parseFloat(in: string): float|nil
 
 Same as parseInt() but with floats.
+
+## varType(in: T): string
+
+Returns the type of the variable as a string.
+
+## isDefined(ident: string): bool
+
+Returns if the given identifier is defined.
