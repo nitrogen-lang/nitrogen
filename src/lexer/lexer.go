@@ -116,22 +116,57 @@ func (l *Lexer) NextToken() token.Token {
 
 	// Operators
 	case '+':
-		tok = l.newToken(token.Plus, l.curCh)
+		if l.peekChar() == '=' {
+			tok = token.Token{
+				Type:    token.PlusAssign,
+				Literal: "+=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.Plus, l.curCh)
+		}
 	case '-':
-		tok = l.newToken(token.Dash, l.curCh)
+		if l.peekChar() == '=' {
+			tok = token.Token{
+				Type:    token.MinusAssign,
+				Literal: "-=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.Dash, l.curCh)
+		}
 	case '*':
-		tok = l.newToken(token.Asterisk, l.curCh)
+		if l.peekChar() == '=' {
+			tok = token.Token{
+				Type:    token.TimesAssign,
+				Literal: "*=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.Asterisk, l.curCh)
+		}
 	case '%':
 		tok = l.newToken(token.Modulo, l.curCh)
 	case '/':
-		if l.peekChar() == '/' {
+		switch l.peekChar() {
+		case '/':
 			l.readRune()
 			tok = l.readSingleLineComment()
 			l.resetPos()
-		} else if l.peekChar() == '*' {
+		case '*':
 			l.readRune()
 			tok = l.readMultiLineComment()
-		} else {
+		case '=':
+			tok = token.Token{
+				Type:    token.SlashAssign,
+				Literal: "/=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		default:
 			tok = l.newToken(token.Slash, l.curCh)
 		}
 	case '!':

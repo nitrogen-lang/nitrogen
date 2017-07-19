@@ -39,6 +39,11 @@ const (
 	Slash
 	Modulo
 
+	PlusAssign
+	MinusAssign
+	TimesAssign
+	SlashAssign
+
 	LessThan
 	GreaterThan
 	LessThanEq
@@ -99,6 +104,11 @@ var tokens = [...]string{
 	Asterisk: "*",
 	Slash:    "/",
 	Modulo:   "%",
+
+	PlusAssign:  "+=",
+	MinusAssign: "-=",
+	TimesAssign: "*=",
+	SlashAssign: "/=",
 
 	LessThan:      "<",
 	GreaterThan:   ">",

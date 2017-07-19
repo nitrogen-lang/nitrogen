@@ -27,4 +27,28 @@ func testCompoundComparisons() {
     }
 }
 
+func testCompoundAssignements() {
+    let a = 5
+
+    a += 2
+    if (a != 7) {
+        println("a != 7, got ", a)
+    }
+
+    a -= 3
+    if (a != 4) {
+        println("a != 4, got ", a)
+    }
+
+    a *= 2
+    if (a != 8) {
+        println("a != 8, got ", a)
+    }
+
+    a /= 4
+    if (a != 2) {
+        println("a != 2, got ", a)
+    }
+}
+
 testCompoundComparisons()

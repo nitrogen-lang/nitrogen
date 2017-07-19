@@ -16,10 +16,6 @@ func evalInfixExpression(op string, left, right object.Object) object.Object {
 		return evalStringInfixExpression(op, left, right)
 	case object.ObjectsAre(object.ARRAY_OBJ, left, right):
 		return evalArrayInfixExpression(op, left, right)
-	case op == "==":
-		return object.NativeBoolToBooleanObj(left == right)
-	case op == "!=":
-		return object.NativeBoolToBooleanObj(left != right)
 	case object.ObjectsAre(object.BOOLEAN_OBJ, left, right):
 		return evalBoolInfixExpression(op, left, right)
 	}
@@ -127,6 +123,10 @@ func evalBoolInfixExpression(op string, left, right object.Object) object.Object
 	rightVal := right.(*object.Boolean).Value
 
 	switch op {
+	case "==":
+		return object.NativeBoolToBooleanObj(leftVal == rightVal)
+	case "!=":
+		return object.NativeBoolToBooleanObj(leftVal != rightVal)
 	case "or":
 		return object.NativeBoolToBooleanObj(leftVal || rightVal)
 	case "and":

@@ -126,3 +126,46 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
 
 	return stmt
 }
+
+// parseCompoundAssign will take a compound assignment like += and
+// turn it into a normal assignment statement using the given left
+// expression as the left side of a normal arithmatic operation
+func (p *Parser) parseCompoundAssign(left ast.Expression) ast.Expression {
+	stmt := &ast.AssignStatement{
+		Token: p.curToken,
+		Left:  left,
+	}
+
+	p.nextToken()
+
+	right := p.parseExpression(priLowest)
+
+	switch stmt.Token.Type {
+	case token.PlusAssign:
+		stmt.Value = makeInfix(token.Plus, left, right)
+	case token.MinusAssign:
+		stmt.Value = makeInfix(token.Dash, left, right)
+	case token.TimesAssign:
+		stmt.Value = makeInfix(token.Asterisk, left, right)
+	case token.SlashAssign:
+		stmt.Value = makeInfix(token.Slash, left, right)
+	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func makeInfix(tokenType token.TokenType, left, right ast.Expression) *ast.InfixExpression {
+	return &ast.InfixExpression{
+		Token: token.Token{
+			Type:    tokenType,
+			Literal: tokenType.String(),
+		},
+		Left:     left,
+		Operator: tokenType.String(),
+		Right:    right,
+	}
+}

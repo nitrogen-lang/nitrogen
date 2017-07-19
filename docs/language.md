@@ -141,6 +141,18 @@ anotherVar = "This will fail"
 var2 = "This also causes an error"
 ```
 
+Compound operations and assignments are supported using the compound operators +=, -=, *=, and /=. Each operator will perform the given operation
+then assign it to the identifier on the left side:
+
+```
+let a = 5
+
+a += 2 // a == 7
+a -= 3 // a == 4
+a *= 2 // a == 8
+a /= 4 // a == 2
+```
+
 ### Constants
 
 Constants can be a string, int, float, or bool. They CANNOT be an array or map.
@@ -177,7 +189,7 @@ let myFunc = func myFunc(thing) { println(thing) } // This is bad
 myFunc("Some variable")
 ```
 
-## If Expressions
+## Comparisons/Control Flow
 
 If expressions in Nitrogen are very similar to other languages:
 
@@ -195,6 +207,8 @@ Nitrogen supports standard comparison operators:
 - `!=`: Not equal
 - `>`: Greater than
 - `<`: Less than
+- `>=`: Greater than or equal to
+` `<=`: Less than or equal to
 
 An expression can be prefixed with the bang operator to negate it:
 
