@@ -1,6 +1,8 @@
 package eval
 
 import (
+	"math"
+
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -68,6 +70,8 @@ func evalFloatInfixExpression(op string, left, right object.Object) object.Objec
 		return &object.Float{Value: leftVal * rightVal}
 	case "/":
 		return &object.Float{Value: leftVal / rightVal}
+	case "%":
+		return &object.Float{Value: math.Mod(leftVal, rightVal)}
 	case "<":
 		return object.NativeBoolToBooleanObj(leftVal < rightVal)
 	case ">":

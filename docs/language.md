@@ -74,7 +74,7 @@ And of course ints can be compared to each other using <, >, ==, and !=.
 
 Floating point numbers are implemented using Go's float64 type which means they are the same as a double in C or Java. Floats can only be represented
 in dotted decimal notation. Exponential notation is coming soon. Like ints, floats support the standard arithmatic operations: addition, subtraction,
-multiplication, and division. Floats may be compared to each other.
+multiplication, division, and modulo. Floats may be compared to each other.
 
 ### Booleans
 
