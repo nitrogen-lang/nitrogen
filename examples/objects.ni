@@ -20,7 +20,7 @@ func account(name) {
     }
 
     // "methods" are added as key pairs to the map
-    dispatch["withdraw"] = func(amount) {
+    dispatch->withdraw = func(amount) {
         if amount > oBalance {
             return 'Insufficent balance'
         }
@@ -28,34 +28,34 @@ func account(name) {
         return oBalance
     }
 
-    dispatch["deposit"] = func(amount) {
+    dispatch->deposit = func(amount) {
         oBalance = oBalance + amount
         return oBalance
     }
 
-    dispatch["balance"] = func() { oBalance }
-    dispatch["name"] = func() { name }
+    dispatch->balance = func() { oBalance }
+    dispatch->name = name
     return dispatch
 }
 
 func main() {
     let me = account("John Smith")
-    println(me["name"]())
-    println(me["balance"]())
-    println(me["deposit"](200)) // "methods" are invoked by simply looking up the key in the map
-    println(me["withdraw"](50))
-    println(me["withdraw"](250))
-    println(me["balance"]())
+    println(me->name)
+    println(me->balance())
+    println(me->deposit(200)) // "methods" are invoked by simply looking up the key in the map
+    println(me->withdraw(50))
+    println(me->withdraw(250))
+    println(me->balance())
 
     // Multiple invocations of account() create new, unique "objects"
     let me2 = account("John Smith2")
-    println(me2["name"]())
-    println(me2["balance"]())
-    println(me2["deposit"](90))
+    println(me2->name)
+    println(me2->balance())
+    println(me2->deposit(90))
 
     // Show original account was not modified
-    println(me["name"]())
-    println(me["balance"]())
+    println(me->name)
+    println(me->balance())
 }
 
 main()

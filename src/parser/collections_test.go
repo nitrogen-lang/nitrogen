@@ -233,6 +233,68 @@ func TestArrayAssignments(t *testing.T) {
 	}
 }
 
+func TestHashArrowOperator(t *testing.T) {
+	input := `m->value;`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("exp is not ast.IndexExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if exp.Left.String() != "m" {
+		t.Fatalf("exp hash ident is not correct. expected=m, got=%s",
+			exp.Left.String())
+	}
+
+	if exp.Index.String() != "value" {
+		t.Fatalf("exp index is not correct. expected=value, got=%q",
+			exp.Index.String())
+	}
+}
+
+func TestHashArrowOperatorString(t *testing.T) {
+	input := `m->"value";`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("exp is not ast.IndexExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if exp.Left.String() != "m" {
+		t.Fatalf("exp hash ident is not correct. expected=m, got=%s",
+			exp.Left.String())
+	}
+
+	if exp.Index.String() != "value" {
+		t.Fatalf("exp index is not correct. expected=value, got=%q",
+			exp.Index.String())
+	}
+}
+
 func TestParsingHashLiteralsMultiLine(t *testing.T) {
 	input := `{
                 "one": 1,

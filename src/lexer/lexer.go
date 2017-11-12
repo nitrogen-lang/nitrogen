@@ -134,6 +134,13 @@ func (l *Lexer) NextToken() token.Token {
 				Pos:     l.curPosition(),
 			}
 			l.readRune()
+		} else if l.peekChar() == '>' {
+			tok = token.Token{
+				Type:    token.Arrow,
+				Literal: "->",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
 		} else {
 			tok = l.newToken(token.Dash, l.curCh)
 		}
