@@ -19,7 +19,7 @@ let hello = func(place) {
 
 // Syntax sugar for the above
 func hello2(place) {
-     return "Hello2, " + place
+    return "Hello2, " + place
 }
 
 // Here we assign the output of calling hello()
@@ -108,10 +108,10 @@ println(thisIsNull)
 
 // Functions can take more arguments than declared, this can be used for optional args
 func extra(a) {
-     // The local variable "args" is an array that contains all parameters after those
-     // that were declared. So here, "args[0]" will be the SECOND parameter given since
-     // the first paramter is bound to "a".
-     println(args)
+    // The local variable "args" is an array that contains all parameters after those
+    // that were declared. So here, "args[0]" will be the SECOND parameter given since
+    // the first paramter is bound to "a".
+    println(args)
 }
 
 extra(1, 2)
