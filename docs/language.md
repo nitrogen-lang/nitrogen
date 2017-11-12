@@ -8,7 +8,7 @@ Nitrogen source files are read as valid UTF-8 characters.
 
 Nitrogen's formal grammar uses semicolons to denote the end of a statement or expression. However, Nitrogen code doesn't need to have
 explicit semicolons as the lexer will automatically insert a semicolon where it's needed. Namely, after an identifier, literal,
-nil, closing parenthesis, curly and square brackets, and after the keyword "return". This requires the programmer to keep in mind
+nil, a closing parenthesis, curly or square bracket, and after the keyword "return". This requires the programmer to keep in mind
 how they're formatting code. For example, the following if statement is invalid:
 
 ```
@@ -20,6 +20,12 @@ else
 {
     print("No, it's not 3")
 }
+```
+
+But the following is ok:
+
+```
+if (var == 3) { print("It's a 3") } else { print("No, it's not 3") }
 ```
 
 The parser will catch any such errors and will warn the programmer.
@@ -52,8 +58,8 @@ values between types.
 
 #### Integers
 
-Integers are implemented using Go's int64 type which means all ints are 64 bits. Integers can be declared using decimal, octal, or hexadecimal
-notation. Here's a few examples:
+Integers are implemented using Go's int64 type which means all ints are signed and 64 bits long. Integers can be declared using
+decimal, octal, or hexadecimal notation. Here's a few examples:
 
 ```
 45    // Decimal
@@ -79,7 +85,7 @@ Booleans are simple `true` and `false`.
 Strings are made up of arbitrary bytes that may or may not represent a UTF-8 encoded string. There are two types of strings in Nitrogen,
 interpreted strings and raw strings.
 
-Interpreted strings are surrouned by double quotes and cannot contain any new lines (it can't span lines), but it can contain escape sequences:
+Interpreted strings are surrounded by double quotes and cannot contain any new lines (it can't span lines), but it can contain escape sequences:
 
 - \b - Backspace
 - \n - Newline
@@ -92,7 +98,7 @@ Interpreted strings are surrouned by double quotes and cannot contain any new li
 
 If any other escape sequence is found, the backslash and following character are left untouched. For example the string `"He\llo World"` would
 not change in its interpreted form since the escape sequence `\l` isn't valid. It's always good practice to explicitly escape a backslash
-rather than relying on this behaviour.
+rather than relying on this behavior.
 
 Raw strings are slightly different. They're surrounded by single quotes and may span multiple lines. The only valid escape sequence
 is `\'`, escaping a single quote. Raw strings can be helpful for templates or large bodies of inline text.
@@ -107,7 +113,7 @@ library documentation for functions that can manipulate arrays.
 
 ### Hash Maps
 
-Also known as dictionaries or associative arrays are data structures that use key-value pairs. Keys can be strings, ints, or floats. Attemping
+Also known as dictionaries or associative arrays are data structures that use key-value pairs. Keys can be strings, ints, or floats. Attempting
 to use any other data type will result in an evaluation error. Maps can be created using the syntax `{"key": "value", "key2": "value2"}`.
 Map definitions can span multiple lines but be careful of automatic semicolon insertion, every key-value pair must have a comma after it:
 
