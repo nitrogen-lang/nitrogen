@@ -24,27 +24,31 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Object {
 	scope := object.NewEnclosedEnv(env)
 
-	init := Eval(loop.Init, scope)
-	if isError(init) {
-		return init
-	}
+	if loop.Init != nil {
+		init := Eval(loop.Init, scope)
+		if isError(init) {
+			return init
+		}
 
-	// If the iterator is not an assignment, generate one using the ident from the initializer
-	if _, ok := loop.Iter.(*ast.AssignStatement); !ok {
-		loop.Iter = &ast.AssignStatement{
-			Left:  loop.Init.Name,
-			Value: loop.Iter,
+		// If the iterator is not an assignment, generate one using the ident from the initializer
+		if _, ok := loop.Iter.(*ast.AssignStatement); !ok {
+			loop.Iter = &ast.AssignStatement{
+				Left:  loop.Init.Name,
+				Value: loop.Iter,
+			}
 		}
 	}
 
 	for {
 		// Check loop condition
-		condition := Eval(loop.Condition, scope)
-		if isError(condition) {
-			return condition
-		}
-		if !isTruthy(condition) {
-			break
+		if loop.Condition != nil {
+			condition := Eval(loop.Condition, scope)
+			if isError(condition) {
+				return condition
+			}
+			if !isTruthy(condition) {
+				break
+			}
 		}
 
 		// Execute body
@@ -67,9 +71,11 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 		}
 
 		// Execute iterator
-		iter := Eval(loop.Iter, scope)
-		if isError(iter) {
-			return iter
+		if loop.Iter != nil {
+			iter := Eval(loop.Iter, scope)
+			if isError(iter) {
+				return iter
+			}
 		}
 	}
 	return object.NULL

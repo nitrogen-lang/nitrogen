@@ -46,30 +46,36 @@ func (p *Parser) parseForLoop() ast.Statement {
 		p.nextToken()
 	}
 
-	if !p.peekTokenIs(token.Identifier) {
-		p.peekError(token.Identifier)
-		return nil
+	if p.peekTokenIs(token.LBrace) || (expectClosingParen && p.peekTokenIs(token.RParen)) {
+		loop.Init = nil
+		loop.Condition = nil
+		loop.Iter = nil
+	} else {
+		if !p.peekTokenIs(token.Identifier) {
+			p.peekError(token.Identifier)
+			return nil
+		}
+
+		p.insertToken(token.Token{Type: token.Let, Literal: "let"})
+		p.nextToken()
+
+		loop.Init = p.parseDefStatement().(*ast.DefStatement)
+		if !p.curTokenIs(token.Semicolon) {
+			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
+			return nil
+		}
+		p.nextToken()
+
+		loop.Condition = p.parseExpression(priLowest)
+		p.nextToken()
+		if !p.curTokenIs(token.Semicolon) {
+			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
+			return nil
+		}
+		p.nextToken()
+
+		loop.Iter = p.parseExpression(priLowest)
 	}
-
-	p.insertToken(token.Token{Type: token.Let, Literal: "let"})
-	p.nextToken()
-
-	loop.Init = p.parseDefStatement().(*ast.DefStatement)
-	if !p.curTokenIs(token.Semicolon) {
-		p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
-		return nil
-	}
-	p.nextToken()
-
-	loop.Condition = p.parseExpression(priLowest)
-	p.nextToken()
-	if !p.curTokenIs(token.Semicolon) {
-		p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
-		return nil
-	}
-	p.nextToken()
-
-	loop.Iter = p.parseExpression(priLowest)
 
 	if expectClosingParen && !p.expectPeek(token.RParen) {
 		return nil
