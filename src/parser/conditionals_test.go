@@ -93,6 +93,55 @@ func TestIfExpression(t *testing.T) {
 	}
 }
 
+func TestIfExpressionNoParens(t *testing.T) {
+	input := `if x < y { x }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T",
+			stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.Consequence.Statements) != 1 {
+		t.Errorf("consequence is not 1 statements. got=%d\n",
+			len(exp.Consequence.Statements))
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if exp.Alternative != nil {
+		t.Errorf("exp.Alternative.Statements was not nil. got=%+v", exp.Alternative)
+	}
+}
+
 func TestIfElseExpression(t *testing.T) {
 	input := `if (x < y) { x } else { y }`
 
@@ -214,9 +263,7 @@ func TestAndExpression(t *testing.T) {
 }
 
 func TestForLoop(t *testing.T) {
-	input := `for (i = 0; i < 10; i + 1) {
-    print(i)
-}`
+	input := `for (i = 0; i < 10; i + 1) { print(i) }`
 
 	l := lexer.NewString(input)
 	p := New(l)
@@ -243,6 +290,111 @@ func TestForLoop(t *testing.T) {
 
 	if fl.Iter.String() != "(i + 1)" {
 		t.Fatalf("Incorrect iterator. Got %s", fl.Iter.String())
+	}
+
+	if len(fl.Body.Statements) != 1 {
+		t.Fatalf("Incorrect number of body statements. Expected 1, got %d", len(fl.Body.Statements))
+	}
+}
+
+func TestForLoopNoParens(t *testing.T) {
+	input := `for i = 0; i < 10; i + 1 { print(i) }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	if !ok {
+		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
+	}
+
+	if fl.Init.String() != "let i = 0;" {
+		t.Fatalf("Incorrect initializer. Got %s", fl.Init.String())
+	}
+
+	if fl.Condition.String() != "(i < 10)" {
+		t.Fatalf("Incorrect condition. Got %s", fl.Condition.String())
+	}
+
+	if fl.Iter.String() != "(i + 1)" {
+		t.Fatalf("Incorrect iterator. Got %s", fl.Iter.String())
+	}
+
+	if len(fl.Body.Statements) != 1 {
+		t.Fatalf("Incorrect number of body statements. Expected 1, got %d", len(fl.Body.Statements))
+	}
+}
+
+func TestInfiniteForLoop(t *testing.T) {
+	input := `for { print(i) }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	if !ok {
+		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
+	}
+
+	if fl.Init != nil {
+		t.Fatalf("Initializer should be nil. Got %s", fl.Init.String())
+	}
+
+	if fl.Condition != nil {
+		t.Fatalf("Condition should be nil. Got %s", fl.Condition.String())
+	}
+
+	if fl.Iter != nil {
+		t.Fatalf("Iterator should be nil. Got %s", fl.Iter.String())
+	}
+
+	if len(fl.Body.Statements) != 1 {
+		t.Fatalf("Incorrect number of body statements. Expected 1, got %d", len(fl.Body.Statements))
+	}
+}
+
+func TestInfiniteForLoopEmptyParens(t *testing.T) {
+	input := `for() { print(i) }`
+
+	l := lexer.NewString(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	if !ok {
+		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
+	}
+
+	if fl.Init != nil {
+		t.Fatalf("Initializer should be nil. Got %s", fl.Init.String())
+	}
+
+	if fl.Condition != nil {
+		t.Fatalf("Condition should be nil. Got %s", fl.Condition.String())
+	}
+
+	if fl.Iter != nil {
+		t.Fatalf("Iterator should be nil. Got %s", fl.Iter.String())
 	}
 
 	if len(fl.Body.Statements) != 1 {
