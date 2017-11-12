@@ -308,10 +308,14 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression {
+	return p.parseGroupedExpressionC(token.RParen)
+}
+
+func (p *Parser) parseGroupedExpressionC(end token.TokenType) ast.Expression {
 	p.nextToken()
 	exp := p.parseExpression(priLowest)
 
-	if !p.expectPeek(token.RParen) {
+	if !p.expectPeek(end) {
 		return nil
 	}
 	return exp

@@ -8,16 +8,17 @@ import (
 func (p *Parser) parseIfExpression() ast.Expression {
 	expression := &ast.IfExpression{Token: p.curToken}
 
-	if !p.expectPeek(token.LParen) {
-		return nil
+	if p.curTokenIs(token.LParen) {
+		p.nextToken()
+		expression.Condition = p.parseGroupedExpression()
+		if !p.expectPeek(token.LBrace) {
+			return nil
+		}
+	} else {
+		expression.Condition = p.parseGroupedExpressionC(token.LBrace)
 	}
 
-	expression.Condition = p.parseGroupedExpression()
 	if expression.Condition == nil {
-		return nil
-	}
-
-	if !p.expectPeek(token.LBrace) {
 		return nil
 	}
 
@@ -38,9 +39,11 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 func (p *Parser) parseForLoop() ast.Statement {
 	loop := &ast.ForLoopStatement{}
+	expectClosingParen := false
 
-	if !p.expectPeek(token.LParen) {
-		return nil
+	if p.peekTokenIs(token.LParen) {
+		expectClosingParen = true
+		p.nextToken()
 	}
 
 	if !p.peekTokenIs(token.Identifier) {
@@ -68,7 +71,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 
 	loop.Iter = p.parseExpression(priLowest)
 
-	if !p.expectPeek(token.RParen) {
+	if expectClosingParen && !p.expectPeek(token.RParen) {
 		return nil
 	}
 
