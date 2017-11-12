@@ -155,7 +155,7 @@ anotherVar = "This will fail"
 var2 = "This also causes an error"
 ```
 
-Compound operations and assignments are supported using the compound operators +=, -=, *=, and /=. Each operator will perform the given operation
+Compound operations and assignments are supported using the compound operators +=, -=, *=, /=, and %=. Each operator will perform the given operation
 then assign it to the identifier on the left side:
 
 ```
@@ -165,6 +165,7 @@ a += 2 // a == 7
 a -= 3 // a == 4
 a *= 2 // a == 8
 a /= 4 // a == 2
+a %= 4 // a == 1
 ```
 
 ### Constants

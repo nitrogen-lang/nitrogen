@@ -149,6 +149,8 @@ func (p *Parser) parseCompoundAssign(left ast.Expression) ast.Expression {
 		stmt.Value = makeInfix(token.Asterisk, left, right)
 	case token.SlashAssign:
 		stmt.Value = makeInfix(token.Slash, left, right)
+	case token.ModAssign:
+		stmt.Value = makeInfix(token.Modulo, left, right)
 	}
 
 	if p.peekTokenIs(token.Semicolon) {

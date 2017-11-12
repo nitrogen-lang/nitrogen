@@ -44,6 +44,7 @@ const (
 	MinusAssign
 	TimesAssign
 	SlashAssign
+	ModAssign
 
 	LessThan
 	GreaterThan
@@ -111,6 +112,7 @@ var tokens = [...]string{
 	MinusAssign: "-=",
 	TimesAssign: "*=",
 	SlashAssign: "/=",
+	ModAssign:   "%=",
 
 	LessThan:      "<",
 	GreaterThan:   ">",

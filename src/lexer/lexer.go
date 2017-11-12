@@ -156,7 +156,16 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.newToken(token.Asterisk, l.curCh)
 		}
 	case '%':
-		tok = l.newToken(token.Modulo, l.curCh)
+		if l.peekChar() == '=' {
+			tok = token.Token{
+				Type:    token.ModAssign,
+				Literal: "%=",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.Modulo, l.curCh)
+		}
 	case '/':
 		switch l.peekChar() {
 		case '/':
