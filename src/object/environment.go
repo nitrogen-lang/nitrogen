@@ -39,7 +39,7 @@ func NewEnclosedEnv(outer *Environment) *Environment {
 
 func (e *Environment) Print(indent string) {
 	for k, v := range e.store {
-		fmt.Printf("%s%s = %s\n%s%sConst: %t\n", indent, k, v.v.Inspect(), indent, indent, v.readonly)
+		fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, k, v.v.Inspect(), indent, v.readonly)
 	}
 
 	if e.parent != nil {
