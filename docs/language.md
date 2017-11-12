@@ -200,12 +200,14 @@ myFunc("Some variable")
 If expressions in Nitrogen are very similar to other languages:
 
 ```
-if (condition) {
+if condition {
     ... do stuff
 } else {
     ... do other stuff
 }
 ```
+
+The condition may be enclosed in parentheses, but they are completely optional.
 
 Nitrogen supports standard comparison operators:
 
@@ -225,11 +227,11 @@ An expression can be prefixed with the bang operator to negate it:
 Compound comparisons are also possible with the keywords `and` and `or`:
 
 ```
-if (a == b or a == c) {
+if a == b or a == c {
     ... do stuff
 }
 
-if (a == b and b == c) {
+if a == b and b == c {
     ... then a == c
 }
 ```
@@ -237,7 +239,7 @@ if (a == b and b == c) {
 Conditions can be groups to change the order or precidence:
 
 ```
-if (a == b or (a == c and a == d)) {
+if a == b or (a == c and a == d) {
     ... do more stuff
 }
 ```
@@ -247,10 +249,23 @@ if (a == b or (a == c and a == d)) {
 Nitrogen supports a version of the traditional C for loop:
 
 ```
+// Limited loop
 for (i = 0; i < 10; i + 1) {
     println(i)
 }
+
+// Parentheses are optional
+for i = 0; i < 10; i + 1 {
+    println(i)
+}
+
+// Infinite loop
+for {
+    println("Infinity")
+}
 ```
+
+The initlizer, condition, and incrementor may be enclosed in parentheses, but they are completely optional.
 
 A for loop has three parts in the header. An initializer which is ran before the loop starts, a condition which is evaluated before each
 iteration, and an iterator which is ran after the body but before the next condition check.
@@ -262,6 +277,8 @@ the value of `i + 1` to a variable, it will automatically be assigned to `i`. Th
 but because i is in the initalizer.
 
 Only one variable can be assigned in the initializer.
+
+An inifinate loop can be achieved my simply omitting the entire loop header.
 
 ### Loop control
 

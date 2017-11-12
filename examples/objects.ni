@@ -21,7 +21,7 @@ func account(name) {
 
     // "methods" are added as key pairs to the map
     dispatch["withdraw"] = func(amount) {
-        if (amount > oBalance) {
+        if amount > oBalance {
             return 'Insufficent balance'
         }
         oBalance = oBalance - amount
@@ -52,6 +52,10 @@ func main() {
     println(me2["name"]())
     println(me2["balance"]())
     println(me2["deposit"](90))
+
+    // Show original account was not modified
+    println(me["name"]())
+    println(me["balance"]())
 }
 
 main()

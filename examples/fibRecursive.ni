@@ -6,7 +6,7 @@
  */
 
 func fib(x) {
-    if (x == 0 or x == 1) {
+    if x == 0 or x == 1 {
         return x;
     }
 
@@ -14,7 +14,7 @@ func fib(x) {
 }
 
 func main() {
-    for (i = 0; i < 30; i + 1) {
+    for i = 0; i < 30; i + 1 {
         println("Fib of ", i, " is ", fib(i))
     }
 }

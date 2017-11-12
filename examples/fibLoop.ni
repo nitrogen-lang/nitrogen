@@ -11,7 +11,7 @@ func main() {
     let num2 = 1
     let sumOfPrevTwo = 0
 
-    for (i = 0; num1 >= 0; i + 1) {
+    for i = 0; num1 >= 0; i + 1 {
         println(count, ": ", num1, " ")
 
         sumOfPrevTwo = num1 + num2

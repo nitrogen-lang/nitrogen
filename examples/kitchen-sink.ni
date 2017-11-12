@@ -62,7 +62,7 @@ println(helloWorld2)
  * even though somethingElse isn't defined anywhere.
  */
 
-if (helloWorld == "Hello, World!" and true or somethingElse) {
+if helloWorld == "Hello, World!" and true or somethingElse {
     println("Yep, that's right")
 } else {
     println("That's not right...")
@@ -115,3 +115,8 @@ func extra(a) {
 }
 
 extra(1, 2)
+
+// Simple loops are also possible. An infinite loop can be achieved by omitting the loop header
+for i = 0; i < 5; i + 1 {
+    println(i)
+}
