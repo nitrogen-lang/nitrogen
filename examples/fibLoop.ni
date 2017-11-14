@@ -21,4 +21,4 @@ func main() {
     }
 }
 
-main();
+main()
