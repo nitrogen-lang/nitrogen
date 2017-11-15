@@ -316,6 +316,8 @@ func (l *Lexer) needSemicolon() bool {
 		token.String,
 		token.Nil,
 		token.Return,
+		token.Break,
+		token.Continue,
 		token.RParen,
 		token.RSquare,
 		token.RBrace) && !l.lastTokenWas(token.Semicolon)
