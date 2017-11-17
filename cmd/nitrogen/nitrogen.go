@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"plugin"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
@@ -20,15 +22,24 @@ const PROMPT = ">> "
 var (
 	interactive bool
 	printAst    bool
+	modulePath  string
 )
 
 func init() {
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
+	flag.StringVar(&modulePath, "modules", "", "Module directory")
 }
 
 func main() {
 	flag.Parse()
+
+	if modulePath != "" {
+		if err := loadModules(modulePath); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
 
 	if interactive {
 		fmt.Print("Nitrogen Programming Language\n")
@@ -107,4 +118,19 @@ func printParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		fmt.Fprintf(out, "ERROR: %s\n", msg)
 	}
+}
+
+func loadModules(modulePath string) error {
+	return filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || filepath.Ext(path) != ".so" {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Loading module %s\n", filepath.Base(path))
+		_, err = plugin.Open(path)
+		return err
+	})
 }

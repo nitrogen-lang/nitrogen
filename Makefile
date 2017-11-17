@@ -1,6 +1,6 @@
-.PHONY: go-test nitrogen-test build-exec build
+.PHONY: go-test nitrogen-test nitrogen modules
 
-all: build
+all: go-test modules nitrogen nitrogen-test
 
 go-test:
 	go test ./...
@@ -11,7 +11,15 @@ nitrogen-test:
 		nitrogen "$$test"; \
 	done
 
-build-exec:
+nitrogen:
 	go install ./cmd/nitrogen/...
 
-build: go-test build-exec nitrogen-test
+modules:
+	rm -f ./built-modules/*
+	@p="$$(pwd)"; \
+	for m in ./modules/*; do \
+		cd "$$m"; \
+		echo "Building module $$(basename $$m).so"; \
+		go build -buildmode=plugin -o "../../built-modules/$$(basename $$m).so" .; \
+		cd "$$p"; \
+	done
