@@ -53,12 +53,12 @@ func main() {
 		return
 	}
 
-	if len(flag.Args()) == 0 {
-		fmt.Print("No file given")
+	if flag.NArg() == 0 {
+		fmt.Print("No script given")
 		os.Exit(1)
 	}
 
-	l, err := lexer.NewFileList(flag.Args())
+	l, err := lexer.NewFile(flag.Arg(0))
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -77,6 +77,10 @@ func main() {
 
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getEnvironment())
+
+	if flag.NArg() > 1 {
+		env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
+	}
 
 	result := eval.Eval(program, env)
 	if result != nil && result != object.NULL {
@@ -101,6 +105,17 @@ func getEnvironment() *object.Hash {
 		}
 	}
 	return m
+}
+
+func getScriptArgs(filepath string) *object.Array {
+	s := flag.Args()[1:]
+	length := len(s) + 1
+	newElements := make([]object.Object, length, length)
+	newElements[0] = &object.String{Value: filepath}
+	for i, v := range s {
+		newElements[i+1] = &object.String{Value: v}
+	}
+	return &object.Array{Elements: newElements}
 }
 
 func startRepl(in io.Reader, out io.Writer) {

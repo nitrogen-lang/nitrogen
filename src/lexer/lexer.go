@@ -32,6 +32,10 @@ func New(reader io.Reader) *Lexer {
 	return l
 }
 
+func NewFile(file string) (*Lexer, error) {
+	return NewFileList([]string{file})
+}
+
 func NewFileList(files []string) (*Lexer, error) {
 	l := &Lexer{fileList: files}
 	if err := l.loadFile(); err != nil {
