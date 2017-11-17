@@ -22,10 +22,10 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 }
 
 func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Object {
-	scope := object.NewEnclosedEnv(env)
+	outterScope := object.NewEnclosedEnv(env)
 
 	if loop.Init != nil {
-		init := Eval(loop.Init, scope)
+		init := Eval(loop.Init, outterScope)
 		if isError(init) {
 			return init
 		}
@@ -42,7 +42,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 	for {
 		// Check loop condition
 		if loop.Condition != nil {
-			condition := Eval(loop.Condition, scope)
+			condition := Eval(loop.Condition, outterScope)
 			if isError(condition) {
 				return condition
 			}
@@ -52,7 +52,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 		}
 
 		// Execute body
-		body := Eval(loop.Body, scope)
+		body := Eval(loop.Body, object.NewEnclosedEnv(outterScope))
 		if isError(body) {
 			return body
 		}
@@ -72,7 +72,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 
 		// Execute iterator
 		if loop.Iter != nil {
-			iter := Eval(loop.Iter, scope)
+			iter := Eval(loop.Iter, outterScope)
 			if isError(iter) {
 				return iter
 			}
