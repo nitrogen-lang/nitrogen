@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"plugin"
+	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
@@ -74,7 +75,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	result := eval.Eval(program, object.NewEnvironment())
+	env := object.NewEnvironment()
+	env.CreateConst("_ENV", getEnvironment())
+
+	result := eval.Eval(program, env)
 	if result != nil && result != object.NULL {
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.WriteString("\n")
@@ -83,6 +87,20 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func getEnvironment() *object.Hash {
+	env := os.Environ()
+	m := &object.Hash{Pairs: make(map[object.HashKey]object.HashPair)}
+	for _, v := range env {
+		val := strings.SplitN(v, "=", 2)
+		key := &object.String{Value: val[0]}
+		m.Pairs[key.HashKey()] = object.HashPair{
+			Key:   key,
+			Value: &object.String{Value: val[1]},
+		}
+	}
+	return m
 }
 
 func startRepl(in io.Reader, out io.Writer) {
