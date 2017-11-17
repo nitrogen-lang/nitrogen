@@ -8,7 +8,7 @@ func applyFunction(fn object.Object, args []object.Object, env *object.Environme
 	switch fn := fn.(type) {
 	case *object.Function:
 		if len(args) < len(fn.Parameters) {
-			return object.NewError("Not enough parameters to call function %s", fn.Name)
+			return object.NewException("Not enough parameters to call function %s", fn.Name)
 		}
 		extendedEnv := extendFunctionEnv(fn, args)
 		evaled := Eval(fn.Body, extendedEnv)
@@ -17,7 +17,7 @@ func applyFunction(fn object.Object, args []object.Object, env *object.Environme
 		return fn.Fn(env, args...)
 	}
 
-	return object.NewError("%s is not a function", fn.Type())
+	return object.NewException("%s is not a function", fn.Type())
 }
 
 func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {

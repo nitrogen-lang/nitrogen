@@ -12,7 +12,7 @@ func evalIndexExpression(left, index object.Object) object.Object {
 	case left.Type() == object.HASH_OBJ:
 		return evalHashIndexExpression(left, index)
 	}
-	return object.NewError("Index operator not allowed: %s", left.Type())
+	return object.NewException("Index operator not allowed: %s", left.Type())
 }
 
 func evalArrayIndexExpression(array, index object.Object) object.Object {
@@ -41,7 +41,7 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 
 	key, ok := index.(object.Hashable)
 	if !ok {
-		return object.NewError("Invalid map key: %s", index.Type())
+		return object.NewException("Invalid map key: %s", index.Type())
 	}
 
 	pair, ok := hashObj.Pairs[key.HashKey()]
@@ -57,17 +57,17 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 
 	for keyNode, valueNode := range node.Pairs {
 		key := Eval(keyNode, env)
-		if isError(key) {
+		if isException(key) {
 			return key
 		}
 
 		hashKey, ok := key.(object.Hashable)
 		if !ok {
-			return object.NewError("Invalid map key: %s", key.Type())
+			return object.NewException("Invalid map key: %s", key.Type())
 		}
 
 		value := Eval(valueNode, env)
-		if isError(value) {
+		if isException(value) {
 			return value
 		}
 

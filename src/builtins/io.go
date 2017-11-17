@@ -37,13 +37,13 @@ func printEnvBuiltin(env *object.Environment, args ...object.Object) object.Obje
 
 func readLineBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) > 1 {
-		return object.NewError("readline only accepts up to one argument. Got %d", len(args))
+		return object.NewException("readline only accepts up to one argument. Got %d", len(args))
 	}
 
 	if len(args) == 1 {
 		prompt, ok := args[0].(*object.String)
 		if !ok {
-			return object.NewError("readline expects a string for the first arguemnt, got %s", args[0].Type().String())
+			return object.NewException("readline expects a string for the first arguemnt, got %s", args[0].Type().String())
 		}
 		fmt.Print(prompt.Value)
 	}

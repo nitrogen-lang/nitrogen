@@ -16,7 +16,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalBlockStatements(node, env)
 	case *ast.ReturnStatement:
 		val := Eval(node.Value, env)
-		if isError(val) {
+		if isException(val) {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
@@ -39,7 +39,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Float{Value: node.Value}
 	case *ast.Array:
 		elements := evalExpressions(node.Elements, env)
-		if len(elements) == 1 && isError(elements[0]) {
+		if len(elements) == 1 && isException(elements[0]) {
 			return elements[0]
 		}
 		return &object.Array{Elements: elements}
@@ -53,30 +53,30 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIdent(node, env)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
-		if isError(right) {
+		if isException(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
 		right := Eval(node.Right, env)
-		if isError(right) {
+		if isException(right) {
 			return right
 		}
 
 		left := Eval(node.Left, env)
-		if isError(left) {
+		if isException(left) {
 			return left
 		}
 
 		return evalInfixExpression(node.Operator, left, right)
 	case *ast.IndexExpression:
 		left := Eval(node.Left, env)
-		if isError(left) {
+		if isException(left) {
 			return left
 		}
 
 		index := Eval(node.Index, env)
-		if isError(index) {
+		if isException(index) {
 			return index
 		}
 		return evalIndexExpression(left, index)
@@ -103,15 +103,15 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 	case *ast.CallExpression:
 		function := Eval(node.Function, env)
-		if isError(function) {
+		if isException(function) {
 			if ident, ok := node.Function.(*ast.Identifier); ok {
-				return object.NewError("function not found: %s", ident.Value)
+				return object.NewException("function not found: %s", ident.Value)
 			}
 			return function
 		}
 
 		args := evalExpressions(node.Arguments, env)
-		if len(args) == 1 && isError(args[0]) {
+		if len(args) == 1 && isException(args[0]) {
 			return args[0]
 		}
 
@@ -130,7 +130,7 @@ func evalProgram(p *ast.Program, env *object.Environment) object.Object {
 		switch result := result.(type) {
 		case *object.ReturnValue:
 			return result.Value
-		case *object.Error:
+		case *object.Exception:
 			return result
 		}
 	}
@@ -146,7 +146,7 @@ func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) obj
 
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_OBJ || rt == object.ERROR_OBJ || rt == object.LOOP_CONTROL_OBJ {
+			if rt == object.RETURN_OBJ || rt == object.EXCEPTION_OBJ || rt == object.LOOP_CONTROL_OBJ {
 				return result
 			}
 		}
@@ -160,7 +160,7 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 
 	for _, e := range exps {
 		evaled := Eval(e, env)
-		if isError(evaled) {
+		if isException(evaled) {
 			return []object.Object{evaled}
 		}
 		result = append(result, evaled)
@@ -176,5 +176,5 @@ func evalIdent(node *ast.Identifier, env *object.Environment) object.Object {
 	if builtin := getBuiltin(node.Value); builtin != nil {
 		return builtin
 	}
-	return object.NewError("identifier not found: %s", node.Value)
+	return object.NewException("identifier not found: %s", node.Value)
 }

@@ -56,6 +56,6 @@ func convertToBoolean(obj object.Object) (bool, bool) {
 	return isTruthy(obj), isValid
 }
 
-func isError(obj object.Object) bool {
-	return (obj != nil && obj.Type() == object.ERROR_OBJ)
+func isException(obj object.Object) bool {
+	return (obj != nil && obj.Type() == object.EXCEPTION_OBJ)
 }

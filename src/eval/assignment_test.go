@@ -46,7 +46,7 @@ func TestAlwaysStatements(t *testing.T) {
 
 	for _, test := range tests {
 		evaled = testEval(test.input, t)
-		errObj, ok := evaled.(*object.Error)
+		errObj, ok := evaled.(*object.Exception)
 
 		if !ok {
 			t.Fatalf("expected error redeclaring const. got=%T(%+v)", evaled, evaled)
@@ -88,7 +88,7 @@ func TestHashAssignEval(t *testing.T) {
 		case int:
 			testIntegerObject(t, evaluated, int64(i))
 		case string:
-			err, ok := evaluated.(*object.Error)
+			err, ok := evaluated.(*object.Exception)
 			if !ok {
 				t.Fatalf("Expected Error, got %T", evaluated)
 			}

@@ -25,13 +25,14 @@ func init() {
 	eval.RegisterBuiltin("isString", makeIsTypeBuiltin(object.STRING_OBJ))
 	eval.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ARRAY_OBJ))
 	eval.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HASH_OBJ))
-	// The below function is a placeholder for later
-	// eval.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ERROR_OBJ))
+	eval.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ERROR_OBJ))
+
+	eval.RegisterBuiltin("errorVal", getErrorVal)
 }
 
 func toIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 1", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
 
 	switch arg := args[0].(type) {
@@ -41,12 +42,12 @@ func toIntBuiltin(env *object.Environment, args ...object.Object) object.Object 
 		return &object.Integer{Value: int64(arg.Value)}
 	}
 
-	return object.NewError("Argument to `toInt` must be FLOAT or INT, got %s", args[0].Type())
+	return object.NewException("Argument to `toInt` must be FLOAT or INT, got %s", args[0].Type())
 }
 
 func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 1", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
 
 	switch arg := args[0].(type) {
@@ -56,13 +57,13 @@ func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Objec
 		return arg
 	}
 
-	return object.NewError("Argument to `toFloat` must be FLOAT or INT, got %s", args[0].Type())
+	return object.NewException("Argument to `toFloat` must be FLOAT or INT, got %s", args[0].Type())
 }
 
 func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
 	return func(env *object.Environment, args ...object.Object) object.Object {
 		if len(args) != 1 {
-			return object.NewError("Type check requires one argument. Got %d", len(args))
+			return object.NewException("Type check requires one argument. Got %d", len(args))
 		}
 
 		return object.NativeBoolToBooleanObj(args[0].Type() == t)
@@ -73,9 +74,21 @@ func varTypeBuiltin(env *object.Environment, args ...object.Object) object.Objec
 	return &object.String{Value: args[0].Type().String()}
 }
 
+func getErrorVal(env *object.Environment, args ...object.Object) object.Object {
+	if ac := CheckArgs("errorVal", 1, args...); ac != nil {
+		return ac
+	}
+
+	errObj, ok := args[0].(*object.Error)
+	if !ok {
+		return &object.String{Value: ""}
+	}
+	return &object.String{Value: errObj.Message}
+}
+
 func toStringBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("toString expects 1 argument. Got %d", len(args))
+		return object.NewException("toString expects 1 argument. Got %d", len(args))
 	}
 
 	converted := ""
@@ -98,12 +111,12 @@ func toStringBuiltin(env *object.Environment, args ...object.Object) object.Obje
 
 func parseIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("parseInt expects 1 argument. Got %d", len(args))
+		return object.NewException("parseInt expects 1 argument. Got %d", len(args))
 	}
 
 	str, ok := args[0].(*object.String)
 	if !ok {
-		return object.NewError("parseInt expected a string, got %s", args[0].Type().String())
+		return object.NewException("parseInt expected a string, got %s", args[0].Type().String())
 	}
 
 	i, err := strconv.ParseInt(str.Value, 10, 64)
@@ -116,12 +129,12 @@ func parseIntBuiltin(env *object.Environment, args ...object.Object) object.Obje
 
 func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("parseFloat expects 1 argument. Got %d", len(args))
+		return object.NewException("parseFloat expects 1 argument. Got %d", len(args))
 	}
 
 	str, ok := args[0].(*object.String)
 	if !ok {
-		return object.NewError("parseFloat expected a string, got %s", args[0].Type().String())
+		return object.NewException("parseFloat expected a string, got %s", args[0].Type().String())
 	}
 
 	f, err := strconv.ParseFloat(str.Value, 64)
@@ -133,13 +146,13 @@ func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Ob
 }
 
 func isDefinedBuiltin(env *object.Environment, args ...object.Object) object.Object {
-	if ac := checkArgs("isDefined", 1, args...); ac != nil {
+	if ac := CheckArgs("isDefined", 1, args...); ac != nil {
 		return ac
 	}
 
 	ident, ok := args[0].(*object.String)
 	if !ok {
-		return object.NewError("isDefined expects a string, got %s", args[0].Type().String())
+		return object.NewException("isDefined expects a string, got %s", args[0].Type().String())
 	}
 
 	_, ok = env.Get(ident.Value)

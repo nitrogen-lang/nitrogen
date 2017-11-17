@@ -118,7 +118,7 @@ func TestParseIntBuiltin(t *testing.T) {
 		}
 
 		if tt.expected == -1 {
-			if evaled.Type() != object.ERROR_OBJ {
+			if evaled.Type() != object.EXCEPTION_OBJ {
 				t.Fatalf("Expected error, got %#v", evaled)
 			}
 			continue
@@ -158,7 +158,7 @@ func TestParseFloatBuiltin(t *testing.T) {
 		}
 
 		if tt.expected == -1 {
-			if evaled.Type() != object.ERROR_OBJ {
+			if evaled.Type() != object.EXCEPTION_OBJ {
 				t.Fatalf("Expected error, got %#v", evaled)
 			}
 			continue

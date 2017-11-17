@@ -12,7 +12,7 @@ func evalPrefixExpression(op string, right object.Object) object.Object {
 		return evalMinusPreOpExpression(right)
 	}
 
-	return object.NewError("unknown operator: %s%s", op, right.Type())
+	return object.NewException("unknown operator: %s%s", op, right.Type())
 }
 
 func evalBangOpExpression(right object.Object) object.Object {
@@ -37,5 +37,5 @@ func evalMinusPreOpExpression(right object.Object) object.Object {
 		return &object.Float{Value: -value}
 	}
 
-	return object.NewError("unknown operator: -%s", right.Type())
+	return object.NewException("unknown operator: -%s", right.Type())
 }

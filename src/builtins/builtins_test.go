@@ -81,7 +81,7 @@ func showError(obj object.Object) string {
 		return "nil"
 	}
 
-	if obj, ok := obj.(*object.Error); ok {
+	if obj, ok := obj.(*object.Exception); ok {
 		return obj.Inspect()
 	}
 	return obj.Type().String()
@@ -94,7 +94,7 @@ func TestBuiltinsCantBeOverridden(t *testing.T) {
 		t.Fatal("no error object returned")
 	}
 
-	err, ok := evaled.(*object.Error)
+	err, ok := evaled.(*object.Exception)
 	if !ok {
 		t.Fatalf("object is not Error. got=%T (%+v)", evaled, showError(evaled))
 	}
@@ -113,7 +113,7 @@ func testLiteralErrorObjects(t *testing.T, got object.Object, expected interface
 	case bool:
 		testBoolObject(t, got, expected)
 	case string:
-		errObj, ok := got.(*object.Error)
+		errObj, ok := got.(*object.Exception)
 		if !ok {
 			t.Errorf("object is not Error. got=%T (%+v)", got, showError(got))
 			return

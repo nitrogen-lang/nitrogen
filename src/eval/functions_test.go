@@ -67,7 +67,7 @@ func TestExtraArgs(t *testing.T) {
 func TestExtraArgsError(t *testing.T) {
 	input := `func extra(a) { args = 5; } extra(1, 2)`
 	evaled := testEval(input, t)
-	errObj, ok := evaled.(*object.Error)
+	errObj, ok := evaled.(*object.Exception)
 	if !ok {
 		t.Fatalf("Expected error, got %#v", evaled)
 	}

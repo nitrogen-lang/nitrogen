@@ -148,7 +148,7 @@ func TestErrorHandling(t *testing.T) {
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input, t)
-		errObj, ok := evaluated.(*object.Error)
+		errObj, ok := evaluated.(*object.Exception)
 
 		if !ok {
 			t.Errorf("no error object returned. got=%T(%+v)",

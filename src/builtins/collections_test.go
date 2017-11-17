@@ -88,7 +88,7 @@ func TestBuiltinRestFunction(t *testing.T) {
 			continue
 		}
 
-		errObj, ok := got.(*object.Error)
+		errObj, ok := got.(*object.Exception)
 		if !ok {
 			t.Errorf("object is not Error. got=%T (%+v)", got, showError(got))
 			continue
@@ -124,7 +124,7 @@ func TestBuiltinPushFunction(t *testing.T) {
 			continue
 		}
 
-		errObj, ok := got.(*object.Error)
+		errObj, ok := got.(*object.Exception)
 		if !ok {
 			t.Errorf("object is not Error. got=%T (%+v)", got, showError(got))
 			continue
@@ -160,7 +160,7 @@ func TestBuiltinHashMerge(t *testing.T) {
 			continue
 		}
 
-		errObj, ok := got.(*object.Error)
+		errObj, ok := got.(*object.Exception)
 		if !ok {
 			t.Errorf("object is not Error. got=%T (%+v)", got, showError(got))
 			continue

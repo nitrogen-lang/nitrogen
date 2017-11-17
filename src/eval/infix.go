@@ -9,7 +9,7 @@ import (
 func evalInfixExpression(op string, left, right object.Object) object.Object {
 	switch {
 	case left.Type() != right.Type():
-		return object.NewError("type mismatch: %s %s %s", left.Type(), op, right.Type())
+		return object.NewException("type mismatch: %s %s %s", left.Type(), op, right.Type())
 	case object.ObjectsAre(object.INTEGER_OBJ, left, right):
 		return evalIntegerInfixExpression(op, left, right)
 	case object.ObjectsAre(object.FLOAT_OBJ, left, right):
@@ -22,7 +22,7 @@ func evalInfixExpression(op string, left, right object.Object) object.Object {
 		return evalBoolInfixExpression(op, left, right)
 	}
 
-	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalIntegerInfixExpression(op string, left, right object.Object) object.Object {
@@ -54,7 +54,7 @@ func evalIntegerInfixExpression(op string, left, right object.Object) object.Obj
 		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
 	}
 
-	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalFloatInfixExpression(op string, left, right object.Object) object.Object {
@@ -86,7 +86,7 @@ func evalFloatInfixExpression(op string, left, right object.Object) object.Objec
 		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
 	}
 
-	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalStringInfixExpression(op string, left, right object.Object) object.Object {
@@ -102,7 +102,7 @@ func evalStringInfixExpression(op string, left, right object.Object) object.Obje
 		return object.NativeBoolToBooleanObj(leftVal != rightVal)
 	}
 
-	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalArrayInfixExpression(op string, left, right object.Object) object.Object {
@@ -119,7 +119,7 @@ func evalArrayInfixExpression(op string, left, right object.Object) object.Objec
 		return &object.Array{Elements: newElements}
 	}
 
-	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
 func evalBoolInfixExpression(op string, left, right object.Object) object.Object {
@@ -137,5 +137,5 @@ func evalBoolInfixExpression(op string, left, right object.Object) object.Object
 		return object.NativeBoolToBooleanObj(leftVal && rightVal)
 	}
 
-	return object.NewError("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }

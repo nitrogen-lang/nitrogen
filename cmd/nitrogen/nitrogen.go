@@ -64,7 +64,7 @@ func main() {
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.WriteString("\n")
 
-		if _, ok := result.(*object.Error); ok {
+		if _, ok := result.(*object.Exception); ok {
 			os.Exit(1)
 		}
 	}

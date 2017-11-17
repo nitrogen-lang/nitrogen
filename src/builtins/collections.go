@@ -17,7 +17,7 @@ func init() {
 
 func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 1", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
 
 	switch arg := args[0].(type) {
@@ -29,15 +29,15 @@ func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
 		return &object.Integer{Value: 0}
 	}
 
-	return object.NewError("Unsupported type %s", args[0].Type())
+	return object.NewException("Unsupported type %s", args[0].Type())
 }
 
 func firstBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 1", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
 	if args[0].Type() != object.ARRAY_OBJ {
-		return object.NewError("Argument to `first` must be ARRAY, got %s", args[0].Type())
+		return object.NewException("Argument to `first` must be ARRAY, got %s", args[0].Type())
 	}
 
 	arr := args[0].(*object.Array)
@@ -50,10 +50,10 @@ func firstBuiltin(env *object.Environment, args ...object.Object) object.Object 
 
 func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 1", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
 	if args[0].Type() != object.ARRAY_OBJ {
-		return object.NewError("Argument to `last` must be ARRAY, got %s", args[0].Type())
+		return object.NewException("Argument to `last` must be ARRAY, got %s", args[0].Type())
 	}
 
 	arr := args[0].(*object.Array)
@@ -67,10 +67,10 @@ func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
 
 func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 1", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
 	if args[0].Type() != object.ARRAY_OBJ {
-		return object.NewError("Argument to `rest` must be ARRAY, got %s", args[0].Type())
+		return object.NewException("Argument to `rest` must be ARRAY, got %s", args[0].Type())
 	}
 
 	arr := args[0].(*object.Array)
@@ -86,10 +86,10 @@ func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
 
 func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 2 {
-		return object.NewError("Incorrect number of arguments. Got %d, expected 2", len(args))
+		return object.NewException("Incorrect number of arguments. Got %d, expected 2", len(args))
 	}
 	if args[0].Type() != object.ARRAY_OBJ {
-		return object.NewError("Argument to `push` must be ARRAY, got %s", args[0].Type())
+		return object.NewException("Argument to `push` must be ARRAY, got %s", args[0].Type())
 	}
 
 	arr := args[0].(*object.Array)
@@ -103,11 +103,11 @@ func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 
 func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) < 2 {
-		return object.NewError("hashMerge requires at least 2 arguments. Got %d", len(args))
+		return object.NewException("hashMerge requires at least 2 arguments. Got %d", len(args))
 	}
 
 	if !object.ObjectsAre(object.HASH_OBJ, args[:2]...) {
-		return object.NewError("First two arguments must be maps")
+		return object.NewException("First two arguments must be maps")
 	}
 
 	overwrite := true
@@ -135,13 +135,13 @@ func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Obj
 }
 
 func hashKeysBuiltin(env *object.Environment, args ...object.Object) object.Object {
-	if ac := checkArgs("hashKeys", 1, args...); ac != nil {
+	if ac := CheckArgs("hashKeys", 1, args...); ac != nil {
 		return ac
 	}
 
 	hash, ok := args[0].(*object.Hash)
 	if !ok {
-		return object.NewError("hashKeys expects a hash map")
+		return object.NewException("hashKeys expects a hash map")
 	}
 
 	arr := &object.Array{

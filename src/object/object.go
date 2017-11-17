@@ -16,12 +16,14 @@ func (o ObjectType) String() string {
 	return objectTypeNames[o]
 }
 
+// These are all the internal object types used in the interpreter
 const (
 	INTEGER_OBJ ObjectType = iota
 	FLOAT_OBJ
 	BOOLEAN_OBJ
 	NULL_OBJ
 	RETURN_OBJ
+	EXCEPTION_OBJ
 	ERROR_OBJ
 	FUNCTION_OBJ
 	STRING_OBJ
@@ -29,22 +31,26 @@ const (
 	ARRAY_OBJ
 	HASH_OBJ
 	LOOP_CONTROL_OBJ
+	RESOURCE_OBJ
 )
 
 var objectTypeNames = map[ObjectType]string{
-	INTEGER_OBJ:  "INTEGER",
-	FLOAT_OBJ:    "FLOAT",
-	BOOLEAN_OBJ:  "BOOLEAN",
-	NULL_OBJ:     "NULL",
-	RETURN_OBJ:   "RETURN",
-	ERROR_OBJ:    "ERROR",
-	FUNCTION_OBJ: "FUNCTION",
-	STRING_OBJ:   "STRING",
-	BUILTIN_OBJ:  "BUILTIN",
-	ARRAY_OBJ:    "ARRAY",
-	HASH_OBJ:     "MAP",
+	INTEGER_OBJ:   "INTEGER",
+	FLOAT_OBJ:     "FLOAT",
+	BOOLEAN_OBJ:   "BOOLEAN",
+	NULL_OBJ:      "NULL",
+	RETURN_OBJ:    "RETURN",
+	EXCEPTION_OBJ: "EXCEPTION",
+	ERROR_OBJ:     "ERROR",
+	FUNCTION_OBJ:  "FUNCTION",
+	STRING_OBJ:    "STRING",
+	BUILTIN_OBJ:   "BUILTIN",
+	ARRAY_OBJ:     "ARRAY",
+	HASH_OBJ:      "MAP",
+	RESOURCE_OBJ:  "RESOURCE",
 }
 
+// These are all constants in the language that can be represented with a single instance
 var (
 	NULL  = &Null{}
 	TRUE  = &Boolean{Value: true}
@@ -111,11 +117,18 @@ func (r *ReturnValue) Inspect() string  { return r.Value.Inspect() }
 func (r *ReturnValue) Type() ObjectType { return RETURN_OBJ }
 
 // TODO: Expand with line/column numbers and stack trace
+type Exception struct {
+	Message string
+}
+
+func (e *Exception) Inspect() string  { return "EXCEPTION: " + e.Message }
+func (e *Exception) Type() ObjectType { return EXCEPTION_OBJ }
+
 type Error struct {
 	Message string
 }
 
-func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+func (e *Error) Inspect() string  { return "Error: " + e.Message }
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
 
 type Function struct {
@@ -162,7 +175,11 @@ func (a *Array) Inspect() string {
 	elements := []string{}
 
 	for _, e := range a.Elements {
-		elements = append(elements, e.Inspect())
+		if e.Type() == STRING_OBJ {
+			elements = append(elements, fmt.Sprintf(`"%s"`, e.Inspect()))
+		} else {
+			elements = append(elements, e.Inspect())
+		}
 	}
 
 	out.WriteByte('[')
@@ -227,6 +244,10 @@ func (lc *LoopControl) Inspect() string {
 		return "continue"
 	}
 	return "break"
+}
+
+func NewException(format string, a ...interface{}) *Exception {
+	return &Exception{Message: fmt.Sprintf(format, a...)}
 }
 
 func NewError(format string, a ...interface{}) *Error {

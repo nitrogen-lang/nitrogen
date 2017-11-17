@@ -8,7 +8,7 @@ import (
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
 	condition := Eval(ie.Condition, env)
-	if isError(condition) {
+	if isException(condition) {
 		return condition
 	}
 
@@ -26,7 +26,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 
 	if loop.Init != nil {
 		init := Eval(loop.Init, outterScope)
-		if isError(init) {
+		if isException(init) {
 			return init
 		}
 
@@ -43,7 +43,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 		// Check loop condition
 		if loop.Condition != nil {
 			condition := Eval(loop.Condition, outterScope)
-			if isError(condition) {
+			if isException(condition) {
 				return condition
 			}
 			if !isTruthy(condition) {
@@ -53,7 +53,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 
 		// Execute body
 		body := Eval(loop.Body, object.NewEnclosedEnv(outterScope))
-		if isError(body) {
+		if isException(body) {
 			return body
 		}
 
@@ -73,7 +73,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 		// Execute iterator
 		if loop.Iter != nil {
 			iter := Eval(loop.Iter, outterScope)
-			if isError(iter) {
+			if isException(iter) {
 				return iter
 			}
 		}
@@ -83,13 +83,13 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 
 func evalCompareExpression(node *ast.CompareExpression, env *object.Environment) object.Object {
 	left := Eval(node.Left, env)
-	if isError(left) {
+	if isException(left) {
 		return left
 	}
 
 	lBool, valid := convertToBoolean(left)
 	if !valid {
-		return object.NewError("Left side of conditional must be truthy or falsey")
+		return object.NewException("Left side of conditional must be truthy or falsey")
 	}
 
 	// Short circuit if possible
@@ -101,13 +101,13 @@ func evalCompareExpression(node *ast.CompareExpression, env *object.Environment)
 	}
 
 	right := Eval(node.Right, env)
-	if isError(right) {
+	if isException(right) {
 		return right
 	}
 
 	rBool, valid := convertToBoolean(right)
 	if !valid {
-		return object.NewError("Right side of condition must be truthy or falsey")
+		return object.NewException("Right side of condition must be truthy or falsey")
 	}
 
 	return object.NativeBoolToBooleanObj(rBool)

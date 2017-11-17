@@ -12,7 +12,7 @@ func evalAssignment(stmt *ast.AssignStatement, env *object.Environment) object.O
 
 	ident, ok := stmt.Left.(*ast.Identifier)
 	if !ok {
-		return object.NewError("Invalid variable name, expected identifier, got %s",
+		return object.NewException("Invalid variable name, expected identifier, got %s",
 			stmt.Left.String())
 	}
 
@@ -26,7 +26,7 @@ func assignIdentValue(
 	env *object.Environment) object.Object {
 	// Protect builtin functions
 	if builtin := getBuiltin(name.Value); builtin != nil {
-		return object.NewError(
+		return object.NewException(
 			"Attempted redeclaration of builtin function '%s'",
 			name.Value,
 		)
@@ -34,16 +34,16 @@ func assignIdentValue(
 
 	if !new { // Variables must be declared before use
 		if _, exists := env.Get(name.Value); !exists {
-			return object.NewError("Assignment to uninitialized variable %s", name.Value)
+			return object.NewException("Assignment to uninitialized variable %s", name.Value)
 		}
 	}
 
 	if env.IsConst(name.Value) {
-		return object.NewError("Assignment to declared constant %s", name.Value)
+		return object.NewException("Assignment to declared constant %s", name.Value)
 	}
 
 	evaled := Eval(val, env)
-	if isError(evaled) {
+	if isException(evaled) {
 		return evaled
 	}
 
@@ -62,23 +62,23 @@ func assignConstIdentValue(
 	env *object.Environment) object.Object {
 	// Protect builtin functions
 	if builtin := getBuiltin(name.Value); builtin != nil {
-		return object.NewError(
+		return object.NewException(
 			"Attempted redeclaration of builtin function '%s'",
 			name.Value,
 		)
 	}
 
 	if _, exists := env.Get(name.Value); exists { // Constants can't redeclare an existing var
-		return object.NewError("Can't assign constant to variable `%s`", name.Value)
+		return object.NewException("Can't assign constant to variable `%s`", name.Value)
 	}
 
 	evaled := Eval(val, env)
-	if isError(evaled) {
+	if isException(evaled) {
 		return evaled
 	}
 
 	if !object.ObjectIs(evaled, object.INTEGER_OBJ, object.FLOAT_OBJ, object.STRING_OBJ, object.NULL_OBJ, object.BOOLEAN_OBJ) {
-		return object.NewError("Constants must be int, float, string, bool or null")
+		return object.NewException("Constants must be int, float, string, bool or null")
 	}
 
 	// Ignore error since we check above
@@ -91,12 +91,12 @@ func assignIndexedValue(
 	val ast.Expression,
 	env *object.Environment) object.Object {
 	indexed := Eval(e.Left, env)
-	if isError(indexed) {
+	if isException(indexed) {
 		return indexed
 	}
 
 	index := Eval(e.Index, env)
-	if isError(indexed) {
+	if isException(indexed) {
 		return indexed
 	}
 
@@ -117,16 +117,16 @@ func assignArrayIndex(
 
 	in, ok := index.(*object.Integer)
 	if !ok {
-		return object.NewError("Invalid array index type %s", index.(object.Object).Type())
+		return object.NewException("Invalid array index type %s", index.(object.Object).Type())
 	}
 
 	value := Eval(val, env)
-	if isError(value) {
+	if isException(value) {
 		return value
 	}
 
 	if in.Value < 0 || in.Value > int64(len(array.Elements)-1) {
-		return object.NewError("Index out of bounds: %s", index.Inspect())
+		return object.NewException("Index out of bounds: %s", index.Inspect())
 	}
 
 	array.Elements[in.Value] = value
@@ -141,11 +141,11 @@ func assignHashMapIndex(
 
 	hashable, ok := index.(object.Hashable)
 	if !ok {
-		return object.NewError("Invalid index type %s", index.Type())
+		return object.NewException("Invalid index type %s", index.Type())
 	}
 
 	value := Eval(val, env)
-	if isError(value) {
+	if isException(value) {
 		return value
 	}
 

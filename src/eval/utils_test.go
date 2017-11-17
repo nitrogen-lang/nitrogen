@@ -102,7 +102,7 @@ func showError(obj object.Object) string {
 		return "nil"
 	}
 
-	if obj, ok := obj.(*object.Error); ok {
+	if obj, ok := obj.(*object.Exception); ok {
 		return obj.Inspect()
 	}
 	return obj.Type().String()
