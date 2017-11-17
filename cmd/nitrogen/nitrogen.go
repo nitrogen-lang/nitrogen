@@ -34,8 +34,12 @@ func init() {
 func main() {
 	flag.Parse()
 
+	modulesPath := os.Getenv("NITROGEN_MODULES")
 	if modulePath != "" {
-		if err := loadModules(modulePath); err != nil {
+		modulesPath = modulePath
+	}
+	if modulesPath != "" {
+		if err := loadModules(modulesPath); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
