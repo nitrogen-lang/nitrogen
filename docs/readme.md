@@ -4,6 +4,8 @@ Here you will find documentation for the language syntax, as well as the standar
 
 - [Language](language.md)
 - [Standard Library](stdlib)
+- [Optional Modules](modules)
+- [Module Documentation](modules.md)
 
 ## Function Notation
 
