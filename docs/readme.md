@@ -6,6 +6,7 @@ Here you will find documentation for the language syntax, as well as the standar
 - [Standard Library](stdlib)
 - [Optional Modules](modules)
 - [Module Documentation](modules.md)
+- [SCGI Server](scgi-server.md)
 
 ## Function Notation
 
