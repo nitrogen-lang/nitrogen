@@ -18,7 +18,7 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 		return Eval(ie.Alternative, env)
 	}
 
-	return object.NULL
+	return object.NullConst
 }
 
 func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Object {
@@ -59,12 +59,12 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 
 		// Return if necessary
 		rt := body.Type()
-		if rt == object.RETURN_OBJ {
+		if rt == object.ReturnObj {
 			return body
 		}
 
 		// Break if necessary, continue automatically
-		if rt == object.LOOP_CONTROL_OBJ {
+		if rt == object.LoopControlObj {
 			if !body.(*object.LoopControl).Continue {
 				break
 			}
@@ -78,7 +78,7 @@ func evalForLoop(loop *ast.ForLoopStatement, env *object.Environment) object.Obj
 			}
 		}
 	}
-	return object.NULL
+	return object.NullConst
 }
 
 func evalCompareExpression(node *ast.CompareExpression, env *object.Environment) object.Object {
@@ -94,10 +94,10 @@ func evalCompareExpression(node *ast.CompareExpression, env *object.Environment)
 
 	// Short circuit if possible
 	if node.Token.Type == token.LOr && lBool {
-		return object.TRUE
+		return object.TrueConst
 	}
 	if node.Token.Type == token.LAnd && !lBool {
-		return object.FALSE
+		return object.FalseConst
 	}
 
 	right := Eval(node.Right, env)

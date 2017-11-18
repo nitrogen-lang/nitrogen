@@ -18,43 +18,44 @@ func (o ObjectType) String() string {
 
 // These are all the internal object types used in the interpreter
 const (
-	INTEGER_OBJ ObjectType = iota
-	FLOAT_OBJ
-	BOOLEAN_OBJ
-	NULL_OBJ
-	RETURN_OBJ
-	EXCEPTION_OBJ
-	ERROR_OBJ
-	FUNCTION_OBJ
-	STRING_OBJ
-	BUILTIN_OBJ
-	ARRAY_OBJ
-	HASH_OBJ
-	LOOP_CONTROL_OBJ
-	RESOURCE_OBJ
+	IntergerObj ObjectType = iota
+	FloatObj
+	BooleanObj
+	NullObj
+	ReturnObj
+	ExceptionObj
+	ErrorObj
+	FunctionObj
+	StringObj
+	BuiltinObj
+	ArrayObj
+	HashObj
+	LoopControlObj
+	// ResourceObj can be used by modules to denote a generic resource. The implementation may be module specific.
+	ResourceObj
 )
 
 var objectTypeNames = map[ObjectType]string{
-	INTEGER_OBJ:   "INTEGER",
-	FLOAT_OBJ:     "FLOAT",
-	BOOLEAN_OBJ:   "BOOLEAN",
-	NULL_OBJ:      "NULL",
-	RETURN_OBJ:    "RETURN",
-	EXCEPTION_OBJ: "EXCEPTION",
-	ERROR_OBJ:     "ERROR",
-	FUNCTION_OBJ:  "FUNCTION",
-	STRING_OBJ:    "STRING",
-	BUILTIN_OBJ:   "BUILTIN",
-	ARRAY_OBJ:     "ARRAY",
-	HASH_OBJ:      "MAP",
-	RESOURCE_OBJ:  "RESOURCE",
+	IntergerObj:  "INTEGER",
+	FloatObj:     "FLOAT",
+	BooleanObj:   "BOOLEAN",
+	NullObj:      "NULL",
+	ReturnObj:    "RETURN",
+	ExceptionObj: "EXCEPTION",
+	ErrorObj:     "ERROR",
+	FunctionObj:  "FUNCTION",
+	StringObj:    "STRING",
+	BuiltinObj:   "BUILTIN",
+	ArrayObj:     "ARRAY",
+	HashObj:      "MAP",
+	ResourceObj:  "RESOURCE",
 }
 
 // These are all constants in the language that can be represented with a single instance
 var (
-	NULL  = &Null{}
-	TRUE  = &Boolean{Value: true}
-	FALSE = &Boolean{Value: false}
+	NullConst  = &Null{}
+	TrueConst  = &Boolean{Value: true}
+	FalseConst = &Boolean{Value: false}
 )
 
 type BuiltinFunction func(env *Environment, args ...Object) Object
@@ -62,6 +63,7 @@ type BuiltinFunction func(env *Environment, args ...Object) Object
 type Object interface {
 	Type() ObjectType
 	Inspect() string // Returns the value the object represents
+	Dup() Object     // Returns a duplicate of the object
 }
 
 type Integer struct {
@@ -69,21 +71,24 @@ type Integer struct {
 }
 
 func (i *Integer) Inspect() string  { return strconv.FormatInt(i.Value, 10) }
-func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
+func (i *Integer) Type() ObjectType { return IntergerObj }
+func (i *Integer) Dup() Object      { return &Integer{Value: i.Value} }
 
 type Float struct {
 	Value float64
 }
 
 func (f *Float) Inspect() string  { return strconv.FormatFloat(f.Value, 'G', -1, 64) }
-func (f *Float) Type() ObjectType { return FLOAT_OBJ }
+func (f *Float) Type() ObjectType { return FloatObj }
+func (f *Float) Dup() Object      { return &Float{Value: f.Value} }
 
 type String struct {
 	Value string
 }
 
 func (s *String) Inspect() string  { return s.Value }
-func (s *String) Type() ObjectType { return STRING_OBJ }
+func (s *String) Type() ObjectType { return StringObj }
+func (s *String) Dup() Object      { return &String{Value: s.Value} }
 
 type Boolean struct {
 	Value bool
@@ -95,26 +100,34 @@ func (b *Boolean) Inspect() string {
 	}
 	return "false"
 }
-func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
+func (b *Boolean) Type() ObjectType { return BooleanObj }
+func (b *Boolean) Dup() Object {
+	if b.Value {
+		return TrueConst
+	}
+	return FalseConst
+}
 
 func NativeBoolToBooleanObj(input bool) *Boolean {
 	if input {
-		return TRUE
+		return TrueConst
 	}
-	return FALSE
+	return FalseConst
 }
 
 type Null struct{}
 
 func (n *Null) Inspect() string  { return "nil" }
-func (n *Null) Type() ObjectType { return NULL_OBJ }
+func (n *Null) Type() ObjectType { return NullObj }
+func (n *Null) Dup() Object      { return NullConst }
 
 type ReturnValue struct {
 	Value Object
 }
 
 func (r *ReturnValue) Inspect() string  { return r.Value.Inspect() }
-func (r *ReturnValue) Type() ObjectType { return RETURN_OBJ }
+func (r *ReturnValue) Type() ObjectType { return ReturnObj }
+func (r *ReturnValue) Dup() Object      { return &ReturnValue{Value: r.Value.Dup()} }
 
 // TODO: Expand with line/column numbers and stack trace
 type Exception struct {
@@ -122,14 +135,16 @@ type Exception struct {
 }
 
 func (e *Exception) Inspect() string  { return "EXCEPTION: " + e.Message }
-func (e *Exception) Type() ObjectType { return EXCEPTION_OBJ }
+func (e *Exception) Type() ObjectType { return ExceptionObj }
+func (e *Exception) Dup() Object      { return &Exception{Message: e.Message} }
 
 type Error struct {
 	Message string
 }
 
 func (e *Error) Inspect() string  { return "Error: " + e.Message }
-func (e *Error) Type() ObjectType { return ERROR_OBJ }
+func (e *Error) Type() ObjectType { return ErrorObj }
+func (e *Error) Dup() Object      { return &Error{Message: e.Message} }
 
 type Function struct {
 	Name       string
@@ -157,14 +172,16 @@ func (f *Function) Inspect() string {
 
 	return out.String()
 }
-func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
+func (f *Function) Type() ObjectType { return FunctionObj }
+func (f *Function) Dup() Object      { return f }
 
 type Builtin struct {
 	Fn BuiltinFunction
 }
 
 func (b *Builtin) Inspect() string  { return "builtin function" }
-func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+func (b *Builtin) Type() ObjectType { return BuiltinObj }
+func (b *Builtin) Dup() Object      { return b }
 
 type Array struct {
 	Elements []Object
@@ -175,7 +192,7 @@ func (a *Array) Inspect() string {
 	elements := []string{}
 
 	for _, e := range a.Elements {
-		if e.Type() == STRING_OBJ {
+		if e.Type() == StringObj {
 			elements = append(elements, fmt.Sprintf(`"%s"`, e.Inspect()))
 		} else {
 			elements = append(elements, e.Inspect())
@@ -188,7 +205,16 @@ func (a *Array) Inspect() string {
 
 	return out.String()
 }
-func (a *Array) Type() ObjectType { return ARRAY_OBJ }
+func (a *Array) Type() ObjectType { return ArrayObj }
+func (a *Array) Dup() Object {
+	newElements := make([]Object, len(a.Elements))
+
+	for i, element := range a.Elements {
+		newElements[i] = element.Dup()
+	}
+
+	return &Array{Elements: newElements}
+}
 
 type Hashable interface {
 	HashKey() HashKey
@@ -197,6 +223,13 @@ type Hashable interface {
 type HashKey struct {
 	Type  ObjectType
 	Value uint64
+}
+
+func (k HashKey) Dup() HashKey {
+	return HashKey{
+		Type:  k.Type,
+		Value: k.Value,
+	}
 }
 
 func (i *Integer) HashKey() HashKey {
@@ -214,11 +247,18 @@ type HashPair struct {
 	Value Object
 }
 
+func (p HashPair) Dup() HashPair {
+	return HashPair{
+		Key:   p.Key.Dup(),
+		Value: p.Value.Dup(),
+	}
+}
+
 type Hash struct {
 	Pairs map[HashKey]HashPair
 }
 
-func (h *Hash) Type() ObjectType { return HASH_OBJ }
+func (h *Hash) Type() ObjectType { return HashObj }
 func (h *Hash) Inspect() string {
 	var out bytes.Buffer
 
@@ -233,18 +273,28 @@ func (h *Hash) Inspect() string {
 	out.WriteByte('}')
 	return out.String()
 }
+func (h *Hash) Dup() Object {
+	newElements := make(map[HashKey]HashPair, len(h.Pairs))
+
+	for key, pair := range h.Pairs {
+		newElements[key.Dup()] = pair.Dup()
+	}
+
+	return &Hash{Pairs: newElements}
+}
 
 type LoopControl struct {
 	Continue bool
 }
 
-func (lc *LoopControl) Type() ObjectType { return LOOP_CONTROL_OBJ }
+func (lc *LoopControl) Type() ObjectType { return LoopControlObj }
 func (lc *LoopControl) Inspect() string {
 	if lc.Continue {
 		return "continue"
 	}
 	return "break"
 }
+func (lc *LoopControl) Dup() Object { return &LoopControl{Continue: lc.Continue} }
 
 func NewException(format string, a ...interface{}) *Exception {
 	return &Exception{Message: fmt.Sprintf(format, a...)}

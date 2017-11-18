@@ -10,7 +10,7 @@ func TestNullEval(t *testing.T) {
 	input := `nil`
 	evaluated := testEval(input, t)
 
-	if evaluated != object.NULL {
+	if evaluated != object.NullConst {
 		t.Fatalf("object is not Null. got=%T (%+v)", evaluated, showError(evaluated))
 	}
 }

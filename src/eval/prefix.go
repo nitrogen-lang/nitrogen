@@ -16,23 +16,23 @@ func evalPrefixExpression(op string, right object.Object) object.Object {
 }
 
 func evalBangOpExpression(right object.Object) object.Object {
-	if right == object.FALSE || right == object.NULL {
-		return object.TRUE
+	if right == object.FalseConst || right == object.NullConst {
+		return object.TrueConst
 	}
 
-	if right.Type() == object.INTEGER_OBJ && right.(*object.Integer).Value == 0 {
-		return object.TRUE
+	if right.Type() == object.IntergerObj && right.(*object.Integer).Value == 0 {
+		return object.TrueConst
 	}
 
-	return object.FALSE
+	return object.FalseConst
 }
 
 func evalMinusPreOpExpression(right object.Object) object.Object {
 	switch right.Type() {
-	case object.INTEGER_OBJ:
+	case object.IntergerObj:
 		value := right.(*object.Integer).Value
 		return &object.Integer{Value: -value}
-	case object.FLOAT_OBJ:
+	case object.FloatObj:
 		value := right.(*object.Float).Value
 		return &object.Float{Value: -value}
 	}

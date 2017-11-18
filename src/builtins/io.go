@@ -21,18 +21,18 @@ func printBuiltin(env *object.Environment, args ...object.Object) object.Object 
 	for _, arg := range args {
 		fmt.Print(arg.Inspect())
 	}
-	return object.NULL
+	return object.NullConst
 }
 
 func printlnBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	printBuiltin(env, args...)
 	fmt.Print("\n")
-	return object.NULL
+	return object.NullConst
 }
 
 func printEnvBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	env.Print("")
-	return object.NULL
+	return object.NullConst
 }
 
 func readLineBuiltin(env *object.Environment, args ...object.Object) object.Object {

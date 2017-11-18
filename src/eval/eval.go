@@ -32,7 +32,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	// Literals
 	case *ast.NullLiteral:
-		return object.NULL
+		return object.NullConst
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 	case *ast.StringLiteral:
@@ -156,7 +156,7 @@ func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) obj
 
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_OBJ || rt == object.EXCEPTION_OBJ || rt == object.LOOP_CONTROL_OBJ {
+			if rt == object.ReturnObj || rt == object.ExceptionObj || rt == object.LoopControlObj {
 				return result
 			}
 		}

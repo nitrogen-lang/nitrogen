@@ -32,10 +32,10 @@ func evalScript(env *object.Environment, args ...object.Object) object.Object {
 	cleanEnv := object.NewEnvironment()
 
 	envvar, _ := env.Get("_ARGV")
-	cleanEnv.CreateConst("_ARGV", envvar)
+	cleanEnv.CreateConst("_ARGV", envvar.Dup())
 
 	envvar, _ = env.Get("_ENV")
-	cleanEnv.CreateConst("_ENV", envvar)
+	cleanEnv.CreateConst("_ENV", envvar.Dup())
 
 	return commonInclude(false, false, cleanEnv, args...)
 }
@@ -69,7 +69,7 @@ func commonInclude(require bool, save bool, env *object.Environment, args ...obj
 	program, exists := included[includedFile]
 	if exists {
 		if once || program == nil {
-			return object.NULL
+			return object.NullConst
 		}
 		return eval.Eval(program, object.NewEnclosedEnv(env))
 	}

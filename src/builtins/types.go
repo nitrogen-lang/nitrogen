@@ -17,15 +17,15 @@ func init() {
 
 	eval.RegisterBuiltin("varType", varTypeBuiltin)
 	eval.RegisterBuiltin("isDefined", isDefinedBuiltin)
-	eval.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FLOAT_OBJ))
-	eval.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.INTEGER_OBJ))
-	eval.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BOOLEAN_OBJ))
-	eval.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NULL_OBJ))
-	eval.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FUNCTION_OBJ))
-	eval.RegisterBuiltin("isString", makeIsTypeBuiltin(object.STRING_OBJ))
-	eval.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ARRAY_OBJ))
-	eval.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HASH_OBJ))
-	eval.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ERROR_OBJ))
+	eval.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FloatObj))
+	eval.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.IntergerObj))
+	eval.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BooleanObj))
+	eval.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NullObj))
+	eval.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FunctionObj))
+	eval.RegisterBuiltin("isString", makeIsTypeBuiltin(object.StringObj))
+	eval.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
+	eval.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
+	eval.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
 
 	eval.RegisterBuiltin("errorVal", getErrorVal)
 }
@@ -121,7 +121,7 @@ func parseIntBuiltin(env *object.Environment, args ...object.Object) object.Obje
 
 	i, err := strconv.ParseInt(str.Value, 10, 64)
 	if err != nil {
-		return object.NULL
+		return object.NullConst
 	}
 
 	return &object.Integer{Value: i}
@@ -139,7 +139,7 @@ func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Ob
 
 	f, err := strconv.ParseFloat(str.Value, 64)
 	if err != nil {
-		return object.NULL
+		return object.NullConst
 	}
 
 	return &object.Float{Value: f}

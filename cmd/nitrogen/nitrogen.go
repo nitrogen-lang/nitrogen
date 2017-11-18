@@ -81,7 +81,7 @@ func main() {
 	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
 
 	result := eval.Eval(program, env)
-	if result != nil && result != object.NULL {
+	if result != nil && result != object.NullConst {
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.WriteString("\n")
 

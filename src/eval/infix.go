@@ -10,15 +10,15 @@ func evalInfixExpression(op string, left, right object.Object) object.Object {
 	switch {
 	case left.Type() != right.Type():
 		return object.NewException("type mismatch: %s %s %s", left.Type(), op, right.Type())
-	case object.ObjectsAre(object.INTEGER_OBJ, left, right):
+	case object.ObjectsAre(object.IntergerObj, left, right):
 		return evalIntegerInfixExpression(op, left, right)
-	case object.ObjectsAre(object.FLOAT_OBJ, left, right):
+	case object.ObjectsAre(object.FloatObj, left, right):
 		return evalFloatInfixExpression(op, left, right)
-	case object.ObjectsAre(object.STRING_OBJ, left, right):
+	case object.ObjectsAre(object.StringObj, left, right):
 		return evalStringInfixExpression(op, left, right)
-	case object.ObjectsAre(object.ARRAY_OBJ, left, right):
+	case object.ObjectsAre(object.ArrayObj, left, right):
 		return evalArrayInfixExpression(op, left, right)
-	case object.ObjectsAre(object.BOOLEAN_OBJ, left, right):
+	case object.ObjectsAre(object.BooleanObj, left, right):
 		return evalBoolInfixExpression(op, left, right)
 	}
 

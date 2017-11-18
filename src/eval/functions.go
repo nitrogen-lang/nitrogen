@@ -42,7 +42,7 @@ func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Enviro
 	} else {
 		// The idea is for functions to call "len(args)" to check for
 		// anything extra. "len(nil)" returns 0.
-		env.CreateConst("args", object.NULL)
+		env.CreateConst("args", object.NullConst)
 	}
 
 	return env

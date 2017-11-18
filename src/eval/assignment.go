@@ -53,7 +53,7 @@ func assignIdentValue(
 	} else {
 		env.Set(name.Value, evaled)
 	}
-	return object.NULL
+	return object.NullConst
 }
 
 func assignConstIdentValue(
@@ -77,13 +77,13 @@ func assignConstIdentValue(
 		return evaled
 	}
 
-	if !object.ObjectIs(evaled, object.INTEGER_OBJ, object.FLOAT_OBJ, object.STRING_OBJ, object.NULL_OBJ, object.BOOLEAN_OBJ) {
+	if !object.ObjectIs(evaled, object.IntergerObj, object.FloatObj, object.StringObj, object.NullObj, object.BooleanObj) {
 		return object.NewException("Constants must be int, float, string, bool or null")
 	}
 
 	// Ignore error since we check above
 	env.CreateConst(name.Value, evaled)
-	return object.NULL
+	return object.NullConst
 }
 
 func assignIndexedValue(
@@ -101,12 +101,12 @@ func assignIndexedValue(
 	}
 
 	switch indexed.Type() {
-	case object.ARRAY_OBJ:
+	case object.ArrayObj:
 		return assignArrayIndex(indexed.(*object.Array), index, val, env)
-	case object.HASH_OBJ:
+	case object.HashObj:
 		return assignHashMapIndex(indexed.(*object.Hash), index, val, env)
 	}
-	return object.NULL
+	return object.NullConst
 }
 
 func assignArrayIndex(
@@ -130,7 +130,7 @@ func assignArrayIndex(
 	}
 
 	array.Elements[in.Value] = value
-	return object.NULL
+	return object.NullConst
 }
 
 func assignHashMapIndex(
@@ -153,5 +153,5 @@ func assignHashMapIndex(
 		Key:   index,
 		Value: value,
 	}
-	return object.NULL
+	return object.NullConst
 }

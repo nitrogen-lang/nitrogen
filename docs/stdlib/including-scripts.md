@@ -26,7 +26,7 @@ halt if the include fails.
 ## evalScript(path: script): T
 
 This function will execute a script in an isolated environment. The script will have no access to the environment of the
-calling script. `evalScript` will return the value of the called script or an error. The called script retains access to
+calling script. `evalScript` will return the value of the called script or an error. The called script receives a copy of
 `_ENV` and `_ARGV`.
 
 ## Examples

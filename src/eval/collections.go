@@ -7,9 +7,9 @@ import (
 
 func evalIndexExpression(left, index object.Object) object.Object {
 	switch {
-	case left.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+	case left.Type() == object.ArrayObj && index.Type() == object.IntergerObj:
 		return evalArrayIndexExpression(left, index)
-	case left.Type() == object.HASH_OBJ:
+	case left.Type() == object.HashObj:
 		return evalHashIndexExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
@@ -21,7 +21,7 @@ func evalArrayIndexExpression(array, index object.Object) object.Object {
 	max := int64(len(arrObj.Elements))
 
 	if idx > max-1 { // Check upper bound
-		return object.NULL
+		return object.NullConst
 	}
 
 	if idx < 0 { // Check lower bound
@@ -29,7 +29,7 @@ func evalArrayIndexExpression(array, index object.Object) object.Object {
 		idx = max + idx
 
 		if idx < 0 { // Check lower bound again
-			return object.NULL
+			return object.NullConst
 		}
 	}
 
@@ -46,7 +46,7 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 
 	pair, ok := hashObj.Pairs[key.HashKey()]
 	if !ok {
-		return object.NULL
+		return object.NullConst
 	}
 
 	return pair.Value

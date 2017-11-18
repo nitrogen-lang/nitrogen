@@ -36,7 +36,7 @@ func firstBuiltin(env *object.Environment, args ...object.Object) object.Object 
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
-	if args[0].Type() != object.ARRAY_OBJ {
+	if args[0].Type() != object.ArrayObj {
 		return object.NewException("Argument to `first` must be ARRAY, got %s", args[0].Type())
 	}
 
@@ -45,14 +45,14 @@ func firstBuiltin(env *object.Environment, args ...object.Object) object.Object 
 		return arr.Elements[0]
 	}
 
-	return object.NULL
+	return object.NullConst
 }
 
 func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
-	if args[0].Type() != object.ARRAY_OBJ {
+	if args[0].Type() != object.ArrayObj {
 		return object.NewException("Argument to `last` must be ARRAY, got %s", args[0].Type())
 	}
 
@@ -62,14 +62,14 @@ func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
 		return arr.Elements[length-1]
 	}
 
-	return object.NULL
+	return object.NullConst
 }
 
 func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
-	if args[0].Type() != object.ARRAY_OBJ {
+	if args[0].Type() != object.ArrayObj {
 		return object.NewException("Argument to `rest` must be ARRAY, got %s", args[0].Type())
 	}
 
@@ -81,14 +81,14 @@ func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
 		return &object.Array{Elements: newElements}
 	}
 
-	return object.NULL
+	return object.NullConst
 }
 
 func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 2 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 2", len(args))
 	}
-	if args[0].Type() != object.ARRAY_OBJ {
+	if args[0].Type() != object.ArrayObj {
 		return object.NewException("Argument to `push` must be ARRAY, got %s", args[0].Type())
 	}
 
@@ -106,13 +106,13 @@ func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Obj
 		return object.NewException("hashMerge requires at least 2 arguments. Got %d", len(args))
 	}
 
-	if !object.ObjectsAre(object.HASH_OBJ, args[:2]...) {
+	if !object.ObjectsAre(object.HashObj, args[:2]...) {
 		return object.NewException("First two arguments must be maps")
 	}
 
 	overwrite := true
 	if len(args) > 2 {
-		if args[2].Type() == object.BOOLEAN_OBJ {
+		if args[2].Type() == object.BooleanObj {
 			overwrite = args[2].(*object.Boolean).Value
 		}
 	}

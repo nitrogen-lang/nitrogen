@@ -27,7 +27,8 @@ type fileResource struct {
 }
 
 func (f *fileResource) Inspect() string         { return "File resource" }
-func (f *fileResource) Type() object.ObjectType { return object.RESOURCE_OBJ }
+func (f *fileResource) Type() object.ObjectType { return object.ResourceObj }
+func (f *fileResource) Dup() object.Object      { return object.NullConst } // Duplicating a file resource isn't allowed
 
 var modes = map[string]int{
 	"r":  os.O_RDONLY,
@@ -78,7 +79,7 @@ func closeFile(env *object.Environment, args ...object.Object) object.Object {
 
 	file.file.Close()
 
-	return object.NULL
+	return object.NullConst
 }
 
 func writeFile(env *object.Environment, args ...object.Object) object.Object {
@@ -133,14 +134,14 @@ func deleteFile(env *object.Environment, args ...object.Object) object.Object {
 	}
 
 	if !fileExistsCheck(filepath.Value) {
-		return object.NULL
+		return object.NullConst
 	}
 
 	if err := os.Remove(filepath.Value); err != nil {
 		return object.NewException("Error reading file %s", err.Error())
 	}
 
-	return object.NULL
+	return object.NullConst
 }
 
 func fileExists(env *object.Environment, args ...object.Object) object.Object {
@@ -180,5 +181,5 @@ func renameFile(env *object.Environment, args ...object.Object) object.Object {
 		return object.NewError("Error renaming file %s", err.Error())
 	}
 
-	return object.NULL
+	return object.NullConst
 }
