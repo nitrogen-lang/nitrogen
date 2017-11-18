@@ -19,14 +19,14 @@ func init() {
 
 func printBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	for _, arg := range args {
-		fmt.Print(arg.Inspect())
+		fmt.Fprint(eval.Stdout, arg.Inspect())
 	}
 	return object.NullConst
 }
 
 func printlnBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	printBuiltin(env, args...)
-	fmt.Print("\n")
+	fmt.Fprint(eval.Stdout, "\n")
 	return object.NullConst
 }
 
@@ -45,7 +45,7 @@ func readLineBuiltin(env *object.Environment, args ...object.Object) object.Obje
 		if !ok {
 			return object.NewException("readline expects a string for the first arguemnt, got %s", args[0].Type().String())
 		}
-		fmt.Print(prompt.Value)
+		fmt.Fprint(eval.Stdout, prompt.Value)
 	}
 
 	reader := bufio.NewReader(os.Stdin)

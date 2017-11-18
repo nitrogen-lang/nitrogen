@@ -1,9 +1,12 @@
-# Nitrogen Webserver Example
+# Nitrogen CGI Webserver Example
 
 Requirements:
 
 - Docker
 - Docker Compose
+
+This example demonstrates running Nitrogen scripts using CGI. fcgiwrap is used to "conver" FastCGI requests from Nginx
+into CGI requests for the script.
 
 ## Setup
 
@@ -15,7 +18,7 @@ Build Nitrogen using the make file at the root of the project. Simply run `make`
 
 ## Running
 
-While in the `webserver` directory, run `docker-compose up`. This will start two containers. One is for Nginx which exposes
+While in the `webserver-cgi` directory, run `docker-compose up`. This will start two containers. One is for Nginx which exposes
 the server on port 8080. The second is an app container running fcgiwrap. The second container should have the Nitrogen
 binary. The Nginx container doesn't need Nitrogen.
 

@@ -99,7 +99,7 @@ func writeFile(env *object.Environment, args ...object.Object) object.Object {
 
 	written, err := file.file.WriteString(str.Value)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(eval.Stdout, err)
 	}
 
 	return &object.Integer{Value: int64(written)}

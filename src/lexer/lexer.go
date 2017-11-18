@@ -3,7 +3,7 @@ package lexer
 import (
 	"bufio"
 	"bytes"
-	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -55,8 +55,6 @@ func NewString(input string) *Lexer {
 	return New(strings.NewReader(input))
 }
 
-var errFailedLoadingFile = errors.New("Failed to open file")
-
 func (l *Lexer) loadFile() error {
 	if len(l.fileList) == 0 {
 		panic("No more files to load")
@@ -67,7 +65,7 @@ func (l *Lexer) loadFile() error {
 
 	file, err := os.Open(nextFile)
 	if err != nil {
-		return errFailedLoadingFile
+		return fmt.Errorf("Failed to open file %s", nextFile)
 	}
 
 	l.input = bufio.NewReader(file)
@@ -82,7 +80,7 @@ func (l *Lexer) readRune() {
 	if err != nil {
 		if len(l.fileList) > 0 {
 			if err := l.loadFile(); err != nil {
-				panic("Failed opening file")
+				panic(err)
 			}
 			l.readRune()
 			return

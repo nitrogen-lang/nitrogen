@@ -16,17 +16,21 @@ import (
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
 
-const PROMPT = ">> "
+const interactivePrompt = ">> "
 
 var (
 	interactive bool
 	printAst    bool
+	startSCGI   bool
+	scgiSock    string
 	modulePath  string
 )
 
 func init() {
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
+	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
+	flag.StringVar(&scgiSock, "scgi-sock", "tcp:0.0.0.0:9000", "Socket to listen on for SCGI")
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
 }
 
@@ -44,6 +48,11 @@ func main() {
 		}
 	}
 
+	if startSCGI {
+		startSCGIServer()
+		return
+	}
+
 	if interactive {
 		fmt.Print("Nitrogen Programming Language\n")
 		fmt.Print("Type in commands at the prompt\n")
@@ -56,15 +65,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	l, err := lexer.NewFile(flag.Arg(0))
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	p := parser.New(l)
-	program := p.ParseProgram()
-	if len(p.Errors()) != 0 {
-		printParserErrors(os.Stdout, p.Errors())
+	program, parseErrors := parseFile(flag.Arg(0))
+	if len(parseErrors) != 0 {
+		printParserErrors(os.Stdout, parseErrors)
 		os.Exit(1)
 	}
 
@@ -90,14 +93,26 @@ func main() {
 }
 
 func getEnvironment() *object.Hash {
+	return makeEnvironment(getEnvironmentMap())
+}
+
+func getEnvironmentMap() map[string]string {
 	env := os.Environ()
-	m := &object.Hash{Pairs: make(map[object.HashKey]object.HashPair)}
+	m := make(map[string]string, len(env))
 	for _, v := range env {
 		val := strings.SplitN(v, "=", 2)
-		key := &object.String{Value: val[0]}
+		m[val[0]] = val[1]
+	}
+	return m
+}
+
+func makeEnvironment(env map[string]string) *object.Hash {
+	m := &object.Hash{Pairs: make(map[object.HashKey]object.HashPair)}
+	for k, v := range env {
+		key := &object.String{Value: k}
 		m.Pairs[key.HashKey()] = object.HashPair{
 			Key:   key,
-			Value: &object.String{Value: val[1]},
+			Value: &object.String{Value: v},
 		}
 	}
 	return m
@@ -119,7 +134,7 @@ func startRepl(in io.Reader, out io.Writer) {
 	env := object.NewEnvironment()
 
 	for {
-		fmt.Fprint(out, PROMPT)
+		fmt.Fprint(out, interactivePrompt)
 		scanned := scanner.Scan()
 		if !scanned {
 			return

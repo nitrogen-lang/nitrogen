@@ -1,0 +1,19 @@
+version: '3'
+services:
+    web:
+        image: nginx:alpine
+        container_name: web
+        depends_on:
+            - app
+        ports:
+            - "8081:80"
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+    app:
+        image: debian:latest
+        container_name: app
+        entrypoint: ["/usr/local/bin/nitrogen", "-scgi"]
+        volumes:
+            - ./app:/app
+            - ../../bin/nitrogen:/usr/local/bin/nitrogen

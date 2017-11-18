@@ -1,11 +1,26 @@
 package eval
 
 import (
+	"io"
+	"os"
+
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-var scriptNameStack = newStringStack()
+var (
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
+
+	scriptNameStack = newStringStack()
+)
+
+func init() {
+	Stdin = os.Stdin
+	Stdout = os.Stdout
+	Stderr = os.Stderr
+}
 
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
