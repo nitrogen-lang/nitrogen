@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -19,11 +20,13 @@ import (
 const interactivePrompt = ">> "
 
 var (
-	interactive bool
-	printAst    bool
-	startSCGI   bool
-	scgiSock    string
-	modulePath  string
+	interactive       bool
+	printAst          bool
+	startSCGI         bool
+	scgiSock          string
+	scgiWorkers       int
+	scgiWorkerTimeout int
+	modulePath        string
 )
 
 func init() {
@@ -31,6 +34,8 @@ func init() {
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.StringVar(&scgiSock, "scgi-sock", "tcp:0.0.0.0:9000", "Socket to listen on for SCGI")
+	flag.IntVar(&scgiWorkers, "scgi-workers", 5, "Number of workers to service SCGI requests")
+	flag.IntVar(&scgiWorkerTimeout, "scgi-worker-timeout", 10, "Number of seconds to wait for an available worker before giving up")
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
 }
 
@@ -168,4 +173,14 @@ func printParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		fmt.Fprintf(out, "ERROR: %s\n", msg)
 	}
+}
+
+func parseFile(pathname string) (*ast.Program, []string) {
+	l, err := lexer.NewFile(pathname)
+	if err != nil {
+		return nil, []string{err.Error()}
+	}
+	p := parser.New(l)
+	program := p.ParseProgram()
+	return program, p.Errors()
 }

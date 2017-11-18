@@ -11,12 +11,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
-	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
-	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
 func startSCGIServer() {
@@ -39,92 +37,36 @@ func startSCGIServer() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("Creating %d workers\n", scgiWorkers)
+	workerPool := make(chan *worker, scgiWorkers)
+	for i := 0; i < scgiWorkers; i++ {
+		workerPool <- &worker{id: i, workerPool: workerPool}
+	}
+
 	fmt.Printf("SCGI listening on %s\n", scgiSock)
 
+	workerTimeout := time.Duration(scgiWorkerTimeout) * time.Second
+	workerTimeoutTimer := time.NewTimer(workerTimeout)
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			os.Stderr.WriteString(err.Error())
 			os.Exit(1)
 		}
-		handleSCGIRequest(conn)
-	}
-}
 
-func handleSCGIRequest(conn net.Conn) {
-	defer conn.Close()
+		if !workerTimeoutTimer.Stop() { // Consume any time already in channel. See time.Timer docs.
+			<-workerTimeoutTimer.C
+		}
+		workerTimeoutTimer.Reset(workerTimeout)
 
-	headerBytes, err := getNetString(conn)
-	if err != nil {
-		os.Stderr.WriteString(err.Error())
-		os.Stderr.Write([]byte{'\n'})
-		return
-	}
-
-	values := bytes.Split(headerBytes, []byte{0})
-	headers := make(map[string]string, len(values)/2)
-
-	for i := 0; i < len(values)-1; i = i + 2 {
-		headers[string(values[i])] = string(values[i+1])
-	}
-
-	contentLength, _ := strconv.Atoi(headers["CONTENT_LENGTH"])
-	body := make([]byte, contentLength)
-	n, err := conn.Read(body)
-	if n != contentLength {
-		os.Stderr.WriteString("Body length and Content-Length don't match\n")
-		return
-	}
-	if err != nil {
-		os.Stderr.WriteString(err.Error())
-		os.Stderr.Write([]byte{'\n'})
-		return
-	}
-
-	if headers["SCGI"] != "1" {
-		os.Stderr.WriteString("Invalid SCGI header\n")
-	}
-
-	appEnv := getEnvironmentMap()
-	for k, v := range headers {
-		appEnv[k] = v
-	}
-
-	env := object.NewEnvironment()
-	env.CreateConst("_ENV", makeEnvironment(appEnv))
-
-	scriptFilename := headers["SCRIPT_FILENAME"]
-	if scriptFilename == "" {
-		scriptName := headers["SCRIPT_NAME"]
-		docRoot := headers["DOCUMENT_ROOT"]
-		scriptFilename = filepath.Join(docRoot, scriptName)
-	}
-
-	program, parseErrors := parseFile(scriptFilename)
-	if len(parseErrors) != 0 {
-		printParserErrors(os.Stderr, parseErrors[:1])
-		return
-	}
-
-	interpreter := eval.NewInterpreter()
-	interpreter.Stdout = conn
-	result := interpreter.Eval(program, env)
-	if result != nil && result != object.NullConst {
-		if e, ok := result.(*object.Exception); ok {
-			os.Stderr.WriteString(e.Message)
-			os.Stderr.Write([]byte{'\n'})
+		select {
+		case w := <-workerPool:
+			go w.run(conn)
+		case <-workerTimeoutTimer.C:
+			os.Stderr.WriteString("Not enough workers\n")
+			conn.Close()
 		}
 	}
-}
-
-func parseFile(pathname string) (*ast.Program, []string) {
-	l, err := lexer.NewFile(pathname)
-	if err != nil {
-		return nil, []string{err.Error()}
-	}
-	p := parser.New(l)
-	program := p.ParseProgram()
-	return program, p.Errors()
 }
 
 func getNetString(r io.Reader) ([]byte, error) {
@@ -150,4 +92,88 @@ func getNetString(r io.Reader) ([]byte, error) {
 	}
 
 	return netstring, nil
+}
+
+type worker struct {
+	id         int
+	workerPool chan *worker
+}
+
+func (w *worker) run(conn net.Conn) {
+	defer func() {
+		conn.Close()
+		w.workerPool <- w
+	}()
+
+	// Get Headers
+	headerBytes, err := getNetString(conn)
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		os.Stderr.Write([]byte{'\n'})
+		return
+	}
+
+	values := bytes.Split(headerBytes, []byte{0})
+	headers := make(map[string]string, len(values)/2)
+
+	// Convert headers into a map
+	for i := 0; i < len(values)-1; i += 2 {
+		headers[string(values[i])] = string(values[i+1])
+	}
+
+	// Read body
+	contentLength, _ := strconv.Atoi(headers["CONTENT_LENGTH"])
+	body := make([]byte, contentLength)
+	n, err := conn.Read(body)
+	if n != contentLength {
+		os.Stderr.WriteString("Body length and Content-Length don't match\n")
+		return
+	}
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		os.Stderr.Write([]byte{'\n'})
+		return
+	}
+
+	// Check valid SCGI request
+	if headers["SCGI"] != "1" {
+		os.Stderr.WriteString("Invalid SCGI header\n")
+	}
+
+	// Get interpreter environment and merge with headers. Header values take precedence
+	appEnv := getEnvironmentMap()
+	for k, v := range headers {
+		appEnv[k] = v
+	}
+
+	// Inject environment variables into execution environment
+	env := object.NewEnvironment()
+	env.CreateConst("_ENV", makeEnvironment(appEnv))
+
+	// Get script file path
+	scriptFilename := headers["SCRIPT_FILENAME"]
+	if scriptFilename == "" {
+		scriptName := headers["SCRIPT_NAME"]
+		docRoot := headers["DOCUMENT_ROOT"]
+		scriptFilename = filepath.Join(docRoot, scriptName)
+	}
+
+	// Parse script
+	program, parseErrors := parseFile(scriptFilename)
+	if len(parseErrors) != 0 {
+		printParserErrors(os.Stderr, parseErrors[:1])
+		return
+	}
+
+	// Execute script
+	interpreter := eval.NewInterpreter()
+	interpreter.Stdout = conn
+
+	result := interpreter.Eval(program, env)
+	if result != nil && result != object.NullConst {
+		if e, ok := result.(*object.Exception); ok {
+			os.Stderr.WriteString(e.Message)
+			os.Stderr.Write([]byte{'\n'})
+		}
+	}
 }
