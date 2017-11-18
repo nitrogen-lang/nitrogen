@@ -20,6 +20,10 @@ Returns a new array with elements from in starting at index 1 to the end.
 
 Returns a new array with all elements of arr plus the element val added to the end.
 
+## sort(arr: array): array
+
+Returns a sorted version of the input array. Array elements must be strings.
+
 ## hashMerge(map1, map2: map[, overwrite: bool]): map
 
 Returns a new map with the key-value pairs of map1 combined with those of map2. Map1 acts as the base

@@ -1,6 +1,8 @@
 package builtins
 
 import (
+	"sort"
+
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
@@ -11,6 +13,7 @@ func init() {
 	eval.RegisterBuiltin("last", lastBuiltin)
 	eval.RegisterBuiltin("rest", restBuiltin)
 	eval.RegisterBuiltin("push", pushBuiltin)
+	eval.RegisterBuiltin("sort", sortArrayBuiltin)
 	eval.RegisterBuiltin("hashMerge", hashMergeBuiltin)
 	eval.RegisterBuiltin("hashKeys", hashKeysBuiltin)
 }
@@ -99,6 +102,34 @@ func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	newElements[length] = args[1]
 
 	return &object.Array{Elements: newElements}
+}
+
+func sortArrayBuiltin(env *object.Environment, args ...object.Object) object.Object {
+	if ac := CheckMinArgs("sort", 1, args...); ac != nil {
+		return ac
+	}
+
+	arr, ok := args[0].(*object.Array)
+	if !ok {
+		return object.NewException("Argument to `sort` must be ARRAY, got %s", args[0].Type())
+	}
+
+	sorter := &arraySorter{arr.Dup().(*object.Array)}
+	sort.Sort(sorter)
+
+	return sorter.a
+}
+
+type arraySorter struct {
+	a *object.Array
+}
+
+func (s *arraySorter) Len() int { return len(s.a.Elements) }
+func (s *arraySorter) Less(i, j int) bool {
+	return s.a.Elements[i].(*object.String).Value < s.a.Elements[j].(*object.String).Value
+}
+func (s *arraySorter) Swap(i, j int) {
+	s.a.Elements[i], s.a.Elements[j] = s.a.Elements[j], s.a.Elements[i]
 }
 
 func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Object {
