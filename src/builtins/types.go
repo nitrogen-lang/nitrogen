@@ -30,7 +30,7 @@ func init() {
 	eval.RegisterBuiltin("errorVal", getErrorVal)
 }
 
-func toIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -45,7 +45,7 @@ func toIntBuiltin(env *object.Environment, args ...object.Object) object.Object 
 	return object.NewException("Argument to `toInt` must be FLOAT or INT, got %s", args[0].Type())
 }
 
-func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func toFloatBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -61,7 +61,7 @@ func toFloatBuiltin(env *object.Environment, args ...object.Object) object.Objec
 }
 
 func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
-	return func(env *object.Environment, args ...object.Object) object.Object {
+	return func(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 		if len(args) != 1 {
 			return object.NewException("Type check requires one argument. Got %d", len(args))
 		}
@@ -70,11 +70,11 @@ func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
 	}
 }
 
-func varTypeBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func varTypeBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	return &object.String{Value: args[0].Type().String()}
 }
 
-func getErrorVal(env *object.Environment, args ...object.Object) object.Object {
+func getErrorVal(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := CheckArgs("errorVal", 1, args...); ac != nil {
 		return ac
 	}
@@ -86,7 +86,7 @@ func getErrorVal(env *object.Environment, args ...object.Object) object.Object {
 	return &object.String{Value: errObj.Message}
 }
 
-func toStringBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("toString expects 1 argument. Got %d", len(args))
 	}
@@ -109,7 +109,7 @@ func toStringBuiltin(env *object.Environment, args ...object.Object) object.Obje
 	return &object.String{Value: converted}
 }
 
-func parseIntBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func parseIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("parseInt expects 1 argument. Got %d", len(args))
 	}
@@ -127,7 +127,7 @@ func parseIntBuiltin(env *object.Environment, args ...object.Object) object.Obje
 	return &object.Integer{Value: i}
 }
 
-func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func parseFloatBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("parseFloat expects 1 argument. Got %d", len(args))
 	}
@@ -145,7 +145,7 @@ func parseFloatBuiltin(env *object.Environment, args ...object.Object) object.Ob
 	return &object.Float{Value: f}
 }
 
-func isDefinedBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func isDefinedBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := CheckArgs("isDefined", 1, args...); ac != nil {
 		return ac
 	}

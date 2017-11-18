@@ -17,25 +17,25 @@ func init() {
 	eval.RegisterBuiltin("readline", readLineBuiltin)
 }
 
-func printBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	for _, arg := range args {
-		fmt.Fprint(eval.Stdout, arg.Inspect())
+		fmt.Fprint(interpreter.GetStdout(), arg.Inspect())
 	}
 	return object.NullConst
 }
 
-func printlnBuiltin(env *object.Environment, args ...object.Object) object.Object {
-	printBuiltin(env, args...)
-	fmt.Fprint(eval.Stdout, "\n")
+func printlnBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	printBuiltin(interpreter, env, args...)
+	fmt.Fprint(interpreter.GetStdout(), "\n")
 	return object.NullConst
 }
 
-func printEnvBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func printEnvBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	env.Print("")
 	return object.NullConst
 }
 
-func readLineBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func readLineBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) > 1 {
 		return object.NewException("readline only accepts up to one argument. Got %d", len(args))
 	}
@@ -45,7 +45,7 @@ func readLineBuiltin(env *object.Environment, args ...object.Object) object.Obje
 		if !ok {
 			return object.NewException("readline expects a string for the first arguemnt, got %s", args[0].Type().String())
 		}
-		fmt.Fprint(eval.Stdout, prompt.Value)
+		fmt.Fprint(interpreter.GetStdout(), prompt.Value)
 	}
 
 	reader := bufio.NewReader(os.Stdin)

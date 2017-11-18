@@ -81,7 +81,8 @@ func main() {
 
 	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
 
-	result := eval.Eval(program, env)
+	interpreter := eval.NewInterpreter()
+	result := interpreter.Eval(program, env)
 	if result != nil && result != object.NullConst {
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.WriteString("\n")
@@ -133,6 +134,7 @@ func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
 
+	interpreter := eval.NewInterpreter()
 	for {
 		fmt.Fprint(out, interactivePrompt)
 		scanned := scanner.Scan()
@@ -154,7 +156,7 @@ func startRepl(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		result := eval.Eval(program, env)
+		result := interpreter.Eval(program, env)
 		if result != nil {
 			io.WriteString(out, result.Inspect())
 			io.WriteString(out, "\n")

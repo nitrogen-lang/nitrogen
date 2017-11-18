@@ -8,42 +8,45 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-var (
+type Interpreter struct {
 	Stdin  io.Reader
 	Stdout io.Writer
 	Stderr io.Writer
 
-	scriptNameStack = newStringStack()
-)
-
-func init() {
-	Stdin = os.Stdin
-	Stdout = os.Stdout
-	Stderr = os.Stderr
+	scriptNameStack *stringStack
 }
 
-func Eval(node ast.Node, env *object.Environment) object.Object {
+func NewInterpreter() *Interpreter {
+	return &Interpreter{
+		Stdin:           os.Stdin,
+		Stdout:          os.Stdout,
+		Stderr:          os.Stderr,
+		scriptNameStack: newStringStack(),
+	}
+}
+
+func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	// Statements
 	case *ast.Program:
-		return evalProgram(node, env)
+		return i.evalProgram(node, env)
 	case *ast.ExpressionStatement:
-		return Eval(node.Expression, env)
+		return i.Eval(node.Expression, env)
 	case *ast.BlockStatement:
-		return evalBlockStatements(node, env)
+		return i.evalBlockStatements(node, env)
 	case *ast.ReturnStatement:
-		val := Eval(node.Value, env)
+		val := i.Eval(node.Value, env)
 		if isException(val) {
 			return val
 		}
 		return &object.ReturnValue{Value: val}
 	case *ast.DefStatement:
 		if node.Const {
-			return assignConstIdentValue(node.Name, node.Value, env)
+			return i.assignConstIdentValue(node.Name, node.Value, env)
 		}
-		return assignIdentValue(node.Name, node.Value, true, env)
+		return i.assignIdentValue(node.Name, node.Value, true, env)
 	case *ast.AssignStatement:
-		return evalAssignment(node, env)
+		return i.evalAssignment(node, env)
 
 	// Literals
 	case *ast.NullLiteral:
@@ -55,7 +58,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.FloatLiteral:
 		return &object.Float{Value: node.Value}
 	case *ast.Array:
-		elements := evalExpressions(node.Elements, env)
+		elements := i.evalExpressions(node.Elements, env)
 		if len(elements) == 1 && isException(elements[0]) {
 			return elements[0]
 		}
@@ -63,48 +66,48 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.Boolean:
 		return object.NativeBoolToBooleanObj(node.Value)
 	case *ast.HashLiteral:
-		return evalHashLiteral(node, env)
+		return i.evalHashLiteral(node, env)
 
 	// Expressions
 	case *ast.Identifier:
-		return evalIdent(node, env)
+		return i.evalIdent(node, env)
 	case *ast.PrefixExpression:
-		right := Eval(node.Right, env)
+		right := i.Eval(node.Right, env)
 		if isException(right) {
 			return right
 		}
-		return evalPrefixExpression(node.Operator, right)
+		return i.evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
-		right := Eval(node.Right, env)
+		right := i.Eval(node.Right, env)
 		if isException(right) {
 			return right
 		}
 
-		left := Eval(node.Left, env)
+		left := i.Eval(node.Left, env)
 		if isException(left) {
 			return left
 		}
 
-		return evalInfixExpression(node.Operator, left, right)
+		return i.evalInfixExpression(node.Operator, left, right)
 	case *ast.IndexExpression:
-		left := Eval(node.Left, env)
+		left := i.Eval(node.Left, env)
 		if isException(left) {
 			return left
 		}
 
-		index := Eval(node.Index, env)
+		index := i.Eval(node.Index, env)
 		if isException(index) {
 			return index
 		}
-		return evalIndexExpression(left, index)
+		return i.evalIndexExpression(left, index)
 
 	// Conditionals
 	case *ast.IfExpression:
-		return evalIfExpression(node, env)
+		return i.evalIfExpression(node, env)
 	case *ast.CompareExpression:
-		return evalCompareExpression(node, env)
+		return i.evalCompareExpression(node, env)
 	case *ast.ForLoopStatement:
-		return evalForLoop(node, env)
+		return i.evalForLoop(node, env)
 	case *ast.ContinueStatement:
 		return &object.LoopControl{Continue: true}
 	case *ast.BreakStatement:
@@ -119,7 +122,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			Env:        env,
 		}
 	case *ast.CallExpression:
-		function := Eval(node.Function, env)
+		function := i.Eval(node.Function, env)
 		if isException(function) {
 			if ident, ok := node.Function.(*ast.Identifier); ok {
 				return object.NewException("function not found: %s", ident.Value)
@@ -127,30 +130,40 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return function
 		}
 
-		args := evalExpressions(node.Arguments, env)
+		args := i.evalExpressions(node.Arguments, env)
 		if len(args) == 1 && isException(args[0]) {
 			return args[0]
 		}
 
-		return applyFunction(function, args, env)
+		return i.applyFunction(function, args, env)
 	}
 
 	return nil
 }
 
 // GetCurrentScriptPath returns the filepath of the current executing script
-func GetCurrentScriptPath() string {
-	return scriptNameStack.getFront()
+func (i *Interpreter) GetCurrentScriptPath() string {
+	return i.scriptNameStack.getFront()
 }
 
-func evalProgram(p *ast.Program, env *object.Environment) object.Object {
+func (i *Interpreter) GetStdout() io.Writer {
+	return i.Stdout
+}
+func (i *Interpreter) GetStderr() io.Writer {
+	return i.Stderr
+}
+func (i *Interpreter) GetStdin() io.Reader {
+	return i.Stdin
+}
+
+func (i *Interpreter) evalProgram(p *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
-	scriptNameStack.push(p.Filename)
-	defer scriptNameStack.pop()
+	i.scriptNameStack.push(p.Filename)
+	defer i.scriptNameStack.pop()
 	env.CreateConst("_FILE", &object.String{Value: p.Filename})
 
 	for _, statement := range p.Statements {
-		result = Eval(statement, env)
+		result = i.Eval(statement, env)
 
 		switch result := result.(type) {
 		case *object.ReturnValue:
@@ -163,11 +176,11 @@ func evalProgram(p *ast.Program, env *object.Environment) object.Object {
 	return result
 }
 
-func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object {
+func (i *Interpreter) evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
 
 	for _, statement := range block.Statements {
-		result = Eval(statement, env)
+		result = i.Eval(statement, env)
 
 		if result != nil {
 			rt := result.Type()
@@ -180,11 +193,11 @@ func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) obj
 	return result
 }
 
-func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object {
+func (i *Interpreter) evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object {
 	var result []object.Object
 
 	for _, e := range exps {
-		evaled := Eval(e, env)
+		evaled := i.Eval(e, env)
 		if isException(evaled) {
 			return []object.Object{evaled}
 		}
@@ -194,7 +207,7 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 	return result
 }
 
-func evalIdent(node *ast.Identifier, env *object.Environment) object.Object {
+func (i *Interpreter) evalIdent(node *ast.Identifier, env *object.Environment) object.Object {
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}

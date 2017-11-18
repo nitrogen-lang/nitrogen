@@ -6,26 +6,26 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-func evalInfixExpression(op string, left, right object.Object) object.Object {
+func (i *Interpreter) evalInfixExpression(op string, left, right object.Object) object.Object {
 	switch {
 	case left.Type() != right.Type():
 		return object.NewException("type mismatch: %s %s %s", left.Type(), op, right.Type())
 	case object.ObjectsAre(object.IntergerObj, left, right):
-		return evalIntegerInfixExpression(op, left, right)
+		return i.evalIntegerInfixExpression(op, left, right)
 	case object.ObjectsAre(object.FloatObj, left, right):
-		return evalFloatInfixExpression(op, left, right)
+		return i.evalFloatInfixExpression(op, left, right)
 	case object.ObjectsAre(object.StringObj, left, right):
-		return evalStringInfixExpression(op, left, right)
+		return i.evalStringInfixExpression(op, left, right)
 	case object.ObjectsAre(object.ArrayObj, left, right):
-		return evalArrayInfixExpression(op, left, right)
+		return i.evalArrayInfixExpression(op, left, right)
 	case object.ObjectsAre(object.BooleanObj, left, right):
-		return evalBoolInfixExpression(op, left, right)
+		return i.evalBoolInfixExpression(op, left, right)
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
-func evalIntegerInfixExpression(op string, left, right object.Object) object.Object {
+func (i *Interpreter) evalIntegerInfixExpression(op string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 
@@ -57,7 +57,7 @@ func evalIntegerInfixExpression(op string, left, right object.Object) object.Obj
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
-func evalFloatInfixExpression(op string, left, right object.Object) object.Object {
+func (i *Interpreter) evalFloatInfixExpression(op string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Float).Value
 	rightVal := right.(*object.Float).Value
 
@@ -89,7 +89,7 @@ func evalFloatInfixExpression(op string, left, right object.Object) object.Objec
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
-func evalStringInfixExpression(op string, left, right object.Object) object.Object {
+func (i *Interpreter) evalStringInfixExpression(op string, left, right object.Object) object.Object {
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
 
@@ -105,7 +105,7 @@ func evalStringInfixExpression(op string, left, right object.Object) object.Obje
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
-func evalArrayInfixExpression(op string, left, right object.Object) object.Object {
+func (i *Interpreter) evalArrayInfixExpression(op string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Array)
 	rightVal := right.(*object.Array)
 
@@ -122,7 +122,7 @@ func evalArrayInfixExpression(op string, left, right object.Object) object.Objec
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
-func evalBoolInfixExpression(op string, left, right object.Object) object.Object {
+func (i *Interpreter) evalBoolInfixExpression(op string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Boolean).Value
 	rightVal := right.(*object.Boolean).Value
 

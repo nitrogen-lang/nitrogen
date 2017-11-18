@@ -9,13 +9,15 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
+var testInterpreter = eval.NewInterpreter()
+
 func testEval(input string) object.Object {
 	l := lexer.NewString(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
 
-	return eval.Eval(program, env)
+	return testInterpreter.Eval(program, env)
 }
 
 // Verification functions

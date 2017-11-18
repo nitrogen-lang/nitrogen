@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"hash/fnv"
+	"io"
 	"strconv"
 	"strings"
 
@@ -58,7 +59,15 @@ var (
 	FalseConst = &Boolean{Value: false}
 )
 
-type BuiltinFunction func(env *Environment, args ...Object) Object
+type Interpreter interface {
+	Eval(node ast.Node, env *Environment) Object
+	GetCurrentScriptPath() string
+	GetStdout() io.Writer
+	GetStderr() io.Writer
+	GetStdin() io.Reader
+}
+
+type BuiltinFunction func(i Interpreter, env *Environment, args ...Object) Object
 
 type Object interface {
 	Type() ObjectType

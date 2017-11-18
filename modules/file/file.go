@@ -39,7 +39,7 @@ var modes = map[string]int{
 	"a+": os.O_APPEND | os.O_RDWR | os.O_CREATE,
 }
 
-func openFile(env *object.Environment, args ...object.Object) object.Object {
+func openFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("openFile", 2, args...); ac != nil {
 		return ac
 	}
@@ -67,7 +67,7 @@ func openFile(env *object.Environment, args ...object.Object) object.Object {
 	return &fileResource{file}
 }
 
-func closeFile(env *object.Environment, args ...object.Object) object.Object {
+func closeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("closeFile", 1, args...); ac != nil {
 		return ac
 	}
@@ -82,7 +82,7 @@ func closeFile(env *object.Environment, args ...object.Object) object.Object {
 	return object.NullConst
 }
 
-func writeFile(env *object.Environment, args ...object.Object) object.Object {
+func writeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("writeFile", 2, args...); ac != nil {
 		return ac
 	}
@@ -99,13 +99,13 @@ func writeFile(env *object.Environment, args ...object.Object) object.Object {
 
 	written, err := file.file.WriteString(str.Value)
 	if err != nil {
-		fmt.Fprintln(eval.Stdout, err)
+		fmt.Fprintln(interpreter.GetStderr(), err)
 	}
 
 	return &object.Integer{Value: int64(written)}
 }
 
-func readFullFile(env *object.Environment, args ...object.Object) object.Object {
+func readFullFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("readFullFile", 1, args...); ac != nil {
 		return ac
 	}
@@ -123,7 +123,7 @@ func readFullFile(env *object.Environment, args ...object.Object) object.Object 
 	return &object.String{Value: string(file)}
 }
 
-func deleteFile(env *object.Environment, args ...object.Object) object.Object {
+func deleteFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("deleteFile", 1, args...); ac != nil {
 		return ac
 	}
@@ -144,7 +144,7 @@ func deleteFile(env *object.Environment, args ...object.Object) object.Object {
 	return object.NullConst
 }
 
-func fileExists(env *object.Environment, args ...object.Object) object.Object {
+func fileExists(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("fileExists", 1, args...); ac != nil {
 		return ac
 	}
@@ -162,7 +162,7 @@ func fileExistsCheck(file string) bool {
 	return !os.IsNotExist(err)
 }
 
-func renameFile(env *object.Environment, args ...object.Object) object.Object {
+func renameFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("renameFile", 2, args...); ac != nil {
 		return ac
 	}

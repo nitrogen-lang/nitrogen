@@ -14,7 +14,7 @@ func init() {
 
 func main() {}
 
-func runSystem(env *object.Environment, args ...object.Object) object.Object {
+func runSystem(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("system", 2, args...); ac != nil {
 		return ac
 	}

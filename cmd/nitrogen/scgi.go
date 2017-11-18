@@ -106,8 +106,9 @@ func handleSCGIRequest(conn net.Conn) {
 		return
 	}
 
-	eval.Stdout = conn
-	result := eval.Eval(program, env)
+	interpreter := eval.NewInterpreter()
+	interpreter.Stdout = conn
+	result := interpreter.Eval(program, env)
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stderr.WriteString(e.Message)

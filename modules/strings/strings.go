@@ -16,7 +16,7 @@ func init() {
 
 func main() {}
 
-func strSplitN(env *object.Environment, args ...object.Object) object.Object {
+func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("strSplitN", 3, args...); ac != nil {
 		return ac
 	}
@@ -47,7 +47,7 @@ func strSplitN(env *object.Environment, args ...object.Object) object.Object {
 	return &object.Array{Elements: newElements}
 }
 
-func strTrim(env *object.Environment, args ...object.Object) object.Object {
+func strTrim(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("strTrim", 1, args...); ac != nil {
 		return ac
 	}
@@ -60,7 +60,7 @@ func strTrim(env *object.Environment, args ...object.Object) object.Object {
 	return &object.String{Value: strings.TrimSpace(target.Value)}
 }
 
-func strDedup(env *object.Environment, args ...object.Object) object.Object {
+func strDedup(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := builtins.CheckArgs("strDedup", 2, args...); ac != nil {
 		return ac
 	}

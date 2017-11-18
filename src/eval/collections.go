@@ -5,17 +5,17 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-func evalIndexExpression(left, index object.Object) object.Object {
+func (i *Interpreter) evalIndexExpression(left, index object.Object) object.Object {
 	switch {
 	case left.Type() == object.ArrayObj && index.Type() == object.IntergerObj:
-		return evalArrayIndexExpression(left, index)
+		return i.evalArrayIndexExpression(left, index)
 	case left.Type() == object.HashObj:
-		return evalHashIndexExpression(left, index)
+		return i.evalHashIndexExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
 
-func evalArrayIndexExpression(array, index object.Object) object.Object {
+func (i *Interpreter) evalArrayIndexExpression(array, index object.Object) object.Object {
 	arrObj := array.(*object.Array)
 	idx := index.(*object.Integer).Value
 	max := int64(len(arrObj.Elements))
@@ -36,7 +36,7 @@ func evalArrayIndexExpression(array, index object.Object) object.Object {
 	return arrObj.Elements[idx]
 }
 
-func evalHashIndexExpression(hash, index object.Object) object.Object {
+func (i *Interpreter) evalHashIndexExpression(hash, index object.Object) object.Object {
 	hashObj := hash.(*object.Hash)
 
 	key, ok := index.(object.Hashable)
@@ -52,11 +52,11 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 	return pair.Value
 }
 
-func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
+func (i *Interpreter) evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
 	pairs := make(map[object.HashKey]object.HashPair)
 
 	for keyNode, valueNode := range node.Pairs {
-		key := Eval(keyNode, env)
+		key := i.Eval(keyNode, env)
 		if isException(key) {
 			return key
 		}
@@ -66,7 +66,7 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 			return object.NewException("Invalid map key: %s", key.Type())
 		}
 
-		value := Eval(valueNode, env)
+		value := i.Eval(valueNode, env)
 		if isException(value) {
 			return value
 		}

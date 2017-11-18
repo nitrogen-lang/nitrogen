@@ -5,9 +5,9 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-func evalAssignment(stmt *ast.AssignStatement, env *object.Environment) object.Object {
+func (i *Interpreter) evalAssignment(stmt *ast.AssignStatement, env *object.Environment) object.Object {
 	if left, ok := stmt.Left.(*ast.IndexExpression); ok {
-		return assignIndexedValue(left, stmt.Value, env)
+		return i.assignIndexedValue(left, stmt.Value, env)
 	}
 
 	ident, ok := stmt.Left.(*ast.Identifier)
@@ -16,10 +16,10 @@ func evalAssignment(stmt *ast.AssignStatement, env *object.Environment) object.O
 			stmt.Left.String())
 	}
 
-	return assignIdentValue(ident, stmt.Value, false, env)
+	return i.assignIdentValue(ident, stmt.Value, false, env)
 }
 
-func assignIdentValue(
+func (i *Interpreter) assignIdentValue(
 	name *ast.Identifier,
 	val ast.Expression,
 	new bool,
@@ -42,7 +42,7 @@ func assignIdentValue(
 		return object.NewException("Assignment to declared constant %s", name.Value)
 	}
 
-	evaled := Eval(val, env)
+	evaled := i.Eval(val, env)
 	if isException(evaled) {
 		return evaled
 	}
@@ -56,7 +56,7 @@ func assignIdentValue(
 	return object.NullConst
 }
 
-func assignConstIdentValue(
+func (i *Interpreter) assignConstIdentValue(
 	name *ast.Identifier,
 	val ast.Expression,
 	env *object.Environment) object.Object {
@@ -72,7 +72,7 @@ func assignConstIdentValue(
 		return object.NewException("Can't assign constant to variable `%s`", name.Value)
 	}
 
-	evaled := Eval(val, env)
+	evaled := i.Eval(val, env)
 	if isException(evaled) {
 		return evaled
 	}
@@ -86,30 +86,30 @@ func assignConstIdentValue(
 	return object.NullConst
 }
 
-func assignIndexedValue(
+func (i *Interpreter) assignIndexedValue(
 	e *ast.IndexExpression,
 	val ast.Expression,
 	env *object.Environment) object.Object {
-	indexed := Eval(e.Left, env)
+	indexed := i.Eval(e.Left, env)
 	if isException(indexed) {
 		return indexed
 	}
 
-	index := Eval(e.Index, env)
+	index := i.Eval(e.Index, env)
 	if isException(indexed) {
 		return indexed
 	}
 
 	switch indexed.Type() {
 	case object.ArrayObj:
-		return assignArrayIndex(indexed.(*object.Array), index, val, env)
+		return i.assignArrayIndex(indexed.(*object.Array), index, val, env)
 	case object.HashObj:
-		return assignHashMapIndex(indexed.(*object.Hash), index, val, env)
+		return i.assignHashMapIndex(indexed.(*object.Hash), index, val, env)
 	}
 	return object.NullConst
 }
 
-func assignArrayIndex(
+func (i *Interpreter) assignArrayIndex(
 	array *object.Array,
 	index object.Object,
 	val ast.Expression,
@@ -120,7 +120,7 @@ func assignArrayIndex(
 		return object.NewException("Invalid array index type %s", index.(object.Object).Type())
 	}
 
-	value := Eval(val, env)
+	value := i.Eval(val, env)
 	if isException(value) {
 		return value
 	}
@@ -133,7 +133,7 @@ func assignArrayIndex(
 	return object.NullConst
 }
 
-func assignHashMapIndex(
+func (i *Interpreter) assignHashMapIndex(
 	hashmap *object.Hash,
 	index object.Object,
 	val ast.Expression,
@@ -144,7 +144,7 @@ func assignHashMapIndex(
 		return object.NewException("Invalid index type %s", index.Type())
 	}
 
-	value := Eval(val, env)
+	value := i.Eval(val, env)
 	if isException(value) {
 		return value
 	}

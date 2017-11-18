@@ -20,15 +20,15 @@ func init() {
 	included = make(map[string]*ast.Program)
 }
 
-func includeScript(env *object.Environment, args ...object.Object) object.Object {
-	return commonInclude(false, true, env, args...)
+func includeScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return commonInclude(false, true, interpreter, env, args...)
 }
 
-func requireScript(env *object.Environment, args ...object.Object) object.Object {
-	return commonInclude(true, true, env, args...)
+func requireScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return commonInclude(true, true, interpreter, env, args...)
 }
 
-func evalScript(env *object.Environment, args ...object.Object) object.Object {
+func evalScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	cleanEnv := object.NewEnvironment()
 
 	envvar, _ := env.Get("_ARGV")
@@ -37,10 +37,10 @@ func evalScript(env *object.Environment, args ...object.Object) object.Object {
 	envvar, _ = env.Get("_ENV")
 	cleanEnv.CreateConst("_ENV", envvar.Dup())
 
-	return commonInclude(false, false, cleanEnv, args...)
+	return commonInclude(false, false, interpreter, cleanEnv, args...)
 }
 
-func commonInclude(require bool, save bool, env *object.Environment, args ...object.Object) object.Object {
+func commonInclude(require bool, save bool, i object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	funcName := "include"
 	if require {
 		funcName = "require"
@@ -64,14 +64,14 @@ func commonInclude(require bool, save bool, env *object.Environment, args ...obj
 		once = includeOnce.Value
 	}
 
-	includedFile := filepath.Clean(filepath.Join(filepath.Dir(eval.GetCurrentScriptPath()), filepathArg.Value))
+	includedFile := filepath.Clean(filepath.Join(filepath.Dir(i.GetCurrentScriptPath()), filepathArg.Value))
 
 	program, exists := included[includedFile]
 	if exists {
 		if once || program == nil {
 			return object.NullConst
 		}
-		return eval.Eval(program, object.NewEnclosedEnv(env))
+		return i.Eval(program, object.NewEnclosedEnv(env))
 	}
 
 	l, err := lexer.NewFile(includedFile)
@@ -99,5 +99,5 @@ func commonInclude(require bool, save bool, env *object.Environment, args ...obj
 			included[includedFile] = program
 		}
 	}
-	return eval.Eval(program, object.NewEnclosedEnv(env))
+	return i.Eval(program, object.NewEnclosedEnv(env))
 }

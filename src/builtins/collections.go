@@ -18,7 +18,7 @@ func init() {
 	eval.RegisterBuiltin("hashKeys", hashKeysBuiltin)
 }
 
-func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -35,7 +35,7 @@ func lenBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	return object.NewException("Unsupported type %s", args[0].Type())
 }
 
-func firstBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func firstBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -51,7 +51,7 @@ func firstBuiltin(env *object.Environment, args ...object.Object) object.Object 
 	return object.NullConst
 }
 
-func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func lastBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -68,7 +68,7 @@ func lastBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	return object.NullConst
 }
 
-func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func restBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
@@ -87,7 +87,7 @@ func restBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	return object.NullConst
 }
 
-func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func pushBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 2 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 2", len(args))
 	}
@@ -104,7 +104,7 @@ func pushBuiltin(env *object.Environment, args ...object.Object) object.Object {
 	return &object.Array{Elements: newElements}
 }
 
-func sortArrayBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func sortArrayBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := CheckMinArgs("sort", 1, args...); ac != nil {
 		return ac
 	}
@@ -132,7 +132,7 @@ func (s *arraySorter) Swap(i, j int) {
 	s.a.Elements[i], s.a.Elements[j] = s.a.Elements[j], s.a.Elements[i]
 }
 
-func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func hashMergeBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) < 2 {
 		return object.NewException("hashMerge requires at least 2 arguments. Got %d", len(args))
 	}
@@ -165,7 +165,7 @@ func hashMergeBuiltin(env *object.Environment, args ...object.Object) object.Obj
 	return newMap
 }
 
-func hashKeysBuiltin(env *object.Environment, args ...object.Object) object.Object {
+func hashKeysBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := CheckArgs("hashKeys", 1, args...); ac != nil {
 		return ac
 	}
