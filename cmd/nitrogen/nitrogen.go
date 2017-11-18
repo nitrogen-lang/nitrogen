@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"plugin"
 	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
@@ -153,19 +151,4 @@ func printParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		fmt.Fprintf(out, "ERROR: %s\n", msg)
 	}
-}
-
-func loadModules(modulePath string) error {
-	return filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() || filepath.Ext(path) != ".so" {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("Loading module %s\n", filepath.Base(path))
-		_, err = plugin.Open(path)
-		return err
-	})
 }

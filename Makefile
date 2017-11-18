@@ -12,7 +12,11 @@ nitrogen-test:
 	done
 
 nitrogen:
-	go install ./cmd/nitrogen/...
+	go build -o bin/nitrogen ./cmd/nitrogen/...
+
+
+nitrogen-no-modules:
+	CGO_ENABLED=0 go build -o bin/nitrogen ./cmd/nitrogen/...
 
 modules:
 	rm -f ./built-modules/*
