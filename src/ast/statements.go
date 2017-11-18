@@ -12,6 +12,7 @@ type Statement interface {
 }
 
 type Program struct {
+	Filename   string
 	Statements []Statement
 }
 

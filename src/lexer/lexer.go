@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode"
 
@@ -18,8 +19,9 @@ type Lexer struct {
 	peekCh    rune // peek character
 	lastToken token.Token
 
-	fileList  []string
-	line, col int
+	fileList    []string
+	line, col   int
+	currentFile string
 }
 
 func New(reader io.Reader) *Lexer {
@@ -29,6 +31,7 @@ func New(reader io.Reader) *Lexer {
 	l.readRune()
 	l.col = 1
 	l.line = 1
+	l.currentFile = "anonymous"
 	return l
 }
 
@@ -68,6 +71,7 @@ func (l *Lexer) loadFile() error {
 	}
 
 	l.input = bufio.NewReader(file)
+	l.currentFile, _ = filepath.Abs(nextFile)
 	return nil
 }
 
@@ -122,9 +126,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '+':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.PlusAssign,
-				Literal: "+=",
-				Pos:     l.curPosition(),
+				Type:     token.PlusAssign,
+				Literal:  "+=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -133,16 +138,18 @@ func (l *Lexer) NextToken() token.Token {
 	case '-':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.MinusAssign,
-				Literal: "-=",
-				Pos:     l.curPosition(),
+				Type:     token.MinusAssign,
+				Literal:  "-=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else if l.peekChar() == '>' {
 			tok = token.Token{
-				Type:    token.Arrow,
-				Literal: "->",
-				Pos:     l.curPosition(),
+				Type:     token.Arrow,
+				Literal:  "->",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -151,9 +158,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '*':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.TimesAssign,
-				Literal: "*=",
-				Pos:     l.curPosition(),
+				Type:     token.TimesAssign,
+				Literal:  "*=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -162,9 +170,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '%':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.ModAssign,
-				Literal: "%=",
-				Pos:     l.curPosition(),
+				Type:     token.ModAssign,
+				Literal:  "%=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -181,9 +190,10 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.readMultiLineComment()
 		case '=':
 			tok = token.Token{
-				Type:    token.SlashAssign,
-				Literal: "/=",
-				Pos:     l.curPosition(),
+				Type:     token.SlashAssign,
+				Literal:  "/=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		default:
@@ -192,9 +202,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '!':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.NotEqual,
-				Literal: "!=",
-				Pos:     l.curPosition(),
+				Type:     token.NotEqual,
+				Literal:  "!=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -205,9 +216,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.Equal,
-				Literal: "==",
-				Pos:     l.curPosition(),
+				Type:     token.Equal,
+				Literal:  "==",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -216,9 +228,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '<':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.LessThanEq,
-				Literal: "<=",
-				Pos:     l.curPosition(),
+				Type:     token.LessThanEq,
+				Literal:  "<=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -227,9 +240,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '>':
 		if l.peekChar() == '=' {
 			tok = token.Token{
-				Type:    token.GreaterThanEq,
-				Literal: ">=",
-				Pos:     l.curPosition(),
+				Type:     token.GreaterThanEq,
+				Literal:  ">=",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 			l.readRune()
 		} else {
@@ -280,6 +294,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Literal = ""
 			tok.Type = token.EOF
 			tok.Pos = l.curPosition()
+			tok.Filename = l.currentFile
 		}
 
 	default:
@@ -287,6 +302,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Pos = l.curPosition()
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
+			tok.Filename = l.currentFile
 			l.lastToken = tok
 			return tok
 		} else if isDigit(l.curCh) {
@@ -344,9 +360,10 @@ func (l *Lexer) readString() token.Token {
 	for l.curCh != '"' {
 		if l.curCh == '\n' {
 			return token.Token{
-				Literal: "Newline not allowed in string",
-				Type:    token.Illegal,
-				Pos:     l.curPosition(),
+				Literal:  "Newline not allowed in string",
+				Type:     token.Illegal,
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
 			}
 		}
 
@@ -381,9 +398,10 @@ func (l *Lexer) readString() token.Token {
 	}
 
 	return token.Token{
-		Literal: ident.String(),
-		Type:    token.String,
-		Pos:     pos,
+		Literal:  ident.String(),
+		Type:     token.String,
+		Pos:      pos,
+		Filename: l.currentFile,
 	}
 }
 
@@ -401,9 +419,10 @@ func (l *Lexer) readRawString() token.Token {
 	}
 
 	return token.Token{
-		Literal: ident.String(),
-		Type:    token.String,
-		Pos:     pos,
+		Literal:  ident.String(),
+		Type:     token.String,
+		Pos:      pos,
+		Filename: l.currentFile,
 	}
 }
 
@@ -422,9 +441,10 @@ func (l *Lexer) readNumber() token.Token {
 	if l.curCh == '.' {
 		l.readRune()
 		return token.Token{
-			Type:    token.Illegal,
-			Literal: "Invalid float literal",
-			Pos:     pos,
+			Type:     token.Illegal,
+			Literal:  "Invalid float literal",
+			Pos:      pos,
+			Filename: l.currentFile,
 		}
 	}
 
@@ -432,9 +452,10 @@ func (l *Lexer) readNumber() token.Token {
 		if l.curCh == '.' {
 			if tokenType != token.Integer {
 				return token.Token{
-					Type:    token.Illegal,
-					Literal: "Invalid float literal",
-					Pos:     pos,
+					Type:     token.Illegal,
+					Literal:  "Invalid float literal",
+					Pos:      pos,
+					Filename: l.currentFile,
 				}
 			}
 			tokenType = token.Float
@@ -445,9 +466,10 @@ func (l *Lexer) readNumber() token.Token {
 	}
 
 	return token.Token{
-		Type:    token.TokenType(tokenType),
-		Literal: base + number.String(),
-		Pos:     pos,
+		Type:     token.TokenType(tokenType),
+		Literal:  base + number.String(),
+		Pos:      pos,
+		Filename: l.currentFile,
 	}
 }
 
@@ -465,9 +487,10 @@ func (l *Lexer) readSingleLineComment() token.Token {
 	}
 
 	return token.Token{
-		Literal: strings.TrimSpace(com.String()),
-		Type:    token.Comment,
-		Pos:     pos,
+		Literal:  strings.TrimSpace(com.String()),
+		Type:     token.Comment,
+		Pos:      pos,
+		Filename: l.currentFile,
 	}
 }
 
@@ -492,9 +515,10 @@ func (l *Lexer) readMultiLineComment() token.Token {
 	}
 
 	return token.Token{
-		Literal: com.String(),
-		Type:    token.Comment,
-		Pos:     pos,
+		Literal:  com.String(),
+		Type:     token.Comment,
+		Pos:      pos,
+		Filename: l.currentFile,
 	}
 }
 
@@ -515,9 +539,10 @@ func (l *Lexer) devourWhitespaceNotNewLine() {
 
 func (l *Lexer) newToken(tokenType token.TokenType, ch rune) token.Token {
 	return token.Token{
-		Type:    tokenType,
-		Literal: string(ch),
-		Pos:     l.curPosition(),
+		Type:     tokenType,
+		Literal:  string(ch),
+		Pos:      l.curPosition(),
+		Filename: l.currentFile,
 	}
 }
 

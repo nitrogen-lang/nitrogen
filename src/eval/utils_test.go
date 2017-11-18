@@ -107,3 +107,47 @@ func showError(obj object.Object) string {
 	}
 	return obj.Type().String()
 }
+
+func TestStringStack(t *testing.T) {
+	stack := newStringStack()
+
+	if stack.len() != 0 {
+		t.Fatalf("Stack has none 0 length: %d", stack.len())
+	}
+
+	if stack.getFront() != "" {
+		t.Fatalf("Stack front should be empty string: %s", stack.getFront())
+	}
+
+	stack.push("item1")
+	if stack.len() != 1 {
+		t.Fatalf("Stack length should be 1: %d", stack.len())
+	}
+
+	if stack.getFront() != "item1" {
+		t.Fatalf("Stack front should be `item1`: %s", stack.getFront())
+	}
+
+	stack.push("item2")
+	if stack.len() != 2 {
+		t.Fatalf("Stack length should be 2: %d", stack.len())
+	}
+
+	if stack.getFront() != "item2" {
+		t.Fatalf("Stack front should be `item2`: %s", stack.getFront())
+	}
+
+	stack.pop()
+	if stack.len() != 1 {
+		t.Fatalf("Stack length should be 1: %d", stack.len())
+	}
+
+	if stack.getFront() != "item1" {
+		t.Fatalf("Stack front should be `item1`: %s", stack.getFront())
+	}
+
+	stack.pop()
+	if stack.len() != 0 {
+		t.Fatalf("Stack has none 0 length: %d", stack.len())
+	}
+}

@@ -78,9 +78,7 @@ func main() {
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getEnvironment())
 
-	if flag.NArg() > 1 {
-		env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
-	}
+	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
 
 	result := eval.Eval(program, env)
 	if result != nil && result != object.NULL {

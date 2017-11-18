@@ -12,9 +12,10 @@ type Position struct {
 
 // TODO: Add filename to token
 type Token struct {
-	Type    TokenType
-	Literal string
-	Pos     Position
+	Type     TokenType
+	Literal  string
+	Pos      Position
+	Filename string
 }
 
 // All tokens in Nitrogen

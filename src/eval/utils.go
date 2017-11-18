@@ -59,3 +59,46 @@ func convertToBoolean(obj object.Object) (bool, bool) {
 func isException(obj object.Object) bool {
 	return (obj != nil && obj.Type() == object.EXCEPTION_OBJ)
 }
+
+type stringStack struct {
+	head   *stackElement
+	length int
+}
+
+type stackElement struct {
+	val  string
+	prev *stackElement
+}
+
+func newStringStack() *stringStack {
+	return &stringStack{}
+}
+
+func (s *stringStack) push(val string) {
+	s.head = &stackElement{
+		val:  val,
+		prev: s.head,
+	}
+	s.length++
+}
+
+func (s *stringStack) getFront() string {
+	if s.head == nil {
+		return ""
+	}
+	return s.head.val
+}
+
+func (s *stringStack) pop() string {
+	if s.head == nil {
+		return ""
+	}
+	r := s.head.val
+	s.head = s.head.prev
+	s.length--
+	return r
+}
+
+func (s *stringStack) len() int {
+	return s.length
+}

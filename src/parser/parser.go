@@ -140,17 +140,17 @@ func (p *Parser) addError(format string, args ...interface{}) {
 
 func (p *Parser) addErrorWithPos(format string, args ...interface{}) {
 	if len(args) > 0 {
-		args = append([]interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}, args)
+		args = append([]interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}, args...)
 	} else {
 		args = []interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}
 	}
-	msg := fmt.Sprintf("<%d,%d> "+format, args...)
+	msg := fmt.Sprintf("at line %d, col %d "+format, args...)
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) peekError(t token.TokenType) {
 	p.addError(
-		"<%d,%d> Incorrect next token. Expected %q, got %q",
+		"at line %d, col %d Incorrect next token. Expected %q, got %q",
 		p.peekToken.Pos.Line,
 		p.peekToken.Pos.Col,
 		t.String(),
@@ -159,7 +159,7 @@ func (p *Parser) peekError(t token.TokenType) {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	p.addError("<%d,%d> Invalid prefix: %s", p.curToken.Pos.Line, p.curToken.Pos.Col, t)
+	p.addErrorWithPos("Invalid prefix: %s", t)
 }
 
 func (p *Parser) nextToken() {
@@ -169,7 +169,7 @@ func (p *Parser) nextToken() {
 	}
 
 	if p.curTokenIs(token.Illegal) {
-		p.addError("Got illegal token: %s", p.curToken.Literal)
+		p.addErrorWithPos("Got illegal token: %s", p.curToken.Literal)
 		p.nextToken()
 	}
 }
@@ -195,7 +195,7 @@ func (p *Parser) insertToken(t token.Token) {
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
-	program := &ast.Program{}
+	program := &ast.Program{Filename: p.curToken.Filename}
 	program.Statements = []ast.Statement{}
 
 	for p.curToken.Type != token.EOF {

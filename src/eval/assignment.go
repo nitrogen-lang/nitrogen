@@ -102,9 +102,9 @@ func assignIndexedValue(
 
 	switch indexed.Type() {
 	case object.ARRAY_OBJ:
-		assignArrayIndex(indexed.(*object.Array), index, val, env)
+		return assignArrayIndex(indexed.(*object.Array), index, val, env)
 	case object.HASH_OBJ:
-		assignHashMapIndex(indexed.(*object.Hash), index, val, env)
+		return assignHashMapIndex(indexed.(*object.Hash), index, val, env)
 	}
 	return object.NULL
 }

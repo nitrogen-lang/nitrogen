@@ -1,3 +1,5 @@
 func otherFile() {
-    println("Hello, World")
+    println("Hello from ", _FILE)
 }
+
+return otherFile

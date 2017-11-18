@@ -16,3 +16,7 @@ values doesn't affect execution or system calls.
 `_ARGV` is a string array that contains all arguments given to the script upon
 execution. `len(_ARGV)` will return the number of arguments given. `_ARGV[0]` is
 the path name of the main script as it was called.
+
+## _FILE
+
+`_FILE` is the absolute path to the currently executing script.

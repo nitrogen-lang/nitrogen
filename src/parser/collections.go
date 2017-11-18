@@ -34,7 +34,7 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 		}
 
 		if !p.peekTokenIs(token.RBrace) && !p.expectPeek(token.Comma) {
-			p.addError("Invalid hash literal")
+			p.addErrorWithPos("Invalid hash literal")
 			return nil
 		}
 	}

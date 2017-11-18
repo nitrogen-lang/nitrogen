@@ -5,6 +5,8 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
+var scriptNameStack = newStringStack()
+
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	// Statements
@@ -121,8 +123,16 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	return nil
 }
 
+// GetCurrentScriptPath returns the filepath of the current executing script
+func GetCurrentScriptPath() string {
+	return scriptNameStack.getFront()
+}
+
 func evalProgram(p *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
+	scriptNameStack.push(p.Filename)
+	defer scriptNameStack.pop()
+	env.CreateConst("_FILE", &object.String{Value: p.Filename})
 
 	for _, statement := range p.Statements {
 		result = Eval(statement, env)
