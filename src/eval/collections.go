@@ -11,6 +11,8 @@ func (i *Interpreter) evalIndexExpression(left, index object.Object) object.Obje
 		return i.evalArrayIndexExpression(left, index)
 	case left.Type() == object.HashObj:
 		return i.evalHashIndexExpression(left, index)
+	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
+		return i.evalStringIndexExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
@@ -76,4 +78,25 @@ func (i *Interpreter) evalHashLiteral(node *ast.HashLiteral, env *object.Environ
 	}
 
 	return &object.Hash{Pairs: pairs}
+}
+
+func (i *Interpreter) evalStringIndexExpression(array, index object.Object) object.Object {
+	strObj := array.(*object.String)
+	idx := index.(*object.Integer).Value
+	max := int64(len(strObj.Value))
+
+	if idx > max-1 { // Check upper bound
+		return object.NullConst
+	}
+
+	if idx < 0 { // Check lower bound
+		// Convert a negative index to positive
+		idx = max + idx
+
+		if idx < 0 { // Check lower bound again
+			return object.NullConst
+		}
+	}
+
+	return &object.String{Value: string(strObj.Value[idx])}
 }

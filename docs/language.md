@@ -103,6 +103,9 @@ rather than relying on this behavior.
 Raw strings are slightly different. They're surrounded by single quotes and may span multiple lines. The only valid escape sequence
 is `\'`, escaping a single quote. Raw strings can be helpful for templates or large bodies of inline text.
 
+Strings may be indexed like an array using square brackets `"Hello, world"[0] == "H"`. The value of an index expression is another string
+with the character at the index of the original string.
+
 ## Collections
 
 ### Arrays

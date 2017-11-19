@@ -162,7 +162,7 @@ func startRepl(in io.Reader, out io.Writer) {
 		}
 
 		result := interpreter.Eval(program, env)
-		if result != nil {
+		if result != nil && result != object.NullConst {
 			io.WriteString(out, result.Inspect())
 			io.WriteString(out, "\n")
 		}

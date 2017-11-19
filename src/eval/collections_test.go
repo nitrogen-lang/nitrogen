@@ -190,3 +190,65 @@ func TestHashIndexExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestStringIndexExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			`"Hello, world"[0]`,
+			"H",
+		},
+		{
+			`"Hello, world"[1]`,
+			"e",
+		},
+		{
+			`"Hello, world"[2]`,
+			"l",
+		},
+		{
+			`let i = 0; "Hello, world"[i];`,
+			"H",
+		},
+		{
+			`"Hello, world"[1 + 1];`,
+			"l",
+		},
+		{
+			`let myArray = "Hello, world"; myArray[2];`,
+			"l",
+		},
+		{
+			`let myArray = "Hello, world"; myArray[0] + myArray[1] + myArray[2];`,
+			"Hel",
+		},
+		{
+			`"Hello, world"[12]`,
+			nil,
+		},
+		{
+			`"Hello, world"[-1]`,
+			"d",
+		},
+		{
+			`"Hello, world"[-3]`,
+			"r",
+		},
+		{
+			`"Hello, world"[-13]`,
+			nil,
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input, t)
+		str, ok := tt.expected.(string)
+		if ok {
+			testStringObject(t, evaluated, str)
+		} else {
+			testNullObject(t, evaluated)
+		}
+	}
+}
