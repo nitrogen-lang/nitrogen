@@ -105,6 +105,8 @@ func (i *Interpreter) assignIndexedValue(
 		return i.assignArrayIndex(indexed.(*object.Array), index, val, env)
 	case object.HashObj:
 		return i.assignHashMapIndex(indexed.(*object.Hash), index, val, env)
+	case object.ModuleObj:
+		return i.assignModuleVariable(indexed.(*object.Module), index, val, env)
 	}
 	return object.NullConst
 }
@@ -153,5 +155,29 @@ func (i *Interpreter) assignHashMapIndex(
 		Key:   index,
 		Value: value,
 	}
+	return object.NullConst
+}
+
+func (i *Interpreter) assignModuleVariable(
+	module *object.Module,
+	index object.Object,
+	val ast.Expression,
+	env *object.Environment) object.Object {
+
+	hashable, ok := index.(*object.String)
+	if !ok {
+		return object.NewException("Invalid index type %s", index.Type())
+	}
+
+	if _, exists := module.Vars[hashable.Value]; !exists {
+		return object.NewException("Module %s has no assignable variable %s", module.Name, hashable.Value)
+	}
+
+	value := i.Eval(val, env)
+	if isException(value) {
+		return value
+	}
+
+	module.Vars[hashable.Value] = value
 	return object.NullConst
 }
