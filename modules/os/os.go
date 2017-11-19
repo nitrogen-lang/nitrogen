@@ -11,8 +11,8 @@ import (
 )
 
 func init() {
-	eval.RegisterModule("os", &object.Module{
-		Name: "os",
+	eval.RegisterModule(ModuleName, &object.Module{
+		Name: ModuleName,
 		Methods: map[string]object.BuiltinFunction{
 			"system": runSystem,
 			"exec":   runSystemPT,

@@ -4,9 +4,10 @@ Modules are shared libraries that can be loaded into the Nitrogen interpreter at
 that are still in active development and aren't part of the core library yet. Once they are stable and have a fixed API, they'll
 be added to the core library.
 
-- [Files](files.md): File IO and management
-- [OS](os.md): Interfacing with the OS
-- [Strings](strings.md): Functions to manipulate strings.
+- [file](file.md): File IO and management
+- [filepath](filepath.md): Functions dealing with file paths
+- [os](os.md): Interfacing with the OS
+- [strings](strings.md): Functions to manipulate strings.
 
 ## module(filename: string[, required: bool]): module|error|nil
 

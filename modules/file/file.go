@@ -11,8 +11,8 @@ import (
 )
 
 func init() {
-	eval.RegisterModule("file", &object.Module{
-		Name: "file",
+	eval.RegisterModule(ModuleName, &object.Module{
+		Name: ModuleName,
 		Methods: map[string]object.BuiltinFunction{
 			"open":    openFile,
 			"close":   closeFile,

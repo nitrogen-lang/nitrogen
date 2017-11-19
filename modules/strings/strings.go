@@ -9,8 +9,8 @@ import (
 )
 
 func init() {
-	eval.RegisterModule("strings", &object.Module{
-		Name: "strings",
+	eval.RegisterModule(ModuleName, &object.Module{
+		Name: ModuleName,
 		Methods: map[string]object.BuiltinFunction{
 			"splitN":    strSplitN,
 			"trimSpace": strTrim,
