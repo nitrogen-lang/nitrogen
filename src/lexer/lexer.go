@@ -255,6 +255,8 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newToken(token.Semicolon, l.curCh)
 	case ':':
 		tok = l.newToken(token.Colon, l.curCh)
+	case '.':
+		tok = l.newToken(token.Arrow, l.curCh)
 
 	// Groupings
 	case '(':
