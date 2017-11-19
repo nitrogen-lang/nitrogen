@@ -1,8 +1,9 @@
-package builtins
+package typing
 
 import (
 	"testing"
 
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -18,7 +19,7 @@ func TestBuiltinIntConvFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
+		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -34,7 +35,7 @@ func TestBuiltinFloatConvFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
+		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -62,7 +63,7 @@ func TestIsBuiltins(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testLiteralErrorObjects(t, testEval(tt.input), tt.expected)
+		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -82,7 +83,7 @@ func TestToStringBuiltin(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaled := testEval(tt.input)
+		evaled := moduleutils.TestEval(tt.input)
 
 		str, ok := evaled.(*object.String)
 		if !ok {
@@ -108,7 +109,7 @@ func TestParseIntBuiltin(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaled := testEval(tt.input)
+		evaled := moduleutils.TestEval(tt.input)
 
 		if tt.expected == 0 {
 			if evaled != object.NullConst {
@@ -130,7 +131,7 @@ func TestParseIntBuiltin(t *testing.T) {
 		}
 
 		if io.Value != tt.expected {
-			t.Fatalf("%d: toInt failed. Expected `%s`, got `%s`", i+1, tt.expected, io.Value)
+			t.Fatalf("%d: toInt failed. Expected `%d`, got `%d`", i+1, tt.expected, io.Value)
 		}
 	}
 }
@@ -148,7 +149,7 @@ func TestParseFloatBuiltin(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaled := testEval(tt.input)
+		evaled := moduleutils.TestEval(tt.input)
 
 		if tt.expected == 0 {
 			if evaled != object.NullConst {
@@ -170,7 +171,7 @@ func TestParseFloatBuiltin(t *testing.T) {
 		}
 
 		if io.Value != tt.expected {
-			t.Fatalf("%d: toFloat failed. Expected `%s`, got `%s`", i+1, tt.expected, io.Value)
+			t.Fatalf("%d: toFloat failed. Expected `%f`, got `%f`", i+1, tt.expected, io.Value)
 		}
 	}
 }

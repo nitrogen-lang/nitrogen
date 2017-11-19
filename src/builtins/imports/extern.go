@@ -1,4 +1,4 @@
-package builtins
+package imports
 
 import (
 	"path/filepath"

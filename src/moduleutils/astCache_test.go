@@ -5,10 +5,11 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestBasicCache(t *testing.T) {
-	ASTCache.Clear()
+	ASTCache.ClearAll()
 
 	cache1, err := ASTCache.GetTree("./testdata/cache1.ni")
 	if err != nil {
@@ -26,7 +27,7 @@ func TestBasicCache(t *testing.T) {
 }
 
 func TestMultipleCache(t *testing.T) {
-	ASTCache.Clear()
+	ASTCache.ClearAll()
 
 	cache1, err := ASTCache.GetTree("./testdata/cache1.ni")
 	if err != nil {
@@ -67,7 +68,7 @@ println(str)
 `
 
 func TestCacheMiss(t *testing.T) {
-	ASTCache.Clear()
+	ASTCache.ClearAll()
 	// Copy a test data script tp play with
 	copyFileContents("./testdata/cache1.ni", "./testdata/cache1-1.ni")
 	defer os.Remove("./testdata/cache1-1.ni")
@@ -78,6 +79,7 @@ func TestCacheMiss(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	time.Sleep(time.Second) // Ensure file modtimes are sufficiently spaced apart
 	// Modify the file
 	if err := ioutil.WriteFile("./testdata/cache1-1.ni", []byte(cacheMissTestScript), 0644); err != nil {
 		t.Fatal(err)
