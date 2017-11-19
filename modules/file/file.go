@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/nitrogen-lang/nitrogen/src/builtins"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -40,7 +40,7 @@ var modes = map[string]int{
 }
 
 func openFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("openFile", 2, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("openFile", 2, args...); ac != nil {
 		return ac
 	}
 
@@ -68,7 +68,7 @@ func openFile(interpreter object.Interpreter, env *object.Environment, args ...o
 }
 
 func closeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("closeFile", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("closeFile", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -83,7 +83,7 @@ func closeFile(interpreter object.Interpreter, env *object.Environment, args ...
 }
 
 func writeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("writeFile", 2, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("writeFile", 2, args...); ac != nil {
 		return ac
 	}
 
@@ -106,7 +106,7 @@ func writeFile(interpreter object.Interpreter, env *object.Environment, args ...
 }
 
 func readFullFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("readFullFile", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("readFullFile", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -124,7 +124,7 @@ func readFullFile(interpreter object.Interpreter, env *object.Environment, args 
 }
 
 func deleteFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("deleteFile", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("deleteFile", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -145,7 +145,7 @@ func deleteFile(interpreter object.Interpreter, env *object.Environment, args ..
 }
 
 func fileExists(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("fileExists", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("fileExists", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -163,7 +163,7 @@ func fileExistsCheck(file string) bool {
 }
 
 func renameFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("renameFile", 2, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("renameFile", 2, args...); ac != nil {
 		return ac
 	}
 

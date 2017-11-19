@@ -1,4 +1,4 @@
-package builtins
+package moduleutils
 
 import "github.com/nitrogen-lang/nitrogen/src/object"
 

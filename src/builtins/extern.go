@@ -2,10 +2,12 @@ package builtins
 
 import (
 	"path/filepath"
+	"plugin"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
@@ -16,6 +18,7 @@ func init() {
 	eval.RegisterBuiltin("include", includeScript)
 	eval.RegisterBuiltin("require", requireScript)
 	eval.RegisterBuiltin("evalScript", evalScript)
+	eval.RegisterBuiltin("module", importModule)
 
 	included = make(map[string]*ast.Program)
 }
@@ -26,6 +29,37 @@ func includeScript(interpreter object.Interpreter, env *object.Environment, args
 
 func requireScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	return commonInclude(true, true, interpreter, env, args...)
+}
+
+func importModule(i object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("module", 1, args...); ac != nil {
+		return ac
+	}
+
+	filepathArg, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("module expected a string, got %s", args[0].Type().String())
+	}
+
+	required := false
+	if len(args) > 1 {
+		requiredArg, ok := args[1].(*object.Boolean)
+		if !ok {
+			return object.NewException("module expected a boolean for second argument, got %s", args[1].Type().String())
+		}
+		required = requiredArg.Value
+	}
+
+	includedPath := filepath.Clean(filepath.Join(filepath.Dir(i.GetCurrentScriptPath()), filepathArg.Value))
+	//return &object.String{Value: includedPath}
+	_, err := plugin.Open(includedPath)
+	if err != nil {
+		if required {
+			return &object.Exception{Message: err.Error()}
+		}
+		return &object.Error{Message: err.Error()}
+	}
+	return object.NullConst
 }
 
 func evalScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -46,7 +80,7 @@ func commonInclude(require bool, save bool, i object.Interpreter, env *object.En
 		funcName = "require"
 	}
 
-	if ac := CheckMinArgs(funcName, 1, args...); ac != nil {
+	if ac := moduleutils.CheckMinArgs(funcName, 1, args...); ac != nil {
 		return ac
 	}
 

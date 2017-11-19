@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -105,7 +106,7 @@ func pushBuiltin(interpreter object.Interpreter, env *object.Environment, args .
 }
 
 func sortArrayBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := CheckMinArgs("sort", 1, args...); ac != nil {
+	if ac := moduleutils.CheckMinArgs("sort", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -166,7 +167,7 @@ func hashMergeBuiltin(interpreter object.Interpreter, env *object.Environment, a
 }
 
 func hashKeysBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := CheckArgs("hashKeys", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("hashKeys", 1, args...); ac != nil {
 		return ac
 	}
 

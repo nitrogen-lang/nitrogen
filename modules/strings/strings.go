@@ -3,8 +3,8 @@ package main
 import (
 	"strings"
 
-	"github.com/nitrogen-lang/nitrogen/src/builtins"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -17,7 +17,7 @@ func init() {
 func main() {}
 
 func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("strSplitN", 3, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("strSplitN", 3, args...); ac != nil {
 		return ac
 	}
 
@@ -48,7 +48,7 @@ func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...
 }
 
 func strTrim(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("strTrim", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("strTrim", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -61,7 +61,7 @@ func strTrim(interpreter object.Interpreter, env *object.Environment, args ...ob
 }
 
 func strDedup(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := builtins.CheckArgs("strDedup", 2, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("strDedup", 2, args...); ac != nil {
 		return ac
 	}
 

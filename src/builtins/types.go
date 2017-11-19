@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -75,7 +76,7 @@ func varTypeBuiltin(interpreter object.Interpreter, env *object.Environment, arg
 }
 
 func getErrorVal(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := CheckArgs("errorVal", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("errorVal", 1, args...); ac != nil {
 		return ac
 	}
 
@@ -146,7 +147,7 @@ func parseFloatBuiltin(interpreter object.Interpreter, env *object.Environment, 
 }
 
 func isDefinedBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := CheckArgs("isDefined", 1, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("isDefined", 1, args...); ac != nil {
 		return ac
 	}
 
