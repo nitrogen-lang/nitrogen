@@ -11,6 +11,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
 
@@ -70,10 +71,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	program, parseErrors := parseFile(flag.Arg(0))
-	if len(parseErrors) != 0 {
-		printParserErrors(os.Stdout, parseErrors)
-		os.Exit(1)
+	program, err := moduleutils.ASTCache.GetTree(flag.Arg(0))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 
 	if printAst {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"bufio"
 	"bytes"
 	"errors"
@@ -159,9 +160,10 @@ func (w *worker) run(conn net.Conn) {
 	}
 
 	// Parse script
-	program, parseErrors := parseFile(scriptFilename)
-	if len(parseErrors) != 0 {
-		printParserErrors(os.Stderr, parseErrors[:1])
+	program, err := moduleutils.ASTCache.GetTree(scriptFilename)
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		os.Stderr.Write([]byte{'\n'})
 		return
 	}
 
