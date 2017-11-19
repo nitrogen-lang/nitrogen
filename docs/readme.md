@@ -22,6 +22,7 @@ of any function arguments as well as return types:
 - Multiple types are denoted using pipes or the generic type "T":
   - `func print(in...: T)` - Print takes 1 or more arguments of any type
   - `func calc(op: string, nums...: string|int): int` - This function takes one argument of type string plus one or more arguments of type string OR int. The function returns an int.
+  - `func calc(op: string, nums...: string|int): int|error|nil` - This function takes one argument of type string plus one or more arguments of type string OR int. The function returns an int, error, or nil.
 - Multiple arguments with the same type next to each other don't need to specify type:
   - `func hashMerge(map1, map2: map): map` - hashMerge takes two maps. Since they're the same type, the type only needs to be on the last argument.
 - Optional arguments are denoted with square braces:
