@@ -343,7 +343,7 @@ func (l *Lexer) needSemicolon() bool {
 
 func (l *Lexer) readIdentifier() string {
 	var ident bytes.Buffer
-	for isIdent(l.curCh) || isDigit(l.curCh) {
+	for isIdent(l.curCh) {
 		ident.WriteRune(l.curCh)
 		l.readRune()
 	}
