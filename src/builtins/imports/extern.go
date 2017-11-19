@@ -50,14 +50,30 @@ func importModule(i object.Interpreter, env *object.Environment, args ...object.
 		required = requiredArg.Value
 	}
 
+	// Return already registered, named module
+	if module := eval.GetModule(filepathArg.Value); module != nil {
+		return module
+	}
+
 	includedPath := filepath.Clean(filepath.Join(filepath.Dir(i.GetCurrentScriptPath()), filepathArg.Value))
-	//return &object.String{Value: includedPath}
-	_, err := plugin.Open(includedPath)
+
+	p, err := plugin.Open(includedPath)
 	if err != nil {
 		if required {
-			return &object.Exception{Message: err.Error()}
+			return object.NewException("%s", err)
 		}
-		return &object.Error{Message: err.Error()}
+		return object.NewError("%s", err)
+	}
+
+	// Check module name
+	moduleNameSym, err := p.Lookup("ModuleName")
+	if err != nil {
+		// The module didn't declare a name
+		return object.NewException("Invalid module %s", filepathArg.Value)
+	}
+
+	if module := eval.GetModule(*(moduleNameSym.(*string))); module != nil {
+		return module
 	}
 	return object.NullConst
 }

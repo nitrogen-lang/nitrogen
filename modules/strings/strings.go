@@ -9,12 +9,22 @@ import (
 )
 
 func init() {
-	eval.RegisterBuiltin("strSplitN", strSplitN)
-	eval.RegisterBuiltin("strTrim", strTrim)
-	eval.RegisterBuiltin("strDedup", strDedup)
+	eval.RegisterModule("strings", &object.Module{
+		Name: "strings",
+		Methods: map[string]object.BuiltinFunction{
+			"splitN":    strSplitN,
+			"trimSpace": strTrim,
+			"dedup":     strDedup,
+		},
+		Vars: map[string]object.Object{
+			"name": object.MakeStringObj(ModuleName),
+		},
+	})
 }
 
 func main() {}
+
+var ModuleName = "strings"
 
 func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := moduleutils.CheckArgs("strSplitN", 3, args...); ac != nil {

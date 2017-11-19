@@ -34,6 +34,7 @@ const (
 	LoopControlObj
 	// ResourceObj can be used by modules to denote a generic resource. The implementation may be module specific.
 	ResourceObj
+	ModuleObj
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -50,6 +51,7 @@ var objectTypeNames = map[ObjectType]string{
 	ArrayObj:     "ARRAY",
 	HashObj:      "MAP",
 	ResourceObj:  "RESOURCE",
+	ModuleObj:    "MODULE",
 }
 
 // These are all constants in the language that can be represented with a single instance
@@ -98,6 +100,10 @@ type String struct {
 func (s *String) Inspect() string  { return s.Value }
 func (s *String) Type() ObjectType { return StringObj }
 func (s *String) Dup() Object      { return &String{Value: s.Value} }
+
+func MakeStringObj(s string) *String {
+	return &String{Value: s}
+}
 
 type Boolean struct {
 	Value bool
@@ -304,6 +310,16 @@ func (lc *LoopControl) Inspect() string {
 	return "break"
 }
 func (lc *LoopControl) Dup() Object { return &LoopControl{Continue: lc.Continue} }
+
+type Module struct {
+	Name    string
+	Methods map[string]BuiltinFunction
+	Vars    map[string]Object
+}
+
+func (m *Module) Inspect() string  { return fmt.Sprintf("Module %s", m.Name) }
+func (m *Module) Type() ObjectType { return ModuleObj }
+func (m *Module) Dup() Object      { return NullConst }
 
 func NewException(format string, a ...interface{}) *Exception {
 	return &Exception{Message: fmt.Sprintf(format, a...)}

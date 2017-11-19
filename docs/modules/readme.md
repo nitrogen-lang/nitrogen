@@ -8,7 +8,25 @@ be added to the core library.
 - [OS](os.md): Interfacing with the OS
 - [Strings](strings.md): Functions to manipulate strings.
 
-## module(filename: string): error
+## module(filename: string[, required: bool]): module|error|nil
 
-`module` will attempt to import a binary shared library into the interpreter. If the import fails, `module` returns an error object.
-Otherwise it returns nil.
+`module` will attempt to import a binary shared library into the interpreter. The returned value depends on how the module
+registers itself and if required is true. `module` will return nil if the module is found and imported successfully. An error
+will be returned if required is false and the module isn't found. An exception is thrown if an error occurs and required is true
+or if the module is found but fails importing regardless of `required`. A module object is returned if the module registered
+such an object. A module is able to register global functions or an encapsulated module object. Consult the module documentation
+for specifics.
+
+If a module returns a Module object, functions or variables can be retrieved using arrow or index notation.
+
+Example:
+
+```
+// Attempt to load module, but it's not required
+let os = module('os.so')
+if isError(os) {
+    println('Failed loading module os: ', os) // Print error message
+}
+
+print(os->system('whoami')[0]) // Call the system function and print stdout
+```

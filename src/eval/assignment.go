@@ -77,7 +77,7 @@ func (i *Interpreter) assignConstIdentValue(
 		return evaled
 	}
 
-	if !object.ObjectIs(evaled, object.IntergerObj, object.FloatObj, object.StringObj, object.NullObj, object.BooleanObj) {
+	if !object.ObjectIs(evaled, object.IntergerObj, object.FloatObj, object.StringObj, object.NullObj, object.BooleanObj, object.ModuleObj) {
 		return object.NewException("Constants must be int, float, string, bool or null")
 	}
 

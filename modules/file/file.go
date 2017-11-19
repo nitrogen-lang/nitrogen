@@ -11,16 +11,26 @@ import (
 )
 
 func init() {
-	eval.RegisterBuiltin("openFile", openFile)
-	eval.RegisterBuiltin("closeFile", closeFile)
-	eval.RegisterBuiltin("writeFile", writeFile)
-	eval.RegisterBuiltin("readFullFile", readFullFile)
-	eval.RegisterBuiltin("deleteFile", deleteFile)
-	eval.RegisterBuiltin("fileExists", fileExists)
-	eval.RegisterBuiltin("renameFile", renameFile)
+	eval.RegisterModule("file", &object.Module{
+		Name: "file",
+		Methods: map[string]object.BuiltinFunction{
+			"open":    openFile,
+			"close":   closeFile,
+			"write":   writeFile,
+			"readAll": readFullFile,
+			"delete":  deleteFile,
+			"exists":  fileExists,
+			"rename":  renameFile,
+		},
+		Vars: map[string]object.Object{
+			"name": object.MakeStringObj(ModuleName),
+		},
+	})
 }
 
 func main() {}
+
+var ModuleName = "file"
 
 type fileResource struct {
 	file *os.File

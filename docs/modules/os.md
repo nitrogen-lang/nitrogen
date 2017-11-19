@@ -1,5 +1,7 @@
 # OS
 
+The os module returns a Module object. All documented functions are part of this returned object.
+
 ## system(cmd: string[, args: array]): array|error|nil
 
 `system` will execute `cmd` with arguments `args`. `args` must be an array of strings. The returned array contains the

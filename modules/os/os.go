@@ -5,16 +5,27 @@ import (
 	"os/exec"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
 func init() {
-	eval.RegisterBuiltin("system", runSystem)
-	eval.RegisterBuiltin("exec", runSystemPT)
+	eval.RegisterModule("os", &object.Module{
+		Name: "os",
+		Methods: map[string]object.BuiltinFunction{
+			"system": runSystem,
+			"exec":   runSystemPT,
+		},
+		Vars: map[string]object.Object{
+			"name": object.MakeStringObj(ModuleName),
+		},
+	})
 }
 
 func main() {}
+
+var ModuleName = "os"
 
 func runSystem(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := moduleutils.CheckMinArgs("system", 1, args...); ac != nil {

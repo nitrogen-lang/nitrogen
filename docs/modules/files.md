@@ -1,8 +1,10 @@
 # Files
 
-## openFile(path, mode: string): resource
+The files module returns a Module object. All documented functions are part of this returned object.
 
-openFile will attempt to open the file at `path` using mode `mode`. The returned value is file resource that is used
+## open(path, mode: string): resource
+
+`open` will attempt to open the file at `path` using mode `mode`. The returned value is file resource that is used
 by other file methods in this module.
 
 | mode | description                                                                                                                        |
@@ -14,27 +16,27 @@ by other file methods in this module.
 | a    | Opening for writing only; places file pointer at the end of file (append); if the file doesn't exist, attempts to create it        |
 | a+   | Opening for reading and writing; places file pointer at the end of file (append); if the file doesn't exist, attempts to create it |
 
-## closeFile(file: resource)
+## close(file: resource)
 
 Closes an open file. If the file is already closed, nothing happens.
 
-## writeFile(file: resource, data: string): int
+## write(file: resource, data: string): int
 
 Writes `data` to `file`. `file` must have been open using a mode that allows writing otherwise a runtime exception will occur.
 The function returns the number of bytes written.
 
-## readFullFile(filepath: string): string
+## readAll(filepath: string): string
 
 Reads the entire file at `filepath` and returns its contents as a string.
 
-## deleteFile(filepath: string)
+## delete(filepath: string)
 
 Deletes the file at `filepath`. If the file doesn't exist, nothing happens.
 
-## fileExists(filepath: string): bool
+## exists(filepath: string): bool
 
 Returns if the file at `filepath` exists.
 
-## renameFile(oldPath, newPath: string): error
+## rename(oldPath, newPath: string): error
 
 Attempts to rename a file from `oldPath` to `newPath`. If no error occurs, nil is returned.

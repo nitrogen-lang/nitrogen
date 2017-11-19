@@ -13,6 +13,8 @@ func (i *Interpreter) evalIndexExpression(left, index object.Object) object.Obje
 		return i.evalHashIndexExpression(left, index)
 	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
 		return i.evalStringIndexExpression(left, index)
+	case left.Type() == object.ModuleObj && index.Type() == object.StringObj:
+		return i.evalModuleLookupExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
@@ -52,6 +54,23 @@ func (i *Interpreter) evalHashIndexExpression(hash, index object.Object) object.
 	}
 
 	return pair.Value
+}
+
+func (i *Interpreter) evalModuleLookupExpression(module, index object.Object) object.Object {
+	moduleObj := module.(*object.Module)
+	key := index.(*object.String)
+
+	// Methods have priority over variables
+	method, ok := moduleObj.Methods[key.Value]
+	if ok {
+		return &object.Builtin{Fn: method}
+	}
+
+	variable, ok := moduleObj.Vars[key.Value]
+	if ok {
+		return variable
+	}
+	return object.NullConst
 }
 
 func (i *Interpreter) evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
