@@ -21,6 +21,8 @@ func init() {
 			"delete":  deleteFile,
 			"exists":  fileExists,
 			"rename":  renameFile,
+			"dirlist": directoryList,
+			"isdir":   isDirectory,
 		},
 		Vars: map[string]object.Object{
 			"name": object.MakeStringObj(ModuleName),
@@ -192,4 +194,44 @@ func renameFile(interpreter object.Interpreter, env *object.Environment, args ..
 	}
 
 	return object.NullConst
+}
+
+func directoryList(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("dirList", 1, args...); ac != nil {
+		return ac
+	}
+
+	filepath, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("dirList expected a string, got %s", args[0].Type().String())
+	}
+
+	file, err := os.Open(filepath.Value)
+	if err != nil {
+		return object.NewException("Error opening directory %s", err.Error())
+	}
+	defer file.Close()
+
+	dirlist, err := file.Readdirnames(0)
+	if err != nil {
+		return object.NewException("Error reading directory list %s %s", filepath.Value, err.Error())
+	}
+	return object.MakeStringArray(dirlist)
+}
+
+func isDirectory(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("dirList", 1, args...); ac != nil {
+		return ac
+	}
+
+	filepath, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("dirList expected a string, got %s", args[0].Type().String())
+	}
+
+	file, err := os.Stat(filepath.Value)
+	if err != nil {
+		return object.NewException("Error opening directory %s", err.Error())
+	}
+	return object.NativeBoolToBooleanObj(file.IsDir())
 }

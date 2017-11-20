@@ -233,6 +233,15 @@ func (a *Array) Dup() Object {
 	return &Array{Elements: newElements}
 }
 
+func MakeStringArray(e []string) *Array {
+	length := len(e)
+	newElements := make([]Object, length, length)
+	for i, s := range e {
+		newElements[i] = &String{Value: s}
+	}
+	return &Array{Elements: newElements}
+}
+
 type Hashable interface {
 	HashKey() HashKey
 }

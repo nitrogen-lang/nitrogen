@@ -40,3 +40,11 @@ Returns if the file at `filepath` exists.
 ## rename(oldPath, newPath: string): error
 
 Attempts to rename a file from `oldPath` to `newPath`. If no error occurs, nil is returned.
+
+## dirlist(path: string): array
+
+Returns an array which is the directory listing of path. If path is not a directory, and exception is thrown.
+
+## isdir(path: string): bool
+
+Returns if path is a directory.

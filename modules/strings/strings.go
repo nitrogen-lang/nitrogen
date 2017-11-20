@@ -46,15 +46,7 @@ func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...
 		return object.NewException("strSplitN expected an int, got %s", args[1].Type().String())
 	}
 
-	splits := strings.SplitN(target.Value, sep.Value, int(count.Value))
-
-	length := len(splits)
-	newElements := make([]object.Object, length, length)
-	for i, s := range splits {
-		newElements[i] = &object.String{Value: s}
-	}
-
-	return &object.Array{Elements: newElements}
+	return object.MakeStringArray(strings.SplitN(target.Value, sep.Value, int(count.Value)))
 }
 
 func strTrim(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -67,7 +59,7 @@ func strTrim(interpreter object.Interpreter, env *object.Environment, args ...ob
 		return object.NewException("strTrim expected a string, got %s", args[0].Type().String())
 	}
 
-	return &object.String{Value: strings.TrimSpace(target.Value)}
+	return object.MakeStringObj(strings.TrimSpace(target.Value))
 }
 
 func strDedup(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -89,7 +81,7 @@ func strDedup(interpreter object.Interpreter, env *object.Environment, args ...o
 		return object.NewException("Dedup string must be one byte")
 	}
 
-	return &object.String{Value: dedupString(target.Value, dedup.Value[0])}
+	return object.MakeStringObj(dedupString(target.Value, dedup.Value[0]))
 }
 
 func dedupString(str string, c byte) string {
