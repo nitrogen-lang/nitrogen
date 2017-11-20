@@ -107,3 +107,37 @@ func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
 		Right: p.parseExpression(priLowest),
 	}
 }
+
+func (p *Parser) parseTryCatch() ast.Expression {
+	if !p.expectPeek(token.LBrace) {
+		return nil
+	}
+
+	try := p.parseBlockStatements()
+
+	if !p.expectPeek(token.Catch) {
+		return nil
+	}
+
+	var symbol *ast.Identifier
+	if p.peekTokenIs(token.Identifier) {
+		p.nextToken()
+		symbol = p.parseIdentifier().(*ast.Identifier)
+	}
+
+	if !p.expectPeek(token.LBrace) {
+		return nil
+	}
+
+	catch := p.parseBlockStatements()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return &ast.TryCatchExpression{
+		Try:    try,
+		Catch:  catch,
+		Symbol: symbol,
+	}
+}

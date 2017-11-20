@@ -177,3 +177,11 @@ type BreakStatement struct{}
 func (b *BreakStatement) statementNode()       {}
 func (b *BreakStatement) TokenLiteral() string { return "break" }
 func (b *BreakStatement) String() string       { return "break" }
+
+type ThrowStatement struct {
+	Expression Expression
+}
+
+func (t *ThrowStatement) statementNode()       {}
+func (t *ThrowStatement) TokenLiteral() string { return "throw" }
+func (t *ThrowStatement) String() string       { return "throw" }

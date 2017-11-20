@@ -146,10 +146,12 @@ func (r *ReturnValue) Dup() Object      { return &ReturnValue{Value: r.Value.Dup
 
 // TODO: Expand with line/column numbers and stack trace
 type Exception struct {
-	Message string
+	Catchable bool
+	Message   string
+	Caught    bool
 }
 
-func (e *Exception) Inspect() string  { return "EXCEPTION: " + e.Message }
+func (e *Exception) Inspect() string  { return e.Message }
 func (e *Exception) Type() ObjectType { return ExceptionObj }
 func (e *Exception) Dup() Object      { return &Exception{Message: e.Message} }
 
@@ -322,6 +324,13 @@ func (m *Module) Type() ObjectType { return ModuleObj }
 func (m *Module) Dup() Object      { return NullConst }
 
 func NewException(format string, a ...interface{}) *Exception {
+	return &Exception{
+		Message:   fmt.Sprintf(format, a...),
+		Catchable: true,
+	}
+}
+
+func NewPanic(format string, a ...interface{}) *Exception {
 	return &Exception{Message: fmt.Sprintf(format, a...)}
 }
 

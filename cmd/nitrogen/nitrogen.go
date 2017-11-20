@@ -90,12 +90,14 @@ func main() {
 	interpreter := eval.NewInterpreter()
 	result := interpreter.Eval(program, env)
 	if result != nil && result != object.NullConst {
-		os.Stdout.WriteString(result.Inspect())
-		os.Stdout.WriteString("\n")
-
-		if _, ok := result.(*object.Exception); ok {
+		if e, ok := result.(*object.Exception); ok {
+			os.Stdout.WriteString("Uncaught Exception: ")
+			os.Stdout.WriteString(e.Message)
+			os.Stdout.Write([]byte{'\n'})
 			os.Exit(1)
 		}
+		os.Stdout.WriteString(result.Inspect())
+		os.Stdout.Write([]byte{'\n'})
 	}
 }
 

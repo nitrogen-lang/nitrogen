@@ -8,7 +8,7 @@ go-test:
 nitrogen-test:
 	@echo "Run Nitrogen source test suite"
 	@for test in tests/*.ni; do \
-		nitrogen "$$test"; \
+		./bin/nitrogen "$$test"; \
 	done
 
 nitrogen:

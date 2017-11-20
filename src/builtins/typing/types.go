@@ -80,11 +80,14 @@ func getErrorVal(interpreter object.Interpreter, env *object.Environment, args .
 		return ac
 	}
 
-	errObj, ok := args[0].(*object.Error)
-	if !ok {
-		return &object.String{Value: ""}
+	switch arg := args[0].(type) {
+	case *object.Error:
+		return &object.String{Value: arg.Message}
+	case *object.Exception:
+		return &object.String{Value: arg.Message}
 	}
-	return &object.String{Value: errObj.Message}
+
+	return &object.String{Value: ""}
 }
 
 func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

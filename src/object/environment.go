@@ -64,6 +64,14 @@ func (e *Environment) Get(name string) (Object, bool) {
 	return nil, false
 }
 
+func (e *Environment) GetLocal(name string) (Object, bool) {
+	obj, ok := e.store[name]
+	if ok {
+		return obj.v, ok
+	}
+	return nil, false
+}
+
 func (e *Environment) IsConst(name string) bool {
 	obj, ok := e.store[name]
 	if ok {
@@ -72,6 +80,14 @@ func (e *Environment) IsConst(name string) bool {
 
 	if e.parent != nil {
 		return e.parent.IsConst(name)
+	}
+	return false
+}
+
+func (e *Environment) IsConstLocal(name string) bool {
+	obj, ok := e.store[name]
+	if ok {
+		return obj.readonly
 	}
 	return false
 }
@@ -89,7 +105,7 @@ func (e *Environment) Create(name string, val Object) (Object, error) {
 		return nil, errAlreadyDefined
 	}
 
-	return e.setLocal(name, val)
+	return e.setLocal(name, val), nil
 }
 
 func (e *Environment) CreateConst(name string, val Object) (Object, error) {
@@ -109,7 +125,7 @@ func (e *Environment) Set(name string, val Object) (Object, error) {
 		if v.readonly {
 			return nil, constError
 		}
-		return e.setLocal(name, val)
+		return e.setLocal(name, val), nil
 	}
 
 	if e.parent != nil {
@@ -118,7 +134,27 @@ func (e *Environment) Set(name string, val Object) (Object, error) {
 	return nil, errNotDefined
 }
 
-func (e *Environment) setLocal(name string, val Object) (Object, error) {
+func (e *Environment) SetForce(name string, val Object, readonly bool) {
+	e.store[name] = &eco{
+		v:        val,
+		readonly: readonly,
+	}
+}
+
+func (e *Environment) setLocal(name string, val Object) Object {
 	e.store[name] = &eco{v: val}
-	return val, nil
+	return val
+}
+
+func (e *Environment) UnsetLocal(name string) {
+	delete(e.store, name)
+}
+
+func (e *Environment) Unset(name string) {
+	if _, exists := e.store[name]; exists {
+		delete(e.store, name)
+	}
+	if e.parent != nil {
+		e.parent.Unset(name)
+	}
 }

@@ -1,6 +1,7 @@
 package imports
 
 import (
+	"os"
 	"path/filepath"
 	"plugin"
 
@@ -56,6 +57,12 @@ func importModule(i object.Interpreter, env *object.Environment, args ...object.
 	}
 
 	includedPath := filepath.Clean(filepath.Join(filepath.Dir(i.GetCurrentScriptPath()), filepathArg.Value))
+	if !fileExists(includedPath) {
+		if required {
+			return object.NewException("Module %s not found", filepathArg.Value)
+		}
+		return object.NewError("Module %s not found", filepathArg.Value)
+	}
 
 	p, err := plugin.Open(includedPath)
 	if err != nil {
@@ -150,4 +157,9 @@ func commonInclude(require bool, save bool, i object.Interpreter, env *object.En
 		}
 	}
 	return i.Eval(program, object.NewEnclosedEnv(env))
+}
+
+func fileExists(file string) bool {
+	_, err := os.Stat(file)
+	return !os.IsNotExist(err)
 }

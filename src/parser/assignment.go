@@ -17,6 +17,15 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseFuncDefStatement()
 	case token.For:
 		return p.parseForLoop()
+	case token.Throw:
+		p.nextToken()
+		t := &ast.ThrowStatement{
+			Expression: p.parseExpression(priLowest),
+		}
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+		return t
 	case token.Continue:
 		stat := &ast.ContinueStatement{}
 		if p.peekTokenIs(token.Semicolon) {

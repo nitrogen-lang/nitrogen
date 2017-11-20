@@ -47,6 +47,13 @@ func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object
 		return i.assignIdentValue(node.Name, node.Value, true, env)
 	case *ast.AssignStatement:
 		return i.evalAssignment(node, env)
+	case *ast.ThrowStatement:
+		ret := i.Eval(node.Expression, env)
+		if exc, ok := ret.(*object.Exception); ok {
+			exc.Caught = false // Reset since exception is being rethrown.
+			return exc
+		}
+		return object.NewException(ret.Inspect())
 
 	// Literals
 	case *ast.NullLiteral:
@@ -112,6 +119,8 @@ func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object
 		return &object.LoopControl{Continue: true}
 	case *ast.BreakStatement:
 		return &object.LoopControl{Continue: false}
+	case *ast.TryCatchExpression:
+		return i.evalTryCatch(node, env)
 
 	// Functions
 	case *ast.FunctionLiteral:
@@ -157,7 +166,7 @@ func (i *Interpreter) GetStdin() io.Reader {
 }
 
 func (i *Interpreter) evalProgram(p *ast.Program, env *object.Environment) object.Object {
-	var result object.Object
+	var result object.Object = object.NullConst
 	i.scriptNameStack.push(p.Filename)
 	defer i.scriptNameStack.pop()
 	env.CreateConst("_FILE", &object.String{Value: p.Filename})
@@ -177,7 +186,7 @@ func (i *Interpreter) evalProgram(p *ast.Program, env *object.Environment) objec
 }
 
 func (i *Interpreter) evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object {
-	var result object.Object
+	var result object.Object = object.NullConst
 
 	for _, statement := range block.Statements {
 		result = i.Eval(statement, env)

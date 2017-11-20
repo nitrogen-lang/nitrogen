@@ -84,6 +84,9 @@ const (
 	For
 	Continue
 	Break
+	Try
+	Catch
+	Throw
 	keywordEnd
 )
 
@@ -150,6 +153,9 @@ var tokens = [...]string{
 	For:      "for",
 	Continue: "continue",
 	Break:    "break",
+	Try:      "try",
+	Catch:    "catch",
+	Throw:    "throw",
 }
 
 var keywords map[string]TokenType

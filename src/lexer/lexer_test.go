@@ -43,7 +43,6 @@ nil
 comment */
 
 12.5
-12.5.7
 
 "\n\r\t\v\f\\\"\b\' Hello"
 '\n\r\t\v\f\\\"\b\' Hello'
@@ -188,29 +187,24 @@ for
 		{token.Float, "12.5", makePos(36, 1)},
 		{token.Semicolon, ";", makePos(36, 5)},
 
-		{token.Illegal, "Invalid float literal", makePos(37, 1)},
-		{token.Illegal, "Invalid float literal", makePos(37, 5)},
-		{token.Integer, "7", makePos(37, 6)},
-		{token.Semicolon, ";", makePos(37, 7)},
+		{token.String, "\n\r\t\v\f\\\"\b\\' Hello", makePos(38, 1)},
+		{token.Semicolon, ";", makePos(38, 27)},
 
-		{token.String, "\n\r\t\v\f\\\"\b\\' Hello", makePos(39, 1)},
+		{token.String, "\\n\\r\\t\\v\\f\\\\\\\"\\b' Hello", makePos(39, 1)},
 		{token.Semicolon, ";", makePos(39, 27)},
 
-		{token.String, "\\n\\r\\t\\v\\f\\\\\\\"\\b' Hello", makePos(40, 1)},
-		{token.Semicolon, ";", makePos(40, 27)},
+		{token.Integer, "0x2F54a", makePos(41, 1)},
+		{token.Semicolon, ";", makePos(41, 9)},
 
-		{token.Integer, "0x2F54a", makePos(42, 1)},
-		{token.Semicolon, ";", makePos(42, 9)},
+		{token.LOr, "or", makePos(42, 1)},
 
-		{token.LOr, "or", makePos(43, 1)},
+		{token.LAnd, "and", makePos(44, 1)},
 
-		{token.LAnd, "and", makePos(45, 1)},
+		{token.For, "for", makePos(46, 1)},
 
-		{token.For, "for", makePos(47, 1)},
+		{token.Arrow, "->", makePos(48, 1)},
 
-		{token.Arrow, "->", makePos(49, 1)},
-
-		{token.EOF, "", makePos(50, 0)},
+		{token.EOF, "", makePos(49, 0)},
 	}
 
 	l := NewString(input)

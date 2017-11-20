@@ -112,3 +112,40 @@ func (i *Interpreter) evalCompareExpression(node *ast.CompareExpression, env *ob
 
 	return object.NativeBoolToBooleanObj(rBool)
 }
+
+func (i *Interpreter) evalTryCatch(t *ast.TryCatchExpression, env *object.Environment) object.Object {
+	try := i.Eval(t.Try, env)
+	if try.Type() != object.ExceptionObj {
+		return unwrapReturnValue(try)
+	}
+
+	exception := try.(*object.Exception)
+	if !exception.Catchable {
+		return exception
+	}
+	exception.Caught = true
+
+	var orig object.Object
+	var origConst bool
+
+	if t.Symbol != nil {
+		// Get original value is set
+		orig, _ = env.GetLocal(t.Symbol.Value)
+		origConst = env.IsConstLocal(t.Symbol.Value)
+
+		// Clobber value
+		env.SetForce(t.Symbol.Value, try, true)
+	}
+
+	catch := i.Eval(t.Catch, env)
+
+	if t.Symbol != nil {
+		if orig == nil { // The exception ident never existed
+			env.UnsetLocal(t.Symbol.Value)
+		} else {
+			env.SetForce(t.Symbol.Value, orig, origConst)
+		}
+	}
+
+	return unwrapReturnValue(catch)
+}

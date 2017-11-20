@@ -57,7 +57,21 @@ func convertToBoolean(obj object.Object) (bool, bool) {
 }
 
 func isException(obj object.Object) bool {
-	return (obj != nil && obj.Type() == object.ExceptionObj)
+	if obj == nil {
+		return false
+	}
+
+	e, ok := obj.(*object.Exception)
+	return ok && e.Catchable && !e.Caught
+}
+
+func isPanic(obj object.Object) bool {
+	if obj == nil {
+		return false
+	}
+
+	e, ok := obj.(*object.Exception)
+	return ok && !e.Catchable
 }
 
 type stringStack struct {
