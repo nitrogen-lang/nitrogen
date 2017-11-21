@@ -16,6 +16,8 @@ Convert a number to a float.
 ## isFunc(in: T): bool
 ## isArray(in: T): bool
 ## isMap(in: T): bool
+## isClass(in: T): bool
+## isInstance(in: T): bool
 
 Return if a variable is a specific type.
 
@@ -34,3 +36,12 @@ Returns the type of the variable as a string.
 ## isDefined(ident: string): bool
 
 Returns if the given identifier is defined.
+
+## is_a(i: T, className: string|class): bool
+
+Returns if object i is an instance of `className`. `className` can be either a string or an actual class object.
+`is_a` will throw an exception if `className` is not a class or string.
+
+## classOf(i: T): string
+
+Returns the name of the class that i is an instance of. Returns empty string if i is not an object.

@@ -37,6 +37,10 @@ func NewEnclosedEnv(outer *Environment) *Environment {
 	return env
 }
 
+func (e *Environment) SetParent(env *Environment) {
+	e.parent = env
+}
+
 func (e *Environment) Print(indent string) {
 	for k, v := range e.store {
 		fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, k, v.v.Inspect(), indent, v.readonly)

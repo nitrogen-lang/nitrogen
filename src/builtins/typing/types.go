@@ -27,6 +27,8 @@ func init() {
 	eval.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
 	eval.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
 	eval.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
+	eval.RegisterBuiltin("isClass", makeIsTypeBuiltin(object.ClassObj))
+	eval.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))
 
 	eval.RegisterBuiltin("errorVal", getErrorVal)
 }

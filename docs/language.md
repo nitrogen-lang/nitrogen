@@ -450,3 +450,67 @@ let m1 = try {
     println('Outer ', e) // Will print "Outer EXCEPTION: Nope"
 }
 ```
+
+## Classes
+
+Nitrogen has support for simple classes. Classes are like Python where methods and properties don't have visibility
+limitations. It's up to the programmer to use methods as "public" or "private". Classes allow to encapsulate functionality
+and data. Instances of a class have different field values while sharing the same method definitions.
+
+### Class Example
+
+```
+class name ^ parent {
+    let field1
+    always field2 = "constant"
+
+    func init(x) { // Initializer function
+        this.x = x // The instance can be referenced with "this"s
+    }
+
+    // Class methods
+    func doStuff(msg) {
+        return 'ID: ' + toString(x) + ' Msg: ' + msg
+    }
+
+    func setX(x) {
+        this.x = x
+    }
+}
+```
+
+### Class Inheritance
+
+Class inheritance is not currently implemented but it's on the way. The syntax to use a base class is already present with
+the caret (or circumflex) symbol '^'. This symbol denotes the "upper" class of the one being defined. Once inheritance
+is implemented, child classes will be able to override parent methods and fields. The parent methods/fields will
+be available with the special "parent" variable.
+
+### Creating an Instance
+
+An instance of a class can be created using the `make` keyword followed by the class and any arguments to the init
+method.
+
+```
+class name ^ parent {
+    let field1
+    always field2 = "constant"
+
+    func init(x) { // Initializer function
+        this.x = x // The instance can be referenced with "this"s
+    }
+
+    // Class methods
+    func doStuff(msg) {
+        return 'ID: ' + toString(x) + ' Msg: ' + msg
+    }
+
+    func setX(x) {
+        this.x = x
+    }
+}
+
+let myObject = make name(10)
+
+println(classOf(myObject)) // Prints "name"
+```

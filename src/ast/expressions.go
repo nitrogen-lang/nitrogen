@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/token"
@@ -171,4 +172,19 @@ func (t *TryCatchExpression) String() string {
 	out.WriteString(t.Catch.String())
 	out.WriteByte('}')
 	return out.String()
+}
+
+type MakeInstance struct {
+	Class     string
+	Arguments []Expression
+}
+
+func (m *MakeInstance) expressionNode()      {}
+func (m *MakeInstance) TokenLiteral() string { return "make" }
+func (m *MakeInstance) String() string {
+	args := make([]string, len(m.Arguments))
+	for i, a := range m.Arguments {
+		args[i] = a.String()
+	}
+	return fmt.Sprintf("make %s(%s)", m.Class, strings.Join(args, ", "))
 }

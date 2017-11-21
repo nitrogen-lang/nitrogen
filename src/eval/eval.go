@@ -145,6 +145,22 @@ func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object
 		}
 
 		return i.applyFunction(function, args, env)
+
+	// Classes
+	case *ast.ClassLiteral:
+		c := &object.Class{
+			Name:    node.Name,
+			Parent:  node.Parent,
+			Fields:  node.Fields,
+			Methods: make(map[string]*object.Function, len(node.Methods)),
+		}
+
+		for k, f := range node.Methods {
+			c.Methods[k] = i.Eval(f, env).(*object.Function)
+		}
+		return c
+	case *ast.MakeInstance:
+		return i.evalMakeInstance(node, env)
 	}
 
 	return nil

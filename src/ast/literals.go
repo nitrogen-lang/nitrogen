@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/token"
@@ -119,4 +120,17 @@ func (h *HashLiteral) String() string {
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteByte('}')
 	return out.String()
+}
+
+type ClassLiteral struct {
+	Name    string
+	Parent  string
+	Fields  []*DefStatement
+	Methods map[string]*FunctionLiteral
+}
+
+func (c *ClassLiteral) expressionNode()      {}
+func (c *ClassLiteral) TokenLiteral() string { return "class" }
+func (c *ClassLiteral) String() string {
+	return fmt.Sprintf("class %s ^ %s {...}", c.Name, c.Parent)
 }

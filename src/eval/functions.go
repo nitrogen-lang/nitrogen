@@ -10,7 +10,7 @@ func (i *Interpreter) applyFunction(fn object.Object, args []object.Object, env 
 		if len(args) < len(fn.Parameters) {
 			return object.NewException("Not enough parameters to call function %s", fn.Name)
 		}
-		extendedEnv := i.extendFunctionEnv(fn, args)
+		extendedEnv := i.extendFunctionEnv(fn, fn.Env, args)
 		evaled := i.Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaled)
 	case *object.Builtin:
@@ -20,8 +20,24 @@ func (i *Interpreter) applyFunction(fn object.Object, args []object.Object, env 
 	return object.NewException("%s is not a function", fn.Type())
 }
 
-func (i *Interpreter) extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
-	env := object.NewEnclosedEnv(fn.Env)
+func (i *Interpreter) applyFunctionDirect(fn object.Object, args []object.Object, env *object.Environment) object.Object {
+	switch fn := fn.(type) {
+	case *object.Function:
+		if len(args) < len(fn.Parameters) {
+			return object.NewException("Not enough parameters to call function %s", fn.Name)
+		}
+		extendedEnv := i.extendFunctionEnv(fn, env, args)
+		evaled := i.Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaled)
+	case *object.Builtin:
+		return fn.Fn(i, env, args...)
+	}
+
+	return object.NewException("%s is not a function", fn.Type())
+}
+
+func (i *Interpreter) extendFunctionEnv(fn *object.Function, outer *object.Environment, args []object.Object) *object.Environment {
+	env := object.NewEnclosedEnv(outer)
 
 	for i, param := range fn.Parameters {
 		env.Create(param.Value, args[i])

@@ -15,6 +15,8 @@ func (i *Interpreter) evalIndexExpression(left, index object.Object) object.Obje
 		return i.evalStringIndexExpression(left, index)
 	case left.Type() == object.ModuleObj && index.Type() == object.StringObj:
 		return i.evalModuleLookupExpression(left, index)
+	case left.Type() == object.InstanceObj && index.Type() == object.StringObj:
+		return i.evalInstanceLookupExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
@@ -118,4 +120,25 @@ func (i *Interpreter) evalStringIndexExpression(array, index object.Object) obje
 	}
 
 	return &object.String{Value: string(strObj.Value[idx])}
+}
+
+func (i *Interpreter) evalInstanceLookupExpression(instance, index object.Object) object.Object {
+	instanceObj := instance.(*object.Instance)
+	key := index.(*object.String)
+
+	method := instanceObj.GetMethod(key.Value)
+	if method != nil {
+		return &object.Function{
+			Name:       method.Name,
+			Parameters: method.Parameters,
+			Body:       method.Body,
+			Env:        object.NewEnclosedEnv(instanceObj.Fields),
+		}
+	}
+
+	val, ok := instanceObj.Fields.Get(key.Value)
+	if ok {
+		return val
+	}
+	return object.NullConst
 }

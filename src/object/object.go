@@ -35,6 +35,8 @@ const (
 	// ResourceObj can be used by modules to denote a generic resource. The implementation may be module specific.
 	ResourceObj
 	ModuleObj
+	ClassObj
+	InstanceObj
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -52,6 +54,8 @@ var objectTypeNames = map[ObjectType]string{
 	HashObj:      "MAP",
 	ResourceObj:  "RESOURCE",
 	ModuleObj:    "MODULE",
+	ClassObj:     "CLASS",
+	InstanceObj:  "INSTANCE",
 }
 
 // These are all constants in the language that can be represented with a single instance

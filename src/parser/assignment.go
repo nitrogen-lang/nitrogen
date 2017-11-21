@@ -15,6 +15,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.Function:
 		return p.parseFuncDefStatement()
+	case token.Class:
+		return p.parseClassDefStatement()
 	case token.For:
 		return p.parseForLoop()
 	case token.Throw:
@@ -53,6 +55,16 @@ func (p *Parser) parseDefStatement() ast.Statement {
 
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+
+		if stmt.Const {
+			p.addErrorWithPos("Constant defined with no value")
+			return nil
+		}
+		return stmt
+	}
+
 	if !p.expectPeek(token.Assign) {
 		return nil
 	}
@@ -63,6 +75,9 @@ func (p *Parser) parseDefStatement() ast.Statement {
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
+	}
+	if class, ok := stmt.Value.(*ast.ClassLiteral); ok {
+		class.Name = stmt.Name.String()
 	}
 
 	if p.peekTokenIs(token.Semicolon) {
@@ -110,6 +125,35 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
+	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseClassDefStatement() ast.Statement {
+	if !p.peekTokenIs(token.Identifier) {
+		return p.parseExpressionStatement()
+	}
+
+	classToken := p.curToken
+	if !p.expectPeek(token.Identifier) {
+		return nil
+	}
+
+	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	p.insertToken(classToken)
+	p.nextToken()
+
+	stmt.Value = p.parseExpression(priLowest)
+
+	if class, ok := stmt.Value.(*ast.ClassLiteral); ok {
+		class.Name = stmt.Name.String()
 	}
 
 	if p.peekTokenIs(token.Semicolon) {

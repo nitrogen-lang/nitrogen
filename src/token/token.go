@@ -58,6 +58,7 @@ const (
 	Comma
 	Semicolon
 	Colon
+	Carrot
 
 	// Groups and blocks
 	LParen
@@ -87,6 +88,8 @@ const (
 	Try
 	Catch
 	Throw
+	Class
+	Make
 	keywordEnd
 )
 
@@ -129,6 +132,7 @@ var tokens = [...]string{
 	Comma:     ",",
 	Semicolon: ";",
 	Colon:     ":",
+	Carrot:    "^",
 
 	// Groups and blocks
 	LParen:  "(",
@@ -156,6 +160,8 @@ var tokens = [...]string{
 	Try:      "try",
 	Catch:    "catch",
 	Throw:    "throw",
+	Class:    "class",
+	Make:     "make",
 }
 
 var keywords map[string]TokenType
