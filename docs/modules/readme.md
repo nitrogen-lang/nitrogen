@@ -9,6 +9,10 @@ be added to the core library.
 - [os](os.md): Interfacing with the OS
 - [strings](strings.md): Functions to manipulate strings.
 
+## modulesSupported(): bool
+
+Returns if the platform supports dynamic binary modules.
+
 ## module(filename: string[, required: bool]): module|error|nil
 
 `module` will attempt to import a binary shared library into the interpreter. The returned value depends on how the module
