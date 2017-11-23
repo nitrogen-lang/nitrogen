@@ -483,7 +483,7 @@ func (l *Lexer) readSingleLineComment() token.Token {
 	}
 	l.readRune() // Go over # or / characters
 
-	for l.curCh != '\n' {
+	for l.curCh != '\n' && l.curCh != 0 {
 		com.WriteRune(l.curCh)
 		l.readRune()
 	}

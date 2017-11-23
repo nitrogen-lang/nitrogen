@@ -84,7 +84,7 @@ func commonInclude(require bool, save bool, i object.Interpreter, env *object.En
 		return object.NewError("including %s failed %s", includedFile, err.Error())
 	}
 
-	p := parser.New(l)
+	p := parser.New(l, moduleutils.ParserSettings)
 	program = p.ParseProgram()
 	if len(p.Errors()) != 0 {
 		if require {

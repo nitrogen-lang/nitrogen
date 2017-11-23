@@ -11,10 +11,29 @@ func (i *Interpreter) applyFunction(fn object.Object, args []object.Object, env 
 			return object.NewException("Not enough parameters to call function %s", fn.Name)
 		}
 		extendedEnv := i.extendFunctionEnv(fn, fn.Env, args)
+		oldInstance := i.currentInstance
+		i.currentInstance = fn.Instance
 		evaled := i.Eval(fn.Body, extendedEnv)
+		i.currentInstance = oldInstance
 		return unwrapReturnValue(evaled)
 	case *object.Builtin:
 		return fn.Fn(i, env, args...)
+	case *object.Class: // Class init function
+		init := fn.GetMethod("init")
+		if init == nil {
+			return object.NullConst
+		}
+
+		if len(args) < len(init.Parameters) {
+			return object.NewException("Not enough parameters to call class initializer %s", fn.Name)
+		}
+		extendedEnv := i.extendFunctionEnv(init, init.Env, args)
+		extendedEnv.SetParent(env)
+		if fn.Parent != nil {
+			extendedEnv.CreateConst("parent", fn.Parent)
+		}
+		evaled := i.Eval(init.Body, extendedEnv)
+		return unwrapReturnValue(evaled)
 	}
 
 	return object.NewException("%s is not a function", fn.Type())

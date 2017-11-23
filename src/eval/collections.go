@@ -17,6 +17,8 @@ func (i *Interpreter) evalIndexExpression(left, index object.Object) object.Obje
 		return i.evalModuleLookupExpression(left, index)
 	case left.Type() == object.InstanceObj && index.Type() == object.StringObj:
 		return i.evalInstanceLookupExpression(left, index)
+	case left.Type() == object.ClassObj && index.Type() == object.StringObj:
+		return i.evalClassLookupExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
@@ -128,17 +130,51 @@ func (i *Interpreter) evalInstanceLookupExpression(instance, index object.Object
 
 	method := instanceObj.GetMethod(key.Value)
 	if method != nil {
-		return &object.Function{
+		fn := &object.Function{
 			Name:       method.Name,
 			Parameters: method.Parameters,
 			Body:       method.Body,
 			Env:        object.NewEnclosedEnv(instanceObj.Fields),
+			Instance:   instanceObj,
 		}
+		if instanceObj.Class.Parent != nil {
+			fn.Env.CreateConst("parent", instanceObj.Class.Parent)
+		}
+		return fn
 	}
 
 	val, ok := instanceObj.Fields.Get(key.Value)
 	if ok {
 		return val
 	}
+	return object.NullConst
+}
+
+func (i *Interpreter) evalClassLookupExpression(class, index object.Object) object.Object {
+	classObj := class.(*object.Class)
+	if !object.InstanceOf(classObj.Name, i.currentInstance) {
+		return object.NullConst
+	}
+	key := index.(*object.String)
+
+	method := classObj.GetMethod(key.Value)
+	if method != nil {
+		fn := &object.Function{
+			Name:       method.Name,
+			Parameters: method.Parameters,
+			Body:       method.Body,
+			Env:        i.currentInstance.Fields,
+			Instance:   i.currentInstance,
+		}
+		if classObj.Parent != nil {
+			fn.Env.CreateConst("parent", classObj.Parent)
+		}
+		return fn
+	}
+
+	// val, ok := classObj.Fields.Get(key.Value)
+	// if ok {
+	// 	return val
+	// }
 	return object.NullConst
 }

@@ -23,9 +23,9 @@ func instanceOf(interpreter object.Interpreter, env *object.Environment, args ..
 
 	switch class := args[1].(type) {
 	case *object.String:
-		return object.NativeBoolToBooleanObj(instance.Class.Name == class.Value)
+		return object.NativeBoolToBooleanObj(object.InstanceOf(class.Value, instance))
 	case *object.Class:
-		return object.NativeBoolToBooleanObj(instance.Class == class)
+		return object.NativeBoolToBooleanObj(object.InstanceOf(class.Name, instance))
 	}
 
 	return object.NewException("is_a expected a class or string for second argument")

@@ -8,15 +8,21 @@ import (
 
 type Class struct {
 	Name    string
-	Parent  string
+	Parent  *Class
 	Fields  []*ast.DefStatement
 	Methods map[string]*Function
 }
 
-func (c *Class) Inspect() string                 { return "class " + c.Name }
-func (c *Class) Type() ObjectType                { return ClassObj }
-func (c *Class) Dup() Object                     { return NullConst }
-func (c *Class) GetMethod(name string) *Function { return c.Methods[name] }
+func (c *Class) Inspect() string  { return "class " + c.Name }
+func (c *Class) Type() ObjectType { return ClassObj }
+func (c *Class) Dup() Object      { return NullConst }
+func (c *Class) GetMethod(name string) *Function {
+	m, ok := c.Methods[name]
+	if ok || c.Parent == nil {
+		return m
+	}
+	return c.Parent.GetMethod(name)
+}
 
 type Instance struct {
 	Class  *Class
@@ -28,12 +34,21 @@ func (i *Instance) Type() ObjectType                { return InstanceObj }
 func (i *Instance) Dup() Object                     { return NullConst }
 func (i *Instance) GetMethod(name string) *Function { return i.Class.GetMethod(name) }
 
-func InstanceOf(class string, instance Object) *Instance {
-	i, ok := instance.(*Instance)
-	if !ok || i.Class.Name != class {
-		return nil
+func InstanceOf(class string, i *Instance) bool {
+	if i == nil {
+		return false
 	}
-	return i
+
+	c := i.Class
+	for {
+		if c.Name == class {
+			return true
+		}
+		if c.Parent == nil {
+			return false
+		}
+		c = c.Parent
+	}
 }
 
 func InstanceOfAny(instance Object, classes ...string) bool {
@@ -43,7 +58,7 @@ func InstanceOfAny(instance Object, classes ...string) bool {
 	}
 
 	for _, class := range classes {
-		if i.Class.Name == class {
+		if InstanceOf(class, i) {
 			return true
 		}
 	}

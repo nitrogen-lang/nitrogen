@@ -14,6 +14,7 @@ type Interpreter struct {
 	Stderr io.Writer
 
 	scriptNameStack *stringStack
+	currentInstance *object.Instance
 }
 
 func NewInterpreter() *Interpreter {
@@ -148,9 +149,21 @@ func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object
 
 	// Classes
 	case *ast.ClassLiteral:
+		var parentClass *object.Class
+		if node.Parent != "" {
+			parent, ok := env.Get(node.Parent)
+			if !ok {
+				return object.NewException("Parent class %s not declared", node.Parent)
+			}
+			parentClass, ok = parent.(*object.Class)
+			if !ok {
+				return object.NewException("Ident %s is not a class", node.Parent)
+			}
+		}
+
 		c := &object.Class{
 			Name:    node.Name,
-			Parent:  node.Parent,
+			Parent:  parentClass,
 			Fields:  node.Fields,
 			Methods: make(map[string]*object.Function, len(node.Methods)),
 		}

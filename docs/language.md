@@ -481,10 +481,55 @@ class name ^ parent {
 
 ### Class Inheritance
 
-Class inheritance is not currently implemented but it's on the way. The syntax to use a base class is already present with
-the caret (or circumflex) symbol '^'. This symbol denotes the "upper" class of the one being defined. Once inheritance
-is implemented, child classes will be able to override parent methods and fields. The parent methods/fields will
-be available with the special "parent" variable.
+Classes can inherit methods and fields from another class using the inheritance syntax `class basename ^ parent { }`.
+Classes may have only one parent. Calling the parent init method can be done by calling `parent()`. In methods, the
+variable `parent` is bound to the parent class if one is available. If a class doesn't have a parent, `parent` is
+not defined. Parent methods can be retrieved like so: `parent.overridenMethod()`. If a method isn't redefined in a child
+class, the method can be called directly without consulting the `parent` variable.
+
+```
+class parentPrinter {
+    let z
+
+    func init() {
+        z = "parent thing"
+    }
+
+    func doStuff(msg) {
+        return 'Parent: ' + z + ' Msg: ' + msg
+    }
+
+    func parentOnly() {
+        return "I'm the parent"
+    }
+}
+
+class printer ^ parentPrinter {
+    let x
+    always t = "Thing"
+
+    func init(x) {
+        parent()
+        this.x = x
+    }
+
+    // Overridden function
+    func doStuff(msg) {
+        return 'ID: ' + toString(x) + ' Msg: ' + msg
+    }
+
+    func doStuff2(msg) {
+        return parent.doStuff(msg)
+    }
+}
+
+let myPrinter = make printer(1)
+
+println(myPrinter->doStuff('Hello')) // Redefined on child class
+println(myPrinter->z) // Field from parent class
+println(myPrinter->parentOnly()) // Method only on parent class
+println(myPrinter->doStuff2('Hello')) // Method that calls the parent's doStuff() method
+```
 
 ### Creating an Instance
 

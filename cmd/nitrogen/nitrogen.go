@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
@@ -18,7 +17,10 @@ import (
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
 
-const interactivePrompt = ">> "
+const (
+	interactivePrompt = ">> "
+	version           = "0.1.0"
+)
 
 var (
 	interactive       bool
@@ -28,6 +30,8 @@ var (
 	scgiWorkers       int
 	scgiWorkerTimeout int
 	modulePath        string
+	printVersion      bool
+	fullDebug         bool
 )
 
 func init() {
@@ -38,10 +42,17 @@ func init() {
 	flag.IntVar(&scgiWorkers, "scgi-workers", 5, "Number of workers to service SCGI requests")
 	flag.IntVar(&scgiWorkerTimeout, "scgi-worker-timeout", 10, "Number of seconds to wait for an available worker before giving up")
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
+	flag.BoolVar(&printVersion, "version", false, "Print version information")
+	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 }
 
 func main() {
 	flag.Parse()
+
+	if printVersion {
+		fmt.Printf("Nitrogen Interpreter Version %s\n", version)
+		return
+	}
 
 	modulesPath := os.Getenv("NITROGEN_MODULES")
 	if modulePath != "" {
@@ -59,6 +70,7 @@ func main() {
 		return
 	}
 
+	moduleutils.ParserSettings.Debug = fullDebug
 	if interactive {
 		fmt.Print("Nitrogen Programming Language\n")
 		fmt.Print("Type in commands at the prompt\n")
@@ -156,7 +168,7 @@ func startRepl(in io.Reader, out io.Writer) {
 		}
 
 		l := lexer.NewString(line)
-		p := parser.New(l)
+		p := parser.New(l, moduleutils.ParserSettings)
 
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
@@ -176,14 +188,4 @@ func printParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		fmt.Fprintf(out, "ERROR: %s\n", msg)
 	}
-}
-
-func parseFile(pathname string) (*ast.Program, []string) {
-	l, err := lexer.NewFile(pathname)
-	if err != nil {
-		return nil, []string{err.Error()}
-	}
-	p := parser.New(l)
-	program := p.ParseProgram()
-	return program, p.Errors()
 }

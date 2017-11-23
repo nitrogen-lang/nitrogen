@@ -49,11 +49,15 @@ var precedences = map[token.TokenType]int{
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
+	Settings      struct {
+		Debug bool
+	}
 )
 
 type Parser struct {
-	l      *lexer.Lexer
-	errors []string
+	l        *lexer.Lexer
+	errors   []string
+	settings *Settings
 
 	lastToken token.Token
 	curToken  token.Token
@@ -65,9 +69,14 @@ type Parser struct {
 	infixParseFns  map[token.TokenType]infixParseFn
 }
 
-func New(l *lexer.Lexer) *Parser {
+func New(l *lexer.Lexer, settings *Settings) *Parser {
+	if settings == nil {
+		settings = &Settings{}
+	}
+
 	p := &Parser{
 		l:              l,
+		settings:       settings,
 		errors:         []string{},
 		insertedTokens: make([]token.Token, 0, 5),
 	}
@@ -174,6 +183,10 @@ func (p *Parser) nextToken() {
 	if p.curTokenIs(token.Illegal) {
 		p.addErrorWithPos("Got illegal token: %s", p.curToken.Literal)
 		p.nextToken()
+	}
+
+	if p.settings.Debug {
+		fmt.Println(p.curToken)
 	}
 }
 

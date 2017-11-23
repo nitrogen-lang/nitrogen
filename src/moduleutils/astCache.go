@@ -12,7 +12,10 @@ import (
 )
 
 // ASTCache is a global cache of Program AST nodes keyed to a script filename
-var ASTCache = newASTCache()
+var (
+	ASTCache       = newASTCache()
+	ParserSettings = &parser.Settings{}
+)
 
 type astCache struct {
 	m     sync.Mutex
@@ -50,7 +53,7 @@ func (c *astCache) GetTree(file string) (*ast.Program, error) {
 		return nil, err
 	}
 
-	p := parser.New(l)
+	p := parser.New(l, ParserSettings)
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {
 		return nil, errors.New(p.Errors()[0])

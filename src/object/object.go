@@ -172,6 +172,7 @@ type Function struct {
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
 	Env        *Environment
+	Instance   *Instance
 }
 
 func (f *Function) Inspect() string {

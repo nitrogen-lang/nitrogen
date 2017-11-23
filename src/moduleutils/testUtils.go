@@ -13,7 +13,7 @@ var testInterpreter = eval.NewInterpreter()
 
 func TestEval(input string) object.Object {
 	l := lexer.NewString(input)
-	p := parser.New(l)
+	p := parser.New(l, nil)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
 
