@@ -10,7 +10,7 @@ import (
 func TestParsingArrayLiterals(t *testing.T) {
 	input := "[1, 2 * 2, 3 + 3]"
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -32,7 +32,7 @@ func TestParsingArrayLiterals(t *testing.T) {
 func TestParsingIndexExpressions(t *testing.T) {
 	input := "myArray[1 + 1]"
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -55,7 +55,7 @@ func TestParsingHashLiteralsStringKeys(t *testing.T) {
 	input := `{"one": 1, "two": 2, "three": 3}`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -89,7 +89,7 @@ func TestParsingEmptyHashLiteral(t *testing.T) {
 	input := "{}"
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -108,7 +108,7 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 	input := `{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -153,7 +153,7 @@ func TestHashAssignments(t *testing.T) {
 	input := `m["key"] = "value";`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -195,7 +195,7 @@ func TestArrayAssignments(t *testing.T) {
 	input := `m[0] = "value";`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -237,7 +237,7 @@ func TestHashArrowOperator(t *testing.T) {
 	input := `m->value;`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -268,7 +268,7 @@ func TestHashArrowOperatorString(t *testing.T) {
 	input := `m->"value";`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -303,7 +303,7 @@ func TestParsingHashLiteralsMultiLine(t *testing.T) {
               }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -341,7 +341,7 @@ func TestInvalidHashLiteralMultiLine(t *testing.T) {
               }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	p.ParseProgram()
 	if len(p.Errors()) == 0 {
 		t.Fatalf("No errors for invalid hash literal, missing comma")

@@ -11,6 +11,7 @@ import (
 
 func init() {
 	eval.RegisterBuiltin("print", printBuiltin)
+	eval.RegisterBuiltin("printlnb", printBinaryBuiltin)
 	eval.RegisterBuiltin("println", printlnBuiltin)
 	eval.RegisterBuiltin("printenv", printEnvBuiltin)
 
@@ -27,6 +28,11 @@ func printBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 func printlnBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	printBuiltin(interpreter, env, args...)
 	fmt.Fprint(interpreter.GetStdout(), "\n")
+	return object.NullConst
+}
+
+func printBinaryBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	fmt.Fprintf(interpreter.GetStdout(), "%b\n", args[0].(*object.Integer).Value)
 	return object.NullConst
 }
 

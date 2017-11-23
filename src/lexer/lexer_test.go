@@ -194,17 +194,17 @@ for
 		{token.Semicolon, ";", makePos(39, 27)},
 
 		{token.Integer, "0x2F54a", makePos(41, 1)},
-		{token.Semicolon, ";", makePos(41, 9)},
+		{token.Semicolon, ";", makePos(41, 8)},
 
-		{token.LOr, "or", makePos(42, 1)},
+		{token.LOr, "or", makePos(43, 1)},
 
-		{token.LAnd, "and", makePos(44, 1)},
+		{token.LAnd, "and", makePos(45, 1)},
 
-		{token.For, "for", makePos(46, 1)},
+		{token.For, "for", makePos(47, 1)},
 
-		{token.Arrow, "->", makePos(48, 1)},
+		{token.Arrow, "->", makePos(49, 1)},
 
-		{token.EOF, "", makePos(49, 0)},
+		{token.EOF, "", makePos(50, 0)},
 	}
 
 	l := NewString(input)

@@ -232,6 +232,14 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
+		} else if l.peekChar() == '<' {
+			tok = token.Token{
+				Type:     token.ShiftLeft,
+				Literal:  "<<",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
+			}
+			l.readRune()
 		} else {
 			tok = l.newToken(token.LessThan, l.curCh)
 		}
@@ -244,9 +252,32 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
+		} else if l.peekChar() == '>' {
+			tok = token.Token{
+				Type:     token.ShiftRight,
+				Literal:  ">>",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
+			}
+			l.readRune()
 		} else {
 			tok = l.newToken(token.GreaterThan, l.curCh)
 		}
+
+	case '&':
+		if l.peekChar() == '^' {
+			tok = token.Token{
+				Type:     token.BitwiseAndNot,
+				Literal:  "&^",
+				Pos:      l.curPosition(),
+				Filename: l.currentFile,
+			}
+			l.readRune()
+		} else {
+			tok = l.newToken(token.BitwiseAnd, l.curCh)
+		}
+	case '|':
+		tok = l.newToken(token.BitwiseOr, l.curCh)
 
 	// Control characters
 	case ',':
@@ -285,9 +316,10 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekCh == 'x' {
 			l.readRune()
 			tok = l.readNumber()
-		} else {
-			tok = l.newToken(token.Illegal, l.curCh)
+			l.lastToken = tok
+			return tok
 		}
+		tok = l.newToken(token.Illegal, l.curCh)
 	case 0:
 		if l.needSemicolon() {
 			tok = l.newToken(token.Semicolon, ';')
@@ -433,6 +465,13 @@ func (l *Lexer) readNumber() token.Token {
 	pos := l.curPosition()
 	base := ""
 	tokenType := token.Integer
+
+	if l.curCh == '0' && l.peekCh == 'x' {
+		base = "0x"
+		pos.Col-- // Correct for initial 0x
+		l.readRune()
+		l.readRune()
+	}
 
 	if l.curCh == 'x' {
 		base = "0x"

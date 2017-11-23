@@ -52,6 +52,24 @@ func (i *Interpreter) evalIntegerInfixExpression(op string, left, right object.O
 		return object.NativeBoolToBooleanObj(leftVal <= rightVal)
 	case ">=":
 		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
+	case "<<":
+		if rightVal < 0 {
+			return object.NewException("Shift value must be non-negative")
+		}
+		return &object.Integer{Value: leftVal << uint64(rightVal)}
+	case ">>":
+		if rightVal < 0 {
+			return object.NewException("Shift value must be non-negative")
+		}
+		return &object.Integer{Value: leftVal >> uint64(rightVal)}
+	case "&":
+		return &object.Integer{Value: leftVal & rightVal}
+	case "&^":
+		return &object.Integer{Value: leftVal &^ rightVal}
+	case "|":
+		return &object.Integer{Value: leftVal | rightVal}
+	case "^":
+		return &object.Integer{Value: leftVal ^ rightVal}
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())

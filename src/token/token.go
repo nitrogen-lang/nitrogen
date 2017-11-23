@@ -54,6 +54,13 @@ const (
 	Equal
 	NotEqual
 
+	BitwiseAnd
+	BitwiseOr
+	BitwiseAndNot
+
+	ShiftLeft
+	ShiftRight
+
 	// Delimiters
 	Comma
 	Semicolon
@@ -127,6 +134,13 @@ var tokens = [...]string{
 	GreaterThanEq: ">=",
 	Equal:         "==",
 	NotEqual:      "!=",
+
+	BitwiseAnd:    "&",
+	BitwiseOr:     "|",
+	BitwiseAndNot: "&^",
+
+	ShiftLeft:  "<<",
+	ShiftRight: ">>",
 
 	// Delimiters
 	Comma:     ",",

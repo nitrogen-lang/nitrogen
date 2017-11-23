@@ -20,7 +20,7 @@ func TestDefStatements(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -54,7 +54,7 @@ func TestConstStatements(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -88,7 +88,7 @@ func TestReturnStatements(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -118,7 +118,7 @@ func TestFunctionSugar(t *testing.T) {
     }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -144,7 +144,7 @@ func TestLetFuncSugarStatement(t *testing.T) {
     }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	p.ParseProgram()
 	if len(p.Errors()) == 0 {
 		t.Fatalf("let with func sugar expected to fail, but didn't")
@@ -160,7 +160,7 @@ func TestNullReturn(t *testing.T) {
     }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	if len(p.Errors()) > 0 {
 		t.Fatalf("null return returned error: %s", p.Errors()[0])
@@ -176,7 +176,7 @@ func TestGeneralAssignments(t *testing.T) {
 	input := `variable = "value";`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 

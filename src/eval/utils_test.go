@@ -12,7 +12,7 @@ var testInterpreter = NewInterpreter()
 
 func testEval(input string, t *testing.T) object.Object {
 	l := lexer.NewString(input)
-	p := parser.New(l)
+	p := parser.New(l, nil)
 	program := p.ParseProgram()
 	if len(p.Errors()) > 1 {
 		t.Fatal(p.Errors()[0])

@@ -23,7 +23,7 @@ func TestParsingPrefixExpressions(t *testing.T) {
 
 	for _, tt := range prefixTests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -83,7 +83,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 
 	for _, tt := range infixTests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -234,7 +234,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 

@@ -32,9 +32,15 @@ var precedences = map[token.TokenType]int{
 	token.GreaterThan:   priLessGreater,
 	token.Plus:          priSum,
 	token.Dash:          priSum,
+	token.BitwiseOr:     priSum,
+	token.Carrot:        priSum,
 	token.Slash:         priProduct,
 	token.Asterisk:      priProduct,
 	token.Modulo:        priProduct,
+	token.ShiftLeft:     priProduct,
+	token.ShiftRight:    priProduct,
+	token.BitwiseAnd:    priProduct,
+	token.BitwiseAndNot: priProduct,
 	token.LParen:        priCall,
 	token.LSquare:       priIndex,
 	token.Arrow:         priIndex,
@@ -125,6 +131,12 @@ func New(l *lexer.Lexer, settings *Settings) *Parser {
 	p.registerInfix(token.TimesAssign, p.parseCompoundAssign)
 	p.registerInfix(token.SlashAssign, p.parseCompoundAssign)
 	p.registerInfix(token.ModAssign, p.parseCompoundAssign)
+	p.registerInfix(token.ShiftLeft, p.parseInfixExpression)
+	p.registerInfix(token.ShiftRight, p.parseInfixExpression)
+	p.registerInfix(token.BitwiseAnd, p.parseInfixExpression)
+	p.registerInfix(token.BitwiseAndNot, p.parseInfixExpression)
+	p.registerInfix(token.BitwiseOr, p.parseInfixExpression)
+	p.registerInfix(token.Carrot, p.parseInfixExpression)
 
 	// Read the first two tokens to populate curToken and peekToken
 	p.nextToken()

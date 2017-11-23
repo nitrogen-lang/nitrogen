@@ -11,7 +11,7 @@ func TestFunctionLiteralParsing(t *testing.T) {
 	input := `func(x, y) { x + y; }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -66,7 +66,7 @@ func TestFunctionParameterParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -88,7 +88,7 @@ func TestCallExpressionParsing(t *testing.T) {
 	input := "add(1, 2 * 3, 4 + 5);"
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -147,7 +147,7 @@ func TestCallExpressionParameterParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 

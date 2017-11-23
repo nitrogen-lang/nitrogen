@@ -11,7 +11,7 @@ func TestIdentifierExpression(t *testing.T) {
 	input := "foobar;"
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -42,7 +42,7 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	input := "5;"
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -73,7 +73,7 @@ func TestFloatLiteralExpression(t *testing.T) {
 	input := "5.5;"
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -103,7 +103,7 @@ func TestFloatLiteralExpression(t *testing.T) {
 func TestStringLiteralExpression(t *testing.T) {
 	input := `"hello world";`
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
@@ -123,7 +123,7 @@ func TestNullLiteral(t *testing.T) {
 	input := "nil"
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 

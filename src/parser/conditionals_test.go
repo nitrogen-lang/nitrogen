@@ -18,7 +18,7 @@ func TestBooleanExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		l := lexer.NewString(tt.input)
-		p := New(l)
+		p := New(l, nil)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
@@ -48,7 +48,7 @@ func TestIfExpression(t *testing.T) {
 	input := `if (x < y) { x }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -97,7 +97,7 @@ func TestIfExpressionNoParens(t *testing.T) {
 	input := `if x < y { x }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -146,7 +146,7 @@ func TestIfElseExpression(t *testing.T) {
 	input := `if (x < y) { x } else { y }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -205,7 +205,7 @@ func TestOrExpression(t *testing.T) {
 	input := `true or 0`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -236,7 +236,7 @@ func TestAndExpression(t *testing.T) {
 	input := `true and 0`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -266,7 +266,7 @@ func TestForLoop(t *testing.T) {
 	input := `for (i = 0; i < 10; i + 1) { print(i) }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -301,7 +301,7 @@ func TestForLoopNoParens(t *testing.T) {
 	input := `for i = 0; i < 10; i + 1 { print(i) }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -336,7 +336,7 @@ func TestInfiniteForLoop(t *testing.T) {
 	input := `for { print(i) }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
@@ -371,7 +371,7 @@ func TestInfiniteForLoopEmptyParens(t *testing.T) {
 	input := `for() { print(i) }`
 
 	l := lexer.NewString(input)
-	p := New(l)
+	p := New(l, nil)
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
