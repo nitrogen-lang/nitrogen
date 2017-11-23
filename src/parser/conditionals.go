@@ -1,11 +1,16 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 func (p *Parser) parseIfExpression() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseIfExpression")
+	}
 	expression := &ast.IfExpression{Token: p.curToken}
 
 	if p.curTokenIs(token.LParen) {
@@ -38,6 +43,9 @@ func (p *Parser) parseIfExpression() ast.Expression {
 }
 
 func (p *Parser) parseForLoop() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseForLoop")
+	}
 	loop := &ast.ForLoopStatement{}
 	expectClosingParen := false
 
@@ -98,6 +106,9 @@ func (p *Parser) parseForLoop() ast.Statement {
 }
 
 func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseCompareExpression")
+	}
 	c := p.curToken
 	p.nextToken() // Go over OR, AND
 
@@ -109,6 +120,9 @@ func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
 }
 
 func (p *Parser) parseTryCatch() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseTryCatch")
+	}
 	if !p.expectPeek(token.LBrace) {
 		return nil
 	}

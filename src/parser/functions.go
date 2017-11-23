@@ -1,11 +1,16 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseFunctionLiteral")
+	}
 	lit := &ast.FunctionLiteral{Token: p.curToken}
 
 	if !p.expectPeek(token.LParen) {
@@ -24,6 +29,9 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 }
 
 func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+	if p.settings.Debug {
+		fmt.Println("parseFunctionParameters")
+	}
 	idents := []*ast.Identifier{}
 
 	if p.peekTokenIs(token.RParen) {
@@ -51,6 +59,9 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 }
 
 func (p *Parser) parseCallExpression(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseCallExpression")
+	}
 	return &ast.CallExpression{
 		Token:     p.curToken,
 		Function:  left,

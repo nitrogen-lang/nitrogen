@@ -1,11 +1,16 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 func (p *Parser) parseStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseStatment")
+	}
 	switch p.curToken.Type {
 	case token.Let:
 		fallthrough
@@ -45,6 +50,9 @@ func (p *Parser) parseStatement() ast.Statement {
 }
 
 func (p *Parser) parseDefStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseDefStatement")
+	}
 	stmt := &ast.DefStatement{Token: p.curToken}
 
 	stmt.Const = p.curTokenIs(token.Always)
@@ -88,6 +96,9 @@ func (p *Parser) parseDefStatement() ast.Statement {
 }
 
 func (p *Parser) parseReturnStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseReturnStatement")
+	}
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
 	p.nextToken()
@@ -106,6 +117,9 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 }
 
 func (p *Parser) parseFuncDefStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseFuncDefStatement")
+	}
 	if !p.peekTokenIs(token.Identifier) {
 		return p.parseExpressionStatement()
 	}
@@ -135,6 +149,9 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 }
 
 func (p *Parser) parseClassDefStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseClassDefStatement")
+	}
 	if !p.peekTokenIs(token.Identifier) {
 		return p.parseExpressionStatement()
 	}
@@ -164,6 +181,9 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 }
 
 func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseAssignmentStatement")
+	}
 	stmt := &ast.AssignStatement{
 		Token: p.curToken,
 		Left:  left,
@@ -184,6 +204,9 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
 // turn it into a normal assignment statement using the given left
 // expression as the left side of a normal arithmatic operation
 func (p *Parser) parseCompoundAssign(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseCompoundAssign")
+	}
 	stmt := &ast.AssignStatement{
 		Token: p.curToken,
 		Left:  left,

@@ -1,17 +1,25 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 func (p *Parser) parseArrayLiteral() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseArrayLiteral")
+	}
 	array := &ast.Array{Token: p.curToken}
 	array.Elements = p.parseExpressionList(token.RSquare)
 	return array
 }
 
 func (p *Parser) parseHashLiteral() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseHashLiteral")
+	}
 	hash := &ast.HashLiteral{Token: p.curToken}
 	hash.Pairs = make(map[ast.Expression]ast.Expression)
 
@@ -47,6 +55,9 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseIndexExpression")
+	}
 	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
 
 	if p.curTokenIs(token.Arrow) {

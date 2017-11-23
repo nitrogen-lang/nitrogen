@@ -223,6 +223,9 @@ func (p *Parser) insertToken(t token.Token) {
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
+	if p.settings.Debug {
+		fmt.Println("ParseProgram")
+	}
 	program := &ast.Program{Filename: p.curToken.Filename}
 	program.Statements = []ast.Statement{}
 
@@ -241,6 +244,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseExpression")
+	}
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
@@ -262,6 +268,9 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseExpressionStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseExpressionStatement")
+	}
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 
 	stmt.Expression = p.parseExpression(priLowest)
@@ -274,6 +283,9 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 }
 
 func (p *Parser) parseBlockStatements() *ast.BlockStatement {
+	if p.settings.Debug {
+		fmt.Println("parseBlockStatements")
+	}
 	block := &ast.BlockStatement{
 		Token:      p.curToken,
 		Statements: []ast.Statement{},
@@ -292,6 +304,9 @@ func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 }
 
 func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseExpressionList")
+	}
 	list := []ast.Expression{}
 
 	if p.peekTokenIs(end) {
@@ -319,6 +334,9 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parsePrefixExpression")
+	}
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
@@ -330,6 +348,9 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseInfixExpression")
+	}
 	expression := &ast.InfixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
@@ -347,6 +368,9 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 }
 
 func (p *Parser) parseGroupedExpressionC(end token.TokenType) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseGroupedExpressionC")
+	}
 	p.nextToken()
 	exp := p.parseExpression(priLowest)
 

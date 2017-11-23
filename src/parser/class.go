@@ -1,11 +1,16 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
 func (p *Parser) parseClassLiteral() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseClassLiteral")
+	}
 	c := &ast.ClassLiteral{
 		Fields:  make([]*ast.DefStatement, 0),
 		Methods: make(map[string]*ast.FunctionLiteral),
@@ -48,6 +53,9 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 }
 
 func (p *Parser) parseMakeExpression() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseMakeExpression")
+	}
 	m := &ast.MakeInstance{}
 
 	if !p.expectPeek(token.Identifier) {
