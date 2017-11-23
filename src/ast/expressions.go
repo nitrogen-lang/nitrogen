@@ -175,7 +175,7 @@ func (t *TryCatchExpression) String() string {
 }
 
 type MakeInstance struct {
-	Class     string
+	Class     Expression
 	Arguments []Expression
 }
 

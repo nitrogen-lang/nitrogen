@@ -6,8 +6,8 @@ import (
 )
 
 func (i *Interpreter) evalMakeInstance(ms *ast.MakeInstance, env *object.Environment) object.Object {
-	class, exists := env.Get(ms.Class)
-	if !exists {
+	class := i.Eval(ms.Class, env)
+	if class == object.NullConst {
 		return object.NewException("Class %s not defined", ms.Class)
 	}
 
@@ -49,8 +49,10 @@ func (i *Interpreter) evalMakeInstance(ms *ast.MakeInstance, env *object.Environ
 	if len(classChain) > 1 {
 		initEnv.CreateConst("parent", classChain[1])
 	}
-
+	oldInstance := i.currentInstance
+	i.currentInstance = instance
 	args := i.evalExpressions(ms.Arguments, env)
+	i.currentInstance = oldInstance
 	if len(args) == 1 && isException(args[0]) {
 		return args[0]
 	}

@@ -58,15 +58,17 @@ func (p *Parser) parseMakeExpression() ast.Expression {
 	}
 	m := &ast.MakeInstance{}
 
-	if !p.expectPeek(token.Identifier) {
+	p.nextToken()
+	cExpression := p.parseExpression(priLowest)
+
+	call, ok := cExpression.(*ast.CallExpression)
+	if !ok {
+		p.addErrorWithPos("Invalid object creation")
 		return nil
 	}
 
-	m.Class = p.curToken.Literal
-	p.nextToken()
-	m.Arguments = p.parseExpressionList(token.RParen)
-
-	p.nextToken()
+	m.Class = call.Function
+	m.Arguments = call.Arguments
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
