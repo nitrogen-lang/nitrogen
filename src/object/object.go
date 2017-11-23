@@ -37,25 +37,27 @@ const (
 	ModuleObj
 	ClassObj
 	InstanceObj
+	BuiltinMethodObj
 )
 
 var objectTypeNames = map[ObjectType]string{
-	IntergerObj:  "INTEGER",
-	FloatObj:     "FLOAT",
-	BooleanObj:   "BOOLEAN",
-	NullObj:      "NULL",
-	ReturnObj:    "RETURN",
-	ExceptionObj: "EXCEPTION",
-	ErrorObj:     "ERROR",
-	FunctionObj:  "FUNCTION",
-	StringObj:    "STRING",
-	BuiltinObj:   "BUILTIN",
-	ArrayObj:     "ARRAY",
-	HashObj:      "MAP",
-	ResourceObj:  "RESOURCE",
-	ModuleObj:    "MODULE",
-	ClassObj:     "CLASS",
-	InstanceObj:  "INSTANCE",
+	IntergerObj:      "INTEGER",
+	FloatObj:         "FLOAT",
+	BooleanObj:       "BOOLEAN",
+	NullObj:          "NULL",
+	ReturnObj:        "RETURN",
+	ExceptionObj:     "EXCEPTION",
+	ErrorObj:         "ERROR",
+	FunctionObj:      "FUNCTION",
+	StringObj:        "STRING",
+	BuiltinObj:       "BUILTIN",
+	ArrayObj:         "ARRAY",
+	HashObj:          "MAP",
+	ResourceObj:      "RESOURCE",
+	ModuleObj:        "MODULE",
+	ClassObj:         "CLASS",
+	InstanceObj:      "INSTANCE",
+	BuiltinMethodObj: "BUILTIN METHOD",
 }
 
 // These are all constants in the language that can be represented with a single instance
@@ -74,6 +76,8 @@ type Interpreter interface {
 }
 
 type BuiltinFunction func(i Interpreter, env *Environment, args ...Object) Object
+
+type BuiltinMethodFunction func(i Interpreter, self *Instance, env *Environment, args ...Object) Object
 
 type Object interface {
 	Type() ObjectType
@@ -196,6 +200,7 @@ func (f *Function) Inspect() string {
 }
 func (f *Function) Type() ObjectType { return FunctionObj }
 func (f *Function) Dup() Object      { return f }
+func (f *Function) classMethod()     {}
 
 type Builtin struct {
 	Fn BuiltinFunction
@@ -204,6 +209,20 @@ type Builtin struct {
 func (b *Builtin) Inspect() string  { return "builtin function" }
 func (b *Builtin) Type() ObjectType { return BuiltinObj }
 func (b *Builtin) Dup() Object      { return b }
+
+type BuiltinMethod struct {
+	Fn       BuiltinMethodFunction
+	Instance *Instance
+}
+
+func (b *BuiltinMethod) Inspect() string  { return "builtin method" }
+func (b *BuiltinMethod) Type() ObjectType { return BuiltinMethodObj }
+func (b *BuiltinMethod) Dup() Object      { return b }
+func (b *BuiltinMethod) classMethod()     {}
+
+func MakeBuiltinMethod(fn BuiltinMethodFunction) *BuiltinMethod {
+	return &BuiltinMethod{Fn: fn}
+}
 
 type Array struct {
 	Elements []Object

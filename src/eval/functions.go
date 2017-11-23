@@ -18,21 +18,33 @@ func (i *Interpreter) applyFunction(fn object.Object, args []object.Object, env 
 		return unwrapReturnValue(evaled)
 	case *object.Builtin:
 		return fn.Fn(i, env, args...)
+	case *object.BuiltinMethod:
+		oldInstance := i.currentInstance
+		i.currentInstance = fn.Instance
+		result := fn.Fn(i, i.currentInstance, env, args...)
+		i.currentInstance = oldInstance
+		return result
 	case *object.Class: // Class init function
 		init := fn.GetMethod("init")
 		if init == nil {
 			return object.NullConst
 		}
 
-		if len(args) < len(init.Parameters) {
+		if initBuiltin, ok := init.(*object.BuiltinMethod); ok {
+			return initBuiltin.Fn(i, i.currentInstance, env, args...)
+		}
+
+		initFn := init.(*object.Function)
+
+		if len(args) < len(initFn.Parameters) {
 			return object.NewException("Not enough parameters to call class initializer %s", fn.Name)
 		}
-		extendedEnv := i.extendFunctionEnv(init, init.Env, args)
+		extendedEnv := i.extendFunctionEnv(initFn, initFn.Env, args)
 		extendedEnv.SetParent(env)
 		if fn.Parent != nil {
 			extendedEnv.CreateConst("parent", fn.Parent)
 		}
-		evaled := i.Eval(init.Body, extendedEnv)
+		evaled := i.Eval(initFn.Body, extendedEnv)
 		return unwrapReturnValue(evaled)
 	}
 
@@ -50,6 +62,8 @@ func (i *Interpreter) applyFunctionDirect(fn object.Object, args []object.Object
 		return unwrapReturnValue(evaled)
 	case *object.Builtin:
 		return fn.Fn(i, env, args...)
+	case *object.BuiltinMethod:
+		return fn.Fn(i, i.currentInstance, env, args...)
 	}
 
 	return object.NewException("%s is not a function", fn.Type())

@@ -6,17 +6,22 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 )
 
+type ClassMethod interface {
+	Object
+	classMethod()
+}
+
 type Class struct {
 	Name    string
 	Parent  *Class
 	Fields  []*ast.DefStatement
-	Methods map[string]*Function
+	Methods map[string]ClassMethod
 }
 
 func (c *Class) Inspect() string  { return "class " + c.Name }
 func (c *Class) Type() ObjectType { return ClassObj }
 func (c *Class) Dup() Object      { return NullConst }
-func (c *Class) GetMethod(name string) *Function {
+func (c *Class) GetMethod(name string) ClassMethod {
 	m, ok := c.Methods[name]
 	if ok || c.Parent == nil {
 		return m
@@ -29,10 +34,10 @@ type Instance struct {
 	Fields *Environment
 }
 
-func (i *Instance) Inspect() string                 { return fmt.Sprintf("instance of %s", i.Class.Name) }
-func (i *Instance) Type() ObjectType                { return InstanceObj }
-func (i *Instance) Dup() Object                     { return NullConst }
-func (i *Instance) GetMethod(name string) *Function { return i.Class.GetMethod(name) }
+func (i *Instance) Inspect() string                   { return fmt.Sprintf("instance of %s", i.Class.Name) }
+func (i *Instance) Type() ObjectType                  { return InstanceObj }
+func (i *Instance) Dup() Object                       { return NullConst }
+func (i *Instance) GetMethod(name string) ClassMethod { return i.Class.GetMethod(name) }
 
 func InstanceOf(class string, i *Instance) bool {
 	if i == nil {

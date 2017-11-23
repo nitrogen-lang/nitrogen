@@ -165,11 +165,11 @@ func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object
 			Name:    node.Name,
 			Parent:  parentClass,
 			Fields:  node.Fields,
-			Methods: make(map[string]*object.Function, len(node.Methods)),
+			Methods: make(map[string]object.ClassMethod, len(node.Methods)),
 		}
 
 		for k, f := range node.Methods {
-			c.Methods[k] = i.Eval(f, env).(*object.Function)
+			c.Methods[k] = i.Eval(f, env).(object.ClassMethod)
 		}
 		return c
 	case *ast.MakeInstance:

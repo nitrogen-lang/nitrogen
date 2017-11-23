@@ -130,17 +130,25 @@ func (i *Interpreter) evalInstanceLookupExpression(instance, index object.Object
 
 	method := instanceObj.GetMethod(key.Value)
 	if method != nil {
-		fn := &object.Function{
-			Name:       method.Name,
-			Parameters: method.Parameters,
-			Body:       method.Body,
-			Env:        object.NewEnclosedEnv(instanceObj.Fields),
-			Instance:   instanceObj,
+		switch m := method.(type) {
+		case *object.Function:
+			fn := &object.Function{
+				Name:       m.Name,
+				Parameters: m.Parameters,
+				Body:       m.Body,
+				Env:        object.NewEnclosedEnv(instanceObj.Fields),
+				Instance:   instanceObj,
+			}
+			if instanceObj.Class.Parent != nil {
+				fn.Env.CreateConst("parent", instanceObj.Class.Parent)
+			}
+			return fn
+		case *object.BuiltinMethod:
+			return &object.BuiltinMethod{
+				Fn:       m.Fn,
+				Instance: instanceObj,
+			}
 		}
-		if instanceObj.Class.Parent != nil {
-			fn.Env.CreateConst("parent", instanceObj.Class.Parent)
-		}
-		return fn
 	}
 
 	val, ok := instanceObj.Fields.Get(key.Value)
@@ -159,22 +167,26 @@ func (i *Interpreter) evalClassLookupExpression(class, index object.Object) obje
 
 	method := classObj.GetMethod(key.Value)
 	if method != nil {
-		fn := &object.Function{
-			Name:       method.Name,
-			Parameters: method.Parameters,
-			Body:       method.Body,
-			Env:        i.currentInstance.Fields,
-			Instance:   i.currentInstance,
+		switch m := method.(type) {
+		case *object.Function:
+			fn := &object.Function{
+				Name:       m.Name,
+				Parameters: m.Parameters,
+				Body:       m.Body,
+				Env:        i.currentInstance.Fields,
+				Instance:   i.currentInstance,
+			}
+			if classObj.Parent != nil {
+				fn.Env.CreateConst("parent", classObj.Parent)
+			}
+			return fn
+		case *object.BuiltinMethod:
+			return &object.BuiltinMethod{
+				Fn:       m.Fn,
+				Instance: i.currentInstance,
+			}
 		}
-		if classObj.Parent != nil {
-			fn.Env.CreateConst("parent", classObj.Parent)
-		}
-		return fn
 	}
 
-	// val, ok := classObj.Fields.Get(key.Value)
-	// if ok {
-	// 	return val
-	// }
 	return object.NullConst
 }
