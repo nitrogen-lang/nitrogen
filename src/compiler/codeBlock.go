@@ -33,13 +33,28 @@ func (cb *CodeBlock) Print() {
 		offset++
 
 		switch code {
-		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal, opcode.Call,
-			opcode.StoreFast, opcode.MakeArray, opcode.MakeMap,
+		case opcode.MakeArray, opcode.MakeMap,
 			opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.JumpIfTrueOrPop, opcode.JumpIfFalseOrPop, opcode.JumpAbsolute, opcode.JumpForward:
 			fmt.Printf(" %d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 			offset += 2
+		case opcode.LoadConst:
+			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
+			fmt.Printf(" %d (%s)", index, cb.Constants[index].Inspect())
+			offset += 2
+		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst:
+			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
+			fmt.Printf(" %d (%s)", index, cb.Locals[index])
+			offset += 2
+		case opcode.Call:
+			params := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
+			fmt.Printf(" %d (%d positional parameters)", params, params)
+			offset += 2
+		case opcode.LoadGlobal:
+			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
+			fmt.Printf(" %d (%s)", index, cb.Names[index])
+			offset += 2
 		case opcode.Compare:
-			fmt.Printf(" %d", cb.Code[offset])
+			fmt.Printf(" %d (%s)", cb.Code[offset], opcode.CmpOps[cb.Code[offset]])
 			offset++
 		}
 
@@ -94,10 +109,10 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 			if node.Value == o.(*object.Boolean).Value {
 				return uint16(i)
 			}
-		case *CodeBlock:
-			if node.Filename == o.(*CodeBlock).Filename {
-				return uint16(i)
-			}
+			// case *CodeBlock:
+			// 	if node.Filename == o.(*CodeBlock).Filename && node.Name == o.(*CodeBlock).Name {
+			// 		return uint16(i)
+			// 	}
 		}
 	}
 

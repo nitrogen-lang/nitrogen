@@ -1,7 +1,9 @@
 package vm
 
 import (
+	"bytes"
 	"regexp"
+	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -11,7 +13,9 @@ type frame struct {
 	lastFrame *frame
 	code      *compiler.CodeBlock
 	stack     *object.Stack
-	locals    []object.Object
+	locals    map[string]object.Object
+	consts    map[string]object.Object
+	outerVars map[string]object.Object
 	pc        int
 }
 
@@ -97,3 +101,26 @@ func getBuiltin(name string) *vmBuiltin {
 	}
 	return nil
 }
+
+type VMFunction struct {
+	Name       string
+	Parameters []string
+	Body       *compiler.CodeBlock
+	Env        map[string]object.Object
+	Consts     map[string]object.Object
+}
+
+func (f *VMFunction) Inspect() string {
+	var out bytes.Buffer
+
+	out.WriteString("func")
+	out.WriteByte(' ')
+	out.WriteString(f.Name)
+	out.WriteByte('(')
+	out.WriteString(strings.Join(f.Parameters, ", "))
+	out.WriteString(") {...}")
+
+	return out.String()
+}
+func (f *VMFunction) Type() object.ObjectType { return object.FunctionObj }
+func (f *VMFunction) Dup() object.Object      { return f }

@@ -45,7 +45,13 @@ func (vm *VirtualMachine) runFrame(f *frame) object.Object {
 	vm.callStack.Push(f)
 	vm.currentFrame = f
 	if f.locals == nil {
-		f.locals = make([]object.Object, vm.currentFrame.code.LocalCount)
+		f.locals = make(map[string]object.Object, vm.currentFrame.code.LocalCount)
+	}
+	if f.outerVars == nil {
+		f.outerVars = make(map[string]object.Object)
+	}
+	if f.consts == nil {
+		f.consts = make(map[string]object.Object)
 	}
 
 	for {
@@ -111,6 +117,13 @@ func (vm *VirtualMachine) runFrame(f *frame) object.Object {
 			}
 		case opcode.LoadConst:
 			vm.currentFrame.stack.Push(vm.currentFrame.code.Constants[vm.getUint16()])
+		case opcode.StoreConst:
+			name := vm.currentFrame.code.Locals[vm.getUint16()]
+			if _, defined := vm.currentFrame.consts[name]; defined {
+				fmt.Printf("Redefined constant %s\n", name)
+				return vm.returnValue
+			}
+			vm.currentFrame.consts[name] = vm.currentFrame.stack.Pop()
 		case opcode.Return:
 			vm.returnValue = vm.currentFrame.stack.Pop()
 			vm.currentFrame = vm.currentFrame.lastFrame
@@ -118,20 +131,70 @@ func (vm *VirtualMachine) runFrame(f *frame) object.Object {
 			if vm.currentFrame == nil {
 				return vm.returnValue
 			}
+			vm.currentFrame.stack.Push(vm.returnValue)
 		case opcode.Pop:
 			vm.currentFrame.stack.Pop()
 		case opcode.LoadFast:
-			vm.currentFrame.stack.Push(vm.currentFrame.locals[vm.getUint16()])
+			name := vm.currentFrame.code.Locals[vm.getUint16()]
+			if c, defined := vm.currentFrame.consts[name]; defined {
+				vm.currentFrame.stack.Push(c)
+				break
+			}
+
+			if l, defined := vm.currentFrame.locals[name]; defined {
+				vm.currentFrame.stack.Push(l)
+				break
+			}
+
+			fmt.Printf("Unknown variable/constant %s\n", name)
+			return vm.returnValue
 		case opcode.StoreFast:
-			vm.currentFrame.locals[vm.getUint16()] = vm.currentFrame.stack.Pop()
-		case opcode.LoadGlobal:
-			name := vm.currentFrame.code.Names[vm.getUint16()]
-			fn := getBuiltin(name)
-			if fn == nil {
-				fmt.Printf("Global %s doesn't exist\n", name)
+			// Ensure constant isn't redefined
+			name := vm.currentFrame.code.Locals[vm.getUint16()]
+			if _, defined := vm.currentFrame.consts[name]; defined {
+				fmt.Printf("Redefined constant %s\n", name)
 				return vm.returnValue
 			}
-			vm.currentFrame.stack.Push(fn)
+			vm.currentFrame.locals[name] = vm.currentFrame.stack.Pop()
+		case opcode.LoadGlobal:
+			name := vm.currentFrame.code.Names[vm.getUint16()]
+			if g, defined := vm.currentFrame.outerVars[name]; defined {
+				vm.currentFrame.stack.Push(g)
+				break
+			}
+			if fn := getBuiltin(name); fn != nil {
+				vm.currentFrame.stack.Push(fn)
+				break
+			}
+
+			fmt.Printf("Global %s doesn't exist\n", name)
+			return vm.returnValue
+		case opcode.StoreGlobal:
+			// Ensure constant isn't redefined
+			name := vm.currentFrame.code.Names[vm.getUint16()]
+			if _, defined := vm.currentFrame.consts[name]; defined {
+				fmt.Printf("Redefined constant %s\n", name)
+				return vm.returnValue
+			}
+			vm.currentFrame.outerVars[name] = vm.currentFrame.stack.Pop()
+		case opcode.LoadIndex:
+			left := vm.currentFrame.stack.Pop()
+			index := vm.currentFrame.stack.Pop()
+			res := vm.evalIndexExpression(left, index)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				fmt.Printf("Exception %s\n", res.Inspect())
+				return vm.returnValue
+			}
+			vm.currentFrame.stack.Push(res)
+		case opcode.StoreIndex:
+			left := vm.currentFrame.stack.Pop()
+			index := vm.currentFrame.stack.Pop()
+			value := vm.currentFrame.stack.Pop()
+			res := vm.assignIndexedValue(left, index, value)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				fmt.Printf("Exception %s\n", res.Inspect())
+				return vm.returnValue
+			}
 		case opcode.Call:
 			numargs := vm.getUint16()
 			args := make([]object.Object, numargs)
@@ -140,7 +203,26 @@ func (vm *VirtualMachine) runFrame(f *frame) object.Object {
 				args[i] = vm.currentFrame.stack.Pop()
 			}
 
-			vm.currentFrame.stack.Push(fn.(*vmBuiltin).fn(vm, args...))
+			switch fn := fn.(type) {
+			case *vmBuiltin:
+				vm.currentFrame.stack.Push(fn.fn(vm, args...))
+			case *VMFunction:
+				newFrame := &frame{
+					code:      fn.Body,
+					stack:     object.NewStack(),
+					outerVars: fn.Env,
+					consts:    fn.Consts,
+					locals:    make(map[string]object.Object, fn.Body.LocalCount),
+					lastFrame: vm.currentFrame,
+				}
+
+				for i, arg := range args {
+					newFrame.locals[fn.Parameters[i]] = arg
+				}
+
+				vm.currentFrame = newFrame
+				vm.callStack.Push(newFrame)
+			}
 		case opcode.Compare:
 			r := vm.currentFrame.stack.Pop()
 			l := vm.currentFrame.stack.Pop()
@@ -149,6 +231,30 @@ func (vm *VirtualMachine) runFrame(f *frame) object.Object {
 				panic(fmt.Sprintf("Invalid comparison operator %x", op))
 			}
 			vm.currentFrame.stack.Push(vm.compareObjects(l, r, op))
+		case opcode.MakeFunction:
+			fnName := vm.currentFrame.stack.Pop().(*object.String)
+			params := vm.currentFrame.stack.Pop().(*object.Array)
+			codeBlock := vm.currentFrame.stack.Pop().(*compiler.CodeBlock)
+
+			fn := &VMFunction{
+				Name:       fnName.Value,
+				Parameters: make([]string, len(params.Elements)),
+				Body:       codeBlock,
+				Env:        make(map[string]object.Object, len(vm.currentFrame.locals)),
+				Consts:     make(map[string]object.Object, len(vm.currentFrame.consts)),
+			}
+
+			for i, p := range params.Elements {
+				fn.Parameters[i] = p.(*object.String).Value
+			}
+
+			for k, v := range vm.currentFrame.locals {
+				fn.Env[k] = v
+			}
+			for k, v := range vm.currentFrame.consts {
+				fn.Consts[k] = v
+			}
+			vm.currentFrame.stack.Push(fn)
 		case opcode.MakeArray:
 			l := vm.getUint16()
 			array := &object.Array{
@@ -314,4 +420,122 @@ func (vm *VirtualMachine) evalBoolInfixExpression(op byte, left, right object.Ob
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+}
+
+func (vm *VirtualMachine) evalIndexExpression(left, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ArrayObj && index.Type() == object.IntergerObj:
+		return vm.evalArrayIndexExpression(left, index)
+	case left.Type() == object.HashObj:
+		return vm.evalHashIndexExpression(left, index)
+	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
+		return vm.evalStringIndexExpression(left, index)
+	}
+	return object.NewException("Index operator not allowed: %s", left.Type())
+}
+
+func (vm *VirtualMachine) evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrObj := array.(*object.Array)
+	idx := index.(*object.Integer).Value
+	max := int64(len(arrObj.Elements))
+
+	if idx > max-1 { // Check upper bound
+		return object.NullConst
+	}
+
+	if idx < 0 { // Check lower bound
+		// Convert a negative index to positive
+		idx = max + idx
+
+		if idx < 0 { // Check lower bound again
+			return object.NullConst
+		}
+	}
+
+	return arrObj.Elements[idx]
+}
+
+func (vm *VirtualMachine) evalHashIndexExpression(hash, index object.Object) object.Object {
+	hashObj := hash.(*object.Hash)
+
+	key, ok := index.(object.Hashable)
+	if !ok {
+		return object.NewException("Invalid map key: %s", index.Type())
+	}
+
+	pair, ok := hashObj.Pairs[key.HashKey()]
+	if !ok {
+		return object.NullConst
+	}
+
+	return pair.Value
+}
+
+func (vm *VirtualMachine) evalStringIndexExpression(array, index object.Object) object.Object {
+	strObj := array.(*object.String)
+	idx := index.(*object.Integer).Value
+	max := int64(len(strObj.Value))
+
+	if idx > max-1 { // Check upper bound
+		return object.NullConst
+	}
+
+	if idx < 0 { // Check lower bound
+		// Convert a negative index to positive
+		idx = max + idx
+
+		if idx < 0 { // Check lower bound again
+			return object.NullConst
+		}
+	}
+
+	return &object.String{Value: string(strObj.Value[idx])}
+}
+
+func (vm *VirtualMachine) assignIndexedValue(
+	indexed object.Object,
+	index object.Object,
+	val object.Object) object.Object {
+	switch indexed.Type() {
+	case object.ArrayObj:
+		return vm.assignArrayIndex(indexed.(*object.Array), index, val)
+	case object.HashObj:
+		return vm.assignHashMapIndex(indexed.(*object.Hash), index, val)
+	}
+	return object.NullConst
+}
+
+func (vm *VirtualMachine) assignArrayIndex(
+	array *object.Array,
+	index object.Object,
+	val object.Object) object.Object {
+
+	in, ok := index.(*object.Integer)
+	if !ok {
+		return object.NewException("Invalid array index type %s", index.(object.Object).Type())
+	}
+
+	if in.Value < 0 || in.Value > int64(len(array.Elements)-1) {
+		return object.NewException("Index out of bounds: %s", index.Inspect())
+	}
+
+	array.Elements[in.Value] = val
+	return object.NullConst
+}
+
+func (vm *VirtualMachine) assignHashMapIndex(
+	hashmap *object.Hash,
+	index object.Object,
+	val object.Object) object.Object {
+
+	hashable, ok := index.(object.Hashable)
+	if !ok {
+		return object.NewException("Invalid index type %s", index.Type())
+	}
+
+	hashmap.Pairs[hashable.HashKey()] = object.HashPair{
+		Key:   index,
+		Value: val,
+	}
+	return object.NullConst
 }

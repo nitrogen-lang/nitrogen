@@ -3,9 +3,13 @@ package opcode
 const (
 	Noop byte = iota
 	LoadConst
+	StoreConst
 	LoadFast
 	StoreFast
 	LoadGlobal
+	StoreGlobal
+	LoadIndex
+	StoreIndex
 	BinaryAdd
 	BinarySub
 	BinaryMul
@@ -25,6 +29,7 @@ const (
 	Pop
 	MakeArray
 	MakeMap
+	MakeFunction
 	PopJumpIfTrue
 	PopJumpIfFalse
 	JumpIfTrueOrPop
@@ -46,9 +51,13 @@ const (
 var Names = map[byte]string{
 	Noop:             "NOOP",
 	LoadConst:        "LOAD_CONST",
+	StoreConst:       "STORE_CONST",
 	LoadFast:         "LOAD_FAST",
 	StoreFast:        "STORE_FAST",
 	LoadGlobal:       "LOAD_GLOBAL",
+	StoreGlobal: "STORE_GLOBAL",
+	LoadIndex:        "LOAD_INDEX",
+	StoreIndex:       "STORE_INDEX",
 	BinaryAdd:        "BINARY_ADD",
 	BinarySub:        "BINARY_SUB",
 	BinaryMul:        "BINARY_MUL",
@@ -68,6 +77,7 @@ var Names = map[byte]string{
 	Pop:              "POP",
 	MakeArray:        "MAKE_ARRAY",
 	MakeMap:          "MAKE_MAP",
+	MakeFunction:     "MAKE_FUNCTION",
 	PopJumpIfTrue:    "POP_JUMP_IF_TRUE",
 	PopJumpIfFalse:   "POP_JUMP_IF_FALSE",
 	JumpIfTrueOrPop:  "JUMP_IF_TRUE_OR_POP",
