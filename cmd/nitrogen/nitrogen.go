@@ -8,11 +8,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
@@ -32,6 +34,7 @@ var (
 	modulePath        string
 	printVersion      bool
 	fullDebug         bool
+	compile           bool
 )
 
 func init() {
@@ -44,6 +47,7 @@ func init() {
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
+	flag.BoolVar(&compile, "compile", false, "Use the Nitrogen VM")
 }
 
 func main() {
@@ -92,6 +96,24 @@ func main() {
 	if printAst {
 		fmt.Println(program.String())
 		os.Exit(1)
+	}
+
+	if compile {
+		code := compiler.Compile(program)
+		code.Print()
+		machine := vm.NewVM()
+		result := machine.Execute(code)
+		if result != nil && result != object.NullConst {
+			if e, ok := result.(*object.Exception); ok {
+				os.Stdout.WriteString("Uncaught Exception: ")
+				os.Stdout.WriteString(e.Message)
+				os.Stdout.Write([]byte{'\n'})
+				os.Exit(1)
+			}
+			os.Stdout.WriteString(result.Inspect())
+			os.Stdout.Write([]byte{'\n'})
+		}
+		return
 	}
 
 	env := object.NewEnvironment()
