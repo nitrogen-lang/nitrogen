@@ -405,9 +405,9 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
 		case opcode.Continue:
 			_, vm.currentFrame.pc, _ = vm.currentFrame.getCurrentBlock()
-			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env.Parent())
 		case opcode.NextIter:
 			vm.currentFrame.pc, _, _ = vm.currentFrame.getCurrentBlock()
+			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env.Parent())
 		case opcode.Break:
 			_, _, vm.currentFrame.pc = vm.currentFrame.getCurrentBlock()
 		default:
