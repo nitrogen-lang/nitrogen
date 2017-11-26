@@ -262,6 +262,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			compile(ccb, indexed.Index)
 			compile(ccb, indexed.Left)
 			ccb.code.WriteByte(opcode.StoreIndex)
+			compileLoadNull(ccb)
 			break
 		}
 
