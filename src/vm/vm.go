@@ -289,7 +289,12 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 
 			switch fn := fn.(type) {
 			case *vmBuiltin:
-				vm.currentFrame.pushStack(fn.fn(vm, args...))
+				result := fn.fn(vm, args...)
+				if result == nil {
+					result = object.NullConst
+				}
+				vm.returnValue = result
+				vm.currentFrame.pushStack(result)
 			case *VMFunction:
 				newFrame := &Frame{
 					code:       fn.Body,
