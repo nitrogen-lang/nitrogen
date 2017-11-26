@@ -20,8 +20,11 @@ func init() {
 	eval.RegisterBuiltin("readline", readLineBuiltin)
 
 	vm.RegisterBuiltin("print", moduleutils.VMBuiltinWrapper(printBuiltin))
+	vm.RegisterBuiltin("printlnb", moduleutils.VMBuiltinWrapper(printBinaryBuiltin))
 	vm.RegisterBuiltin("println", moduleutils.VMBuiltinWrapper(printlnBuiltin))
 	vm.RegisterBuiltin("printenv", printEnvBuiltinVM)
+
+	vm.RegisterBuiltin("readline", moduleutils.VMBuiltinWrapper(readLineBuiltin))
 }
 
 func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

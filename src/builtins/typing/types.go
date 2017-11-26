@@ -10,6 +10,7 @@ import (
 )
 
 func init() {
+	// Register with interpreter
 	eval.RegisterBuiltin("toInt", toIntBuiltin)
 	eval.RegisterBuiltin("toFloat", toFloatBuiltin)
 	eval.RegisterBuiltin("toString", toStringBuiltin)
@@ -33,7 +34,29 @@ func init() {
 
 	eval.RegisterBuiltin("errorVal", getErrorVal)
 
+	// Register with virual machine
+	vm.RegisterBuiltin("toInt", moduleutils.VMBuiltinWrapper(toIntBuiltin))
+	vm.RegisterBuiltin("toFloat", moduleutils.VMBuiltinWrapper(toFloatBuiltin))
+	vm.RegisterBuiltin("toString", moduleutils.VMBuiltinWrapper(toStringBuiltin))
+
+	vm.RegisterBuiltin("parseInt", moduleutils.VMBuiltinWrapper(parseIntBuiltin))
+	vm.RegisterBuiltin("parseFloat", moduleutils.VMBuiltinWrapper(parseFloatBuiltin))
+
+	vm.RegisterBuiltin("varType", moduleutils.VMBuiltinWrapper(varTypeBuiltin))
 	vm.RegisterBuiltin("isDefined", isDefinedBuiltinVM)
+	vm.RegisterBuiltin("isFloat", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.FloatObj)))
+	vm.RegisterBuiltin("isInt", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.IntergerObj)))
+	vm.RegisterBuiltin("isBool", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.BooleanObj)))
+	vm.RegisterBuiltin("isNull", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.NullObj)))
+	vm.RegisterBuiltin("isFunc", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.FunctionObj)))
+	vm.RegisterBuiltin("isString", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.StringObj)))
+	vm.RegisterBuiltin("isArray", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.ArrayObj)))
+	vm.RegisterBuiltin("isMap", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.HashObj)))
+	vm.RegisterBuiltin("isError", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.ErrorObj)))
+	vm.RegisterBuiltin("isClass", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.ClassObj)))
+	vm.RegisterBuiltin("isInstance", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.InstanceObj)))
+
+	vm.RegisterBuiltin("errorVal", moduleutils.VMBuiltinWrapper(getErrorVal))
 }
 
 func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
