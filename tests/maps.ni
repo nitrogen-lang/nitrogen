@@ -6,7 +6,7 @@
  */
 
 func arrayHasValue(array, value) {
-    for (i = 0; i < len(array); i + 1) {
+    for (i = 0; i < len(array); i += 1) {
         if (array[i] == value) {
 	        return true
 	    }
@@ -29,7 +29,7 @@ func main() {
         println("Not enough keys. Expected ", len(expectedKeys), " got ", len(keys))
     }
 
-    for (i = 0; i < len(expectedKeys); i = i + 1) {
+    for (i = 0; i < len(expectedKeys); i += 1) {
         if (!arrayHasValue(keys, expectedKeys[i])) {
             println("hash keys doesn't have ", expectedKeys[i])
             return
