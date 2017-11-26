@@ -11,7 +11,7 @@ func init() {
 	vm.RegisterBuiltin("dis", disassemble)
 }
 
-func disassemble(machine object.Interpreter, args ...object.Object) object.Object {
+func disassemble(machine object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	cb := args[0].(*vm.VMFunction).Body
 
 	fmt.Printf("Name: %s\nFilename: %s\nLocalCount: %d\nMaxStackSize: %d\nMaxBlockSize: %d\n",

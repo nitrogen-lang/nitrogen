@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
-	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
@@ -19,12 +18,12 @@ func init() {
 
 	eval.RegisterBuiltin("readline", readLineBuiltin)
 
-	vm.RegisterBuiltin("print", moduleutils.VMBuiltinWrapper(printBuiltin))
-	vm.RegisterBuiltin("printlnb", moduleutils.VMBuiltinWrapper(printBinaryBuiltin))
-	vm.RegisterBuiltin("println", moduleutils.VMBuiltinWrapper(printlnBuiltin))
-	vm.RegisterBuiltin("printenv", printEnvBuiltinVM)
+	vm.RegisterBuiltin("print", printBuiltin)
+	vm.RegisterBuiltin("printlnb", printBinaryBuiltin)
+	vm.RegisterBuiltin("println", printlnBuiltin)
+	vm.RegisterBuiltin("printenv", printEnvBuiltin)
 
-	vm.RegisterBuiltin("readline", moduleutils.VMBuiltinWrapper(readLineBuiltin))
+	vm.RegisterBuiltin("readline", readLineBuiltin)
 }
 
 func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -47,11 +46,6 @@ func printBinaryBuiltin(interpreter object.Interpreter, env *object.Environment,
 
 func printEnvBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	env.Print("")
-	return object.NullConst
-}
-
-func printEnvBuiltinVM(machine object.Interpreter, args ...object.Object) object.Object {
-	machine.(*vm.VirtualMachine).CurrentFrame().Env.Print("")
 	return object.NullConst
 }
 

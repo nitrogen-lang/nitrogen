@@ -288,8 +288,8 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 			}
 
 			switch fn := fn.(type) {
-			case *vmBuiltin:
-				result := fn.fn(vm, args...)
+			case *object.Builtin:
+				result := fn.Fn(vm, vm.currentFrame.Env, args...)
 				if result == nil {
 					result = object.NullConst
 				}
@@ -528,6 +528,8 @@ func (vm *VirtualMachine) evalIndexExpression(left, index object.Object) object.
 		return vm.evalHashIndexExpression(left, index)
 	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
 		return vm.evalStringIndexExpression(left, index)
+	case left.Type() == object.ModuleObj && index.Type() == object.StringObj:
+		return vm.evalModuleLookupExpression(left, index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
@@ -634,6 +636,23 @@ func (vm *VirtualMachine) assignHashMapIndex(
 	hashmap.Pairs[hashable.HashKey()] = object.HashPair{
 		Key:   index,
 		Value: val,
+	}
+	return object.NullConst
+}
+
+func (vm *VirtualMachine) evalModuleLookupExpression(module, index object.Object) object.Object {
+	moduleObj := module.(*object.Module)
+	key := index.(*object.String)
+
+	// Methods have priority over variables
+	method, ok := moduleObj.Methods[key.Value]
+	if ok {
+		return &object.Builtin{Fn: method}
+	}
+
+	variable, ok := moduleObj.Vars[key.Value]
+	if ok {
+		return variable
 	}
 	return object.NullConst
 }

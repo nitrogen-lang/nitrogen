@@ -21,14 +21,14 @@ func init() {
 	eval.RegisterBuiltin("hashKeys", hashKeysBuiltin)
 
 	// Register with virtual machine
-	vm.RegisterBuiltin("len", moduleutils.VMBuiltinWrapper(lenBuiltin))
-	vm.RegisterBuiltin("first", moduleutils.VMBuiltinWrapper(firstBuiltin))
-	vm.RegisterBuiltin("last", moduleutils.VMBuiltinWrapper(lastBuiltin))
-	vm.RegisterBuiltin("rest", moduleutils.VMBuiltinWrapper(restBuiltin))
-	vm.RegisterBuiltin("push", moduleutils.VMBuiltinWrapper(pushBuiltin))
-	vm.RegisterBuiltin("sort", moduleutils.VMBuiltinWrapper(sortArrayBuiltin))
-	vm.RegisterBuiltin("hashMerge", moduleutils.VMBuiltinWrapper(hashMergeBuiltin))
-	vm.RegisterBuiltin("hashKeys", moduleutils.VMBuiltinWrapper(hashKeysBuiltin))
+	vm.RegisterBuiltin("len", lenBuiltin)
+	vm.RegisterBuiltin("first", firstBuiltin)
+	vm.RegisterBuiltin("last", lastBuiltin)
+	vm.RegisterBuiltin("rest", restBuiltin)
+	vm.RegisterBuiltin("push", pushBuiltin)
+	vm.RegisterBuiltin("sort", sortArrayBuiltin)
+	vm.RegisterBuiltin("hashMerge", hashMergeBuiltin)
+	vm.RegisterBuiltin("hashKeys", hashKeysBuiltin)
 }
 
 func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

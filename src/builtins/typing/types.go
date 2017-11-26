@@ -35,28 +35,28 @@ func init() {
 	eval.RegisterBuiltin("errorVal", getErrorVal)
 
 	// Register with virual machine
-	vm.RegisterBuiltin("toInt", moduleutils.VMBuiltinWrapper(toIntBuiltin))
-	vm.RegisterBuiltin("toFloat", moduleutils.VMBuiltinWrapper(toFloatBuiltin))
-	vm.RegisterBuiltin("toString", moduleutils.VMBuiltinWrapper(toStringBuiltin))
+	vm.RegisterBuiltin("toInt", toIntBuiltin)
+	vm.RegisterBuiltin("toFloat", toFloatBuiltin)
+	vm.RegisterBuiltin("toString", toStringBuiltin)
 
-	vm.RegisterBuiltin("parseInt", moduleutils.VMBuiltinWrapper(parseIntBuiltin))
-	vm.RegisterBuiltin("parseFloat", moduleutils.VMBuiltinWrapper(parseFloatBuiltin))
+	vm.RegisterBuiltin("parseInt", parseIntBuiltin)
+	vm.RegisterBuiltin("parseFloat", parseFloatBuiltin)
 
-	vm.RegisterBuiltin("varType", moduleutils.VMBuiltinWrapper(varTypeBuiltin))
-	vm.RegisterBuiltin("isDefined", isDefinedBuiltinVM)
-	vm.RegisterBuiltin("isFloat", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.FloatObj)))
-	vm.RegisterBuiltin("isInt", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.IntergerObj)))
-	vm.RegisterBuiltin("isBool", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.BooleanObj)))
-	vm.RegisterBuiltin("isNull", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.NullObj)))
-	vm.RegisterBuiltin("isFunc", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.FunctionObj)))
-	vm.RegisterBuiltin("isString", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.StringObj)))
-	vm.RegisterBuiltin("isArray", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.ArrayObj)))
-	vm.RegisterBuiltin("isMap", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.HashObj)))
-	vm.RegisterBuiltin("isError", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.ErrorObj)))
-	vm.RegisterBuiltin("isClass", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.ClassObj)))
-	vm.RegisterBuiltin("isInstance", moduleutils.VMBuiltinWrapper(makeIsTypeBuiltin(object.InstanceObj)))
+	vm.RegisterBuiltin("varType", varTypeBuiltin)
+	vm.RegisterBuiltin("isDefined", isDefinedBuiltin)
+	vm.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FloatObj))
+	vm.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.IntergerObj))
+	vm.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BooleanObj))
+	vm.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NullObj))
+	vm.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FunctionObj))
+	vm.RegisterBuiltin("isString", makeIsTypeBuiltin(object.StringObj))
+	vm.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
+	vm.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
+	vm.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
+	vm.RegisterBuiltin("isClass", makeIsTypeBuiltin(object.ClassObj))
+	vm.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))
 
-	vm.RegisterBuiltin("errorVal", moduleutils.VMBuiltinWrapper(getErrorVal))
+	vm.RegisterBuiltin("errorVal", getErrorVal)
 }
 
 func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -188,19 +188,5 @@ func isDefinedBuiltin(interpreter object.Interpreter, env *object.Environment, a
 	}
 
 	_, ok = env.Get(ident.Value)
-	return object.NativeBoolToBooleanObj(ok)
-}
-
-func isDefinedBuiltinVM(machine object.Interpreter, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("isDefined", 1, args...); ac != nil {
-		return ac
-	}
-
-	ident, ok := args[0].(*object.String)
-	if !ok {
-		return object.NewException("isDefined expects a string, got %s", args[0].Type().String())
-	}
-
-	_, ok = machine.(*vm.VirtualMachine).CurrentFrame().Env.Get(ident.Value)
 	return object.NativeBoolToBooleanObj(ok)
 }
