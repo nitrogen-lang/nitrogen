@@ -408,9 +408,10 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	compile(ccb, ifs.Consequence)
 	trueBranch := ccb.code
 
-	// Prior code to if statement + size of true branch + faked offset + 3 (other opcodes)
+	// 1 = 1 opcode
 	falseBranchLoc := mainCode.Len() + trueBranch.Len() + ccb.offset + 1
 	if trueNoNil {
+		// 3 = 1 opcode + 2 byte arg (implicit nil from true branch)
 		falseBranchLoc -= 3
 	}
 	ccb.offset = falseBranchLoc
@@ -421,8 +422,6 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	ccb.code = mainCode
 	ccb.offset = oldOffset
 
-	endIfLoc := falseBranch.Len()
-
 	ccb.code.WriteByte(opcode.PopJumpIfFalse)
 	ccb.code.Write(uint16ToBytes(uint16(falseBranchLoc)))
 	ccb.code.Write(trueBranch.Bytes())
@@ -430,7 +429,7 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 		compileLoadNull(ccb)
 	}
 	ccb.code.WriteByte(opcode.JumpForward)
-	ccb.code.Write(uint16ToBytes(uint16(endIfLoc)))
+	ccb.code.Write(uint16ToBytes(uint16(falseBranch.Len())))
 	ccb.code.Write(falseBranch.Bytes())
 	if !falseNoNil {
 		compileLoadNull(ccb)
@@ -444,9 +443,10 @@ func compileIfStatementNoElse(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 
 	_, noNil := ifs.Consequence.Statements[len(ifs.Consequence.Statements)-1].(*ast.ExpressionStatement)
 
-	// Prior code to if statement + size of true branch + faked offset - 2 (IDK why 2, it just works)
+	// 6 = 2 opcodes + 2 x 2 byte args
 	afterIfStmt := ccb.code.Len() + trueBranch.Len() + ccb.offset + 6
 	if !noNil {
+		// 3 = 1 opcode + 2 byte arg
 		afterIfStmt -= 3
 	}
 
@@ -455,7 +455,7 @@ func compileIfStatementNoElse(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	ccb.code.Write(trueBranch.Bytes())
 	if noNil {
 		ccb.code.WriteByte(opcode.JumpForward)
-		ccb.code.Write(uint16ToBytes(uint16(3)))
+		ccb.code.Write(uint16ToBytes(uint16(3))) // 3 = 1 opcode + 2 byte arg (for implicit nil)
 	}
 	compileLoadNull(ccb)
 }
@@ -470,6 +470,7 @@ func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression
 
 	cntBranch := compileInnerBlock(ccb, cmp.Right)
 
+	// 3 = 1 opcode + 1 x 2 byte arg
 	afterCompare := ccb.code.Len() + cntBranch.Len() + ccb.offset + 3
 
 	if cmp.Token.Type == token.LAnd {
@@ -499,6 +500,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	compile(ccb, loop.Condition)
 	condition := ccb.code
 
+	// 8 = 2 x opcode + 3 x 2 byte args
 	ccb.offset = mainCode.Len() + condition.Len() + oldOffset + 8
 	ccb.code = new(bytes.Buffer)
 	compile(ccb, loop.Body)
@@ -508,7 +510,8 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 		ccb.code.WriteByte(opcode.Pop)
 	}
 
-	ccb.offset = mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 4
+	// 3 = 1 opcode + 2 byte arg
+	ccb.offset = mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 3
 	ccb.code = new(bytes.Buffer)
 	compile(ccb, loop.Iter)
 	iterator := ccb.code
@@ -516,8 +519,10 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	ccb.code = mainCode
 	ccb.offset = oldOffset
 
-	endBlock := ccb.code.Len() + condition.Len() + 5 + loopBody.Len() + iterator.Len() + 5
-	iterBlock := ccb.code.Len() + condition.Len() + 5 + loopBody.Len() + 3
+	// 10 = 4 opcodes + 3 x 2 byte args
+	endBlock := mainCode.Len() + condition.Len() + loopBody.Len() + iterator.Len() + ccb.offset + 10
+	// 8 = 2 opcode + 3 x 2 byte args
+	iterBlock := mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 8
 	ccb.code.WriteByte(opcode.StartLoop)
 	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
 	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))
@@ -538,6 +543,7 @@ func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	loopBody := compileInnerBlock(ccb, loop.Body)
 	loopBody.WriteByte(opcode.Continue)
 
+	// 3 = 1 opcode + 1 x 2 byte arg
 	loopEnd := ccb.code.Len() + loopBody.Len() + 3
 	ccb.code.WriteByte(opcode.StartLoop)
 	ccb.code.Write(uint16ToBytes(uint16(loopEnd)))
