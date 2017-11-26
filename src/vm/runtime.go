@@ -7,9 +7,22 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-type block struct {
+type blockType byte
+
+const (
+	loopBlockT blockType = iota
+	tryBlockT
+)
+
+type block interface {
+	blockType() blockType
+}
+
+type forLoopBlock struct {
 	start, iter, end int
 }
+
+func (b *forLoopBlock) blockType() blockType { return loopBlockT }
 
 type Frame struct {
 	lastFrame  *Frame
@@ -48,28 +61,31 @@ func (f *Frame) printStack() {
 	}
 }
 
-func (f *Frame) pushBlock(start, iter, end int) {
+func (f *Frame) pushBlock(b block) {
 	if f.bp == len(f.blockStack) {
 		panic("Block stack overflow")
 	}
-	f.blockStack[f.bp].start = start
-	f.blockStack[f.bp].iter = iter
-	f.blockStack[f.bp].end = end
+	f.blockStack[f.bp] = b
 	f.bp++
 }
 
-// returns start, end
-func (f *Frame) popBlock() (int, int, int) {
+func (f *Frame) popBlock() block {
 	if f.bp == 0 {
 		panic("Block stack exhausted")
 	}
 	f.bp--
-	return f.blockStack[f.bp].start, f.blockStack[f.bp].iter, f.blockStack[f.bp].end
+	return f.blockStack[f.bp]
 }
 
-// returns start, end
-func (f *Frame) getCurrentBlock() (int, int, int) {
-	return f.blockStack[f.bp-1].start, f.blockStack[f.bp-1].iter, f.blockStack[f.bp-1].end
+func (f *Frame) popBlockUntil(bt blockType) block {
+	for f.blockStack[f.bp-1].blockType() != bt {
+		f.popBlock()
+	}
+	return f.blockStack[f.bp-1]
+}
+
+func (f *Frame) getCurrentBlock() block {
+	return f.blockStack[f.bp-1]
 }
 
 type frameStack struct {
