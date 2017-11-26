@@ -10,25 +10,21 @@ import (
 )
 
 func Compile(tree *ast.Program) *CodeBlock {
-	return compileFrame(&ast.BlockStatement{Statements: tree.Statements}, "<module>")
+	return compileFrame(&ast.BlockStatement{Statements: tree.Statements}, "__main", tree.Filename)
 }
 
-func compileFrame(node ast.Node, name string) *CodeBlock {
+func compileFrame(node ast.Node, name, filename string) *CodeBlock {
 	ccb := &codeBlockCompiler{
 		constants: newConstantTable(),
 		locals:    newStringTable(),
 		names:     newStringTable(),
 		code:      new(bytes.Buffer),
+		filename:  filename,
 	}
 
 	compile(ccb, node)
 	if ccb.code.Bytes()[ccb.code.Len()-1] != opcode.Return {
 		ccb.code.WriteByte(opcode.Return)
-	}
-
-	filename := ""
-	if program, ok := node.(*ast.Program); ok {
-		filename = program.Filename
 	}
 
 	code := ccb.code.Bytes()
@@ -41,22 +37,99 @@ func compileFrame(node ast.Node, name string) *CodeBlock {
 		Names:        ccb.names.table,
 		Locals:       ccb.locals.table,
 		MaxStackSize: calculateStackSize(code),
+		MaxBlockSize: calculateBlockSize(code),
 	}
 
 	return c
 }
 
+type maxsizer struct {
+	max, current int
+}
+
+func (s *maxsizer) sub(delta int) {
+	s.current -= delta
+	if s.current > s.max { // Delta can be negative which would add to the size
+		s.max = s.current
+	}
+}
+func (s *maxsizer) add(delta int) {
+	s.current += delta
+	if s.current > s.max {
+		s.max = s.current
+	}
+}
+
 func calculateStackSize(c []byte) int {
-	return 0
+	offset := 0
+	stackSize := &maxsizer{}
+	for offset < len(c) {
+		code := c[offset]
+		offset++
+
+		switch code {
+		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal:
+			stackSize.add(1)
+		case opcode.StoreIndex:
+			stackSize.sub(3)
+		case opcode.BinaryAdd, opcode.BinarySub, opcode.BinaryMul, opcode.BinaryDivide, opcode.BinaryMod, opcode.BinaryShiftL,
+			opcode.BinaryShiftR, opcode.BinaryAnd, opcode.BinaryOr, opcode.BinaryNot, opcode.BinaryAndNot,
+			opcode.StoreConst, opcode.StoreFast, opcode.Define, opcode.StoreGlobal, opcode.LoadIndex, opcode.Compare,
+			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse:
+			stackSize.sub(1)
+		case opcode.Call:
+			params := int(bytesToUint16(c[offset], c[offset+1]))
+			stackSize.sub(params)
+		case opcode.MakeArray:
+			l := int(bytesToUint16(c[offset], c[offset+1]))
+			stackSize.sub(l - 1)
+		case opcode.MakeMap:
+			l := int(bytesToUint16(c[offset], c[offset+1]))
+			stackSize.sub(l*2 - 1)
+		case opcode.MakeFunction:
+			stackSize.sub(2)
+		}
+
+		if opcode.HasOneByteArg[code] {
+			offset++
+		} else if opcode.HasTwoByteArg[code] {
+			offset += 2
+		} else if opcode.HasFourByteArg[code] {
+			offset += 4
+		}
+	}
+	return stackSize.max
+}
+
+func calculateBlockSize(c []byte) int {
+	offset := 0
+	blockLen := &maxsizer{}
+	for offset < len(c) {
+		code := c[offset]
+		offset++
+
+		switch code {
+		case opcode.PrepareBlock:
+			blockLen.add(1)
+		case opcode.EndBlock:
+			blockLen.sub(1)
+		}
+
+		if opcode.HasOneByteArg[code] {
+			offset++
+		} else if opcode.HasTwoByteArg[code] {
+			offset += 2
+		} else if opcode.HasFourByteArg[code] {
+			offset += 4
+		}
+	}
+	return blockLen.max
 }
 
 func compile(ccb *codeBlockCompiler, node ast.Node) {
 	switch node := node.(type) {
 	case *ast.ExpressionStatement:
 		compile(ccb, node.Expression)
-		if _, ok := node.Expression.(*ast.CallExpression); ok {
-			ccb.code.WriteByte(opcode.Pop)
-		}
 	case *ast.BlockStatement:
 		compileBlock(ccb, node)
 
@@ -169,8 +242,6 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compile(ccb, node.Function)
 		ccb.code.WriteByte(opcode.Call)
 		ccb.code.Write(uint16ToBytes(uint16(len(node.Arguments))))
-	case *ast.Program:
-		panic("Not implemented yet")
 	case *ast.ReturnStatement:
 		compile(ccb, node.Value)
 		ccb.code.WriteByte(opcode.Return)
@@ -181,7 +252,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.WriteByte(opcode.StoreConst)
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 		} else {
-			ccb.code.WriteByte(opcode.StoreFast)
+			ccb.code.WriteByte(opcode.Define)
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 		}
 	case *ast.AssignStatement:
@@ -206,6 +277,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.WriteByte(opcode.StoreGlobal)
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(ident.Value)))
 		}
+		compileLoadNull(ccb)
 	case *ast.IfExpression:
 		compileIfStatement(ccb, node)
 	case *ast.CompareExpression:
@@ -219,14 +291,17 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compile(ccb, node.Left)
 		ccb.code.WriteByte(opcode.LoadIndex)
 
-	// Not implemented yet
-	case *ast.ThrowStatement:
-		panic("Not implemented yet")
 	case *ast.ForLoopStatement:
-		panic("Not implemented yet")
+		compileLoop(ccb, node)
 	case *ast.ContinueStatement:
-		panic("Not implemented yet")
+		ccb.code.WriteByte(opcode.Continue)
 	case *ast.BreakStatement:
+		ccb.code.WriteByte(opcode.Break)
+
+	// Not implemented yet
+	case *ast.Program:
+		panic("Not implemented yet")
+	case *ast.ThrowStatement:
 		panic("Not implemented yet")
 	case *ast.TryCatchExpression:
 		panic("Not implemented yet")
@@ -238,8 +313,14 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 }
 
 func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
-	for _, s := range block.Statements {
+	l := len(block.Statements) - 1
+	for i, s := range block.Statements {
 		compile(ccb, s)
+		if i < l {
+			if _, ok := s.(*ast.ExpressionStatement); ok {
+				ccb.code.WriteByte(opcode.Pop)
+			}
+		}
 	}
 }
 
@@ -249,6 +330,7 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral) {
 		locals:    newStringTable(),
 		names:     newStringTable(),
 		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
 	}
 
 	for _, p := range fn.Parameters {
@@ -256,6 +338,9 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral) {
 	}
 
 	compile(ccb2, fn.Body)
+	if _, ok := fn.Body.Statements[len(fn.Body.Statements)-1].(*ast.ExpressionStatement); !ok {
+		compileLoadNull(ccb2)
+	}
 	if ccb2.code.Bytes()[ccb2.code.Len()-1] != opcode.Return {
 		ccb2.code.WriteByte(opcode.Return)
 	}
@@ -263,13 +348,14 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral) {
 	code := ccb2.code.Bytes()
 	body := &CodeBlock{
 		Name:         fn.Name,
-		Filename:     "",
+		Filename:     ccb.filename,
 		LocalCount:   len(ccb2.locals.table),
 		Code:         code,
 		Constants:    ccb2.constants.table,
 		Names:        ccb2.names.table,
 		Locals:       ccb2.locals.table,
 		MaxStackSize: calculateStackSize(code),
+		MaxBlockSize: calculateBlockSize(code),
 	}
 
 	ccb.code.WriteByte(opcode.LoadConst)
@@ -288,11 +374,28 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral) {
 	ccb.code.WriteByte(opcode.MakeFunction)
 }
 
+func compileInnerBlock(ccb *codeBlockCompiler, node ast.Node) *bytes.Buffer {
+	mainCode := ccb.code
+	oldOffset := ccb.offset
+
+	ccb.offset = ccb.code.Len() + ccb.offset
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, node)
+	block := ccb.code
+
+	ccb.code = mainCode
+	ccb.offset = oldOffset
+	return block
+}
+
 func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	if ifs.Alternative == nil {
 		compileIfStatementNoElse(ccb, ifs)
 		return
 	}
+
+	_, trueNoNil := ifs.Consequence.Statements[len(ifs.Consequence.Statements)-1].(*ast.ExpressionStatement)
+	_, falseNoNil := ifs.Alternative.Statements[len(ifs.Alternative.Statements)-1].(*ast.ExpressionStatement)
 
 	compile(ccb, ifs.Condition)
 
@@ -305,7 +408,10 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	trueBranch := ccb.code
 
 	// Prior code to if statement + size of true branch + faked offset + 3 (other opcodes)
-	falseBranchLoc := mainCode.Len() + trueBranch.Len() + ccb.offset + 4
+	falseBranchLoc := mainCode.Len() + trueBranch.Len() + ccb.offset + 1
+	if trueNoNil {
+		falseBranchLoc -= 3
+	}
 	ccb.offset = falseBranchLoc
 	ccb.code = new(bytes.Buffer)
 	compile(ccb, ifs.Alternative)
@@ -314,42 +420,56 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	ccb.code = mainCode
 	ccb.offset = oldOffset
 
+	endIfLoc := falseBranch.Len()
+
 	ccb.code.WriteByte(opcode.PopJumpIfFalse)
 	ccb.code.Write(uint16ToBytes(uint16(falseBranchLoc)))
 	ccb.code.Write(trueBranch.Bytes())
-	ccb.code.WriteByte(opcode.Pop)
+	if !trueNoNil {
+		compileLoadNull(ccb)
+	}
 	ccb.code.WriteByte(opcode.JumpForward)
-	ccb.code.Write(uint16ToBytes(uint16(falseBranch.Len())))
+	ccb.code.Write(uint16ToBytes(uint16(endIfLoc)))
 	ccb.code.Write(falseBranch.Bytes())
+	if !falseNoNil {
+		compileLoadNull(ccb)
+	}
 }
 
 func compileIfStatementNoElse(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	compile(ccb, ifs.Condition)
 
-	mainCode := ccb.code
-	oldOffset := ccb.offset
+	trueBranch := compileInnerBlock(ccb, ifs.Consequence)
 
-	ccb.offset = ccb.code.Len() + ccb.offset
-	ccb.code = new(bytes.Buffer)
-	compile(ccb, ifs.Consequence)
-	trueBranch := ccb.code
-
-	ccb.code = mainCode
-	ccb.offset = oldOffset
+	_, noNil := ifs.Consequence.Statements[len(ifs.Consequence.Statements)-1].(*ast.ExpressionStatement)
 
 	// Prior code to if statement + size of true branch + faked offset - 2 (IDK why 2, it just works)
-	afterIfStmt := ccb.code.Len() + trueBranch.Len() + ccb.offset + 3
+	afterIfStmt := ccb.code.Len() + trueBranch.Len() + ccb.offset + 6
+	if !noNil {
+		afterIfStmt -= 3
+	}
 
 	ccb.code.WriteByte(opcode.PopJumpIfFalse)
 	ccb.code.Write(uint16ToBytes(uint16(afterIfStmt)))
 	ccb.code.Write(trueBranch.Bytes())
-	ccb.code.WriteByte(opcode.Pop)
+	if noNil {
+		ccb.code.WriteByte(opcode.JumpForward)
+		ccb.code.Write(uint16ToBytes(uint16(3)))
+	}
+	compileLoadNull(ccb)
+}
+
+func compileLoadNull(ccb *codeBlockCompiler) {
+	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.NullConst)))
 }
 
 func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression) {
 	compile(ccb, cmp.Left)
 
-	rightBranchLoc := ccb.code.Len() + 3
+	cntBranch := compileInnerBlock(ccb, cmp.Right)
+
+	afterCompare := ccb.code.Len() + cntBranch.Len() + ccb.offset + 3
 
 	if cmp.Token.Type == token.LAnd {
 		ccb.code.WriteByte(opcode.JumpIfFalseOrPop)
@@ -357,7 +477,69 @@ func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression
 		ccb.code.WriteByte(opcode.JumpIfTrueOrPop)
 	}
 
-	ccb.code.Write(uint16ToBytes(uint16(rightBranchLoc)))
+	ccb.code.Write(uint16ToBytes(uint16(afterCompare)))
+	ccb.code.Write(cntBranch.Bytes())
+}
 
-	compile(ccb, cmp.Right)
+func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
+	if loop.Init == nil {
+		compileInfiniteLoop(ccb, loop)
+		return
+	}
+
+	ccb.code.WriteByte(opcode.PrepareBlock)
+	compile(ccb, loop.Init)
+
+	mainCode := ccb.code
+	oldOffset := ccb.offset
+
+	ccb.offset = ccb.code.Len() + ccb.offset
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, loop.Condition)
+	condition := ccb.code
+
+	ccb.offset = mainCode.Len() + condition.Len() + oldOffset + 8
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, loop.Body)
+	loopBody := ccb.code
+
+	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
+		ccb.code.WriteByte(opcode.Pop)
+	}
+
+	ccb.offset = mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 4
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, loop.Iter)
+	iterator := ccb.code
+
+	ccb.code = mainCode
+	ccb.offset = oldOffset
+
+	endBlock := ccb.code.Len() + condition.Len() + 5 + loopBody.Len() + iterator.Len() + 5
+	iterBlock := ccb.code.Len() + condition.Len() + 5 + loopBody.Len() + 3
+	ccb.code.WriteByte(opcode.StartLoop)
+	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
+	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))
+
+	ccb.code.Write(condition.Bytes())
+	ccb.code.WriteByte(opcode.PopJumpIfFalse)
+	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
+
+	ccb.code.Write(loopBody.Bytes())
+	ccb.code.Write(iterator.Bytes())
+
+	ccb.code.WriteByte(opcode.Pop)
+	ccb.code.WriteByte(opcode.NextIter)
+	ccb.code.WriteByte(opcode.EndBlock)
+}
+
+func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
+	loopBody := compileInnerBlock(ccb, loop.Body)
+	loopBody.WriteByte(opcode.Continue)
+
+	loopEnd := ccb.code.Len() + loopBody.Len() + 3
+	ccb.code.WriteByte(opcode.StartLoop)
+	ccb.code.Write(uint16ToBytes(uint16(loopEnd)))
+
+	ccb.code.Write(loopBody.Bytes())
 }

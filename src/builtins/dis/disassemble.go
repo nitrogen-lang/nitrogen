@@ -1,6 +1,8 @@
 package dis
 
 import (
+	"fmt"
+
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
@@ -10,6 +12,10 @@ func init() {
 }
 
 func disassemble(machine object.Interpreter, args ...object.Object) object.Object {
-	args[0].(*vm.VMFunction).Body.Print()
+	cb := args[0].(*vm.VMFunction).Body
+
+	fmt.Printf("Name: %s\nFilename: %s\nLocalCount: %d\nMaxStackSize: %d\nMaxBlockSize: %d\n",
+		cb.Name, cb.Filename, cb.LocalCount, cb.MaxStackSize, cb.MaxBlockSize)
+	cb.Print(" ")
 	return object.NullConst
 }

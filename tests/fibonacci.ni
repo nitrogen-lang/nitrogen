@@ -6,25 +6,18 @@
  */
 
 func fib(x) {
-     if (x == 0) {
-        return 0;
-     }
+    if x == 0 or x == 1 {
+        return x
+    }
 
-     if (x == 1) {
-        return 1;
-     }
-
-     return fib(x-1) + fib(x-2);
+    return fib(x-1) + fib(x-2)
 }
 
 func main() {
-    let fibTest = fib(10);
+    let fibTest = fib(10)
     if (fibTest != 55) {
-        println("Fibonacci is broken!");
-        print("Got: ");
-        print(fibTest);
-        print(", Expected: 55");
+        println("Fibonacci is broken!\nGot: ", fibTest, ", Expected: 55")
     }
 }
 
-main();
+main()

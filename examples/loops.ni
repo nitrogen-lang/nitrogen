@@ -7,7 +7,7 @@
 
 func main() {
     // This loop will go 10 times (0-9) but break on 5 and skip 2
-    for i = 0; i < 10; i + 1 {
+    for i = 0; i < 10; i += 1 {
         // Loops run in an enclosed scope. Variable defined here won't escape to
         // the outer scope. However, like other inner scopes, variables declared
         // before this loop can be modified within the loop

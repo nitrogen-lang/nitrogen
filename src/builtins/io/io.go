@@ -21,6 +21,7 @@ func init() {
 
 	vm.RegisterBuiltin("print", moduleutils.VMBuiltinWrapper(printBuiltin))
 	vm.RegisterBuiltin("println", moduleutils.VMBuiltinWrapper(printlnBuiltin))
+	vm.RegisterBuiltin("printenv", printEnvBuiltinVM)
 }
 
 func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -43,6 +44,11 @@ func printBinaryBuiltin(interpreter object.Interpreter, env *object.Environment,
 
 func printEnvBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	env.Print("")
+	return object.NullConst
+}
+
+func printEnvBuiltinVM(machine object.Interpreter, args ...object.Object) object.Object {
+	machine.(*vm.VirtualMachine).CurrentFrame().Env.Print("")
 	return object.NullConst
 }
 

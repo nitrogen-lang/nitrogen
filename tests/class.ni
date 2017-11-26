@@ -1,6 +1,6 @@
 always conf = 'This thing'
 
-let printer = class ^ parent {
+let printer = class {
     let x
     always t = "Thing"
 

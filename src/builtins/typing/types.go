@@ -6,6 +6,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {
@@ -31,6 +32,8 @@ func init() {
 	eval.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))
 
 	eval.RegisterBuiltin("errorVal", getErrorVal)
+
+	vm.RegisterBuiltin("isDefined", isDefinedBuiltinVM)
 }
 
 func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -162,5 +165,19 @@ func isDefinedBuiltin(interpreter object.Interpreter, env *object.Environment, a
 	}
 
 	_, ok = env.Get(ident.Value)
+	return object.NativeBoolToBooleanObj(ok)
+}
+
+func isDefinedBuiltinVM(machine object.Interpreter, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("isDefined", 1, args...); ac != nil {
+		return ac
+	}
+
+	ident, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("isDefined expects a string, got %s", args[0].Type().String())
+	}
+
+	_, ok = machine.(*vm.VirtualMachine).CurrentFrame().Env.Get(ident.Value)
 	return object.NativeBoolToBooleanObj(ok)
 }

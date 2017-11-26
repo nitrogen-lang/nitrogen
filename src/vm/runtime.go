@@ -2,6 +2,7 @@ package vm
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -9,14 +10,69 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-type frame struct {
-	lastFrame *frame
-	code      *compiler.CodeBlock
-	stack     *object.Stack
-	locals    map[string]object.Object
-	consts    map[string]object.Object
-	outerVars map[string]object.Object
-	pc        int
+type block struct {
+	start, iter, end int
+}
+
+type Frame struct {
+	lastFrame  *Frame
+	code       *compiler.CodeBlock
+	stack      []object.Object
+	sp         int
+	blockStack []block
+	bp         int
+	Env        *object.Environment
+	pc         int
+}
+
+func (f *Frame) pushStack(obj object.Object) {
+	if f.sp == len(f.stack) {
+		panic("Stack overflow")
+	}
+	f.stack[f.sp] = obj
+	f.sp++
+}
+
+func (f *Frame) popStack() object.Object {
+	if f.sp == 0 {
+		panic("Stack exhausted")
+	}
+	f.sp--
+	return f.stack[f.sp]
+}
+
+func (f *Frame) getFrontStack() object.Object {
+	return f.stack[f.sp-1]
+}
+
+func (f *Frame) printStack() {
+	for i := f.sp; i >= 0; i-- {
+		fmt.Printf(" %d: %s\n", i, f.stack[i].Inspect())
+	}
+}
+
+func (f *Frame) pushBlock(start, iter, end int) {
+	if f.bp == len(f.blockStack) {
+		panic("Block stack overflow")
+	}
+	f.blockStack[f.bp].start = start
+	f.blockStack[f.bp].iter = iter
+	f.blockStack[f.bp].end = end
+	f.bp++
+}
+
+// returns start, end
+func (f *Frame) popBlock() (int, int, int) {
+	if f.bp == 0 {
+		panic("Block stack exhausted")
+	}
+	f.bp--
+	return f.blockStack[f.bp].start, f.blockStack[f.bp].iter, f.blockStack[f.bp].end
+}
+
+// returns start, end
+func (f *Frame) getCurrentBlock() (int, int, int) {
+	return f.blockStack[f.bp-1].start, f.blockStack[f.bp-1].iter, f.blockStack[f.bp-1].end
 }
 
 type frameStack struct {
@@ -35,7 +91,7 @@ func (vb *vmBuiltin) Inspect() string         { return "<vmBuiltin>" }
 func (vb *vmBuiltin) Dup() object.Object      { return object.NullConst }
 
 type stackElement struct {
-	val  *frame
+	val  *Frame
 	prev *stackElement
 }
 
@@ -43,7 +99,7 @@ func newFrameStack() *frameStack {
 	return &frameStack{}
 }
 
-func (s *frameStack) Push(val *frame) {
+func (s *frameStack) Push(val *Frame) {
 	s.head = &stackElement{
 		val:  val,
 		prev: s.head,
@@ -51,14 +107,14 @@ func (s *frameStack) Push(val *frame) {
 	s.length++
 }
 
-func (s *frameStack) GetFront() *frame {
+func (s *frameStack) GetFront() *Frame {
 	if s.head == nil {
 		return nil
 	}
 	return s.head.val
 }
 
-func (s *frameStack) Pop() *frame {
+func (s *frameStack) Pop() *Frame {
 	if s.head == nil {
 		return nil
 	}
@@ -106,8 +162,7 @@ type VMFunction struct {
 	Name       string
 	Parameters []string
 	Body       *compiler.CodeBlock
-	Env        map[string]object.Object
-	Consts     map[string]object.Object
+	Env        *object.Environment
 }
 
 func (f *VMFunction) Inspect() string {

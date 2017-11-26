@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
@@ -100,9 +101,16 @@ func main() {
 
 	if compile {
 		code := compiler.Compile(program)
-		code.Print()
-		machine := vm.NewVM()
+		if fullDebug {
+			fmt.Printf("Max Stack: %d\n", code.MaxStackSize)
+			code.Print("")
+		}
+		machine := vm.NewVM(&vm.Settings{
+			Debug: fullDebug,
+		})
+		start := time.Now()
 		result := machine.Execute(code)
+		fmt.Printf("Execution took %s\n", time.Now().Sub(start))
 		if result != nil && result != object.NullConst {
 			if e, ok := result.(*object.Exception); ok {
 				os.Stdout.WriteString("Uncaught Exception: ")
@@ -122,7 +130,9 @@ func main() {
 	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
 
 	interpreter := eval.NewInterpreter()
+	start := time.Now()
 	result := interpreter.Eval(program, env)
+	fmt.Printf("Execution took %s\n", time.Now().Sub(start))
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stdout.WriteString("Uncaught Exception: ")

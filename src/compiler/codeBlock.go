@@ -14,6 +14,7 @@ type CodeBlock struct {
 	Filename     string
 	LocalCount   int
 	MaxStackSize int
+	MaxBlockSize int
 	Constants    []object.Object // Created at compile time
 	Locals       []string        // Created by vm
 	Names        []string        // Created at compile time
@@ -25,37 +26,48 @@ type CodeBlock struct {
 func (cb *CodeBlock) Type() object.ObjectType { return object.ResourceObj }
 func (cb *CodeBlock) Inspect() string         { return "<codeblock>" }
 func (cb *CodeBlock) Dup() object.Object      { return object.NullConst }
-func (cb *CodeBlock) Print() {
+func (cb *CodeBlock) Print(indent string) {
 	offset := 0
 	for offset < len(cb.Code) {
 		code := cb.Code[offset]
-		fmt.Printf("%d: %s", offset, opcode.Names[code])
+		fmt.Printf("%s%d:\t%s", indent, offset, opcode.Names[code])
 		offset++
 
 		switch code {
-		case opcode.MakeArray, opcode.MakeMap,
-			opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.JumpIfTrueOrPop, opcode.JumpIfFalseOrPop, opcode.JumpAbsolute, opcode.JumpForward:
-			fmt.Printf(" %d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
-			offset += 2
+		case opcode.MakeArray, opcode.MakeMap:
+			fmt.Printf("\t\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
+		case opcode.JumpAbsolute, opcode.JumpForward:
+			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
+			fmt.Printf("\t\t%d (%d)", target, offset+2+target)
+		case opcode.StartLoop:
+			fmt.Printf("\t\t%d %d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]), bytesToUint16(cb.Code[offset+2], cb.Code[offset+3]))
+		case opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.JumpIfTrueOrPop, opcode.JumpIfFalseOrPop:
+			fmt.Printf("\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 		case opcode.LoadConst:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf(" %d (%s)", index, cb.Constants[index].Inspect())
-			offset += 2
+			fmt.Printf("\t\t%d (%s)", index, cb.Constants[index].Inspect())
 		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf(" %d (%s)", index, cb.Locals[index])
-			offset += 2
+			fmt.Printf("\t\t%d (%s)", index, cb.Locals[index])
+		case opcode.Define:
+			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
+			fmt.Printf("\t\t\t%d (%s)", index, cb.Locals[index])
 		case opcode.Call:
 			params := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf(" %d (%d positional parameters)", params, params)
-			offset += 2
-		case opcode.LoadGlobal:
+			fmt.Printf("\t\t\t%d (%d positional parameters)", params, params)
+		case opcode.LoadGlobal, opcode.StoreGlobal:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf(" %d (%s)", index, cb.Names[index])
-			offset += 2
+			fmt.Printf("\t\t%d (%s)", index, cb.Names[index])
 		case opcode.Compare:
-			fmt.Printf(" %d (%s)", cb.Code[offset], opcode.CmpOps[cb.Code[offset]])
+			fmt.Printf("\t\t\t%d (%s)", cb.Code[offset], opcode.CmpOps[cb.Code[offset]])
+		}
+
+		if opcode.HasOneByteArg[code] {
 			offset++
+		} else if opcode.HasTwoByteArg[code] {
+			offset += 2
+		} else if opcode.HasFourByteArg[code] {
+			offset += 4
 		}
 
 		fmt.Println()
@@ -71,7 +83,9 @@ type codeBlockCompiler struct {
 	locals    *stringTable
 	names     *stringTable
 	code      *bytes.Buffer
+	filename  string
 	offset    int
+	stackSize int
 }
 
 type constantTable struct {

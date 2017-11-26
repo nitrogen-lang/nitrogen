@@ -11,6 +11,12 @@ nitrogen-test:
 		./bin/nitrogen "$$test"; \
 	done
 
+nitrogen-test-vm:
+	@echo "Run Nitrogen source test suite using VM"
+	@for test in tests/*.ni; do \
+		./bin/nitrogen -compile "$$test"; \
+	done
+
 nitrogen:
 	go build -o bin/nitrogen ./cmd/nitrogen/...
 
