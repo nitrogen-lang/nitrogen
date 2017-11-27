@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"bufio"
 	"bytes"
 	"errors"
@@ -13,6 +12,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -45,6 +48,10 @@ func startSCGIServer() {
 	}
 
 	fmt.Printf("SCGI listening on %s\n", scgiSock)
+
+	if compile {
+		fmt.Println("Using opcode compiler")
+	}
 
 	workerTimeout := time.Duration(scgiWorkerTimeout) * time.Second
 	workerTimeoutTimer := time.NewTimer(workerTimeout)
@@ -168,10 +175,25 @@ func (w *worker) run(conn net.Conn) {
 	}
 
 	// Execute script
-	interpreter := eval.NewInterpreter()
-	interpreter.Stdout = conn
+	var result object.Object
+	if compile {
+		code := compiler.Compile(program, "__main")
+		if fullDebug {
+			code.Print("")
+		}
 
-	result := interpreter.Eval(program, env)
+		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+
+		vmsettings := vm.NewSettings()
+		vmsettings.Stdout = conn
+
+		result = vm.NewVM(vmsettings).Execute(code, env)
+	} else {
+		interpreter := eval.NewInterpreter()
+		interpreter.Stdout = conn
+
+		result = interpreter.Eval(program, env)
+	}
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stderr.WriteString(e.Message)

@@ -1,14 +1,14 @@
 # IO
 
-## print(args...)
+## print(args...): null
 
 Print will print all args to standard output with NO space between them.
 
-## println(args...)
+## println(args...): null
 
 Same as print() but will also output a newline after printing args.
 
-## printenv()
+## printenv(): null
 
 For debugging. Prints the current symbol table as seen by the environment where
 printenv() was called.

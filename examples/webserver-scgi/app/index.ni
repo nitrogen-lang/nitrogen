@@ -14,7 +14,7 @@ println('<h3>Script Environment:</h3>')
 println('<ul>')
 
 let keys = sort(hashKeys(_ENV))
-for i = 0; i < len(keys); i+1 {
+for i = 0; i < len(keys); i += 1 {
     println('<li>', keys[i], ': ', _ENV[keys[i]], '</li>')
 }
 
