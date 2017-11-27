@@ -24,6 +24,12 @@ type forLoopBlock struct {
 
 func (b *forLoopBlock) blockType() blockType { return loopBlockT }
 
+type tryBlock struct {
+	catch, sp int
+}
+
+func (b *tryBlock) blockType() blockType { return tryBlockT }
+
 type Frame struct {
 	lastFrame  *Frame
 	code       *compiler.CodeBlock
@@ -78,8 +84,15 @@ func (f *Frame) popBlock() block {
 }
 
 func (f *Frame) popBlockUntil(bt blockType) block {
+	if f.bp == 0 {
+		return nil
+	}
+
 	for f.blockStack[f.bp-1].blockType() != bt {
-		f.popBlock()
+		f.bp--
+		if f.bp == 0 {
+			return nil
+		}
 	}
 	return f.blockStack[f.bp-1]
 }

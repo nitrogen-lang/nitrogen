@@ -34,7 +34,7 @@ func (cb *CodeBlock) Print(indent string) {
 		offset++
 
 		switch code {
-		case opcode.MakeArray, opcode.MakeMap:
+		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry:
 			fmt.Printf("\t\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 		case opcode.JumpAbsolute, opcode.JumpForward:
 			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))

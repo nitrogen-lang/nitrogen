@@ -162,6 +162,7 @@ type Exception struct {
 func (e *Exception) Inspect() string  { return e.Message }
 func (e *Exception) Type() ObjectType { return ExceptionObj }
 func (e *Exception) Dup() Object      { return &Exception{Message: e.Message} }
+func (e *Exception) String() string   { return e.Message }
 
 type Error struct {
 	Message string
@@ -170,6 +171,7 @@ type Error struct {
 func (e *Error) Inspect() string  { return "Error: " + e.Message }
 func (e *Error) Type() ObjectType { return ErrorObj }
 func (e *Error) Dup() Object      { return &Error{Message: e.Message} }
+func (e *Error) String() string   { return "Error: " + e.Message }
 
 type Function struct {
 	Name       string

@@ -100,7 +100,7 @@ func main() {
 	}
 
 	if compile {
-		code := compiler.Compile(program)
+		code := compiler.Compile(program, "__main")
 		if fullDebug {
 			fmt.Printf("Max Stack: %d\n", code.MaxStackSize)
 			code.Print("")

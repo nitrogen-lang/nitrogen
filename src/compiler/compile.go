@@ -9,8 +9,8 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
 )
 
-func Compile(tree *ast.Program) *CodeBlock {
-	return compileFrame(&ast.BlockStatement{Statements: tree.Statements}, "__main", tree.Filename)
+func Compile(tree *ast.Program, name string) *CodeBlock {
+	return compileFrame(&ast.BlockStatement{Statements: tree.Statements}, name, tree.Filename)
 }
 
 func compileFrame(node ast.Node, name, filename string) *CodeBlock {
@@ -68,14 +68,14 @@ func calculateStackSize(c []byte) int {
 		offset++
 
 		switch code {
-		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal:
+		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal, opcode.StartTry:
 			stackSize.add(1)
 		case opcode.StoreIndex:
 			stackSize.sub(3)
 		case opcode.BinaryAdd, opcode.BinarySub, opcode.BinaryMul, opcode.BinaryDivide, opcode.BinaryMod, opcode.BinaryShiftL,
 			opcode.BinaryShiftR, opcode.BinaryAnd, opcode.BinaryOr, opcode.BinaryNot, opcode.BinaryAndNot,
 			opcode.StoreConst, opcode.StoreFast, opcode.Define, opcode.StoreGlobal, opcode.LoadIndex, opcode.Compare,
-			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse:
+			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.Throw:
 			stackSize.sub(1)
 		case opcode.Call:
 			params := int(bytesToUint16(c[offset], c[offset+1]))
@@ -109,7 +109,7 @@ func calculateBlockSize(c []byte) int {
 		offset++
 
 		switch code {
-		case opcode.PrepareBlock:
+		case opcode.StartLoop, opcode.StartTry:
 			blockLen.add(1)
 		case opcode.EndBlock:
 			blockLen.sub(1)
@@ -299,18 +299,84 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.BreakStatement:
 		ccb.code.WriteByte(opcode.Break)
 
+	case *ast.TryCatchExpression:
+		compileTryCatch(ccb, node)
+	case *ast.ThrowStatement:
+		compile(ccb, node.Expression)
+		ccb.code.WriteByte(opcode.Throw)
+
 	// Not implemented yet
 	case *ast.Program:
-		panic("Not implemented yet")
-	case *ast.ThrowStatement:
-		panic("Not implemented yet")
-	case *ast.TryCatchExpression:
 		panic("Not implemented yet")
 	case *ast.ClassLiteral:
 		panic("Not implemented yet")
 	case *ast.MakeInstance:
 		panic("Not implemented yet")
 	}
+}
+
+func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
+	ccb.code.WriteByte(opcode.PrepareBlock)
+
+	_, tryNoNil := try.Try.Statements[len(try.Try.Statements)-1].(*ast.ExpressionStatement)
+	_, catchNoNil := try.Catch.Statements[len(try.Catch.Statements)-1].(*ast.ExpressionStatement)
+
+	mainCode := ccb.code
+	oldOffset := ccb.offset
+
+	ccb.offset = mainCode.Len() + ccb.offset
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, try.Try)
+	tryBlock := ccb.code
+
+	// 6 = 2 opcodes + 2 x 2 byte args (START_TRY and JUMP_FORWARD)
+	catchBlockLoc := mainCode.Len() + tryBlock.Len() + 6
+	ccb.offset = catchBlockLoc
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, try.Catch)
+	catchBlock := ccb.code
+
+	ccb.code = mainCode
+	ccb.offset = oldOffset
+
+	catchSymOffset := 1 // Catch doesn't bind exception, just pops it
+	if try.Symbol != nil {
+		catchSymOffset = 3 // Catch binds exception to a variable
+	}
+	if tryNoNil && !catchNoNil {
+		catchSymOffset += 3 // Skip load nil from catch block
+	}
+	if !tryNoNil && catchNoNil {
+		if try.Symbol == nil {
+			catchSymOffset += 3 // Skip load nil from try block
+		} else {
+			catchSymOffset += 6 // Skip load nil catch block and symbol bind
+		}
+	}
+
+	ccb.code.WriteByte(opcode.StartTry)
+	ccb.code.Write(uint16ToBytes(uint16(catchBlockLoc)))
+	ccb.code.Write(tryBlock.Bytes())
+
+	ccb.code.WriteByte(opcode.JumpForward)
+	ccb.code.Write(uint16ToBytes(uint16(catchBlock.Len() + catchSymOffset)))
+
+	if try.Symbol == nil {
+		ccb.code.WriteByte(opcode.Pop)
+	} else {
+		ccb.code.WriteByte(opcode.Define)
+		ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(try.Symbol.Value)))
+	}
+
+	ccb.code.Write(catchBlock.Bytes())
+	if catchNoNil && !tryNoNil {
+		ccb.code.WriteByte(opcode.JumpForward)
+		ccb.code.Write(uint16ToBytes(3))
+	}
+	if !tryNoNil || !catchNoNil {
+		compileLoadNull(ccb)
+	}
+	ccb.code.WriteByte(opcode.EndBlock)
 }
 
 func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {

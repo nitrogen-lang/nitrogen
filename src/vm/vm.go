@@ -43,7 +43,7 @@ func (vm *VirtualMachine) GetStdin() io.Reader          { return os.Stdout }
 func (vm *VirtualMachine) Execute(code *compiler.CodeBlock) object.Object {
 	f := &Frame{
 		code:       code,
-		stack:      make([]object.Object, code.MaxStackSize),
+		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
 		blockStack: make([]block, code.MaxBlockSize),
 		Env:        object.NewEnvironment(),
 	}
@@ -57,11 +57,11 @@ func (vm *VirtualMachine) CurrentFrame() *Frame {
 func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println(r)
-			fmt.Println("Stack Trace:")
+			fmt.Fprintln(vm.GetStderr(), r)
+			fmt.Fprintln(vm.GetStderr(), "Stack Trace:")
 			frame := vm.currentFrame
 			for frame != nil {
-				fmt.Printf("\t%s: %s\n", frame.code.Filename, frame.code.Name)
+				fmt.Fprintf(vm.GetStderr(), "\t%s: %s\n", frame.code.Filename, frame.code.Name)
 				frame = frame.lastFrame
 			}
 		}
@@ -70,106 +70,107 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 	vm.callStack.Push(f)
 	vm.currentFrame = f
 
+mainLoop:
 	for {
 		if vm.currentFrame.pc >= len(vm.currentFrame.code.Code) {
 			panic(fmt.Sprintf("Program counter %d outside bounds of bytecode %d", vm.currentFrame.pc, len(vm.currentFrame.code.Code)))
 		}
 		code := vm.fetchByte()
 		if vm.settings.Debug {
-			fmt.Printf("Executing %s\n", opcode.Names[code])
+			fmt.Fprintf(vm.GetStdout(), "Executing %s\n", opcode.Names[code])
 		}
 
 		switch code {
 		case opcode.Noop:
-			break
+			continue mainLoop
 		case opcode.BinaryAdd:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("+", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinarySub:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("-", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryMul:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("*", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryDivide:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("/", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryMod:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("%", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryShiftL:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("<<", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryShiftR:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression(">>", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryAnd:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("&", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryOr:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("|", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryNot:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("^", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.BinaryAndNot:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
 			res := vm.evalBinaryExpression("&^", l, r)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception: %s\n", res.Inspect())
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.UnaryNeg:
 			l := vm.currentFrame.popStack().(*object.Integer)
 			vm.currentFrame.pushStack(&object.Integer{Value: -l.Value})
@@ -186,8 +187,8 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.Env.IsConst(name) {
-				fmt.Printf("Redefined constant %s\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.throw()
 			}
 			if _, err := vm.currentFrame.Env.CreateConst(name, vm.currentFrame.popStack()); err != nil {
 				fmt.Println(err)
@@ -209,30 +210,30 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 				break
 			}
 
-			fmt.Printf("Unknown variable/constant %s\n", name)
-			return vm.returnValue
+			vm.currentFrame.pushStack(object.NewException("Unknown variable/constant %s\n", name))
+			vm.throw()
 		case opcode.StoreFast:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.Env.IsConst(name) {
-				fmt.Printf("Redefined constant %s\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.throw()
 			}
 			if _, exists := vm.currentFrame.Env.Get(name); !exists {
-				fmt.Printf("Variable %s undefined\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Variable %s undefined\n", name))
+				vm.throw()
 			}
 			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.Env.IsConst(name) {
-				fmt.Printf("Redefined constant %s\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.throw()
 			}
 			if _, exists := vm.currentFrame.Env.GetLocal(name); exists {
-				fmt.Printf("Variable %s already defined\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Variable %s already defined\n", name))
+				vm.throw()
 			}
 			vm.currentFrame.Env.Create(name, vm.currentFrame.popStack())
 		case opcode.LoadGlobal:
@@ -246,37 +247,36 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 				break
 			}
 
-			fmt.Printf("Global %s doesn't exist\n", name)
-			return vm.returnValue
+			vm.currentFrame.pushStack(object.NewException("Global %s doesn't exist\n", name))
+			vm.throw()
 		case opcode.StoreGlobal:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			if vm.currentFrame.Env.IsConst(name) {
-				fmt.Printf("Redefined constant %s\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.throw()
 			}
 			if _, exists := vm.currentFrame.Env.Get(name); !exists {
-				fmt.Printf("Global variable %s not defined\n", name)
-				return vm.returnValue
+				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
+				vm.throw()
 			}
 			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
 		case opcode.LoadIndex:
 			left := vm.currentFrame.popStack()
 			index := vm.currentFrame.popStack()
 			res := vm.evalIndexExpression(left, index)
-			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception %s\n", res.Inspect())
-				return vm.returnValue
-			}
 			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 		case opcode.StoreIndex:
 			left := vm.currentFrame.popStack()
 			index := vm.currentFrame.popStack()
 			value := vm.currentFrame.popStack()
 			res := vm.assignIndexedValue(left, index, value)
 			if object.ObjectIs(res, object.ExceptionObj) {
-				fmt.Printf("Exception %s\n", res.Inspect())
-				return vm.returnValue
+				vm.currentFrame.pushStack(res)
+				vm.throw()
 			}
 		case opcode.Call:
 			numargs := vm.getUint16()
@@ -292,12 +292,17 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 				if result == nil {
 					result = object.NullConst
 				}
+
 				vm.returnValue = result
 				vm.currentFrame.pushStack(result)
+
+				if object.ObjectIs(result, object.ExceptionObj) {
+					vm.throw()
+				}
 			case *VMFunction:
 				newFrame := &Frame{
 					code:       fn.Body,
-					stack:      make([]object.Object, fn.Body.MaxStackSize),
+					stack:      make([]object.Object, fn.Body.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
 					blockStack: make([]block, fn.Body.MaxBlockSize),
 					Env:        object.NewEnclosedEnv(fn.Env),
 					lastFrame:  vm.currentFrame,
@@ -315,7 +320,10 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 			l := vm.currentFrame.popStack()
 			op := vm.fetchByte()
 			if op >= opcode.MaxCmpCodes {
-				panic(fmt.Sprintf("Invalid comparison operator %x", op))
+				ex := object.NewException("Invalid comparison operator %x", op)
+				ex.Catchable = false
+				vm.currentFrame.pushStack(ex)
+				vm.throw()
 			}
 			vm.currentFrame.pushStack(vm.compareObjects(l, r, op))
 		case opcode.MakeFunction:
@@ -355,7 +363,10 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 				val := vm.currentFrame.popStack()
 				hashKey, ok := key.(object.Hashable)
 				if !ok {
-					panic("Map key not valid")
+					ex := object.NewException("Map key %s not valid", key.Inspect())
+					ex.Catchable = false
+					vm.currentFrame.pushStack(ex)
+					vm.throw()
 				}
 				hash.Pairs[hashKey.HashKey()] = object.HashPair{
 					Key:   key,
@@ -419,8 +430,25 @@ func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env.Parent())
 		case opcode.Break:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).end
+		case opcode.StartTry:
+			catch := vm.getUint16()
+			tcb := &tryBlock{
+				catch: int(catch),
+				sp:    vm.currentFrame.sp,
+			}
+			vm.currentFrame.pushBlock(tcb)
+			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+		case opcode.Throw:
+			vm.throw()
 		default:
-			panic(fmt.Sprintf("Opcode %s is not supported", opcode.Names[code]))
+			codename := opcode.Names[code]
+			if codename == "" {
+				codename = fmt.Sprintf("%X", code)
+			}
+			ex := object.NewException("Opcode %s is not supported", codename)
+			ex.Catchable = false
+			vm.currentFrame.pushStack(ex)
+			vm.throw()
 		}
 	}
 }
@@ -433,4 +461,42 @@ func (vm *VirtualMachine) fetchByte() byte {
 
 func (vm *VirtualMachine) getUint16() uint16 {
 	return (uint16(vm.fetchByte()) << 8) + uint16(vm.fetchByte())
+}
+
+// throw takes the top of stack item as an exception object
+// it will then progressivly unwind the block stack and call stack until
+// a try block is found. If none is found, it will panic with an uncaught
+// exception and the VM will print a stack trace.
+func (vm *VirtualMachine) throw() {
+	exception := vm.currentFrame.popStack()
+	if exception.Type() != object.ExceptionObj {
+		exception = object.NewException(exception.Inspect())
+	}
+
+	if ex := exception.(*object.Exception); !ex.Catchable {
+		panic(fmt.Sprintf("Runtime Exception: %s", exception.Inspect()))
+	}
+
+	vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
+	cframe := vm.currentFrame
+	for {
+		// Unwind block stack until there's a try block
+		catchBlock := vm.currentFrame.popBlockUntil(tryBlockT)
+		if catchBlock != nil { // Try block found
+			tryBlockS := catchBlock.(*tryBlock)
+			vm.currentFrame.sp = tryBlockS.sp    // Unwind data stack
+			vm.currentFrame.pc = tryBlockS.catch // Set program counter to catch block
+			break
+		}
+		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
+		if vm.currentFrame == nil {                 // Call stack exhausted
+			vm.currentFrame = cframe // Reset frame for stack trace
+			panic(fmt.Sprintf("Uncaught Exception: %s", exception.Inspect()))
+		}
+	}
+
+	// Enclose once for new block (like a PREPARE_BLOCK) and another for block scope
+	// END_BLOCK removes two layers of environments
+	vm.currentFrame.Env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.Env))
+	vm.currentFrame.pushStack(exception)
 }

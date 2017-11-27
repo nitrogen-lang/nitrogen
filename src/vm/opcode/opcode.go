@@ -1,5 +1,15 @@
 package opcode
 
+/*
+When adding a new opcode, make sure to check and make any needed changes to the following places:
+
+- Add the opcode to the appropiate arg count map below.
+- Add a string representation of the opcode below.
+- If the opcode changes the stack in any way, edit the calculateStackSize function in the compiler.
+- If the opcode changes the block stack in any way, edit the calculateBlockSize function in the compiler.
+- If the opcode takes any arguments, eidt the compiler.CodeBlock.Print() method to print the correct output.
+- And obviously, implement it in the virtual machine.
+*/
 const (
 	Noop byte = iota
 	LoadConst
@@ -43,6 +53,10 @@ const (
 	Continue
 	NextIter
 	Break
+	StartTry
+	Throw
+
+	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 )
 
 const (
@@ -76,6 +90,7 @@ var HasTwoByteArg = map[byte]bool{
 	JumpIfFalseOrPop: true,
 	JumpAbsolute:     true,
 	JumpForward:      true,
+	StartTry:         true,
 }
 
 var HasOneByteArg = map[byte]bool{
@@ -107,6 +122,7 @@ var HasNoArg = map[byte]bool{
 	Continue:     true,
 	NextIter:     true,
 	Break:        true,
+	Throw:        true,
 }
 
 var Names = map[byte]string{
@@ -152,6 +168,8 @@ var Names = map[byte]string{
 	Continue:         "CONTINUE",
 	NextIter:         "NEXT_ITER",
 	Break:            "BREAK",
+	StartTry:         "START_TRY",
+	Throw:            "THROW",
 }
 
 var CmpOps = map[byte]string{
