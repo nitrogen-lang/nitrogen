@@ -142,7 +142,9 @@ func main() {
 	interpreter := eval.NewInterpreter()
 	start := time.Now()
 	result := interpreter.Eval(program, env)
-	fmt.Printf("Execution took %s\n", time.Now().Sub(start))
+	if fullDebug {
+		fmt.Printf("Execution took %s\n", time.Now().Sub(start))
+	}
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stdout.WriteString("Uncaught Exception: ")
