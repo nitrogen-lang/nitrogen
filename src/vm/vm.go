@@ -233,7 +233,7 @@ mainLoop:
 			vm.currentFrame.popStack()
 		case opcode.LoadFast:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if val, ok := vm.currentFrame.Env.Get(name); ok {
+			if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
 				vm.currentFrame.pushStack(val)
 				break
 			}
@@ -247,11 +247,11 @@ mainLoop:
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 			}
-			if _, exists := vm.currentFrame.Env.Get(name); !exists {
+			if _, exists := vm.currentFrame.Env.GetLocal(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Variable %s undefined\n", name))
 				vm.throw()
 			}
-			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
+			vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
@@ -266,7 +266,12 @@ mainLoop:
 			vm.currentFrame.Env.Create(name, vm.currentFrame.popStack())
 		case opcode.LoadGlobal:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
-			if val, ok := vm.currentFrame.Env.Get(name); ok {
+			p := vm.currentFrame.Env.Parent()
+			if p == nil {
+				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
+				vm.throw()
+			}
+			if val, ok := p.Get(name); ok {
 				vm.currentFrame.pushStack(val)
 				break
 			}
@@ -284,7 +289,12 @@ mainLoop:
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 			}
-			if _, exists := vm.currentFrame.Env.Get(name); !exists {
+			p := vm.currentFrame.Env.Parent()
+			if p == nil {
+				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
+				vm.throw()
+			}
+			if _, exists := p.Get(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
 				vm.throw()
 			}
@@ -308,14 +318,15 @@ mainLoop:
 			}
 		case opcode.Call:
 			numargs := vm.getUint16()
-			args := make([]object.Object, numargs)
 			fn := vm.currentFrame.popStack()
-			for i := uint16(0); i < numargs; i++ {
-				args[i] = vm.currentFrame.popStack()
-			}
 
 			switch fn := fn.(type) {
 			case *object.Builtin:
+				args := make([]object.Object, numargs)
+				for i := uint16(0); i < numargs; i++ {
+					args[i] = vm.currentFrame.popStack()
+				}
+
 				result := fn.Fn(vm, vm.currentFrame.Env, args...)
 				if result == nil {
 					result = object.NullConst
@@ -328,15 +339,21 @@ mainLoop:
 					vm.throw()
 				}
 			case *VMFunction:
-				newFrame := vm.MakeFrame(fn.Body, object.NewEnclosedEnv(fn.Env))
+				newFrame := vm.MakeFrame(fn.Body, object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount))
 				newFrame.lastFrame = vm.currentFrame
 
-				for i, arg := range args {
-					newFrame.Env.SetForce(fn.Parameters[i], arg, false)
+				for i := 0; i < int(numargs); i++ {
+					newFrame.Env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
 				}
 
 				vm.currentFrame = newFrame
 				vm.callStack.Push(newFrame)
+			default:
+				for i := 0; i < int(numargs); i++ {
+					vm.currentFrame.popStack()
+				}
+				vm.currentFrame.pushStack(object.NewPanic("TOS is not a function for CALL opcode"))
+				vm.throw()
 			}
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
@@ -494,7 +511,7 @@ func (vm *VirtualMachine) throw() {
 	}
 
 	if ex := exception.(*object.Exception); !ex.Catchable {
-		panic(fmt.Sprintf("Runtime Exception: %s", exception.Inspect()))
+		panic(object.NewException("Runtime Exception: %s", exception.Inspect()))
 	}
 
 	vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
@@ -511,7 +528,7 @@ func (vm *VirtualMachine) throw() {
 		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
 		if vm.currentFrame == nil {                 // Call stack exhausted
 			vm.currentFrame = cframe // Reset frame for stack trace
-			panic(fmt.Sprintf("Uncaught Exception: %s", exception.Inspect()))
+			panic(object.NewException("Uncaught Exception: %s", exception.Inspect()))
 		}
 	}
 

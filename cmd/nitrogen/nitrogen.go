@@ -5,7 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"runtime"
+	"runtime/pprof"
 	"strings"
 	"time"
 
@@ -36,6 +39,8 @@ var (
 	printVersion      bool
 	fullDebug         bool
 	compile           bool
+	cpuprofile        string
+	memprofile        string
 )
 
 func init() {
@@ -49,6 +54,8 @@ func init() {
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 	flag.BoolVar(&compile, "compile", false, "Use the Nitrogen VM")
+	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
+	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
 }
 
 func main() {
@@ -86,6 +93,15 @@ func main() {
 	if flag.NArg() == 0 {
 		fmt.Print("No script given")
 		os.Exit(1)
+	}
+
+	if cpuprofile != "" {
+		f, err := os.Create(cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	program, err := moduleutils.ASTCache.GetTree(flag.Arg(0))
@@ -139,6 +155,18 @@ func main() {
 		}
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.Write([]byte{'\n'})
+	}
+
+	if memprofile != "" {
+		f, err := os.Create(memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile: ", err)
+		}
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+		f.Close()
 	}
 }
 
