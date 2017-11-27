@@ -102,17 +102,25 @@ func main() {
 	if compile {
 		code := compiler.Compile(program, "__main")
 		if fullDebug {
-			fmt.Printf("Max Stack: %d\n", code.MaxStackSize)
 			code.Print("")
 		}
-		machine := vm.NewVM(&vm.Settings{
-			Debug: fullDebug,
-		})
+
+		env := object.NewEnvironment()
+		env.CreateConst("_ENV", getEnvironment())
+		env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
+		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+
+		vmsettings := vm.NewSettings()
+		vmsettings.Debug = fullDebug
+		machine := vm.NewVM(vmsettings)
+
 		start := time.Now()
-		result := machine.Execute(code)
+		result := machine.Execute(code, env)
+
 		if fullDebug {
 			fmt.Printf("Execution took %s\n", time.Now().Sub(start))
 		}
+
 		if result != nil && result != object.NullConst {
 			if e, ok := result.(*object.Exception); ok {
 				os.Stdout.WriteString("Uncaught Exception: ")

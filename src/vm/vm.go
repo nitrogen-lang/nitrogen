@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
@@ -13,6 +14,18 @@ import (
 
 type Settings struct {
 	Debug bool
+
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
+}
+
+func NewSettings() *Settings {
+	return &Settings{
+		Stdin:  os.Stdin,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
 }
 
 type VirtualMachine struct {
@@ -24,7 +37,11 @@ type VirtualMachine struct {
 
 func NewVM(settings *Settings) *VirtualMachine {
 	if settings == nil {
-		settings = &Settings{}
+		settings = &Settings{
+			Stdin:  os.Stdin,
+			Stdout: os.Stdout,
+			Stderr: os.Stderr,
+		}
 	}
 	return &VirtualMachine{
 		callStack: newFrameStack(),
@@ -36,33 +53,44 @@ func (vm *VirtualMachine) Eval(node ast.Node, env *object.Environment) object.Ob
 	return object.NullConst
 }
 func (vm *VirtualMachine) GetCurrentScriptPath() string { return vm.currentFrame.code.Filename }
-func (vm *VirtualMachine) GetStdout() io.Writer         { return os.Stdout }
-func (vm *VirtualMachine) GetStderr() io.Writer         { return os.Stderr }
-func (vm *VirtualMachine) GetStdin() io.Reader          { return os.Stdout }
+func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.settings.Stdout }
+func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.settings.Stderr }
+func (vm *VirtualMachine) GetStdin() io.Reader          { return vm.settings.Stdin }
 
-func (vm *VirtualMachine) Execute(code *compiler.CodeBlock) object.Object {
-	f := &Frame{
-		code:       code,
-		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
-		blockStack: make([]block, code.MaxBlockSize),
-		Env:        object.NewEnvironment(),
+func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment) object.Object {
+	if env == nil {
+		env = object.NewEnvironment()
 	}
-	return vm.runFrame(f)
+	return vm.RunFrame(vm.MakeFrame(code, env), false)
 }
 
 func (vm *VirtualMachine) CurrentFrame() *Frame {
 	return vm.currentFrame
 }
 
-func (vm *VirtualMachine) runFrame(f *Frame) object.Object {
+func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Environment) *Frame {
+	return &Frame{
+		code:       code,
+		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
+		blockStack: make([]block, code.MaxBlockSize),
+		Env:        env,
+	}
+}
+
+func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) object.Object {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Fprintln(vm.GetStderr(), r)
-			fmt.Fprintln(vm.GetStderr(), "Stack Trace:")
-			frame := vm.currentFrame
-			for frame != nil {
-				fmt.Fprintf(vm.GetStderr(), "\t%s: %s\n", frame.code.Filename, frame.code.Name)
-				frame = frame.lastFrame
+			if _, ok := r.(object.Object); ok {
+				fmt.Fprintln(vm.GetStderr(), r)
+				fmt.Fprintln(vm.GetStderr(), "Stack Trace:")
+				frame := vm.currentFrame
+				for frame != nil {
+					fmt.Fprintf(vm.GetStderr(), "\t%s: %s\n", frame.code.Filename, frame.code.Name)
+					frame = frame.lastFrame
+				}
+			} else {
+				fmt.Fprintln(vm.GetStderr(), r)
+				fmt.Fprintln(vm.GetStderr(), string(debug.Stack()))
 			}
 		}
 	}()
@@ -197,7 +225,7 @@ mainLoop:
 			vm.returnValue = vm.currentFrame.popStack()
 			vm.currentFrame = vm.currentFrame.lastFrame
 			vm.callStack.Pop()
-			if vm.currentFrame == nil {
+			if vm.currentFrame == nil || immediateReturn {
 				return vm.returnValue
 			}
 			vm.currentFrame.pushStack(vm.returnValue)
@@ -300,13 +328,8 @@ mainLoop:
 					vm.throw()
 				}
 			case *VMFunction:
-				newFrame := &Frame{
-					code:       fn.Body,
-					stack:      make([]object.Object, fn.Body.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
-					blockStack: make([]block, fn.Body.MaxBlockSize),
-					Env:        object.NewEnclosedEnv(fn.Env),
-					lastFrame:  vm.currentFrame,
-				}
+				newFrame := vm.MakeFrame(fn.Body, object.NewEnclosedEnv(fn.Env))
+				newFrame.lastFrame = vm.currentFrame
 
 				for i, arg := range args {
 					newFrame.Env.SetForce(fn.Parameters[i], arg, false)
@@ -320,8 +343,7 @@ mainLoop:
 			l := vm.currentFrame.popStack()
 			op := vm.fetchByte()
 			if op >= opcode.MaxCmpCodes {
-				ex := object.NewException("Invalid comparison operator %x", op)
-				ex.Catchable = false
+				ex := object.NewPanic("Invalid comparison operator %x", op)
 				vm.currentFrame.pushStack(ex)
 				vm.throw()
 			}
@@ -363,8 +385,7 @@ mainLoop:
 				val := vm.currentFrame.popStack()
 				hashKey, ok := key.(object.Hashable)
 				if !ok {
-					ex := object.NewException("Map key %s not valid", key.Inspect())
-					ex.Catchable = false
+					ex := object.NewPanic("Map key %s not valid", key.Inspect())
 					vm.currentFrame.pushStack(ex)
 					vm.throw()
 				}
@@ -445,8 +466,7 @@ mainLoop:
 			if codename == "" {
 				codename = fmt.Sprintf("%X", code)
 			}
-			ex := object.NewException("Opcode %s is not supported", codename)
-			ex.Catchable = false
+			ex := object.NewPanic("Opcode %s is not supported", codename)
 			vm.currentFrame.pushStack(ex)
 			vm.throw()
 		}
