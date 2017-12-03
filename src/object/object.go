@@ -93,6 +93,10 @@ func (i *Integer) Inspect() string  { return strconv.FormatInt(i.Value, 10) }
 func (i *Integer) Type() ObjectType { return IntergerObj }
 func (i *Integer) Dup() Object      { return &Integer{Value: i.Value} }
 
+func MakeIntObj(v int64) *Integer {
+	return &Integer{Value: v}
+}
+
 type Float struct {
 	Value float64
 }
@@ -100,6 +104,10 @@ type Float struct {
 func (f *Float) Inspect() string  { return strconv.FormatFloat(f.Value, 'G', -1, 64) }
 func (f *Float) Type() ObjectType { return FloatObj }
 func (f *Float) Dup() Object      { return &Float{Value: f.Value} }
+
+func MakeFloatObj(v float64) *Float {
+	return &Float{Value: v}
+}
 
 type String struct {
 	Value string

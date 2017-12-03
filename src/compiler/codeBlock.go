@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 
 	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
@@ -16,7 +17,7 @@ type CodeBlock struct {
 	MaxStackSize int
 	MaxBlockSize int
 	Constants    []object.Object // Created at compile time
-	Locals       []string        // Created by vm
+	Locals       []string        // Created by compile time
 	Names        []string        // Created at compile time
 	Code         []byte
 }
@@ -166,7 +167,6 @@ func (t *stringTable) contains(s string) bool {
 
 func uint16ToBytes(i uint16) []byte {
 	b := make([]byte, 2)
-	b[1] = byte(i)
-	b[0] = byte(i >> 8)
+	binary.BigEndian.PutUint16(b, i)
 	return b
 }

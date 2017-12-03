@@ -7,11 +7,13 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"strings"
 	"time"
 
+	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
@@ -41,6 +43,7 @@ var (
 	compile           bool
 	cpuprofile        string
 	memprofile        string
+	outputFile        string
 )
 
 func init() {
@@ -56,6 +59,7 @@ func init() {
 	flag.BoolVar(&compile, "compile", false, "Use the Nitrogen VM")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
+	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
 }
 
 func main() {
@@ -104,37 +108,47 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	program, err := moduleutils.ASTCache.GetTree(flag.Arg(0))
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	if printAst {
-		fmt.Println(program.String())
-		os.Exit(1)
-	}
-
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getEnvironment())
 	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
 
+	var code *compiler.CodeBlock
+	var program *ast.Program
+	var err error
+	if filepath.Ext(flag.Arg(0)) == ".nib" {
+		code, err = compiler.ReadFile(flag.Arg(0))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		compile = true
+	} else {
+		program, err = moduleutils.ASTCache.GetTree(flag.Arg(0))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		if printAst {
+			fmt.Println(program.String())
+			return
+		}
+	}
+
 	var result object.Object
 	var start time.Time
 	if compile {
-		code := compiler.Compile(program, "__main")
-		if fullDebug {
-			code.Print("")
+		if code == nil {
+			code = compiler.Compile(program, "__main")
 		}
 
-		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
-
-		vmsettings := vm.NewSettings()
-		vmsettings.Debug = fullDebug
-		machine := vm.NewVM(vmsettings)
+		if outputFile != "" {
+			compiler.WriteFile(outputFile, code)
+			return
+		}
 
 		start = time.Now()
-		result = machine.Execute(code, env)
+		result = runCompiledCode(code, env)
 	} else {
 		interpreter := eval.NewInterpreter()
 
@@ -168,6 +182,20 @@ func main() {
 		}
 		f.Close()
 	}
+}
+
+func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.Object {
+	if fullDebug {
+		code.Print("")
+	}
+
+	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+
+	vmsettings := vm.NewSettings()
+	vmsettings.Debug = fullDebug
+	machine := vm.NewVM(vmsettings)
+
+	return machine.Execute(code, env)
 }
 
 func getEnvironment() *object.Hash {

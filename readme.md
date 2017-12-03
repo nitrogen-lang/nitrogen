@@ -22,6 +22,25 @@ Run Nitrogen like so: `nitrogen filename.ni`. The file extension for Nitrogen fi
 Nitrogen can run as an SCGI server using multiple workers and the embedded interpreter for performance. Use the `-scgi`
 flag to start the server. See the [SCGI docs](docs/scgi-server.md) for more details.
 
+## Command Line Flags
+
+Usage: `(./bin/)nitrogen [options] SCRIPT`
+
+- `-i`: Run an interactive REPL prompt.
+- `-ast`: Print a representation of the abstract syntax tree and then exit. (Internal debugging)
+- `-scgi`: Start the SCGI server.
+- `-scgi-sock tcp:0.0.0.0:9000`: Listening socket for SCGI server.
+- `-scgi-workers 5`: The number of worker goroutines to handle SCGI requests.
+- `-scgi-worker-timeout 10`: The number of seconds the SCGI server will wait for an available worker.
+- `-modules`: Dynamically linked modules directory. (Only supported on Linux)
+- `-version`: Printer version information.
+- `-debug`: Print debug information during execution.
+- `-compile`: Compile source code into bytecode and use the virtual machine instead of the interpreter. (Typically faster, few caveats)
+- `-cpuprofile profile.out`: Make a CPU profile. (Internal debugging)
+- `-memprofile profile.out`: Make a memory profile. (Internal debugging)
+- `-o file.nib`: Output a compiled script to file then exit. This file can be executed like a normal script but will always use
+the bytecode virtual machine.
+
 ## Documentation
 
 Documentation for the standard library and language is available in the [docs](docs) directory.

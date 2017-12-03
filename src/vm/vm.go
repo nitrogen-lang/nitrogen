@@ -233,7 +233,8 @@ mainLoop:
 			vm.currentFrame.popStack()
 		case opcode.LoadFast:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
+			//if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
+			if val, ok := vm.currentFrame.Env.Get(name); ok {
 				vm.currentFrame.pushStack(val)
 				break
 			}
@@ -247,11 +248,13 @@ mainLoop:
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 			}
-			if _, exists := vm.currentFrame.Env.GetLocal(name); !exists {
+			//if _, exists := vm.currentFrame.Env.GetLocal(name); !exists {
+			if _, exists := vm.currentFrame.Env.Get(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Variable %s undefined\n", name))
 				vm.throw()
 			}
-			vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
+			//vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
+			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
@@ -268,6 +271,11 @@ mainLoop:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			p := vm.currentFrame.Env.Parent()
 			if p == nil {
+				if fn := getBuiltin(name); fn != nil {
+					vm.currentFrame.pushStack(fn)
+					break
+				}
+
 				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
 				vm.throw()
 			}
