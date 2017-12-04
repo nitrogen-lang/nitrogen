@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 
@@ -166,20 +165,14 @@ func (w *worker) run(conn net.Conn) {
 		scriptFilename = filepath.Join(docRoot, scriptName)
 	}
 
-	// Parse script
-	program, err := moduleutils.ASTCache.GetTree(scriptFilename)
-	if err != nil {
-		os.Stderr.WriteString(err.Error())
-		os.Stderr.Write([]byte{'\n'})
-		return
-	}
-
 	// Execute script
 	var result object.Object
 	if compile {
-		code := compiler.Compile(program, "__main")
-		if fullDebug {
-			code.Print("")
+		code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename)
+		if err != nil {
+			os.Stderr.WriteString(err.Error())
+			os.Stderr.Write([]byte{'\n'})
+			return
 		}
 
 		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
@@ -189,6 +182,14 @@ func (w *worker) run(conn net.Conn) {
 
 		result = vm.NewVM(vmsettings).Execute(code, env)
 	} else {
+		// Parse script
+		program, err := moduleutils.ASTCache.GetTree(scriptFilename)
+		if err != nil {
+			os.Stderr.WriteString(err.Error())
+			os.Stderr.Write([]byte{'\n'})
+			return
+		}
+
 		interpreter := eval.NewInterpreter()
 		interpreter.Stdout = conn
 

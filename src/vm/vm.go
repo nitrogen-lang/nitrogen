@@ -271,13 +271,7 @@ mainLoop:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			p := vm.currentFrame.Env.Parent()
 			if p == nil {
-				if fn := getBuiltin(name); fn != nil {
-					vm.currentFrame.pushStack(fn)
-					break
-				}
-
-				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
-				vm.throw()
+				p = vm.currentFrame.Env
 			}
 			if val, ok := p.Get(name); ok {
 				vm.currentFrame.pushStack(val)
