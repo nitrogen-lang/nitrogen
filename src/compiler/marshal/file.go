@@ -1,4 +1,4 @@
-package compiler
+package marshal
 
 import (
 	"bytes"
@@ -7,11 +7,13 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
 )
 
 var ByteFileHeader = []byte{31, 'N', 'I', 'B'}
 
-func WriteFile(name string, cb *CodeBlock) error {
+func WriteFile(name string, cb *compiler.CodeBlock) error {
 	marshaled, err := Marshal(cb)
 	if err != nil {
 		return err
@@ -31,7 +33,7 @@ func WriteFile(name string, cb *CodeBlock) error {
 	return nil
 }
 
-func ReadFile(name string) (*CodeBlock, error) {
+func ReadFile(name string) (*compiler.CodeBlock, error) {
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, err
@@ -56,5 +58,5 @@ func ReadFile(name string) (*CodeBlock, error) {
 	}
 
 	cb, _, err := Unmarshal(rest)
-	return cb.(*CodeBlock), err
+	return cb.(*compiler.CodeBlock), err
 }

@@ -1,10 +1,11 @@
-package compiler
+package marshal
 
 import (
 	"bytes"
 	"reflect"
 	"testing"
 
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -133,11 +134,11 @@ func TestCodeBlockMarshal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	code := Compile(program, "__main")
+	code := compiler.Compile(program, "__main")
 	bytes, _ := Marshal(code)
 
 	newcode, _, _ := Unmarshal(bytes)
-	newcodeObj := newcode.(*CodeBlock)
+	newcodeObj := newcode.(*compiler.CodeBlock)
 	if !reflect.DeepEqual(code, newcodeObj) {
 		t.Fatal("Code objects are not the same")
 	}

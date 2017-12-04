@@ -1,4 +1,4 @@
-package compiler
+package marshal
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -39,7 +40,7 @@ func Marshal(o object.Object) ([]byte, error) {
 		return out, nil
 	case *object.Null:
 		return []byte{'n'}, nil
-	case *CodeBlock:
+	case *compiler.CodeBlock:
 		buf := new(bytes.Buffer)
 		tmpStr := object.MakeStringObj(o.Name)
 		res, _ := Marshal(tmpStr)
@@ -105,7 +106,7 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 	case 'c':
 		inslice := in[9:] // Length is bytes [1-8]
 
-		cb := &CodeBlock{}
+		cb := &compiler.CodeBlock{}
 		name, inslice, _ := Unmarshal(inslice)
 		cb.Name = name.(*object.String).Value
 

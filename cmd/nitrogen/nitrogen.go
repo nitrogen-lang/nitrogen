@@ -15,6 +15,7 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
+	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
 	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
@@ -116,7 +117,7 @@ func main() {
 	var program *ast.Program
 	var err error
 	if filepath.Ext(flag.Arg(0)) == ".nib" {
-		code, err = compiler.ReadFile(flag.Arg(0))
+		code, err = marshal.ReadFile(flag.Arg(0))
 		if err != nil {
 			fmt.Println(err.Error())
 			return
@@ -143,7 +144,7 @@ func main() {
 		}
 
 		if outputFile != "" {
-			compiler.WriteFile(outputFile, code)
+			marshal.WriteFile(outputFile, code)
 			return
 		}
 
