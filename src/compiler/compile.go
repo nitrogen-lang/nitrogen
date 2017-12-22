@@ -312,6 +312,10 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		panic("Not implemented yet")
 	case *ast.MakeInstance:
 		panic("Not implemented yet")
+	case *ast.AttributeExpression:
+		panic("Not implemented yet")
+	default:
+		panic("Not implemented yet")
 	}
 }
 

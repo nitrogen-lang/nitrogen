@@ -287,7 +287,7 @@ func (l *Lexer) NextToken() token.Token {
 	case ':':
 		tok = l.newToken(token.Colon, l.curCh)
 	case '.':
-		tok = l.newToken(token.Arrow, l.curCh)
+		tok = l.newToken(token.Dot, l.curCh)
 	case '^':
 		tok = l.newToken(token.Carrot, l.curCh)
 

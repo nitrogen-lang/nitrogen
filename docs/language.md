@@ -502,7 +502,7 @@ class name ^ parent {
     always field2 = "constant"
 
     func init(x) { // Initializer function
-        this.x = x // The instance can be referenced with "this"s
+        this.x = x // The instance can be referenced with "this"
     }
 
     // Class methods
@@ -518,7 +518,7 @@ class name ^ parent {
 
 ### Class Inheritance
 
-Classes can inherit methods and fields from another class using the inheritance syntax `class basename ^ parent { }`.
+Classes can inherit methods and fields from another class using the inheritance operator `class basename ^ parent { }`.
 Classes may have only one parent. Calling the parent init method can be done by calling `parent()`. In methods, the
 variable `parent` is bound to the parent class if one is available. If a class doesn't have a parent, `parent` is
 not defined. Parent methods can be retrieved like so: `parent.overridenMethod()`. If a method isn't redefined in a child
@@ -562,10 +562,10 @@ class printer ^ parentPrinter {
 
 let myPrinter = make printer(1)
 
-println(myPrinter->doStuff('Hello')) // Redefined on child class
-println(myPrinter->z) // Field from parent class
-println(myPrinter->parentOnly()) // Method only on parent class
-println(myPrinter->doStuff2('Hello')) // Method that calls the parent's doStuff() method
+println(myPrinter.doStuff('Hello')) // Redefined on child class
+println(myPrinter.z) // Field from parent class
+println(myPrinter.parentOnly()) // Method only on parent class
+println(myPrinter.doStuff2('Hello')) // Method that calls the parent's doStuff() method
 ```
 
 ### Creating an Instance

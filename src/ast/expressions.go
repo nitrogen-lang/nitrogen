@@ -151,6 +151,26 @@ func (i *IndexExpression) String() string {
 	return out.String()
 }
 
+type AttributeExpression struct {
+	Token token.Token
+	Left  Expression
+	Index Expression
+}
+
+func (i *AttributeExpression) expressionNode()      {}
+func (i *AttributeExpression) TokenLiteral() string { return i.Token.Literal }
+func (i *AttributeExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteByte('(')
+	out.WriteString(i.Left.String())
+	out.WriteByte('.')
+	out.WriteString(i.Index.String())
+	out.WriteByte(')')
+
+	return out.String()
+}
+
 type TryCatchExpression struct {
 	Try    *BlockStatement
 	Catch  *BlockStatement

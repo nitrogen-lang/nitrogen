@@ -9,6 +9,9 @@ func (i *Interpreter) evalAssignment(stmt *ast.AssignStatement, env *object.Envi
 	if left, ok := stmt.Left.(*ast.IndexExpression); ok {
 		return i.assignIndexedValue(left, stmt.Value, env)
 	}
+	if left, ok := stmt.Left.(*ast.AttributeExpression); ok {
+		return i.evalAssignAttribute(left, stmt.Value, env)
+	}
 
 	ident, ok := stmt.Left.(*ast.Identifier)
 	if !ok {
@@ -110,8 +113,6 @@ func (i *Interpreter) assignIndexedValue(
 		return i.assignHashMapIndex(indexed.(*object.Hash), index, val, env)
 	case object.ModuleObj:
 		return i.assignModuleVariable(indexed.(*object.Module), index, val, env)
-	case object.InstanceObj:
-		return i.assignInstanceVariable(indexed.(*object.Instance), index, val, env)
 	}
 	return object.NullConst
 }
@@ -184,33 +185,5 @@ func (i *Interpreter) assignModuleVariable(
 	}
 
 	module.Vars[hashable.Value] = value
-	return object.NullConst
-}
-
-func (i *Interpreter) assignInstanceVariable(
-	instance *object.Instance,
-	index object.Object,
-	val ast.Expression,
-	env *object.Environment) object.Object {
-
-	hashable, ok := index.(*object.String)
-	if !ok {
-		return object.NewException("Invalid index type %s", index.Type())
-	}
-
-	if _, ok := instance.Fields.Get(hashable.Value); !ok {
-		return object.NewException("Instance has no field %s", hashable.Value)
-	}
-
-	if instance.Fields.IsConst(hashable.Value) {
-		return object.NewException("Assignment to constant field %s", hashable.Value)
-	}
-
-	value := i.Eval(val, env)
-	if isException(value) {
-		return value
-	}
-
-	instance.Fields.SetForce(hashable.Value, value, false)
 	return object.NullConst
 }

@@ -174,6 +174,17 @@ func (i *Interpreter) Eval(node ast.Node, env *object.Environment) object.Object
 		return c
 	case *ast.MakeInstance:
 		return i.evalMakeInstance(node, env)
+	case *ast.AttributeExpression:
+		left := i.Eval(node.Left, env)
+		if isException(left) {
+			return left
+		}
+
+		index := i.Eval(node.Index, env)
+		if isException(index) {
+			return index
+		}
+		return i.evalLookupAttribute(left, index)
 	}
 
 	return nil
