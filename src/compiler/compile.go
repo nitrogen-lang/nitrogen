@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -83,10 +84,13 @@ func calculateStackSize(c []byte) int {
 		case opcode.MakeArray:
 			l := int(bytesToUint16(c[offset], c[offset+1]))
 			stackSize.sub(l - 1)
+		case opcode.BuildClass:
+			l := int(bytesToUint16(c[offset], c[offset+1]))
+			stackSize.sub(l + 2)
 		case opcode.MakeMap:
 			l := int(bytesToUint16(c[offset], c[offset+1]))
 			stackSize.sub(l*2 - 1)
-		case opcode.MakeFunction:
+		case opcode.MakeFunction, opcode.StoreAttribute:
 			stackSize.sub(2)
 		}
 
@@ -127,6 +131,11 @@ func calculateBlockSize(c []byte) int {
 }
 
 func compile(ccb *codeBlockCompiler, node ast.Node) {
+	if node == nil {
+		compileLoadNull(ccb)
+		return
+	}
+
 	switch node := node.(type) {
 	case *ast.ExpressionStatement:
 		compile(ccb, node.Expression)
@@ -139,8 +148,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		ccb.code.WriteByte(opcode.LoadConst)
 		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(i)))
 	case *ast.NullLiteral:
-		ccb.code.WriteByte(opcode.LoadConst)
-		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.NullConst)))
+		compileLoadNull(ccb)
 	case *ast.StringLiteral:
 		str := &object.String{Value: node.Value}
 		ccb.code.WriteByte(opcode.LoadConst)
@@ -266,6 +274,14 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			break
 		}
 
+		if attrib, ok := node.Left.(*ast.AttributeExpression); ok {
+			compile(ccb, attrib.Left)
+			ccb.code.WriteByte(opcode.StoreAttribute)
+			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(attrib.Index.Value)))
+			compileLoadNull(ccb)
+			break
+		}
+
 		ident, ok := node.Left.(*ast.Identifier)
 		if !ok {
 			panic("Assignment to non ident or index")
@@ -285,7 +301,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileCompareExpression(ccb, node)
 
 	case *ast.FunctionLiteral:
-		compileFunction(ccb, node)
+		compileFunction(ccb, node, false)
 
 	case *ast.IndexExpression:
 		compile(ccb, node.Index)
@@ -304,19 +320,75 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.ThrowStatement:
 		compile(ccb, node.Expression)
 		ccb.code.WriteByte(opcode.Throw)
+	case *ast.ClassLiteral:
+		compileClassLiteral(ccb, node)
+	case *ast.MakeInstance:
+		for _, p := range node.Arguments {
+			compile(ccb, p)
+		}
+		compile(ccb, node.Class)
+
+		ccb.code.WriteByte(opcode.MakeInstance)
+		ccb.code.Write(uint16ToBytes(uint16(len(node.Arguments))))
+	case *ast.AttributeExpression:
+		compile(ccb, node.Left)
+		ccb.code.WriteByte(opcode.LoadAttribute)
+		ccb.code.Write(uint16ToBytes(ccb.names.indexOf(node.Index.Value)))
 
 	// Not implemented yet
 	case *ast.Program:
-		panic("Not implemented yet")
-	case *ast.ClassLiteral:
-		panic("Not implemented yet")
-	case *ast.MakeInstance:
-		panic("Not implemented yet")
-	case *ast.AttributeExpression:
-		panic("Not implemented yet")
+		panic("ast.Program Not implemented yet")
 	default:
-		panic("Not implemented yet")
+		panic(fmt.Sprintf("WTF? Not implemented yet: %T", node))
 	}
+}
+
+func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
+	for _, f := range class.Methods {
+		compileFunction(ccb, f, true)
+	}
+
+	ccb2 := &codeBlockCompiler{
+		constants: newConstantTable(),
+		locals:    newStringTable(),
+		names:     newStringTable(),
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+	}
+
+	for _, f := range class.Fields {
+		compile(ccb2, f)
+	}
+	compileLoadNull(ccb2)
+	ccb2.code.WriteByte(opcode.Return)
+
+	code := ccb2.code.Bytes()
+	props := &CodeBlock{
+		Name:         "__init",
+		Filename:     ccb.filename,
+		LocalCount:   len(ccb2.locals.table),
+		Code:         code,
+		Constants:    ccb2.constants.table,
+		Names:        ccb2.names.table,
+		Locals:       ccb2.locals.table,
+		MaxStackSize: calculateStackSize(code),
+		MaxBlockSize: calculateBlockSize(code),
+	}
+
+	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(props)))
+
+	if class.Parent == "" {
+		compileLoadNull(ccb)
+	} else {
+		compile(ccb, &ast.Identifier{Value: class.Parent})
+	}
+
+	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.MakeStringObj(class.Name))))
+
+	ccb.code.WriteByte(opcode.BuildClass)
+	ccb.code.Write(uint16ToBytes(uint16(len(class.Methods))))
 }
 
 func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
@@ -395,7 +467,7 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 	}
 }
 
-func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral) {
+func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bool) {
 	ccb2 := &codeBlockCompiler{
 		constants: newConstantTable(),
 		locals:    newStringTable(),
@@ -406,6 +478,9 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral) {
 
 	for _, p := range fn.Parameters {
 		ccb2.locals.indexOf(p.Value)
+	}
+	if inClass {
+		ccb2.locals.indexOf("this")
 	}
 
 	compile(ccb2, fn.Body)

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"bytes"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -84,3 +85,45 @@ func (f *VMFunction) Inspect() string {
 }
 func (f *VMFunction) Type() object.ObjectType { return object.FunctionObj }
 func (f *VMFunction) Dup() object.Object      { return f }
+func (f *VMFunction) ClassMethod()            {}
+
+type VMClass struct {
+	Name    string
+	Parent  *VMClass
+	Fields  *compiler.CodeBlock
+	Methods map[string]object.ClassMethod
+}
+
+func (c *VMClass) Inspect() string {
+	return fmt.Sprintf("Class %s with %d methods", c.Name, len(c.Methods))
+}
+func (c *VMClass) Type() object.ObjectType { return object.ClassObj }
+func (c *VMClass) Dup() object.Object      { return object.NullConst }
+func (c *VMClass) GetMethod(name string) object.ClassMethod {
+	m, ok := c.Methods[name]
+	if ok || c.Parent == nil {
+		return m
+	}
+	return c.Parent.GetMethod(name)
+}
+
+type VMInstance struct {
+	Class  *VMClass
+	Fields *object.Environment
+}
+
+func (i *VMInstance) Inspect() string                          { return fmt.Sprintf("instance of %s", i.Class.Name) }
+func (i *VMInstance) Type() object.ObjectType                  { return object.InstanceObj }
+func (i *VMInstance) Dup() object.Object                       { return object.NullConst }
+func (i *VMInstance) GetMethod(name string) object.ClassMethod { return i.Class.GetMethod(name) }
+
+type BoundMethod struct {
+	Method   object.ClassMethod
+	Instance *VMInstance
+}
+
+func (b *BoundMethod) Inspect() string {
+	return fmt.Sprintf("method bound to instance of %s", b.Instance.Class.Name)
+}
+func (b *BoundMethod) Type() object.ObjectType { return object.BoundMethodObj }
+func (b *BoundMethod) Dup() object.Object      { return object.NullConst }

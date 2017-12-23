@@ -35,7 +35,7 @@ func (cb *CodeBlock) Print(indent string) {
 		offset++
 
 		switch code {
-		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry:
+		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry, opcode.BuildClass, opcode.LoadAttribute, opcode.StoreAttribute, opcode.MakeInstance:
 			fmt.Printf("\t\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 		case opcode.JumpAbsolute, opcode.JumpForward:
 			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
@@ -124,6 +124,10 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 			if node.Value == o.(*object.Boolean).Value {
 				return uint16(i)
 			}
+		case *object.Class:
+			if node.Name == o.(*object.Class).Name {
+				return uint16(i)
+			}
 			// case *CodeBlock:
 			// 	if node.Filename == o.(*CodeBlock).Filename && node.Name == o.(*CodeBlock).Name {
 			// 		return uint16(i)
@@ -133,6 +137,20 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 
 	t.table = append(t.table, v)
 	return uint16(len(t.table) - 1)
+}
+
+func (t *constantTable) containsClass(name string) *object.Class {
+	for _, o := range t.table {
+		if o.Type() != object.ClassObj {
+			continue
+		}
+
+		c := o.(*object.Class)
+		if c.Name == name {
+			return c
+		}
+	}
+	return nil
 }
 
 type stringTable struct {

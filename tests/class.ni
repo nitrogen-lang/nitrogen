@@ -9,12 +9,12 @@ let printer = class {
     }
 
     func doStuff(msg) {
-        return 'ID: ' + toString(x) + ' Msg: ' + msg
+        return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 }
 
-let myPrinter = make printer(1);
-let myPrinter2 = make printer(2);
+let myPrinter = make printer(1)
+let myPrinter2 = make printer(2)
 
 if !is_a(myPrinter, printer) {
     println("myPrinter isn't a printer (class)")

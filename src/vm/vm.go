@@ -101,7 +101,7 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) object.Object
 mainLoop:
 	for {
 		if vm.currentFrame.pc >= len(vm.currentFrame.code.Code) {
-			panic(fmt.Sprintf("Program counter %d outside bounds of bytecode %d", vm.currentFrame.pc, len(vm.currentFrame.code.Code)))
+			panic(fmt.Sprintf("Program counter %d outside bounds of bytecode %d", vm.currentFrame.pc, len(vm.currentFrame.code.Code)-1))
 		}
 		code := vm.fetchByte()
 		if vm.settings.Debug {
@@ -321,42 +321,7 @@ mainLoop:
 		case opcode.Call:
 			numargs := vm.getUint16()
 			fn := vm.currentFrame.popStack()
-
-			switch fn := fn.(type) {
-			case *object.Builtin:
-				args := make([]object.Object, numargs)
-				for i := uint16(0); i < numargs; i++ {
-					args[i] = vm.currentFrame.popStack()
-				}
-
-				result := fn.Fn(vm, vm.currentFrame.Env, args...)
-				if result == nil {
-					result = object.NullConst
-				}
-
-				vm.returnValue = result
-				vm.currentFrame.pushStack(result)
-
-				if object.ObjectIs(result, object.ExceptionObj) {
-					vm.throw()
-				}
-			case *VMFunction:
-				newFrame := vm.MakeFrame(fn.Body, object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount))
-				newFrame.lastFrame = vm.currentFrame
-
-				for i := 0; i < int(numargs); i++ {
-					newFrame.Env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
-				}
-
-				vm.currentFrame = newFrame
-				vm.callStack.Push(newFrame)
-			default:
-				for i := 0; i < int(numargs); i++ {
-					vm.currentFrame.popStack()
-				}
-				vm.currentFrame.pushStack(object.NewPanic("TOS is not a function for CALL opcode"))
-				vm.throw()
-			}
+			vm.callFunction(numargs, fn, nil)
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -480,6 +445,65 @@ mainLoop:
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
 		case opcode.Throw:
 			vm.throw()
+		case opcode.BuildClass:
+			methodNum := vm.getUint16()
+			class := &VMClass{}
+			class.Name = vm.currentFrame.popStack().(*object.String).Value
+			parent := vm.currentFrame.popStack()
+			if parent != object.NullConst {
+				class.Parent = parent.(*VMClass)
+			}
+			class.Fields = vm.currentFrame.popStack().(*compiler.CodeBlock)
+			class.Methods = make(map[string]object.ClassMethod, methodNum)
+			for i := methodNum; i > 0; i-- {
+				method := vm.currentFrame.popStack().(*VMFunction)
+				class.Methods[method.Name] = method
+			}
+			vm.currentFrame.pushStack(class)
+		case opcode.MakeInstance:
+			vm.makeInstance()
+		case opcode.LoadAttribute:
+			name := vm.currentFrame.code.Names[vm.getUint16()]
+			instance, ok := vm.currentFrame.popStack().(*VMInstance)
+			if !ok {
+				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
+				vm.throw()
+			}
+
+			method := instance.GetMethod(name)
+			if method != nil {
+				vm.currentFrame.pushStack(&BoundMethod{
+					Method:   method,
+					Instance: instance,
+				})
+			} else {
+				val, ok := instance.Fields.Get(name)
+				if ok {
+					vm.currentFrame.pushStack(val)
+				} else {
+					vm.currentFrame.pushStack(object.NullConst)
+				}
+			}
+		case opcode.StoreAttribute:
+			name := vm.currentFrame.code.Names[vm.getUint16()]
+			instance, ok := vm.currentFrame.popStack().(*VMInstance)
+			if !ok {
+				vm.currentFrame.popStack() // The value
+				vm.currentFrame.pushStack(object.NewException("Attribute store on non-object"))
+				vm.throw()
+			}
+
+			val := vm.currentFrame.popStack()
+			if _, ok := instance.Fields.Get(name); !ok {
+				vm.currentFrame.pushStack(object.NewException("Instance has no field %s", name))
+				vm.throw()
+			}
+
+			if instance.Fields.IsConst(name) {
+				vm.currentFrame.pushStack(object.NewException("Assignment to constant field %s", name))
+				vm.throw()
+			}
+			instance.Fields.SetForce(name, val, false)
 		default:
 			codename := opcode.Names[code]
 			if codename == "" {
@@ -538,4 +562,105 @@ func (vm *VirtualMachine) throw() {
 	// END_BLOCK removes two layers of environments
 	vm.currentFrame.Env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.Env))
 	vm.currentFrame.pushStack(exception)
+}
+
+func (vm *VirtualMachine) makeInstance() {
+	argLen := vm.getUint16()
+	class := vm.currentFrame.popStack().(*VMClass)
+
+	cClass := class
+	classChain := make([]*VMClass, 1, 3)
+	classChain[0] = class
+	for cClass.Parent != nil {
+		classChain = append(classChain, cClass.Parent)
+		cClass = cClass.Parent
+	}
+
+	iFields := object.NewEnvironment()
+	iFields.SetParent(vm.currentFrame.Env)
+
+	for _, c := range classChain {
+		frame := vm.MakeFrame(c.Fields, iFields)
+		vm.RunFrame(frame, true)
+	}
+
+	iFields.SetParent(nil)
+
+	instance := &VMInstance{
+		Class:  class,
+		Fields: iFields,
+	}
+
+	init := class.GetMethod("init")
+	if init == nil {
+		for i := argLen; i > 0; i-- {
+			vm.currentFrame.popStack()
+		}
+		vm.currentFrame.pushStack(instance)
+		return
+	}
+
+	vm.callFunction(argLen, init, instance)
+	vm.currentFrame.pushStack(instance)
+}
+
+func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMInstance) {
+	switch fn := fn.(type) {
+	case *object.Builtin:
+		args := make([]object.Object, argc)
+		for i := uint16(0); i < argc; i++ {
+			args[i] = vm.currentFrame.popStack()
+		}
+
+		env := vm.currentFrame.Env
+		if this != nil {
+			env = object.NewEnclosedEnv(env)
+			env.SetForce("this", this, true)
+			if this.Class.Parent != nil {
+				env.SetForce("parent", this.Class.Parent, true)
+			}
+		}
+
+		result := fn.Fn(vm, env, args...)
+		if result == nil {
+			result = object.NullConst
+		}
+
+		vm.returnValue = result
+		vm.currentFrame.pushStack(result)
+
+		if object.ObjectIs(result, object.ExceptionObj) {
+			vm.throw()
+		}
+	case *VMFunction:
+		var env *object.Environment
+		if this != nil {
+			env = object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount+1)
+			env.SetForce("this", this, true)
+			if this.Class.Parent != nil {
+				env.SetForce("parent", this.Class.Parent, true)
+			}
+		} else {
+			env = object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount)
+		}
+
+		newFrame := vm.MakeFrame(fn.Body, env)
+		newFrame.lastFrame = vm.currentFrame
+
+		for i := 0; i < int(argc); i++ {
+			newFrame.Env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
+		}
+
+		// vm.currentFrame = newFrame
+		// vm.callStack.Push(newFrame)
+		vm.currentFrame.pushStack(vm.RunFrame(newFrame, true))
+	case *BoundMethod:
+		vm.callFunction(argc, fn.Method, fn.Instance)
+	default:
+		for i := 0; i < int(argc); i++ {
+			vm.currentFrame.popStack()
+		}
+		vm.currentFrame.pushStack(object.NewPanic("TOS is not a function for CALL opcode"))
+		vm.throw()
+	}
 }

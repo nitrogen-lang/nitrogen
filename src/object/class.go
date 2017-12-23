@@ -8,7 +8,7 @@ import (
 
 type ClassMethod interface {
 	Object
-	classMethod()
+	ClassMethod()
 }
 
 type Class struct {

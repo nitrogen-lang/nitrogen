@@ -7,7 +7,7 @@ When adding a new opcode, make sure to check and make any needed changes to the 
 - Add a string representation of the opcode below.
 - If the opcode changes the stack in any way, edit the calculateStackSize function in the compiler.
 - If the opcode changes the block stack in any way, edit the calculateBlockSize function in the compiler.
-- If the opcode takes any arguments, eidt the compiler.CodeBlock.Print() method to print the correct output.
+- If the opcode takes any arguments, edit the compiler.CodeBlock.Print() method to print the correct output.
 - And obviously, implement it in the virtual machine.
 */
 const (
@@ -21,6 +21,8 @@ const (
 	StoreGlobal
 	LoadIndex
 	StoreIndex
+	LoadAttribute
+	StoreAttribute
 	BinaryAdd
 	BinarySub
 	BinaryMul
@@ -55,6 +57,8 @@ const (
 	Break
 	StartTry
 	Throw
+	BuildClass
+	MakeInstance
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 )
@@ -81,6 +85,8 @@ var HasTwoByteArg = map[byte]bool{
 	Define:           true,
 	LoadGlobal:       true,
 	StoreGlobal:      true,
+	LoadAttribute:    true,
+	StoreAttribute:   true,
 	Call:             true,
 	MakeArray:        true,
 	MakeMap:          true,
@@ -91,6 +97,8 @@ var HasTwoByteArg = map[byte]bool{
 	JumpAbsolute:     true,
 	JumpForward:      true,
 	StartTry:         true,
+	BuildClass:       true,
+	MakeInstance:     true,
 }
 
 var HasOneByteArg = map[byte]bool{
@@ -136,6 +144,8 @@ var Names = map[byte]string{
 	StoreGlobal:      "STORE_GLOBAL",
 	LoadIndex:        "LOAD_INDEX",
 	StoreIndex:       "STORE_INDEX",
+	LoadAttribute:    "LOAD_ATTRIBUTE",
+	StoreAttribute:   "STORE_ATTRIBUTE",
 	BinaryAdd:        "BINARY_ADD",
 	BinarySub:        "BINARY_SUB",
 	BinaryMul:        "BINARY_MUL",
@@ -170,6 +180,8 @@ var Names = map[byte]string{
 	Break:            "BREAK",
 	StartTry:         "START_TRY",
 	Throw:            "THROW",
+	BuildClass:       "BUILD_CLASS",
+	MakeInstance:     "MAKE_INSTANCE",
 }
 
 var CmpOps = map[byte]string{

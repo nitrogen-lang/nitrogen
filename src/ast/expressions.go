@@ -154,7 +154,7 @@ func (i *IndexExpression) String() string {
 type AttributeExpression struct {
 	Token token.Token
 	Left  Expression
-	Index Expression
+	Index *StringLiteral
 }
 
 func (i *AttributeExpression) expressionNode()      {}

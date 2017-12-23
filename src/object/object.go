@@ -38,6 +38,7 @@ const (
 	ClassObj
 	InstanceObj
 	BuiltinMethodObj
+	BoundMethodObj
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -58,6 +59,7 @@ var objectTypeNames = map[ObjectType]string{
 	ClassObj:         "CLASS",
 	InstanceObj:      "INSTANCE",
 	BuiltinMethodObj: "BUILTIN METHOD",
+	BoundMethodObj:   "BOUND METHOD",
 }
 
 // These are all constants in the language that can be represented with a single instance
@@ -210,7 +212,7 @@ func (f *Function) Inspect() string {
 }
 func (f *Function) Type() ObjectType { return FunctionObj }
 func (f *Function) Dup() Object      { return f }
-func (f *Function) classMethod()     {}
+func (f *Function) ClassMethod()     {}
 
 type Builtin struct {
 	Fn BuiltinFunction
@@ -228,7 +230,7 @@ type BuiltinMethod struct {
 func (b *BuiltinMethod) Inspect() string  { return "builtin method" }
 func (b *BuiltinMethod) Type() ObjectType { return BuiltinMethodObj }
 func (b *BuiltinMethod) Dup() Object      { return b }
-func (b *BuiltinMethod) classMethod()     {}
+func (b *BuiltinMethod) ClassMethod()     {}
 
 func MakeBuiltinMethod(fn BuiltinMethodFunction) *BuiltinMethod {
 	return &BuiltinMethod{Fn: fn}
