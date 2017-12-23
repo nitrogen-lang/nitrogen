@@ -301,7 +301,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileCompareExpression(ccb, node)
 
 	case *ast.FunctionLiteral:
-		compileFunction(ccb, node, false)
+		compileFunction(ccb, node, false, false)
 
 	case *ast.IndexExpression:
 		compile(ccb, node.Index)
@@ -345,7 +345,8 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 
 func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 	for _, f := range class.Methods {
-		compileFunction(ccb, f, true)
+		f.FQName = fmt.Sprintf("%s.%s", class.Name, f.Name)
+		compileFunction(ccb, f, true, class.Parent != "")
 	}
 
 	ccb2 := &codeBlockCompiler{
@@ -364,7 +365,7 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 
 	code := ccb2.code.Bytes()
 	props := &CodeBlock{
-		Name:         "__init",
+		Name:         fmt.Sprintf("%s.__init", class.Name),
 		Filename:     ccb.filename,
 		LocalCount:   len(ccb2.locals.table),
 		Code:         code,
@@ -467,7 +468,7 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 	}
 }
 
-func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bool) {
+func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bool, hasParent bool) {
 	ccb2 := &codeBlockCompiler{
 		constants: newConstantTable(),
 		locals:    newStringTable(),
@@ -481,6 +482,9 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 	}
 	if inClass {
 		ccb2.locals.indexOf("this")
+		if hasParent {
+			ccb2.locals.indexOf("parent")
+		}
 	}
 
 	compile(ccb2, fn.Body)
@@ -493,7 +497,7 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 
 	code := ccb2.code.Bytes()
 	body := &CodeBlock{
-		Name:         fn.Name,
+		Name:         fn.FQName,
 		Filename:     ccb.filename,
 		LocalCount:   len(ccb2.locals.table),
 		Code:         code,

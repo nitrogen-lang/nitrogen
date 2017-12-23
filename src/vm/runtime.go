@@ -39,6 +39,7 @@ type Frame struct {
 	bp         int
 	Env        *object.Environment
 	pc         int
+	this       *VMInstance
 }
 
 func (f *Frame) pushStack(obj object.Object) {

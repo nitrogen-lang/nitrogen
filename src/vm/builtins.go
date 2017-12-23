@@ -69,6 +69,7 @@ type VMFunction struct {
 	Parameters []string
 	Body       *compiler.CodeBlock
 	Env        *object.Environment
+	Class      *VMClass
 }
 
 func (f *VMFunction) Inspect() string {
@@ -120,6 +121,7 @@ func (i *VMInstance) GetMethod(name string) object.ClassMethod { return i.Class.
 type BoundMethod struct {
 	Method   object.ClassMethod
 	Instance *VMInstance
+	Parent   *VMClass
 }
 
 func (b *BoundMethod) Inspect() string {
@@ -127,3 +129,20 @@ func (b *BoundMethod) Inspect() string {
 }
 func (b *BoundMethod) Type() object.ObjectType { return object.BoundMethodObj }
 func (b *BoundMethod) Dup() object.Object      { return object.NullConst }
+
+func InstanceOf(class string, i *VMInstance) bool {
+	if i == nil {
+		return false
+	}
+
+	c := i.Class
+	for {
+		if c.Name == class {
+			return true
+		}
+		if c.Parent == nil {
+			return false
+		}
+		c = c.Parent
+	}
+}

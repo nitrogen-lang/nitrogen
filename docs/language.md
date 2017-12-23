@@ -488,8 +488,6 @@ let m1 = try {
 
 ## Classes
 
-**Implementation Note**: The bytecode VM doesn't have support for classes with parents yet.
-
 Nitrogen has support for simple classes. Classes are like Python where methods and properties don't have visibility
 limitations. It's up to the programmer to use methods as "public" or "private". Classes allow to encapsulate functionality
 and data. Instances of a class have different field values while sharing the same method definitions.
@@ -516,7 +514,7 @@ class name ^ parent {
 }
 ```
 
-### Class Inheritance (Not supported in the VM yet)
+### Class Inheritance
 
 Classes can inherit methods and fields from another class using the inheritance operator `class basename ^ parent { }`.
 Classes may have only one parent. Calling the parent init method can be done by calling `parent()`. In methods, the
