@@ -30,6 +30,7 @@ func (i *Interpreter) evalLookupAttributeInstance(instance, index object.Object)
 				Env:        object.NewEnclosedEnv(instanceObj.Fields),
 				Instance:   instanceObj,
 			}
+			fn.Env.CreateConst("this", instanceObj)
 			if instanceObj.Class.Parent != nil {
 				fn.Env.CreateConst("parent", instanceObj.Class.Parent)
 			}

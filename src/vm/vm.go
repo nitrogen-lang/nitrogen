@@ -622,42 +622,70 @@ func (vm *VirtualMachine) throw() {
 
 func (vm *VirtualMachine) makeInstance() {
 	argLen := vm.getUint16()
-	class := vm.currentFrame.popStack().(*VMClass)
+	class := vm.currentFrame.popStack()
 
-	cClass := class
-	classChain := make([]*VMClass, 1, 3)
-	classChain[0] = class
-	for cClass.Parent != nil {
-		classChain = append(classChain, cClass.Parent)
-		cClass = cClass.Parent
-	}
-
-	iFields := object.NewEnvironment()
-	iFields.SetParent(vm.currentFrame.Env)
-
-	for _, c := range classChain {
-		frame := vm.MakeFrame(c.Fields, iFields)
-		vm.RunFrame(frame, true)
-	}
-
-	iFields.SetParent(nil)
-
-	instance := &VMInstance{
-		Class:  class,
-		Fields: iFields,
-	}
-
-	init := class.GetMethod("init")
-	if init == nil {
-		for i := argLen; i > 0; i-- {
-			vm.currentFrame.popStack()
+	if class, ok := class.(*VMClass); ok {
+		cClass := class
+		classChain := make([]*VMClass, 1, 3)
+		classChain[0] = class
+		for cClass.Parent != nil {
+			classChain = append(classChain, cClass.Parent)
+			cClass = cClass.Parent
 		}
+
+		iFields := object.NewEnvironment()
+		iFields.SetParent(vm.currentFrame.Env)
+
+		for _, c := range classChain {
+			frame := vm.MakeFrame(c.Fields, iFields)
+			vm.RunFrame(frame, true)
+		}
+
+		iFields.SetParent(nil)
+
+		instance := &VMInstance{
+			Class:  class,
+			Fields: iFields,
+		}
+
+		init := class.GetMethod("init")
+		if init == nil {
+			for i := argLen; i > 0; i-- {
+				vm.currentFrame.popStack()
+			}
+			vm.currentFrame.pushStack(instance)
+			return
+		}
+
+		vm.callFunction(argLen, init, instance)
 		vm.currentFrame.pushStack(instance)
 		return
 	}
 
-	vm.callFunction(argLen, init, instance)
-	vm.currentFrame.pushStack(instance)
+	if class, ok := class.(*BuiltinClass); ok {
+		iFields := object.NewEnvironment()
+		for k, v := range class.Fields {
+			iFields.SetForce(k, v, false)
+		}
+
+		instance := &VMInstance{
+			Class:  class.VMClass,
+			Fields: iFields,
+		}
+
+		init := class.GetMethod("init")
+		if init == nil {
+			for i := argLen; i > 0; i-- {
+				vm.currentFrame.popStack()
+			}
+			vm.currentFrame.pushStack(instance)
+			return
+		}
+
+		vm.callFunction(argLen, init, instance)
+		vm.currentFrame.pushStack(instance)
+		return
+	}
 }
 
 func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMInstance) {
@@ -675,6 +703,23 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMIn
 		}
 
 		result := fn.Fn(vm, env, args...)
+		if result == nil {
+			result = object.NullConst
+		}
+
+		vm.returnValue = result
+		vm.currentFrame.pushStack(result)
+
+		if object.ObjectIs(result, object.ExceptionObj) {
+			vm.throw()
+		}
+	case *BuiltinMethod:
+		args := make([]object.Object, argc)
+		for i := uint16(0); i < argc; i++ {
+			args[i] = vm.currentFrame.popStack()
+		}
+
+		result := fn.Fn(vm, this, this.Fields, args...)
 		if result == nil {
 			result = object.NullConst
 		}

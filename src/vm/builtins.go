@@ -108,6 +108,11 @@ func (c *VMClass) GetMethod(name string) object.ClassMethod {
 	return c.Parent.GetMethod(name)
 }
 
+type BuiltinClass struct {
+	*VMClass
+	Fields map[string]object.Object
+}
+
 type VMInstance struct {
 	Class  *VMClass
 	Fields *object.Environment
@@ -129,6 +134,21 @@ func (b *BoundMethod) Inspect() string {
 }
 func (b *BoundMethod) Type() object.ObjectType { return object.BoundMethodObj }
 func (b *BoundMethod) Dup() object.Object      { return object.NullConst }
+
+type BuiltinMethodFunction func(i *VirtualMachine, self *VMInstance, env *object.Environment, args ...object.Object) object.Object
+
+type BuiltinMethod struct {
+	Fn BuiltinMethodFunction
+}
+
+func (b *BuiltinMethod) Inspect() string         { return "builtin method" }
+func (b *BuiltinMethod) Type() object.ObjectType { return object.BuiltinMethodObj }
+func (b *BuiltinMethod) Dup() object.Object      { return b }
+func (b *BuiltinMethod) ClassMethod()            {}
+
+func MakeBuiltinMethod(fn BuiltinMethodFunction) *BuiltinMethod {
+	return &BuiltinMethod{Fn: fn}
+}
 
 func InstanceOf(class string, i *VMInstance) bool {
 	if i == nil {
