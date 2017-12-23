@@ -1,6 +1,6 @@
 .PHONY: go-test nitrogen-test nitrogen modules
 
-all: go-test modules nitrogen nitrogen-test
+all: go-test modules nitrogen nitrogen-test nitrogen-test-vm
 
 go-test:
 	go test ./...

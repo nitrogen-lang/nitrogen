@@ -103,7 +103,7 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) object.Object
 
 mainLoop:
 	for {
-		if vm.unwind {
+		if vm.unwind || vm.currentFrame == nil {
 			if vm.returnValue == nil {
 				vm.returnValue = object.NullConst
 			}
@@ -115,7 +115,7 @@ mainLoop:
 		}
 		code := vm.fetchByte()
 		if vm.settings.Debug {
-			fmt.Fprintf(vm.GetStdout(), "Executing %s\n", opcode.Names[code])
+			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s\n", vm.currentFrame.pc-1, opcode.Names[code])
 		}
 
 		switch code {
@@ -354,7 +354,7 @@ mainLoop:
 		case opcode.Call:
 			numargs := vm.getUint16()
 			fn := vm.currentFrame.popStack()
-			vm.callFunction(numargs, fn, nil)
+			vm.callFunction(numargs, fn, false)
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -524,8 +524,8 @@ mainLoop:
 				if method != nil {
 					vm.currentFrame.pushStack(&BoundMethod{
 						Method:   method,
-						Instance: vm.currentFrame.this,
-						Parent:   vm.currentFrame.this.Class.Parent,
+						Instance: vm.currentFrame.frontInstance(),
+						Parent:   vm.currentFrame.frontInstance().Class.Parent,
 					})
 				} else {
 					vm.currentFrame.pushStack(object.NullConst)
@@ -603,9 +603,12 @@ func (vm *VirtualMachine) throw() {
 		catchBlock := vm.currentFrame.popBlockUntil(tryBlockT)
 		if catchBlock != nil { // Try block found
 			tryBlockS := catchBlock.(*tryBlock)
-			vm.currentFrame.sp = tryBlockS.sp    // Unwind data stack
-			vm.currentFrame.pc = tryBlockS.catch // Set program counter to catch block
-			break
+			if !tryBlockS.caught {
+				tryBlockS.caught = true
+				vm.currentFrame.sp = tryBlockS.sp    // Unwind data stack
+				vm.currentFrame.pc = tryBlockS.catch // Set program counter to catch block
+				break
+			}
 		}
 		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
 		if vm.currentFrame == nil {                 // Call stack exhausted
@@ -657,7 +660,9 @@ func (vm *VirtualMachine) makeInstance() {
 			return
 		}
 
-		vm.callFunction(argLen, init, instance)
+		vm.currentFrame.pushInstance(instance)
+		vm.callFunction(argLen, init, true)
+		vm.currentFrame.popInstance()
 		vm.currentFrame.pushStack(instance)
 		return
 	}
@@ -682,13 +687,15 @@ func (vm *VirtualMachine) makeInstance() {
 			return
 		}
 
-		vm.callFunction(argLen, init, instance)
+		vm.currentFrame.pushInstance(instance)
+		vm.callFunction(argLen, init, true)
+		vm.currentFrame.popInstance()
 		vm.currentFrame.pushStack(instance)
 		return
 	}
 }
 
-func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMInstance) {
+func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, now bool) {
 	switch fn := fn.(type) {
 	case *object.Builtin:
 		args := make([]object.Object, argc)
@@ -697,6 +704,7 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMIn
 		}
 
 		env := vm.currentFrame.Env
+		this := vm.currentFrame.frontInstance()
 		if this != nil {
 			env = object.NewEnclosedEnv(env)
 			env.SetForce("this", this, true)
@@ -719,6 +727,7 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMIn
 			args[i] = vm.currentFrame.popStack()
 		}
 
+		this := vm.currentFrame.frontInstance()
 		result := fn.Fn(vm, this, this.Fields, args...)
 		if result == nil {
 			result = object.NullConst
@@ -732,6 +741,7 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMIn
 		}
 	case *VMFunction:
 		var env *object.Environment
+		this := vm.currentFrame.frontInstance()
 		if this != nil {
 			env = object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount+1)
 			env.SetForce("this", this, true)
@@ -745,23 +755,25 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMIn
 		newFrame := vm.MakeFrame(fn.Body, env)
 		newFrame.lastFrame = vm.currentFrame
 		if this != nil {
-			newFrame.this = this
+			newFrame.pushInstance(this)
 		}
 
 		for i := 0; i < int(argc); i++ {
 			newFrame.Env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
 		}
 
-		// vm.currentFrame = newFrame
-		// vm.callStack.Push(newFrame)
-		vm.currentFrame.pushStack(vm.RunFrame(newFrame, true))
+		if now {
+			vm.currentFrame.pushStack(vm.RunFrame(newFrame, true))
+		} else {
+			vm.currentFrame = newFrame
+			vm.callStack.Push(newFrame)
+		}
 	case *BoundMethod:
-		oldThis := vm.currentFrame.this
-		vm.currentFrame.this = fn.Instance
-		vm.callFunction(argc, fn.Method, fn.Instance)
-		vm.currentFrame.this = oldThis
+		vm.currentFrame.pushInstance(fn.Instance)
+		vm.callFunction(argc, fn.Method, true)
+		vm.currentFrame.popInstance()
 	case *VMClass:
-		this := vm.currentFrame.this
+		this := vm.currentFrame.frontInstance()
 		if this == nil {
 			vm.currentFrame.pushStack(object.NewPanic("Can't call class method outside of object"))
 			vm.throw()
@@ -781,7 +793,7 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, this *VMIn
 			}
 			return
 		}
-		vm.callFunction(argc, init, this)
+		vm.callFunction(argc, init, true)
 	default:
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()

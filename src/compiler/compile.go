@@ -410,6 +410,9 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 	catchBlockLoc := mainCode.Len() + tryBlock.Len() + 6
 	ccb.offset = catchBlockLoc
 	ccb.code = new(bytes.Buffer)
+	if try.Symbol != nil {
+		ccb.locals.indexOf(try.Symbol.Value)
+	}
 	compile(ccb, try.Catch)
 	catchBlock := ccb.code
 

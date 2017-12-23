@@ -26,23 +26,60 @@ func (b *forLoopBlock) blockType() blockType { return loopBlockT }
 
 type tryBlock struct {
 	catch, sp int
+	caught    bool
 }
 
 func (b *tryBlock) blockType() blockType { return tryBlockT }
+
+type instanceChain struct {
+	last *instanceChain
+	i    *VMInstance
+}
 
 type Frame struct {
 	lastFrame  *Frame
 	code       *compiler.CodeBlock
 	stack      []object.Object
+	objects    *instanceChain
 	sp         int
 	blockStack []block
 	bp         int
 	Env        *object.Environment
 	pc         int
-	this       *VMInstance
+}
+
+func (f *Frame) pushInstance(i *VMInstance) {
+	f.objects = &instanceChain{
+		last: f.objects,
+		i:    i,
+	}
+}
+
+func (f *Frame) popInstance() *VMInstance {
+	if f == nil {
+		return nil
+	}
+
+	i := f.objects
+	if i == nil {
+		return nil
+	}
+	f.objects = i.last
+	return i.i
+}
+
+func (f *Frame) frontInstance() *VMInstance {
+	if f.objects == nil {
+		return nil
+	}
+	return f.objects.i
 }
 
 func (f *Frame) pushStack(obj object.Object) {
+	if f == nil {
+		return
+	}
+
 	if f.sp == len(f.stack) {
 		panic("Stack overflow")
 	}
