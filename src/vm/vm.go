@@ -354,7 +354,7 @@ mainLoop:
 		case opcode.Call:
 			numargs := vm.getUint16()
 			fn := vm.currentFrame.popStack()
-			vm.callFunction(numargs, fn, false)
+			vm.CallFunction(numargs, fn, false)
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -504,13 +504,8 @@ mainLoop:
 			instance := vm.currentFrame.popStack()
 			switch instance := instance.(type) {
 			case *VMInstance:
-				method := instance.GetMethod(name)
-				if method != nil {
-					vm.currentFrame.pushStack(&BoundMethod{
-						Method:   method,
-						Instance: instance,
-						Parent:   instance.Class,
-					})
+				if method := instance.GetBoundMethod(name); method != nil {
+					vm.currentFrame.pushStack(method)
 				} else {
 					val, ok := instance.Fields.Get(name)
 					if ok {
@@ -520,6 +515,13 @@ mainLoop:
 					}
 				}
 			case *VMClass:
+				this := vm.currentFrame.frontInstance()
+				if this == nil {
+					vm.currentFrame.pushStack(object.NewException("Method call outside instance"))
+					vm.throw()
+					break
+				}
+
 				method := instance.GetMethod(name)
 				if method != nil {
 					vm.currentFrame.pushStack(&BoundMethod{
@@ -582,6 +584,10 @@ func (vm *VirtualMachine) getUint16() uint16 {
 	return (uint16(vm.fetchByte()) << 8) + uint16(vm.fetchByte())
 }
 
+func (vm *VirtualMachine) PopStack() object.Object {
+	return vm.currentFrame.popStack()
+}
+
 // throw takes the top of stack item as an exception object
 // it will then progressivly unwind the block stack and call stack until
 // a try block is found. If none is found, it will panic with an uncaught
@@ -626,6 +632,7 @@ func (vm *VirtualMachine) throw() {
 func (vm *VirtualMachine) makeInstance() {
 	argLen := vm.getUint16()
 	class := vm.currentFrame.popStack()
+	var instance *VMInstance
 
 	if class, ok := class.(*VMClass); ok {
 		cClass := class
@@ -646,25 +653,10 @@ func (vm *VirtualMachine) makeInstance() {
 
 		iFields.SetParent(nil)
 
-		instance := &VMInstance{
+		instance = &VMInstance{
 			Class:  class,
 			Fields: iFields,
 		}
-
-		init := class.GetMethod("init")
-		if init == nil {
-			for i := argLen; i > 0; i-- {
-				vm.currentFrame.popStack()
-			}
-			vm.currentFrame.pushStack(instance)
-			return
-		}
-
-		vm.currentFrame.pushInstance(instance)
-		vm.callFunction(argLen, init, true)
-		vm.currentFrame.popInstance()
-		vm.currentFrame.pushStack(instance)
-		return
 	}
 
 	if class, ok := class.(*BuiltinClass); ok {
@@ -673,29 +665,27 @@ func (vm *VirtualMachine) makeInstance() {
 			iFields.SetForce(k, v, false)
 		}
 
-		instance := &VMInstance{
+		instance = &VMInstance{
 			Class:  class.VMClass,
 			Fields: iFields,
 		}
+	}
 
-		init := class.GetMethod("init")
-		if init == nil {
-			for i := argLen; i > 0; i-- {
-				vm.currentFrame.popStack()
-			}
-			vm.currentFrame.pushStack(instance)
-			return
+	init := instance.GetBoundMethod("init")
+	if init == nil {
+		for i := argLen; i > 0; i-- {
+			vm.currentFrame.popStack()
 		}
-
-		vm.currentFrame.pushInstance(instance)
-		vm.callFunction(argLen, init, true)
-		vm.currentFrame.popInstance()
 		vm.currentFrame.pushStack(instance)
 		return
 	}
+
+	vm.CallFunction(argLen, init, true)
+	vm.currentFrame.pushStack(instance)
+	return
 }
 
-func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, now bool) {
+func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) {
 	switch fn := fn.(type) {
 	case *object.Builtin:
 		args := make([]object.Object, argc)
@@ -770,7 +760,7 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, now bool) 
 		}
 	case *BoundMethod:
 		vm.currentFrame.pushInstance(fn.Instance)
-		vm.callFunction(argc, fn.Method, true)
+		vm.CallFunction(argc, fn.Method, true)
 		vm.currentFrame.popInstance()
 	case *VMClass:
 		this := vm.currentFrame.frontInstance()
@@ -793,7 +783,7 @@ func (vm *VirtualMachine) callFunction(argc uint16, fn object.Object, now bool) 
 			}
 			return
 		}
-		vm.callFunction(argc, init, true)
+		vm.CallFunction(argc, init, true)
 	default:
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()

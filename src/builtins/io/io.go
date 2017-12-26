@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
@@ -22,12 +23,31 @@ func init() {
 	vm.RegisterBuiltin("printlnb", printBinaryBuiltin)
 	vm.RegisterBuiltin("println", printlnBuiltin)
 	vm.RegisterBuiltin("printenv", printEnvBuiltin)
+	vm.RegisterBuiltin("varDump", varDump)
 
 	vm.RegisterBuiltin("readline", readLineBuiltin)
 }
 
+func varDump(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("varDump", 1, args...); ac != nil {
+		return ac
+	}
+
+	return printBuiltin(interpreter, env, args...)
+}
+
 func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	for _, arg := range args {
+		if instance, ok := arg.(*vm.VMInstance); ok {
+			machine := interpreter.(*vm.VirtualMachine)
+			toString := instance.GetBoundMethod("toString")
+			if toString != nil {
+				machine.CallFunction(0, toString, true)
+				printBuiltin(interpreter, env, machine.PopStack())
+				continue
+			}
+		}
+
 		fmt.Fprint(interpreter.GetStdout(), arg.Inspect())
 	}
 	return object.NullConst

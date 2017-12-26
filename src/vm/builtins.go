@@ -122,6 +122,18 @@ func (i *VMInstance) Inspect() string                          { return fmt.Spri
 func (i *VMInstance) Type() object.ObjectType                  { return object.InstanceObj }
 func (i *VMInstance) Dup() object.Object                       { return object.NullConst }
 func (i *VMInstance) GetMethod(name string) object.ClassMethod { return i.Class.GetMethod(name) }
+func (i *VMInstance) GetBoundMethod(name string) *BoundMethod {
+	method := i.Class.GetMethod(name)
+	if method == nil {
+		return nil
+	}
+
+	return &BoundMethod{
+		Method:   method,
+		Instance: i,
+		Parent:   i.Class.Parent,
+	}
+}
 
 type BoundMethod struct {
 	Method   object.ClassMethod
