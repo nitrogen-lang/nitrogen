@@ -24,8 +24,8 @@ func compileFrame(node ast.Node, name, filename string) *CodeBlock {
 	}
 
 	compile(ccb, node)
-	if ccb.code.Bytes()[ccb.code.Len()-1] != opcode.Return {
-		ccb.code.WriteByte(opcode.Return)
+	if opcode.Opcode(ccb.code.Bytes()[ccb.code.Len()-1]) != opcode.Return {
+		ccb.code.WriteByte(opcode.Return.ToByte())
 	}
 
 	code := ccb.code.Bytes()
@@ -65,7 +65,7 @@ func calculateStackSize(c []byte) int {
 	offset := 0
 	stackSize := &maxsizer{}
 	for offset < len(c) {
-		code := c[offset]
+		code := opcode.Opcode(c[offset])
 		offset++
 
 		switch code {
@@ -109,7 +109,7 @@ func calculateBlockSize(c []byte) int {
 	offset := 0
 	blockLen := &maxsizer{}
 	for offset < len(c) {
-		code := c[offset]
+		code := opcode.Opcode(c[offset])
 		offset++
 
 		switch code {
@@ -145,47 +145,47 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	// Literals
 	case *ast.IntegerLiteral:
 		i := &object.Integer{Value: node.Value}
-		ccb.code.WriteByte(opcode.LoadConst)
+		ccb.code.WriteByte(opcode.LoadConst.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(i)))
 	case *ast.NullLiteral:
 		compileLoadNull(ccb)
 	case *ast.StringLiteral:
 		str := &object.String{Value: node.Value}
-		ccb.code.WriteByte(opcode.LoadConst)
+		ccb.code.WriteByte(opcode.LoadConst.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(str)))
 	case *ast.FloatLiteral:
 		float := &object.Float{Value: node.Value}
-		ccb.code.WriteByte(opcode.LoadConst)
+		ccb.code.WriteByte(opcode.LoadConst.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(float)))
 	case *ast.Boolean:
 		b := object.FalseConst
 		if node.Value {
 			b = object.TrueConst
 		}
-		ccb.code.WriteByte(opcode.LoadConst)
+		ccb.code.WriteByte(opcode.LoadConst.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(b)))
 
 	case *ast.Array:
 		for _, e := range node.Elements {
 			compile(ccb, e)
 		}
-		ccb.code.WriteByte(opcode.MakeArray)
+		ccb.code.WriteByte(opcode.MakeArray.ToByte())
 		ccb.code.Write(uint16ToBytes(uint16(len(node.Elements))))
 	case *ast.HashLiteral:
 		for k, v := range node.Pairs {
 			compile(ccb, v)
 			compile(ccb, k)
 		}
-		ccb.code.WriteByte(opcode.MakeMap)
+		ccb.code.WriteByte(opcode.MakeMap.ToByte())
 		ccb.code.Write(uint16ToBytes(uint16(len(node.Pairs))))
 
 	// Expressions
 	case *ast.Identifier:
 		if ccb.locals.contains(node.Value) {
-			ccb.code.WriteByte(opcode.LoadFast)
+			ccb.code.WriteByte(opcode.LoadFast.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Value)))
 		} else {
-			ccb.code.WriteByte(opcode.LoadGlobal)
+			ccb.code.WriteByte(opcode.LoadGlobal.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(node.Value)))
 		}
 	case *ast.PrefixExpression:
@@ -193,9 +193,9 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 
 		switch node.Operator {
 		case "!":
-			ccb.code.WriteByte(opcode.UnaryNot)
+			ccb.code.WriteByte(opcode.UnaryNot.ToByte())
 		case "-":
-			ccb.code.WriteByte(opcode.UnaryNeg)
+			ccb.code.WriteByte(opcode.UnaryNeg.ToByte())
 		}
 	case *ast.InfixExpression:
 		compile(ccb, node.Left)
@@ -203,44 +203,44 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 
 		switch node.Operator {
 		case "+":
-			ccb.code.WriteByte(opcode.BinaryAdd)
+			ccb.code.WriteByte(opcode.BinaryAdd.ToByte())
 		case "-":
-			ccb.code.WriteByte(opcode.BinarySub)
+			ccb.code.WriteByte(opcode.BinarySub.ToByte())
 		case "*":
-			ccb.code.WriteByte(opcode.BinaryMul)
+			ccb.code.WriteByte(opcode.BinaryMul.ToByte())
 		case "/":
-			ccb.code.WriteByte(opcode.BinaryDivide)
+			ccb.code.WriteByte(opcode.BinaryDivide.ToByte())
 		case "%":
-			ccb.code.WriteByte(opcode.BinaryMod)
+			ccb.code.WriteByte(opcode.BinaryMod.ToByte())
 		case "<<":
-			ccb.code.WriteByte(opcode.BinaryShiftL)
+			ccb.code.WriteByte(opcode.BinaryShiftL.ToByte())
 		case ">>":
-			ccb.code.WriteByte(opcode.BinaryShiftR)
+			ccb.code.WriteByte(opcode.BinaryShiftR.ToByte())
 		case "&":
-			ccb.code.WriteByte(opcode.BinaryAnd)
+			ccb.code.WriteByte(opcode.BinaryAnd.ToByte())
 		case "&^":
-			ccb.code.WriteByte(opcode.BinaryAndNot)
+			ccb.code.WriteByte(opcode.BinaryAndNot.ToByte())
 		case "|":
-			ccb.code.WriteByte(opcode.BinaryOr)
+			ccb.code.WriteByte(opcode.BinaryOr.ToByte())
 		case "^":
-			ccb.code.WriteByte(opcode.BinaryNot)
+			ccb.code.WriteByte(opcode.BinaryNot.ToByte())
 		case "<":
-			ccb.code.WriteByte(opcode.Compare)
+			ccb.code.WriteByte(opcode.Compare.ToByte())
 			ccb.code.WriteByte(opcode.CmpLT)
 		case ">":
-			ccb.code.WriteByte(opcode.Compare)
+			ccb.code.WriteByte(opcode.Compare.ToByte())
 			ccb.code.WriteByte(opcode.CmpGT)
 		case "==":
-			ccb.code.WriteByte(opcode.Compare)
+			ccb.code.WriteByte(opcode.Compare.ToByte())
 			ccb.code.WriteByte(opcode.CmpEq)
 		case "!=":
-			ccb.code.WriteByte(opcode.Compare)
+			ccb.code.WriteByte(opcode.Compare.ToByte())
 			ccb.code.WriteByte(opcode.CmpNotEq)
 		case "<=":
-			ccb.code.WriteByte(opcode.Compare)
+			ccb.code.WriteByte(opcode.Compare.ToByte())
 			ccb.code.WriteByte(opcode.CmpLTEq)
 		case ">=":
-			ccb.code.WriteByte(opcode.Compare)
+			ccb.code.WriteByte(opcode.Compare.ToByte())
 			ccb.code.WriteByte(opcode.CmpGTEq)
 		}
 	case *ast.CallExpression:
@@ -248,19 +248,19 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			compile(ccb, node.Arguments[i])
 		}
 		compile(ccb, node.Function)
-		ccb.code.WriteByte(opcode.Call)
+		ccb.code.WriteByte(opcode.Call.ToByte())
 		ccb.code.Write(uint16ToBytes(uint16(len(node.Arguments))))
 	case *ast.ReturnStatement:
 		compile(ccb, node.Value)
-		ccb.code.WriteByte(opcode.Return)
+		ccb.code.WriteByte(opcode.Return.ToByte())
 	case *ast.DefStatement:
 		compile(ccb, node.Value)
 
 		if node.Const {
-			ccb.code.WriteByte(opcode.StoreConst)
+			ccb.code.WriteByte(opcode.StoreConst.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 		} else {
-			ccb.code.WriteByte(opcode.Define)
+			ccb.code.WriteByte(opcode.Define.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 		}
 	case *ast.AssignStatement:
@@ -269,14 +269,14 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		if indexed, ok := node.Left.(*ast.IndexExpression); ok {
 			compile(ccb, indexed.Index)
 			compile(ccb, indexed.Left)
-			ccb.code.WriteByte(opcode.StoreIndex)
+			ccb.code.WriteByte(opcode.StoreIndex.ToByte())
 			compileLoadNull(ccb)
 			break
 		}
 
 		if attrib, ok := node.Left.(*ast.AttributeExpression); ok {
 			compile(ccb, attrib.Left)
-			ccb.code.WriteByte(opcode.StoreAttribute)
+			ccb.code.WriteByte(opcode.StoreAttribute.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(attrib.Index.Value)))
 			compileLoadNull(ccb)
 			break
@@ -288,10 +288,10 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		}
 
 		if ccb.locals.contains(ident.Value) {
-			ccb.code.WriteByte(opcode.StoreFast)
+			ccb.code.WriteByte(opcode.StoreFast.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(ident.Value)))
 		} else {
-			ccb.code.WriteByte(opcode.StoreGlobal)
+			ccb.code.WriteByte(opcode.StoreGlobal.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(ident.Value)))
 		}
 		compileLoadNull(ccb)
@@ -306,20 +306,20 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.IndexExpression:
 		compile(ccb, node.Index)
 		compile(ccb, node.Left)
-		ccb.code.WriteByte(opcode.LoadIndex)
+		ccb.code.WriteByte(opcode.LoadIndex.ToByte())
 
 	case *ast.ForLoopStatement:
 		compileLoop(ccb, node)
 	case *ast.ContinueStatement:
-		ccb.code.WriteByte(opcode.Continue)
+		ccb.code.WriteByte(opcode.Continue.ToByte())
 	case *ast.BreakStatement:
-		ccb.code.WriteByte(opcode.Break)
+		ccb.code.WriteByte(opcode.Break.ToByte())
 
 	case *ast.TryCatchExpression:
 		compileTryCatch(ccb, node)
 	case *ast.ThrowStatement:
 		compile(ccb, node.Expression)
-		ccb.code.WriteByte(opcode.Throw)
+		ccb.code.WriteByte(opcode.Throw.ToByte())
 	case *ast.ClassLiteral:
 		compileClassLiteral(ccb, node)
 	case *ast.MakeInstance:
@@ -328,11 +328,11 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		}
 		compile(ccb, node.Class)
 
-		ccb.code.WriteByte(opcode.MakeInstance)
+		ccb.code.WriteByte(opcode.MakeInstance.ToByte())
 		ccb.code.Write(uint16ToBytes(uint16(len(node.Arguments))))
 	case *ast.AttributeExpression:
 		compile(ccb, node.Left)
-		ccb.code.WriteByte(opcode.LoadAttribute)
+		ccb.code.WriteByte(opcode.LoadAttribute.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.names.indexOf(node.Index.Value)))
 
 	// Not implemented yet
@@ -361,7 +361,7 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 		compile(ccb2, f)
 	}
 	compileLoadNull(ccb2)
-	ccb2.code.WriteByte(opcode.Return)
+	ccb2.code.WriteByte(opcode.Return.ToByte())
 
 	code := ccb2.code.Bytes()
 	props := &CodeBlock{
@@ -376,7 +376,7 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 		MaxBlockSize: calculateBlockSize(code),
 	}
 
-	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.WriteByte(opcode.LoadConst.ToByte())
 	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(props)))
 
 	if class.Parent == "" {
@@ -385,15 +385,15 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 		compile(ccb, &ast.Identifier{Value: class.Parent})
 	}
 
-	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.WriteByte(opcode.LoadConst.ToByte())
 	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.MakeStringObj(class.Name))))
 
-	ccb.code.WriteByte(opcode.BuildClass)
+	ccb.code.WriteByte(opcode.BuildClass.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(len(class.Methods))))
 }
 
 func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
-	ccb.code.WriteByte(opcode.PrepareBlock)
+	ccb.code.WriteByte(opcode.PrepareBlock.ToByte())
 
 	_, tryNoNil := try.Try.Statements[len(try.Try.Statements)-1].(*ast.ExpressionStatement)
 	_, catchNoNil := try.Catch.Statements[len(try.Catch.Statements)-1].(*ast.ExpressionStatement)
@@ -434,29 +434,29 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 		}
 	}
 
-	ccb.code.WriteByte(opcode.StartTry)
+	ccb.code.WriteByte(opcode.StartTry.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(catchBlockLoc)))
 	ccb.code.Write(tryBlock.Bytes())
 
-	ccb.code.WriteByte(opcode.JumpForward)
+	ccb.code.WriteByte(opcode.JumpForward.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(catchBlock.Len() + catchSymOffset)))
 
 	if try.Symbol == nil {
-		ccb.code.WriteByte(opcode.Pop)
+		ccb.code.WriteByte(opcode.Pop.ToByte())
 	} else {
-		ccb.code.WriteByte(opcode.Define)
+		ccb.code.WriteByte(opcode.Define.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(try.Symbol.Value)))
 	}
 
 	ccb.code.Write(catchBlock.Bytes())
 	if catchNoNil && !tryNoNil {
-		ccb.code.WriteByte(opcode.JumpForward)
+		ccb.code.WriteByte(opcode.JumpForward.ToByte())
 		ccb.code.Write(uint16ToBytes(3))
 	}
 	if !tryNoNil || !catchNoNil {
 		compileLoadNull(ccb)
 	}
-	ccb.code.WriteByte(opcode.EndBlock)
+	ccb.code.WriteByte(opcode.EndBlock.ToByte())
 }
 
 func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
@@ -465,7 +465,7 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 		compile(ccb, s)
 		if i < l {
 			if _, ok := s.(*ast.ExpressionStatement); ok {
-				ccb.code.WriteByte(opcode.Pop)
+				ccb.code.WriteByte(opcode.Pop.ToByte())
 			}
 		}
 	}
@@ -494,8 +494,8 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 	if _, ok := fn.Body.Statements[len(fn.Body.Statements)-1].(*ast.ExpressionStatement); !ok {
 		compileLoadNull(ccb2)
 	}
-	if ccb2.code.Bytes()[ccb2.code.Len()-1] != opcode.Return {
-		ccb2.code.WriteByte(opcode.Return)
+	if opcode.Opcode(ccb2.code.Bytes()[ccb2.code.Len()-1]) != opcode.Return {
+		ccb2.code.WriteByte(opcode.Return.ToByte())
 	}
 
 	code := ccb2.code.Bytes()
@@ -511,20 +511,20 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 		MaxBlockSize: calculateBlockSize(code),
 	}
 
-	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.WriteByte(opcode.LoadConst.ToByte())
 	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(body)))
 
 	for _, p := range fn.Parameters {
-		ccb.code.WriteByte(opcode.LoadConst)
+		ccb.code.WriteByte(opcode.LoadConst.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.MakeStringObj(p.Value))))
 	}
-	ccb.code.WriteByte(opcode.MakeArray)
+	ccb.code.WriteByte(opcode.MakeArray.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(len(fn.Parameters))))
 
-	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.WriteByte(opcode.LoadConst.ToByte())
 	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.MakeStringObj(fn.Name))))
 
-	ccb.code.WriteByte(opcode.MakeFunction)
+	ccb.code.WriteByte(opcode.MakeFunction.ToByte())
 }
 
 func compileInnerBlock(ccb *codeBlockCompiler, node ast.Node) *bytes.Buffer {
@@ -574,13 +574,13 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	ccb.code = mainCode
 	ccb.offset = oldOffset
 
-	ccb.code.WriteByte(opcode.PopJumpIfFalse)
+	ccb.code.WriteByte(opcode.PopJumpIfFalse.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(falseBranchLoc)))
 	ccb.code.Write(trueBranch.Bytes())
 	if !trueNoNil {
 		compileLoadNull(ccb)
 	}
-	ccb.code.WriteByte(opcode.JumpForward)
+	ccb.code.WriteByte(opcode.JumpForward.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(falseBranch.Len())))
 	ccb.code.Write(falseBranch.Bytes())
 	if !falseNoNil {
@@ -602,18 +602,18 @@ func compileIfStatementNoElse(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 		afterIfStmt -= 3
 	}
 
-	ccb.code.WriteByte(opcode.PopJumpIfFalse)
+	ccb.code.WriteByte(opcode.PopJumpIfFalse.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(afterIfStmt)))
 	ccb.code.Write(trueBranch.Bytes())
 	if noNil {
-		ccb.code.WriteByte(opcode.JumpForward)
+		ccb.code.WriteByte(opcode.JumpForward.ToByte())
 		ccb.code.Write(uint16ToBytes(uint16(3))) // 3 = 1 opcode + 2 byte arg (for implicit nil)
 	}
 	compileLoadNull(ccb)
 }
 
 func compileLoadNull(ccb *codeBlockCompiler) {
-	ccb.code.WriteByte(opcode.LoadConst)
+	ccb.code.WriteByte(opcode.LoadConst.ToByte())
 	ccb.code.Write(uint16ToBytes(ccb.constants.indexOf(object.NullConst)))
 }
 
@@ -626,9 +626,9 @@ func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression
 	afterCompare := ccb.code.Len() + cntBranch.Len() + ccb.offset + 3
 
 	if cmp.Token.Type == token.LAnd {
-		ccb.code.WriteByte(opcode.JumpIfFalseOrPop)
+		ccb.code.WriteByte(opcode.JumpIfFalseOrPop.ToByte())
 	} else {
-		ccb.code.WriteByte(opcode.JumpIfTrueOrPop)
+		ccb.code.WriteByte(opcode.JumpIfTrueOrPop.ToByte())
 	}
 
 	ccb.code.Write(uint16ToBytes(uint16(afterCompare)))
@@ -641,7 +641,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 		return
 	}
 
-	ccb.code.WriteByte(opcode.PrepareBlock)
+	ccb.code.WriteByte(opcode.PrepareBlock.ToByte())
 	compile(ccb, loop.Init)
 
 	mainCode := ccb.code
@@ -659,7 +659,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	loopBody := ccb.code
 
 	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
-		ccb.code.WriteByte(opcode.Pop)
+		ccb.code.WriteByte(opcode.Pop.ToByte())
 	}
 
 	// 3 = 1 opcode + 2 byte arg
@@ -675,29 +675,29 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	endBlock := mainCode.Len() + condition.Len() + loopBody.Len() + iterator.Len() + ccb.offset + 10
 	// 8 = 2 opcode + 3 x 2 byte args
 	iterBlock := mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 8
-	ccb.code.WriteByte(opcode.StartLoop)
+	ccb.code.WriteByte(opcode.StartLoop.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
 	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))
 
 	ccb.code.Write(condition.Bytes())
-	ccb.code.WriteByte(opcode.PopJumpIfFalse)
+	ccb.code.WriteByte(opcode.PopJumpIfFalse.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
 
 	ccb.code.Write(loopBody.Bytes())
 	ccb.code.Write(iterator.Bytes())
 
-	ccb.code.WriteByte(opcode.Pop)
-	ccb.code.WriteByte(opcode.NextIter)
-	ccb.code.WriteByte(opcode.EndBlock)
+	ccb.code.WriteByte(opcode.Pop.ToByte())
+	ccb.code.WriteByte(opcode.NextIter.ToByte())
+	ccb.code.WriteByte(opcode.EndBlock.ToByte())
 }
 
 func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	loopBody := compileInnerBlock(ccb, loop.Body)
-	loopBody.WriteByte(opcode.Continue)
+	loopBody.WriteByte(opcode.Continue.ToByte())
 
 	// 3 = 1 opcode + 1 x 2 byte arg
 	loopEnd := ccb.code.Len() + loopBody.Len() + 3
-	ccb.code.WriteByte(opcode.StartLoop)
+	ccb.code.WriteByte(opcode.StartLoop.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(loopEnd)))
 
 	ccb.code.Write(loopBody.Bytes())

@@ -113,7 +113,7 @@ mainLoop:
 		if vm.currentFrame.pc >= len(vm.currentFrame.code.Code) {
 			panic(fmt.Sprintf("Program counter %d outside bounds of bytecode %d", vm.currentFrame.pc, len(vm.currentFrame.code.Code)-1))
 		}
-		code := vm.fetchByte()
+		code := vm.fetchOpcode()
 		if vm.settings.Debug {
 			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s\n", vm.currentFrame.pc-1, opcode.Names[code])
 		}
@@ -574,6 +574,10 @@ mainLoop:
 			break
 		}
 	}
+}
+
+func (vm *VirtualMachine) fetchOpcode() opcode.Opcode {
+	return opcode.Opcode(vm.fetchByte())
 }
 
 func (vm *VirtualMachine) fetchByte() byte {

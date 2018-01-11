@@ -8,13 +8,13 @@ go-test:
 nitrogen-test:
 	@echo "Run Nitrogen source test suite"
 	@for test in tests/*.ni; do \
-		./bin/nitrogen "$$test"; \
+		./bin/nitrogen -nocompile "$$test"; \
 	done
 
 nitrogen-test-vm:
 	@echo "Run Nitrogen source test suite using VM"
 	@for test in tests/*.ni; do \
-		./bin/nitrogen -compile "$$test"; \
+		./bin/nitrogen "$$test"; \
 	done
 
 nitrogen:

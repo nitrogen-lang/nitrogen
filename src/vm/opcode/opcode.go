@@ -1,5 +1,15 @@
 package opcode
 
+type Opcode byte
+
+func (o Opcode) ToByte() byte {
+	return byte(o)
+}
+
+func (o Opcode) String() string {
+	return Names[o]
+}
+
 /*
 When adding a new opcode, make sure to check and make any needed changes to the following places:
 
@@ -11,7 +21,7 @@ When adding a new opcode, make sure to check and make any needed changes to the 
 - And obviously, implement it in the virtual machine.
 */
 const (
-	Noop byte = iota
+	Noop Opcode = iota
 	LoadConst
 	StoreConst
 	LoadFast
@@ -73,11 +83,11 @@ const (
 	MaxCmpCodes
 )
 
-var HasFourByteArg = map[byte]bool{
+var HasFourByteArg = map[Opcode]bool{
 	StartLoop: true,
 }
 
-var HasTwoByteArg = map[byte]bool{
+var HasTwoByteArg = map[Opcode]bool{
 	LoadConst:        true,
 	StoreConst:       true,
 	LoadFast:         true,
@@ -101,11 +111,11 @@ var HasTwoByteArg = map[byte]bool{
 	MakeInstance:     true,
 }
 
-var HasOneByteArg = map[byte]bool{
+var HasOneByteArg = map[Opcode]bool{
 	Compare: true,
 }
 
-var HasNoArg = map[byte]bool{
+var HasNoArg = map[Opcode]bool{
 	Noop:         true,
 	LoadIndex:    true,
 	StoreIndex:   true,
@@ -133,7 +143,7 @@ var HasNoArg = map[byte]bool{
 	Throw:        true,
 }
 
-var Names = map[byte]string{
+var Names = map[Opcode]string{
 	Noop:             "NOOP",
 	LoadConst:        "LOAD_CONST",
 	StoreConst:       "STORE_CONST",

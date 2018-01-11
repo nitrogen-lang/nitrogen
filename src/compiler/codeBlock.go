@@ -30,7 +30,7 @@ func (cb *CodeBlock) Dup() object.Object      { return object.NullConst }
 func (cb *CodeBlock) Print(indent string) {
 	offset := 0
 	for offset < len(cb.Code) {
-		code := cb.Code[offset]
+		code := opcode.Opcode(cb.Code[offset])
 		fmt.Printf("%s%d:\t%s", indent, offset, opcode.Names[code])
 		offset++
 
