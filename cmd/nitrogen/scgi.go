@@ -48,8 +48,8 @@ func startSCGIServer() {
 
 	fmt.Printf("SCGI listening on %s\n", scgiSock)
 
-	if compile {
-		fmt.Println("Using opcode compiler")
+	if nocompile {
+		fmt.Println("Opcode compiler disabled")
 	}
 
 	workerTimeout := time.Duration(scgiWorkerTimeout) * time.Second
@@ -167,7 +167,20 @@ func (w *worker) run(conn net.Conn) {
 
 	// Execute script
 	var result object.Object
-	if compile {
+	if nocompile {
+		// Parse script
+		program, err := moduleutils.ASTCache.GetTree(scriptFilename)
+		if err != nil {
+			os.Stderr.WriteString(err.Error())
+			os.Stderr.Write([]byte{'\n'})
+			return
+		}
+
+		interpreter := eval.NewInterpreter()
+		interpreter.Stdout = conn
+
+		result = interpreter.Eval(program, env)
+	} else {
 		code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename)
 		if err != nil {
 			os.Stderr.WriteString(err.Error())
@@ -181,19 +194,6 @@ func (w *worker) run(conn net.Conn) {
 		vmsettings.Stdout = conn
 
 		result = vm.NewVM(vmsettings).Execute(code, env)
-	} else {
-		// Parse script
-		program, err := moduleutils.ASTCache.GetTree(scriptFilename)
-		if err != nil {
-			os.Stderr.WriteString(err.Error())
-			os.Stderr.Write([]byte{'\n'})
-			return
-		}
-
-		interpreter := eval.NewInterpreter()
-		interpreter.Stdout = conn
-
-		result = interpreter.Eval(program, env)
 	}
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {

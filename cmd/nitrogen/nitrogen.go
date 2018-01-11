@@ -41,7 +41,7 @@ var (
 	modulePath        string
 	printVersion      bool
 	fullDebug         bool
-	compile           bool
+	nocompile         bool
 	cpuprofile        string
 	memprofile        string
 	outputFile        string
@@ -57,7 +57,7 @@ func init() {
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
-	flag.BoolVar(&compile, "compile", false, "Use the Nitrogen VM")
+	flag.BoolVar(&nocompile, "nocompile", false, "Disable the Nitrogen VM")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
 	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
@@ -122,7 +122,6 @@ func main() {
 			fmt.Println(err.Error())
 			return
 		}
-		compile = true
 	} else {
 		program, err = moduleutils.ASTCache.GetTree(flag.Arg(0))
 		if err != nil {
@@ -138,7 +137,12 @@ func main() {
 
 	var result object.Object
 	var start time.Time
-	if compile {
+	if nocompile {
+		interpreter := eval.NewInterpreter()
+
+		start = time.Now()
+		result = interpreter.Eval(program, env)
+	} else {
 		if code == nil {
 			code = compiler.Compile(program, "__main")
 		}
@@ -150,11 +154,6 @@ func main() {
 
 		start = time.Now()
 		result = runCompiledCode(code, env)
-	} else {
-		interpreter := eval.NewInterpreter()
-
-		start = time.Now()
-		result = interpreter.Eval(program, env)
 	}
 
 	if fullDebug {
