@@ -498,7 +498,9 @@ mainLoop:
 			}
 			vm.currentFrame.pushStack(class)
 		case opcode.MakeInstance:
-			vm.makeInstance()
+			argLen := vm.getUint16()
+			class := vm.currentFrame.popStack()
+			vm.makeInstance(argLen, class)
 		case opcode.LoadAttribute:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			instance := vm.currentFrame.popStack()
@@ -629,9 +631,7 @@ func (vm *VirtualMachine) throw() {
 	vm.currentFrame.pushStack(exception)
 }
 
-func (vm *VirtualMachine) makeInstance() {
-	argLen := vm.getUint16()
-	class := vm.currentFrame.popStack()
+func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 	var instance *VMInstance
 
 	if class, ok := class.(*VMClass); ok {
