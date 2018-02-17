@@ -1,7 +1,7 @@
 # Language Modules
 
 The Nitrogen interpreter supports dynamically linking to shared Go plugins to extend the functionality of the interpreter
-by providing additional userland functions. **Modules are only supported on Linux.**
+by providing additional userland functions. **Modules are only supported on Linux and macOS.**
 
 ## Using Modules
 
