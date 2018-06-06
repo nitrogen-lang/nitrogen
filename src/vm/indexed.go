@@ -77,14 +77,17 @@ func (vm *VirtualMachine) evalStringIndexExpression(array, index object.Object) 
 func (vm *VirtualMachine) evalModuleLookupExpression(module, index object.Object) object.Object {
 	moduleObj := module.(*object.Module)
 	key := index.(*object.String)
+	return vm.lookupModuleAttr(moduleObj, key.Value)
+}
 
+func (vm *VirtualMachine) lookupModuleAttr(module *object.Module, key string) object.Object {
 	// Methods have priority over variables
-	method, ok := moduleObj.Methods[key.Value]
+	method, ok := module.Methods[key]
 	if ok {
 		return &object.Builtin{Fn: method}
 	}
 
-	variable, ok := moduleObj.Vars[key.Value]
+	variable, ok := module.Vars[key]
 	if ok {
 		return variable
 	}

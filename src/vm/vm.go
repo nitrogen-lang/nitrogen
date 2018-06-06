@@ -538,6 +538,8 @@ mainLoop:
 				} else {
 					vm.currentFrame.pushStack(object.NullConst)
 				}
+			case *object.Module:
+				vm.currentFrame.pushStack(vm.lookupModuleAttr(instance, name))
 			default:
 				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
 				vm.throw()

@@ -22,7 +22,7 @@ or if the module is found but fails importing regardless of `required`. A module
 such an object. A module is able to register global functions or an encapsulated module object. Consult the module documentation
 for specifics.
 
-If a module returns a Module object, functions or variables can be retrieved using arrow or index notation.
+If a module returns a Module object, functions or variables can be retrieved using arrow, index, or dot notation.
 
 Example:
 
@@ -33,5 +33,8 @@ if isError(os) {
     println('Failed loading module os: ', os) // Print error message
 }
 
+// All of these do the same thing
 print(os->system('whoami')[0]) // Call the system function and print stdout
+print(os.system('whoami')[0]) // Call the system function and print stdout
+print(os["system"]('whoami')[0]) // Call the system function and print stdout
 ```

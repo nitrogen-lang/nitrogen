@@ -3,7 +3,7 @@
 Here you will find documentation for the language syntax, as well as the standard library:
 
 - [Language](language.md)
-- [Bytecode VM](vm.md)
+- [Elemental VM](vm.md)
 - [Standard Library](stdlib)
 - [Including Script Files](stdlib/including-scripts.md)
 - [Optional Modules](modules)

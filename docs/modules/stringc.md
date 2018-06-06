@@ -1,7 +1,5 @@
 # Stringc
 
-**Implementation Note**: This module is not available when using the bytecode VM.
-
 stringc exposes a string object that can be used to manipulate strings.
 
 ## class string(s: string)
@@ -27,11 +25,10 @@ If n > 0, at most n substrings will be returned. The returned array may have les
 
 `dedup` will reduce any consecutive substring of `char` to a single occurrence of `char`. `char` must be a single character.
 
-Example:
+## Example
 
 ```
-let strings = module('strings.so')
-strings->dedup("name:    John", " ") == "name: John"
+let stringc = module('strings.so')
+let str = make stringc.string("Hello")
+println(str.str)
 ```
-
-This example replaces consecutive strings of spaces with a single space.
