@@ -3,32 +3,12 @@ package main
 import (
 	"strings"
 
-	"github.com/nitrogen-lang/nitrogen/src/ast"
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {
-	eval.RegisterModule(ModuleName, &object.Module{
-		Name:    ModuleName,
-		Methods: map[string]object.BuiltinFunction{},
-		Vars: map[string]object.Object{
-			"string": &object.Class{
-				Name:   "string",
-				Parent: nil,
-				Fields: []*ast.DefStatement{{Name: &ast.Identifier{Value: "str"}}},
-				Methods: map[string]object.ClassMethod{
-					"init":      object.MakeBuiltinMethod(stringInit),
-					"splitN":    object.MakeBuiltinMethod(strSplitN),
-					"trimSpace": object.MakeBuiltinMethod(strTrim),
-					"dedup":     object.MakeBuiltinMethod(strDedup),
-				},
-			},
-		},
-	})
-
 	vm.RegisterModule(ModuleName, &object.Module{
 		Name:    ModuleName,
 		Methods: map[string]object.BuiltinFunction{},

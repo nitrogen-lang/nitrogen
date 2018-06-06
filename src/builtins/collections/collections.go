@@ -3,23 +3,12 @@ package collections
 import (
 	"sort"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {
-	// Register with the tree walker
-	eval.RegisterBuiltin("len", lenBuiltin)
-	eval.RegisterBuiltin("first", firstBuiltin)
-	eval.RegisterBuiltin("last", lastBuiltin)
-	eval.RegisterBuiltin("rest", restBuiltin)
-	eval.RegisterBuiltin("push", pushBuiltin)
-	eval.RegisterBuiltin("sort", sortArrayBuiltin)
-	eval.RegisterBuiltin("hashMerge", hashMergeBuiltin)
-	eval.RegisterBuiltin("hashKeys", hashKeysBuiltin)
-
 	// Register with virtual machine
 	vm.RegisterBuiltin("len", lenBuiltin)
 	vm.RegisterBuiltin("first", firstBuiltin)

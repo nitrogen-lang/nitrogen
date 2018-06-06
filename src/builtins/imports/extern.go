@@ -6,7 +6,6 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -17,10 +16,6 @@ import (
 var included map[string]*ast.Program
 
 func init() {
-	eval.RegisterBuiltin("include", includeScript)
-	eval.RegisterBuiltin("require", requireScript)
-	eval.RegisterBuiltin("evalScript", evalScript)
-
 	vm.RegisterBuiltin("include", includeScript)
 	vm.RegisterBuiltin("require", requireScript)
 	vm.RegisterBuiltin("evalScript", evalScript)
@@ -114,8 +109,6 @@ func commonInclude(require bool, save bool, i object.Interpreter, env *object.En
 		env = object.NewEnclosedEnv(env)
 		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
 		return i.RunFrame(i.MakeFrame(code, env), true)
-	case *eval.Interpreter:
-		return i.Eval(program, object.NewEnclosedEnv(env))
 	}
 
 	return object.NewPanic("Invalid interpreter")

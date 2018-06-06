@@ -3,37 +3,12 @@ package typing
 import (
 	"strconv"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {
-	// Register with interpreter
-	eval.RegisterBuiltin("toInt", toIntBuiltin)
-	eval.RegisterBuiltin("toFloat", toFloatBuiltin)
-	eval.RegisterBuiltin("toString", toStringBuiltin)
-
-	eval.RegisterBuiltin("parseInt", parseIntBuiltin)
-	eval.RegisterBuiltin("parseFloat", parseFloatBuiltin)
-
-	eval.RegisterBuiltin("varType", varTypeBuiltin)
-	eval.RegisterBuiltin("isDefined", isDefinedBuiltin)
-	eval.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FloatObj))
-	eval.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.IntergerObj))
-	eval.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BooleanObj))
-	eval.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NullObj))
-	eval.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FunctionObj))
-	eval.RegisterBuiltin("isString", makeIsTypeBuiltin(object.StringObj))
-	eval.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
-	eval.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
-	eval.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
-	eval.RegisterBuiltin("isClass", makeIsTypeBuiltin(object.ClassObj))
-	eval.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))
-
-	eval.RegisterBuiltin("errorVal", getErrorVal)
-
 	// Register with virual machine
 	vm.RegisterBuiltin("toInt", toIntBuiltin)
 	vm.RegisterBuiltin("toFloat", toFloatBuiltin)

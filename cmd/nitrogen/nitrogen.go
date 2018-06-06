@@ -257,13 +257,12 @@ func startRepl(in io.Reader, out io.Writer) {
 		}
 
 		code = compiler.Compile(program, "__main")
-		code.Print(" ")
 
 		result := runCompiledCode(code, env)
 		if result != nil && result != object.NullConst {
 			io.WriteString(out, result.Inspect())
-			io.WriteString(out, "\n")
 		}
+		io.WriteString(out, "\n")
 	}
 }
 

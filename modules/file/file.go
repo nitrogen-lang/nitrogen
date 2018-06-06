@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
@@ -30,7 +29,6 @@ func init() {
 		},
 	}
 
-	eval.RegisterModule(ModuleName, fileModule)
 	vm.RegisterModule(ModuleName, fileModule)
 }
 

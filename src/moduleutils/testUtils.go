@@ -3,21 +3,23 @@ package moduleutils
 import (
 	"testing"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var testInterpreter = eval.NewInterpreter()
-
 func TestEval(input string) object.Object {
-	l := lexer.NewString(input)
-	p := parser.New(l, nil)
-	program := p.ParseProgram()
+	program := parser.New(lexer.NewString(input), nil).ParseProgram()
+	code := compiler.Compile(program, "__main")
 	env := object.NewEnvironment()
+	vmSettings := vm.NewSettings()
+	// Force the virtual machine to not panic on uncaught exceptions
+	vmSettings.ReturnExceptions = true
+	machine := vm.NewVM(vmSettings)
 
-	return testInterpreter.Eval(program, env)
+	return machine.Execute(code, env)
 }
 
 // Verification functions

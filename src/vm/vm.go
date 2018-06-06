@@ -13,7 +13,8 @@ import (
 )
 
 type Settings struct {
-	Debug bool
+	Debug            bool
+	ReturnExceptions bool
 
 	Stdin  io.Reader
 	Stdout io.Writer
@@ -479,7 +480,10 @@ mainLoop:
 			vm.currentFrame.pushBlock(tcb)
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
 		case opcode.Throw:
-			vm.throw()
+			exc := vm.throw()
+			if exc != nil {
+				return exc
+			}
 			break
 		case opcode.BuildClass:
 			methodNum := vm.getUint16()
@@ -598,7 +602,7 @@ func (vm *VirtualMachine) PopStack() object.Object {
 // it will then progressivly unwind the block stack and call stack until
 // a try block is found. If none is found, it will panic with an uncaught
 // exception and the VM will print a stack trace.
-func (vm *VirtualMachine) throw() {
+func (vm *VirtualMachine) throw() object.Object {
 	exception := vm.currentFrame.popStack()
 	if exception.Type() != object.ExceptionObj {
 		exception = object.NewException(exception.Inspect())
@@ -624,6 +628,12 @@ func (vm *VirtualMachine) throw() {
 		}
 		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
 		if vm.currentFrame == nil {                 // Call stack exhausted
+			exc := object.NewException("Uncaught Exception: %s", exception.Inspect())
+
+			if vm.settings.ReturnExceptions {
+				return exc
+			}
+
 			vm.currentFrame = cframe // Reset frame for stack trace
 			panic(object.NewException("Uncaught Exception: %s", exception.Inspect()))
 		}
@@ -633,6 +643,7 @@ func (vm *VirtualMachine) throw() {
 	// END_BLOCK removes two layers of environments
 	vm.currentFrame.Env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.Env))
 	vm.currentFrame.pushStack(exception)
+	return nil
 }
 
 func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {

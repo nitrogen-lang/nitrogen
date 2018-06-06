@@ -12,7 +12,8 @@ let m1 = try {
     errorVal(e)
 }
 
-if m1 != "Nope" {
+always expected = "Nope"
+if m1 != expected {
     println('m1 is not the correct value')
-    println('Expected "Nope", got "', m1, '"')
+    println('Expected "', expected, '", got "', m1, '"')
 }
