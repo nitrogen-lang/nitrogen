@@ -263,6 +263,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.WriteByte(opcode.Define.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 		}
+		compileLoadNull(ccb)
 	case *ast.AssignStatement:
 		compile(ccb, node.Value)
 
@@ -464,7 +465,10 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 	for i, s := range block.Statements {
 		compile(ccb, s)
 		if i < l {
-			if _, ok := s.(*ast.ExpressionStatement); ok {
+			switch s.(type) {
+			case *ast.ExpressionStatement:
+				ccb.code.WriteByte(opcode.Pop.ToByte())
+			case *ast.DefStatement:
 				ccb.code.WriteByte(opcode.Pop.ToByte())
 			}
 		}
@@ -491,10 +495,22 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 	}
 
 	compile(ccb2, fn.Body)
-	if _, ok := fn.Body.Statements[len(fn.Body.Statements)-1].(*ast.ExpressionStatement); !ok {
+
+	if len(fn.Body.Statements) > 0 {
+		switch fn.Body.Statements[len(fn.Body.Statements)-1].(type) {
+		case *ast.ExpressionStatement:
+			break
+		case *ast.ReturnStatement:
+			break
+		default:
+			compileLoadNull(ccb2)
+		}
+
+		if opcode.Opcode(ccb2.code.Bytes()[ccb2.code.Len()-1]) != opcode.Return {
+			ccb2.code.WriteByte(opcode.Return.ToByte())
+		}
+	} else {
 		compileLoadNull(ccb2)
-	}
-	if opcode.Opcode(ccb2.code.Bytes()[ccb2.code.Len()-1]) != opcode.Return {
 		ccb2.code.WriteByte(opcode.Return.ToByte())
 	}
 
