@@ -16,7 +16,6 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -41,7 +40,6 @@ var (
 	modulePath        string
 	printVersion      bool
 	fullDebug         bool
-	nocompile         bool
 	cpuprofile        string
 	memprofile        string
 	outputFile        string
@@ -57,7 +55,6 @@ func init() {
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
-	flag.BoolVar(&nocompile, "nocompile", false, "Disable the Nitrogen VM")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
 	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
@@ -137,24 +134,18 @@ func main() {
 
 	var result object.Object
 	var start time.Time
-	if nocompile {
-		interpreter := eval.NewInterpreter()
 
-		start = time.Now()
-		result = interpreter.Eval(program, env)
-	} else {
-		if code == nil {
-			code = compiler.Compile(program, "__main")
-		}
-
-		if outputFile != "" {
-			marshal.WriteFile(outputFile, code)
-			return
-		}
-
-		start = time.Now()
-		result = runCompiledCode(code, env)
+	if code == nil {
+		code = compiler.Compile(program, "__main")
 	}
+
+	if outputFile != "" {
+		marshal.WriteFile(outputFile, code)
+		return
+	}
+
+	start = time.Now()
+	result = runCompiledCode(code, env)
 
 	if fullDebug {
 		fmt.Printf("Execution took %s\n", time.Now().Sub(start))
@@ -238,8 +229,9 @@ func getScriptArgs(filepath string) *object.Array {
 func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
+	env.CreateConst("_ENV", getEnvironment())
 
-	interpreter := eval.NewInterpreter()
+	var code *compiler.CodeBlock
 	for {
 		fmt.Fprint(out, interactivePrompt)
 		scanned := scanner.Scan()
@@ -247,8 +239,11 @@ func startRepl(in io.Reader, out io.Writer) {
 			return
 		}
 
-		line := scanner.Text()
-		if line == ".quit" {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		if line == ".quit" || line == ".exit" {
 			return
 		}
 
@@ -261,7 +256,10 @@ func startRepl(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		result := interpreter.Eval(program, env)
+		code = compiler.Compile(program, "__main")
+		code.Print(" ")
+
+		result := runCompiledCode(code, env)
 		if result != nil && result != object.NullConst {
 			io.WriteString(out, result.Inspect())
 			io.WriteString(out, "\n")

@@ -1,17 +1,11 @@
-.PHONY: go-test nitrogen-test nitrogen modules
+.PHONY: go-test nitrogen-test nitrogen nitrogen-no-modules modules
 
-all: go-test modules nitrogen nitrogen-test nitrogen-test-vm
+all: go-test modules nitrogen nitrogen-test
 
 go-test:
 	go test ./...
 
 nitrogen-test:
-	@echo "Run Nitrogen source test suite"
-	@for test in tests/*.ni; do \
-		./bin/nitrogen -nocompile "$$test"; \
-	done
-
-nitrogen-test-vm:
 	@echo "Run Nitrogen source test suite using VM"
 	@for test in tests/*.ni; do \
 		./bin/nitrogen "$$test"; \
@@ -19,7 +13,6 @@ nitrogen-test-vm:
 
 nitrogen:
 	go build -o bin/nitrogen ./cmd/nitrogen/...
-
 
 nitrogen-no-modules:
 	CGO_ENABLED=0 go build -o bin/nitrogen ./cmd/nitrogen/...

@@ -16,7 +16,6 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -47,10 +46,6 @@ func startSCGIServer() {
 	}
 
 	fmt.Printf("SCGI listening on %s\n", scgiSock)
-
-	if nocompile {
-		fmt.Println("Opcode compiler disabled")
-	}
 
 	workerTimeout := time.Duration(scgiWorkerTimeout) * time.Second
 	workerTimeoutTimer := time.NewTimer(workerTimeout)
@@ -166,35 +161,20 @@ func (w *worker) run(conn net.Conn) {
 	}
 
 	// Execute script
-	var result object.Object
-	if nocompile {
-		// Parse script
-		program, err := moduleutils.ASTCache.GetTree(scriptFilename)
-		if err != nil {
-			os.Stderr.WriteString(err.Error())
-			os.Stderr.Write([]byte{'\n'})
-			return
-		}
-
-		interpreter := eval.NewInterpreter()
-		interpreter.Stdout = conn
-
-		result = interpreter.Eval(program, env)
-	} else {
-		code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename)
-		if err != nil {
-			os.Stderr.WriteString(err.Error())
-			os.Stderr.Write([]byte{'\n'})
-			return
-		}
-
-		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
-
-		vmsettings := vm.NewSettings()
-		vmsettings.Stdout = conn
-
-		result = vm.NewVM(vmsettings).Execute(code, env)
+	code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename)
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		os.Stderr.Write([]byte{'\n'})
+		return
 	}
+
+	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+
+	vmsettings := vm.NewSettings()
+	vmsettings.Stdout = conn
+
+	result := vm.NewVM(vmsettings).Execute(code, env)
+
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stderr.WriteString(e.Message)
