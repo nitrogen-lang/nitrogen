@@ -6,21 +6,21 @@ import (
 	"path/filepath"
 	"plugin"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {
-	eval.RegisterBuiltin("module", importModule)
-	eval.RegisterBuiltin("modulesSupported", moduleSupport)
+	vm.RegisterBuiltin("module", importModuleVM)
+	vm.RegisterBuiltin("modulesSupported", moduleSupport)
 }
 
 func moduleSupport(i object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	return object.NativeBoolToBooleanObj(true)
 }
 
-func importModule(i object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+func importModuleVM(i object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := moduleutils.CheckMinArgs("module", 1, args...); ac != nil {
 		return ac
 	}
@@ -40,7 +40,7 @@ func importModule(i object.Interpreter, env *object.Environment, args ...object.
 	}
 
 	// Return already registered, named module
-	if module := eval.GetModule(filepathArg.Value); module != nil {
+	if module := vm.GetModule(filepathArg.Value); module != nil {
 		return module
 	}
 
@@ -67,7 +67,7 @@ func importModule(i object.Interpreter, env *object.Environment, args ...object.
 		return object.NewException("Invalid module %s", filepathArg.Value)
 	}
 
-	if module := eval.GetModule(*(moduleNameSym.(*string))); module != nil {
+	if module := vm.GetModule(*(moduleNameSym.(*string))); module != nil {
 		return module
 	}
 	return object.NullConst

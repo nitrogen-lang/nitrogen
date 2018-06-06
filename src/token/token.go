@@ -40,6 +40,7 @@ const (
 	Slash
 	Modulo
 	Arrow
+	Dot
 
 	PlusAssign
 	MinusAssign

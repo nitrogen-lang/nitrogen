@@ -8,17 +8,17 @@
 
 // Calculate n!
 func fac(in) {
-     // Don't mess with negative numbers, too complex
-     if (in < 0) {
+    // Don't mess with negative numbers, too complex
+    if (in < 0) {
         println("in must be non-negative");
         return;
-     }
+    }
 
-     // 0! is defined as 1
-     if (in == 0) { return 1; }
+    // 0! is defined as 1
+    if (in == 0) { return 1; }
 
-     // n! = n * (n-1)!
-     return in * fac(in - 1);
+    // n! = n * (n-1)!
+    return in * fac(in - 1);
 }
 
 func main() {

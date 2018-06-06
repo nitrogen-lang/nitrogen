@@ -139,6 +139,7 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
+		fun.FQName = stmt.Name.String()
 	}
 
 	if p.peekTokenIs(token.Semicolon) {

@@ -5,19 +5,20 @@ import (
 	"path/filepath"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
-	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 var included map[string]*ast.Program
 
 func init() {
-	eval.RegisterBuiltin("include", includeScript)
-	eval.RegisterBuiltin("require", requireScript)
-	eval.RegisterBuiltin("evalScript", evalScript)
+	vm.RegisterBuiltin("include", includeScript)
+	vm.RegisterBuiltin("require", requireScript)
+	vm.RegisterBuiltin("evalScript", evalScript)
 
 	included = make(map[string]*ast.Program)
 }
@@ -101,7 +102,16 @@ func commonInclude(require bool, save bool, i object.Interpreter, env *object.En
 			included[includedFile] = program
 		}
 	}
-	return i.Eval(program, object.NewEnclosedEnv(env))
+
+	switch i := i.(type) {
+	case *vm.VirtualMachine:
+		code := compiler.Compile(program, "<included>")
+		env = object.NewEnclosedEnv(env)
+		env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+		return i.RunFrame(i.MakeFrame(code, env), true)
+	}
+
+	return object.NewPanic("Invalid interpreter")
 }
 
 func fileExists(file string) bool {

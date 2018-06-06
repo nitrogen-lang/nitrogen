@@ -5,14 +5,22 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"path/filepath"
+	"runtime"
+	"runtime/pprof"
 	"strings"
+	"time"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/ast"
+	"github.com/nitrogen-lang/nitrogen/src/compiler"
+	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
@@ -32,6 +40,9 @@ var (
 	modulePath        string
 	printVersion      bool
 	fullDebug         bool
+	cpuprofile        string
+	memprofile        string
+	outputFile        string
 )
 
 func init() {
@@ -44,6 +55,9 @@ func init() {
 	flag.StringVar(&modulePath, "modules", "", "Module directory")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
+	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
+	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
+	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
 }
 
 func main() {
@@ -83,24 +97,60 @@ func main() {
 		os.Exit(1)
 	}
 
-	program, err := moduleutils.ASTCache.GetTree(flag.Arg(0))
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	if printAst {
-		fmt.Println(program.String())
-		os.Exit(1)
+	if cpuprofile != "" {
+		f, err := os.Create(cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getEnvironment())
-
 	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
 
-	interpreter := eval.NewInterpreter()
-	result := interpreter.Eval(program, env)
+	var code *compiler.CodeBlock
+	var program *ast.Program
+	var err error
+	if filepath.Ext(flag.Arg(0)) == ".nib" {
+		code, err = marshal.ReadFile(flag.Arg(0))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	} else {
+		program, err = moduleutils.ASTCache.GetTree(flag.Arg(0))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		if printAst {
+			fmt.Println(program.String())
+			return
+		}
+	}
+
+	var result object.Object
+	var start time.Time
+
+	if code == nil {
+		code = compiler.Compile(program, "__main")
+	}
+
+	if outputFile != "" {
+		marshal.WriteFile(outputFile, code)
+		return
+	}
+
+	start = time.Now()
+	result = runCompiledCode(code, env)
+
+	if fullDebug {
+		fmt.Printf("Execution took %s\n", time.Now().Sub(start))
+	}
+
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stdout.WriteString("Uncaught Exception: ")
@@ -111,6 +161,32 @@ func main() {
 		os.Stdout.WriteString(result.Inspect())
 		os.Stdout.Write([]byte{'\n'})
 	}
+
+	if memprofile != "" {
+		f, err := os.Create(memprofile)
+		if err != nil {
+			log.Fatal("could not create memory profile: ", err)
+		}
+		runtime.GC() // get up-to-date statistics
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+		f.Close()
+	}
+}
+
+func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.Object {
+	if fullDebug {
+		code.Print("")
+	}
+
+	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+
+	vmsettings := vm.NewSettings()
+	vmsettings.Debug = fullDebug
+	machine := vm.NewVM(vmsettings)
+
+	return machine.Execute(code, env)
 }
 
 func getEnvironment() *object.Hash {
@@ -153,8 +229,9 @@ func getScriptArgs(filepath string) *object.Array {
 func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
+	env.CreateConst("_ENV", getEnvironment())
 
-	interpreter := eval.NewInterpreter()
+	var code *compiler.CodeBlock
 	for {
 		fmt.Fprint(out, interactivePrompt)
 		scanned := scanner.Scan()
@@ -162,8 +239,11 @@ func startRepl(in io.Reader, out io.Writer) {
 			return
 		}
 
-		line := scanner.Text()
-		if line == ".quit" {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		if line == ".quit" || line == ".exit" {
 			return
 		}
 
@@ -176,11 +256,13 @@ func startRepl(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		result := interpreter.Eval(program, env)
+		code = compiler.Compile(program, "__main")
+
+		result := runCompiledCode(code, env)
 		if result != nil && result != object.NullConst {
 			io.WriteString(out, result.Inspect())
-			io.WriteString(out, "\n")
 		}
+		io.WriteString(out, "\n")
 	}
 }
 

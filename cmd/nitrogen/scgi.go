@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"bufio"
 	"bytes"
 	"errors"
@@ -14,7 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
+	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
+
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -159,19 +160,21 @@ func (w *worker) run(conn net.Conn) {
 		scriptFilename = filepath.Join(docRoot, scriptName)
 	}
 
-	// Parse script
-	program, err := moduleutils.ASTCache.GetTree(scriptFilename)
+	// Execute script
+	code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename)
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
 		os.Stderr.Write([]byte{'\n'})
 		return
 	}
 
-	// Execute script
-	interpreter := eval.NewInterpreter()
-	interpreter.Stdout = conn
+	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
 
-	result := interpreter.Eval(program, env)
+	vmsettings := vm.NewSettings()
+	vmsettings.Stdout = conn
+
+	result := vm.NewVM(vmsettings).Execute(code, env)
+
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
 			os.Stderr.WriteString(e.Message)

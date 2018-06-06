@@ -9,37 +9,39 @@ func main() {
     // Test normal loop
     let outer = 0
 
-    for (i = 0; i < 10; i + 1) {
+    for (i = 0; i < 10; i += 1) {
         outer = outer + 1
     }
 
     if (outer != 10) {
-       println("outer should be 10, got ", outer)
-       return
+        println("outer should be 10, got ", outer)
+        return
     }
 
     // Test skipping every other iteration
     outer = 0
 
-    for (i = 0; i < 10; i + 1) {
+    for (i = 0; i < 10; i += 1) {
         if (i % 2 > 0) { continue }
         outer = outer + 1
     }
 
     if (outer != 5) {
-       println("outer should be 5, got ", outer)
+        println("outer should be 5, got ", outer)
+        return
     }
 
     // Test breaking
     outer = 0
 
-    for (i = 0; i < 12; i + 1) {
+    for (i = 0; i < 12; i += 1) {
         if (i > 9) { break }
         outer = outer + 1
     }
 
     if (outer != 10) {
-       println("outer should be 10, got ", outer)
+        println("outer should be 10, got ", outer)
+        return
     }
 }
 

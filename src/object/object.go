@@ -38,6 +38,7 @@ const (
 	ClassObj
 	InstanceObj
 	BuiltinMethodObj
+	BoundMethodObj
 )
 
 var objectTypeNames = map[ObjectType]string{
@@ -58,6 +59,7 @@ var objectTypeNames = map[ObjectType]string{
 	ClassObj:         "CLASS",
 	InstanceObj:      "INSTANCE",
 	BuiltinMethodObj: "BUILTIN METHOD",
+	BoundMethodObj:   "BOUND METHOD",
 }
 
 // These are all constants in the language that can be represented with a single instance
@@ -93,6 +95,10 @@ func (i *Integer) Inspect() string  { return strconv.FormatInt(i.Value, 10) }
 func (i *Integer) Type() ObjectType { return IntergerObj }
 func (i *Integer) Dup() Object      { return &Integer{Value: i.Value} }
 
+func MakeIntObj(v int64) *Integer {
+	return &Integer{Value: v}
+}
+
 type Float struct {
 	Value float64
 }
@@ -100,6 +106,10 @@ type Float struct {
 func (f *Float) Inspect() string  { return strconv.FormatFloat(f.Value, 'G', -1, 64) }
 func (f *Float) Type() ObjectType { return FloatObj }
 func (f *Float) Dup() Object      { return &Float{Value: f.Value} }
+
+func MakeFloatObj(v float64) *Float {
+	return &Float{Value: v}
+}
 
 type String struct {
 	Value string
@@ -162,6 +172,7 @@ type Exception struct {
 func (e *Exception) Inspect() string  { return e.Message }
 func (e *Exception) Type() ObjectType { return ExceptionObj }
 func (e *Exception) Dup() Object      { return &Exception{Message: e.Message} }
+func (e *Exception) String() string   { return e.Message }
 
 type Error struct {
 	Message string
@@ -170,6 +181,7 @@ type Error struct {
 func (e *Error) Inspect() string  { return "Error: " + e.Message }
 func (e *Error) Type() ObjectType { return ErrorObj }
 func (e *Error) Dup() Object      { return &Error{Message: e.Message} }
+func (e *Error) String() string   { return "Error: " + e.Message }
 
 type Function struct {
 	Name       string
@@ -200,7 +212,7 @@ func (f *Function) Inspect() string {
 }
 func (f *Function) Type() ObjectType { return FunctionObj }
 func (f *Function) Dup() Object      { return f }
-func (f *Function) classMethod()     {}
+func (f *Function) ClassMethod()     {}
 
 type Builtin struct {
 	Fn BuiltinFunction
@@ -218,7 +230,7 @@ type BuiltinMethod struct {
 func (b *BuiltinMethod) Inspect() string  { return "builtin method" }
 func (b *BuiltinMethod) Type() ObjectType { return BuiltinMethodObj }
 func (b *BuiltinMethod) Dup() Object      { return b }
-func (b *BuiltinMethod) classMethod()     {}
+func (b *BuiltinMethod) ClassMethod()     {}
 
 func MakeBuiltinMethod(fn BuiltinMethodFunction) *BuiltinMethod {
 	return &BuiltinMethod{Fn: fn}

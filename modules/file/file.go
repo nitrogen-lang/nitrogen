@@ -5,13 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/nitrogen-lang/nitrogen/src/eval"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {
-	eval.RegisterModule(ModuleName, &object.Module{
+	fileModule := &object.Module{
 		Name: ModuleName,
 		Methods: map[string]object.BuiltinFunction{
 			"open":    openFile,
@@ -27,7 +27,9 @@ func init() {
 		Vars: map[string]object.Object{
 			"name": object.MakeStringObj(ModuleName),
 		},
-	})
+	}
+
+	vm.RegisterModule(ModuleName, fileModule)
 }
 
 func main() {}

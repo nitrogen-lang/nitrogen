@@ -26,13 +26,21 @@ type Environment struct {
 }
 
 func NewEnvironment() *Environment {
+	return NewSizedEnvironment(0)
+}
+
+func NewSizedEnvironment(size int) *Environment {
 	return &Environment{
-		store: make(map[string]*eco),
+		store: make(map[string]*eco, size),
 	}
 }
 
 func NewEnclosedEnv(outer *Environment) *Environment {
-	env := NewEnvironment()
+	return NewSizedEnclosedEnv(outer, 0)
+}
+
+func NewSizedEnclosedEnv(outer *Environment, size int) *Environment {
+	env := NewSizedEnvironment(size)
 	env.parent = outer
 	return env
 }
@@ -42,6 +50,9 @@ func (e *Environment) SetParent(env *Environment) {
 }
 
 func (e *Environment) Parent() *Environment {
+	if e == nil {
+		return nil
+	}
 	return e.parent
 }
 
@@ -100,20 +111,13 @@ func (e *Environment) IsConstLocal(name string) bool {
 	return false
 }
 
-func (e *Environment) isLocalConst(name string) bool {
-	obj, ok := e.store[name]
-	if ok {
-		return obj.readonly
-	}
-	return false
-}
-
 func (e *Environment) Create(name string, val Object) (Object, error) {
 	if _, exists := e.store[name]; exists {
 		return nil, errAlreadyDefined
 	}
 
-	return e.setLocal(name, val), nil
+	e.store[name] = &eco{v: val}
+	return val, nil
 }
 
 func (e *Environment) CreateConst(name string, val Object) (Object, error) {
@@ -133,7 +137,8 @@ func (e *Environment) Set(name string, val Object) (Object, error) {
 		if v.readonly {
 			return nil, constError
 		}
-		return e.setLocal(name, val), nil
+		v.v = val
+		return val, nil
 	}
 
 	if e.parent != nil {
@@ -142,16 +147,28 @@ func (e *Environment) Set(name string, val Object) (Object, error) {
 	return nil, errNotDefined
 }
 
+func (e *Environment) SetLocal(name string, val Object) (Object, error) {
+	if v, exists := e.store[name]; exists {
+		if v.readonly {
+			return nil, constError
+		}
+		v.v = val
+		return val, nil
+	}
+	return nil, errNotDefined
+}
+
 func (e *Environment) SetForce(name string, val Object, readonly bool) {
+	if v, exists := e.store[name]; exists {
+		v.v = val
+		v.readonly = readonly
+		return
+	}
+
 	e.store[name] = &eco{
 		v:        val,
 		readonly: readonly,
 	}
-}
-
-func (e *Environment) setLocal(name string, val Object) Object {
-	e.store[name] = &eco{v: val}
-	return val
 }
 
 func (e *Environment) UnsetLocal(name string) {

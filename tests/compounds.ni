@@ -27,7 +27,7 @@ func testCompoundComparisons() {
     }
 }
 
-func testCompoundAssignements() {
+func testCompoundAssignments() {
     let a = 5
 
     a += 2
@@ -52,3 +52,4 @@ func testCompoundAssignements() {
 }
 
 testCompoundComparisons()
+testCompoundAssignments()

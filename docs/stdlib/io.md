@@ -1,14 +1,16 @@
 # IO
 
-## print(args...)
+## print(args...): null
 
-Print will print all args to standard output with NO space between them.
+Print will print all args to standard output with NO space between them. It an arg is
+an object with a `toString` method, that method will be called and the return value
+will be printed.
 
-## println(args...)
+## println(args...): null
 
 Same as print() but will also output a newline after printing args.
 
-## printenv()
+## printenv(): null
 
 For debugging. Prints the current symbol table as seen by the environment where
 printenv() was called.

@@ -3,7 +3,9 @@
 Here you will find documentation for the language syntax, as well as the standard library:
 
 - [Language](language.md)
+- [Bytecode VM](vm.md)
 - [Standard Library](stdlib)
+- [Including Script Files](stdlib/including-scripts.md)
 - [Optional Modules](modules)
 - [Module Documentation](modules.md)
 - [SCGI Server](scgi-server.md)
@@ -11,7 +13,8 @@ Here you will find documentation for the language syntax, as well as the standar
 ## Function Notation
 
 Throughout the documentation, you will find several function definitions. The following syntax is used to denote the number and type
-of any function arguments as well as return types:
+of any function arguments as well as return types. All functions have an implicit return. If a function doesn't list a return type,
+it's assumed to be nil.
 
 - Arguments are denoted by their name following by a colon and their type:
   - `func someFunc(arg1: string)` - This functions takes a single arg which must be a string

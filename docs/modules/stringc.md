@@ -1,5 +1,7 @@
 # Stringc
 
+**Implementation Note**: This module is not available when using the bytecode VM.
+
 stringc exposes a string object that can be used to manipulate strings.
 
 ## class string(s: string)

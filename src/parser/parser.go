@@ -44,6 +44,7 @@ var precedences = map[token.TokenType]int{
 	token.LParen:        priCall,
 	token.LSquare:       priIndex,
 	token.Arrow:         priIndex,
+	token.Dot:           priIndex,
 	token.Assign:        priAssign,
 	token.PlusAssign:    priAssign,
 	token.MinusAssign:   priAssign,
@@ -125,6 +126,7 @@ func New(l *lexer.Lexer, settings *Settings) *Parser {
 	p.registerInfix(token.LParen, p.parseCallExpression)
 	p.registerInfix(token.LSquare, p.parseIndexExpression)
 	p.registerInfix(token.Arrow, p.parseIndexExpression)
+	p.registerInfix(token.Dot, p.parseAttributeExpression)
 	p.registerInfix(token.Assign, p.parseAssignmentStatement)
 	p.registerInfix(token.PlusAssign, p.parseCompoundAssign)
 	p.registerInfix(token.MinusAssign, p.parseCompoundAssign)

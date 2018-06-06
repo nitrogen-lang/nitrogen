@@ -14,7 +14,7 @@ func fib(x) {
 }
 
 func main() {
-    for i = 0; i < 31; i + 1 {
+    for i = 0; i < 31; i += 1 {
         println("Fib of ", i, " is ", fib(i))
     }
 }

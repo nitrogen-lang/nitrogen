@@ -91,3 +91,30 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 	return exp
 }
+
+func (p *Parser) parseAttributeExpression(left ast.Expression) ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseAttributeExpression")
+	}
+	exp := &ast.AttributeExpression{Token: p.curToken, Left: left}
+
+	p.nextToken()
+	i := p.parseExpression(priAssign)
+
+	ident, ok := i.(*ast.Identifier)
+	if !ok {
+		p.addErrorWithPos("Attribute operator requires an identifier")
+		return nil
+	}
+	// Convert identifier into a string for later lookup
+	exp.Index = &ast.StringLiteral{
+		Token: token.Token{
+			Type:    token.String,
+			Literal: ident.Value,
+			Pos:     p.curToken.Pos,
+		},
+		Value: ident.Value,
+	}
+
+	return exp
+}

@@ -55,6 +55,7 @@ func (b *Boolean) String() string       { return b.Token.Literal }
 type FunctionLiteral struct {
 	Token      token.Token // The 'func' token
 	Name       string
+	FQName     string
 	Parameters []*Identifier
 	Body       *BlockStatement
 }
