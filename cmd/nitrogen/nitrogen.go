@@ -16,6 +16,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
+	"github.com/nitrogen-lang/nitrogen/src/config"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -30,34 +31,51 @@ const (
 	version           = "0.1.0"
 )
 
+type strSliceFlag []string
+
+func (s *strSliceFlag) String() string {
+	return strings.Join(*s, ":")
+}
+
+func (s *strSliceFlag) Set(st string) error {
+	*s = append(*s, st)
+	return nil
+}
+
 var (
-	interactive       bool
-	printAst          bool
-	startSCGI         bool
-	scgiSock          string
-	scgiWorkers       int
-	scgiWorkerTimeout int
-	modulePath        string
-	printVersion      bool
-	fullDebug         bool
-	cpuprofile        string
-	memprofile        string
-	outputFile        string
+	interactive  bool
+	printAst     bool
+	startSCGI    bool
+	printVersion bool
+	fullDebug    bool
+	cpuprofile   string
+	memprofile   string
+	outputFile   string
+
+	modulePaths     strSliceFlag
+	autoloadModules strSliceFlag
 )
 
 func init() {
+	pwd, _ := os.Getwd()
+	modulePaths = append(modulePaths, pwd)
+
+	envModPath := os.Getenv("NITROGEN_MODULES")
+	if envModPath != "" {
+		modulePaths = append(modulePaths, envModPath)
+	}
+
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
-	flag.StringVar(&scgiSock, "scgi-sock", "tcp:0.0.0.0:9000", "Socket to listen on for SCGI")
-	flag.IntVar(&scgiWorkers, "scgi-workers", 5, "Number of workers to service SCGI requests")
-	flag.IntVar(&scgiWorkerTimeout, "scgi-worker-timeout", 10, "Number of seconds to wait for an available worker before giving up")
-	flag.StringVar(&modulePath, "modules", "", "Module directory")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
 	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
+
+	flag.Var(&modulePaths, "M", "Module search paths")
+	flag.Var(&autoloadModules, "al", "Autoload modules")
 }
 
 func main() {
@@ -68,12 +86,10 @@ func main() {
 		return
 	}
 
-	modulesPath := os.Getenv("NITROGEN_MODULES")
-	if modulePath != "" {
-		modulesPath = modulePath
-	}
-	if modulesPath != "" {
-		if err := loadModules(modulesPath); err != nil {
+	config.ModulePaths = modulePaths
+
+	if len(autoloadModules) > 0 {
+		if err := loadModules(modulePaths, autoloadModules); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -86,14 +102,14 @@ func main() {
 
 	moduleutils.ParserSettings.Debug = fullDebug
 	if interactive {
-		fmt.Print("Nitrogen Programming Language\n")
-		fmt.Print("Type in commands at the prompt\n")
+		fmt.Println("Nitrogen Programming Language")
+		fmt.Println("Type in commands at the prompt")
 		startRepl(os.Stdin, os.Stdout)
 		return
 	}
 
 	if flag.NArg() == 0 {
-		fmt.Print("No script given")
+		fmt.Println("No script given")
 		os.Exit(1)
 	}
 
@@ -109,6 +125,7 @@ func main() {
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getEnvironment())
 	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
+	env.CreateConst("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
 
 	var code *compiler.CodeBlock
 	var program *ast.Program

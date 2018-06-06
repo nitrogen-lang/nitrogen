@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"plugin"
 
+	"github.com/nitrogen-lang/nitrogen/src/config"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
@@ -30,6 +31,10 @@ func importModuleVM(i object.Interpreter, env *object.Environment, args ...objec
 		return object.NewException("module expected a string, got %s", args[0].Type().String())
 	}
 
+	if filepathArg.Value == "" {
+		return object.NewException("module name expected")
+	}
+
 	required := false
 	if len(args) > 1 {
 		requiredArg, ok := args[1].(*object.Boolean)
@@ -44,15 +49,34 @@ func importModuleVM(i object.Interpreter, env *object.Environment, args ...objec
 		return module
 	}
 
-	includedPath := filepath.Clean(filepath.Join(filepath.Dir(i.GetCurrentScriptPath()), filepathArg.Value))
-	if !fileExists(includedPath) {
+	modulepath := ""
+	if filepathArg.Value[0] == '/' { // Absolute path
+		if fileExists(filepathArg.Value) {
+			modulepath = filepathArg.Value
+		}
+	} else if filepathArg.Value[0] == '.' { // Relative path to script file
+		fullpath := filepath.Clean(filepath.Join(filepath.Dir(i.GetCurrentScriptPath()), filepathArg.Value))
+		if fileExists(fullpath) {
+			modulepath = fullpath
+		}
+	} else { // Search for module
+		// TODO: Use the _SEARCH_PATHS variable when loading instead
+		for _, path := range config.ModulePaths {
+			fullpath := filepath.Join(path, filepathArg.Value)
+			if fileExists(fullpath) {
+				modulepath = fullpath
+			}
+		}
+	}
+
+	if modulepath == "" {
 		if required {
 			return object.NewException("Module %s not found", filepathArg.Value)
 		}
 		return object.NewError("Module %s not found", filepathArg.Value)
 	}
 
-	p, err := plugin.Open(includedPath)
+	p, err := plugin.Open(modulepath)
 	if err != nil {
 		if required {
 			return object.NewException("%s", err)

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -18,6 +19,18 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
+
+var (
+	scgiSock          string
+	scgiWorkers       int
+	scgiWorkerTimeout int
+)
+
+func init() {
+	flag.StringVar(&scgiSock, "scgi-sock", "tcp:0.0.0.0:9000", "Socket to listen on for SCGI")
+	flag.IntVar(&scgiWorkers, "scgi-workers", 5, "Number of workers to service SCGI requests")
+	flag.IntVar(&scgiWorkerTimeout, "scgi-worker-timeout", 10, "Number of seconds to wait for an available worker before giving up")
+}
 
 func startSCGIServer() {
 	addrSplit := strings.SplitN(scgiSock, ":", 2)

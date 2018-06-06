@@ -2,8 +2,11 @@
 
 package main
 
-import "errors"
+import "fmt"
 
-func loadModules(modulePath string) error {
-	return errors.New("This version of Nitrogen was built without shared module support.")
+func loadModules(searchPaths []string, modules []string) error {
+	if fullDebug {
+		fmt.Println("This version of Nitrogen was built without shared module support.")
+	}
+	return nil
 }
