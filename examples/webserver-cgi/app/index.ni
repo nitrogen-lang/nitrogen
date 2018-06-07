@@ -4,10 +4,10 @@ print("Content-Type: text/html\n\n") // HTTP header section ends with two newlin
 println('<!DOCTYPE html>
 <html>
 <head>
-    <title>Nitrogen Webpage Example</title>
+    <title>Nitrogen Webpage CGI Example</title>
 </head>
 <body>')
-println('<h2>Hello from Nitrogen!</h2>')
+println('<h2>Hello from Nitrogen! CGI</h2>')
 
 println('<h3>Script Environment:</h3>')
 println('<ul>')

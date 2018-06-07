@@ -5,10 +5,10 @@ print("\n") // HTTP header section ends with an empty line
 println('<!DOCTYPE html>
 <html>
 <head>
-    <title>Nitrogen Webpage Example</title>
+    <title>Nitrogen Webpage SCGI Example</title>
 </head>
 <body>')
-println('<h2>Hello from Nitrogen!</h2>')
+println('<h2>Hello from Nitrogen! SCGI</h2>')
 
 println('<h3>Script Environment:</h3>')
 println('<ul>')
