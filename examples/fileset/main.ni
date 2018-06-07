@@ -1,4 +1,4 @@
-let otherFile = include('another.ni')
+let otherFile = import('./another.ni')
 
 func main() {
     otherFile()
