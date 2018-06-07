@@ -5,7 +5,7 @@ Here you will find documentation for the language syntax, as well as the standar
 - [Language](language.md)
 - [Elemental VM](vm.md)
 - [Standard Library](stdlib)
-- [Including Script Files](stdlib/including-scripts.md)
+- [Including Script Files](stdlib/imports.md)
 - [Optional Modules](modules)
 - [Module Documentation](modules.md)
 - [SCGI Server](scgi-server.md)

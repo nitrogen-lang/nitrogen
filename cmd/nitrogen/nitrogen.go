@@ -247,6 +247,8 @@ func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getEnvironment())
+	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
+	env.CreateConst("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
 
 	var code *compiler.CodeBlock
 	for {
