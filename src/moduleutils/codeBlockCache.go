@@ -2,10 +2,12 @@ package moduleutils
 
 import (
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
+	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
 )
 
 // CodeBlockCache is a global cache of Code Blocks keyed to a script filename
@@ -44,15 +46,23 @@ func (c *codeBlockCache) GetBlock(file string) (*compiler.CodeBlock, error) {
 	}
 
 	// miss
-	program, err := ASTCache.GetTree(file)
-	if err != nil {
-		return nil, err
-	}
-
 	if cachedItem == nil {
 		cachedItem = &cbCacheItem{}
 	}
-	cachedItem.block = compiler.Compile(program, "__main")
+
+	if filepath.Ext(file) == ".nib" {
+		code, err := marshal.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+		cachedItem.block = code
+	} else {
+		program, err := ASTCache.GetTree(file)
+		if err != nil {
+			return nil, err
+		}
+		cachedItem.block = compiler.Compile(program, "__main")
+	}
 	cachedItem.modTime = fileinfo.ModTime()
 	c.cache[file] = cachedItem
 

@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
-	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
+	"github.com/nitrogen-lang/nitrogen/src/lexer"
+	"github.com/nitrogen-lang/nitrogen/src/parser"
 
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
@@ -130,10 +131,13 @@ func TestStringMarshal(t *testing.T) {
 }
 
 func TestCodeBlockMarshal(t *testing.T) {
-	program, err := moduleutils.ASTCache.GetTree("./testdata/simple.ni")
+	l, err := lexer.NewFile("./testdata/simple.ni")
 	if err != nil {
 		t.Fatal(err)
+		return
 	}
+
+	program := parser.New(l, &parser.Settings{}).ParseProgram()
 	code := compiler.Compile(program, "__main")
 	bytes, _ := Marshal(code)
 

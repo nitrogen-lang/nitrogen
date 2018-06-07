@@ -11,7 +11,10 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 )
 
-var ByteFileHeader = []byte{31, 'N', 'I', 'B'}
+var (
+	ByteFileHeader = []byte{31, 'N', 'I', 'B'}
+	VersionNumber  = []byte{0, 0, 0, 1}
+)
 
 func WriteFile(name string, cb *compiler.CodeBlock) error {
 	marshaled, err := Marshal(cb)
@@ -26,6 +29,7 @@ func WriteFile(name string, cb *compiler.CodeBlock) error {
 	defer file.Close()
 
 	file.Write(ByteFileHeader)
+	file.Write(VersionNumber)
 	t := make([]byte, 8)
 	binary.BigEndian.PutUint64(t, uint64(time.Now().Unix()))
 	file.Write(t)
@@ -44,6 +48,12 @@ func ReadFile(name string) (*compiler.CodeBlock, error) {
 	file.Read(fileHeader)
 	if !bytes.Equal(ByteFileHeader, fileHeader) {
 		return nil, errors.New("File is not Nitrogen bytecode")
+	}
+
+	fileVersion := make([]byte, 4)
+	file.Read(fileVersion)
+	if !bytes.Equal(VersionNumber, fileVersion) {
+		return nil, errors.New("File does not match current version")
 	}
 
 	fileTime := make([]byte, 8)

@@ -6,7 +6,7 @@ go-test:
 	go test ./...
 
 nitrogen-test:
-	@echo "Run Nitrogen source test suite using VM"
+	@echo "Run Nitrogen source test suite"
 	@for test in tests/*.ni; do \
 		./bin/nitrogen "$$test"; \
 	done

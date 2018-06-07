@@ -245,7 +245,12 @@ mainLoop:
 				fmt.Println(err)
 			}
 		case opcode.Return:
-			vm.returnValue = vm.currentFrame.popStack()
+			if vm.currentFrame.sp == 0 {
+				vm.returnValue = object.NullConst
+			} else {
+				vm.returnValue = vm.currentFrame.popStack()
+			}
+
 			vm.currentFrame = vm.currentFrame.lastFrame
 			vm.callStack.Pop()
 			if vm.currentFrame == nil || immediateReturn {
@@ -454,6 +459,9 @@ mainLoop:
 		case opcode.EndBlock:
 			vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent()
 			vm.currentFrame.popBlock()
+			if vm.currentFrame.sp == 0 {
+				vm.currentFrame.pushStack(object.NullConst)
+			}
 		case opcode.StartLoop:
 			loopEnd := vm.getUint16()
 			iter := vm.getUint16()
