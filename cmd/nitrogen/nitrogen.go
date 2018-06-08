@@ -16,7 +16,6 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
-	"github.com/nitrogen-lang/nitrogen/src/config"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -86,8 +85,6 @@ func main() {
 		return
 	}
 
-	config.ModulePaths = modulePaths
-
 	if len(autoloadModules) > 0 {
 		if err := loadModules(modulePaths, autoloadModules); err != nil {
 			fmt.Println(err)
@@ -122,10 +119,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	env := object.NewEnvironment()
-	env.CreateConst("_ENV", getEnvironment())
-	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
-	env.CreateConst("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
+	env := makeEnv()
 
 	var code *compiler.CodeBlock
 	var program *ast.Program
@@ -206,11 +200,19 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	return machine.Execute(code, env)
 }
 
-func getEnvironment() *object.Hash {
-	return makeEnvironment(getEnvironmentMap())
+func makeEnv() *object.Environment {
+	env := object.NewEnvironment()
+	env.CreateConst("_ENV", getExternalEnv())
+	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
+	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
+	return env
 }
 
-func getEnvironmentMap() map[string]string {
+func getExternalEnv() *object.Hash {
+	return stringMapToHash(getExtEnvMap())
+}
+
+func getExtEnvMap() map[string]string {
 	env := os.Environ()
 	m := make(map[string]string, len(env))
 	for _, v := range env {
@@ -220,7 +222,7 @@ func getEnvironmentMap() map[string]string {
 	return m
 }
 
-func makeEnvironment(env map[string]string) *object.Hash {
+func stringMapToHash(env map[string]string) *object.Hash {
 	m := &object.Hash{Pairs: make(map[object.HashKey]object.HashPair)}
 	for k, v := range env {
 		key := &object.String{Value: k}
@@ -245,10 +247,7 @@ func getScriptArgs(filepath string) *object.Array {
 
 func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
-	env.CreateConst("_ENV", getEnvironment())
-	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
-	env.CreateConst("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
+	env := makeEnv()
 
 	var code *compiler.CodeBlock
 	for {

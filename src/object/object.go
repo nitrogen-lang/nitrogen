@@ -278,6 +278,21 @@ func MakeStringArray(e []string) *Array {
 	return &Array{Elements: newElements}
 }
 
+func ArrayToStringSlice(a *Array) []string {
+	if a == nil {
+		return []string{}
+	}
+
+	strs := make([]string, 0, len(a.Elements))
+	for _, e := range a.Elements {
+		if !(e.Type() == StringObj) {
+			continue
+		}
+		strs = append(strs, (e.(*String)).Value)
+	}
+	return strs
+}
+
 type Hashable interface {
 	HashKey() HashKey
 }

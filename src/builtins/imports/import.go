@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
-	"github.com/nitrogen-lang/nitrogen/src/config"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
@@ -53,7 +52,15 @@ func includeScript(interpreter object.Interpreter, env *object.Environment, args
 		required = reqArg.Value
 	}
 
-	includedFile := findModule(filepathArg.Value, interpreter.GetCurrentScriptPath(), config.ModulePaths)
+	searchPaths, ok := env.Get("_SEARCH_PATHS")
+	if !ok {
+		return object.NewException("_SEARCH_PATHS variable not found, required for module lookup")
+	}
+	if !object.ObjectIs(searchPaths, object.ArrayObj) {
+		return object.NewException("_SEARCH_PATHS must be an array, required for module lookup")
+	}
+
+	includedFile := findModule(filepathArg.Value, interpreter.GetCurrentScriptPath(), object.ArrayToStringSlice(searchPaths.(*object.Array)))
 	if includedFile == "" {
 		if required {
 			return object.NewException("import failed, module not found %s", filepathArg.Value)

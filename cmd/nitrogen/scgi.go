@@ -156,14 +156,10 @@ func (w *worker) run(conn net.Conn) {
 	}
 
 	// Get interpreter environment and merge with headers. Header values take precedence
-	appEnv := getEnvironmentMap()
+	appEnv := getExtEnvMap()
 	for k, v := range headers {
 		appEnv[k] = v
 	}
-
-	// Inject environment variables into execution environment
-	env := object.NewEnvironment()
-	env.CreateConst("_ENV", makeEnvironment(appEnv))
 
 	// Get script file path
 	scriptFilename := headers["SCRIPT_FILENAME"]
@@ -181,7 +177,11 @@ func (w *worker) run(conn net.Conn) {
 		return
 	}
 
+	// Inject environment variables into execution environment
+	env := object.NewEnvironment()
+	env.CreateConst("_ENV", stringMapToHash(appEnv))
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
 
 	vmsettings := vm.NewSettings()
 	vmsettings.Stdout = conn
