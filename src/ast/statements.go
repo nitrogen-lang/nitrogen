@@ -185,3 +185,9 @@ type ThrowStatement struct {
 func (t *ThrowStatement) statementNode()       {}
 func (t *ThrowStatement) TokenLiteral() string { return "throw" }
 func (t *ThrowStatement) String() string       { return "throw" }
+
+type PassStatement struct{}
+
+func (b *PassStatement) statementNode()       {}
+func (b *PassStatement) TokenLiteral() string { return "pass" }
+func (b *PassStatement) String() string       { return "pass" }

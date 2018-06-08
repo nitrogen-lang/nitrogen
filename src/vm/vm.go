@@ -350,9 +350,7 @@ mainLoop:
 			}
 			p := vm.currentFrame.Env.Parent()
 			if p == nil {
-				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
-				vm.throw()
-				break
+				p = vm.currentFrame.Env
 			}
 			if _, exists := p.Get(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))

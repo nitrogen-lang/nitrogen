@@ -97,6 +97,7 @@ const (
 	Throw
 	Class
 	Make
+	Pass
 	keywordEnd
 )
 
@@ -175,6 +176,7 @@ var tokens = [...]string{
 	Throw:    "throw",
 	Class:    "class",
 	Make:     "make",
+	Pass:     "pass",
 }
 
 var keywords map[string]TokenType

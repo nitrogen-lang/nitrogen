@@ -45,6 +45,12 @@ func (p *Parser) parseStatement() ast.Statement {
 			p.nextToken()
 		}
 		return stat
+	case token.Pass:
+		stat := &ast.PassStatement{}
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+		return stat
 	}
 	return p.parseExpressionStatement()
 }

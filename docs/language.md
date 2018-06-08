@@ -4,6 +4,21 @@
 
 Nitrogen source files are read as valid UTF-8 characters.
 
+## Keywords
+
+|        |          |
+|--------|----------|
+| always | and      |
+| break  | catch    |
+| class  | continue |
+| else   | false    |
+| for    | func     |
+| if     | let      |
+| make   | nil      |
+| or     | pass     |
+| return | throw    |
+| true   | try      |
+
 ## Semicolons
 
 Nitrogen's formal grammar uses semicolons to denote the end of a statement or expression. However, Nitrogen code doesn't need to have

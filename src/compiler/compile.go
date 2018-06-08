@@ -335,12 +335,14 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compile(ccb, node.Left)
 		ccb.code.WriteByte(opcode.LoadAttribute.ToByte())
 		ccb.code.Write(uint16ToBytes(ccb.names.indexOf(node.Index.Value)))
+	case *ast.PassStatement:
+		// Ignore
 
 	// Not implemented yet
 	case *ast.Program:
 		panic("ast.Program Not implemented yet")
 	default:
-		panic(fmt.Sprintf("WTF? Not implemented yet: %T", node))
+		panic(fmt.Sprintf("Node type not implemented: %T", node))
 	}
 }
 
