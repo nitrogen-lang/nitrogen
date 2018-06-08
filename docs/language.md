@@ -161,12 +161,11 @@ myMap = {
 }
 ```
 
-Map values can be retrieved in two ways. The first is standard array index form `myMap["key2"]`. The other using arrow notation
-`myMap->key2`. Arrow notation can be used for string keys and when the key is a valid identifier. If the key is not a valid identifier,
-the key can be quoted like so `myMap->"3key"`. "3key" is not a valid identifier because it starts with a number but can still be used
-as a map key. The arrow syntax can also be used for assignment `myMap->key2 = "another value2"`. The arrow notation is left associative
-meaning any map index will be resolved before calling a function. Example: `myMap->key2()` is syntactically the same as `(myMap->key2)()`.
-The arrow notation is simply a cleaner way of setting and retrieving values. Both it and the standard index notation function the same.
+Map values can be retrieved in two ways. The first is standard array index form `myMap["key2"]`. The other using dot notation
+`myMap.key2`. Dot notation can be used when the key is a valid identifier. If the key is not a valid identifier,
+the normal index notation must be used with a string. The dot notation can also be used for assignment
+`myMap.key2 = "another value2"`. The dot notation is left associative meaning any map index will be
+resolved before calling a function. Example: `myMap.key2()` is syntactically the same as `(myMap.key2)()`.
 
 ## Assignments
 

@@ -122,6 +122,7 @@ mainLoop:
 		switch code {
 		case opcode.Noop:
 			continue mainLoop
+
 		case opcode.BinaryAdd:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -131,6 +132,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinarySub:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -140,6 +142,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryMul:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -149,6 +152,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryDivide:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -158,6 +162,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryMod:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -167,6 +172,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryShiftL:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -176,6 +182,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryShiftR:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -185,6 +192,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryAnd:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -194,6 +202,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryOr:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -203,6 +212,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryNot:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -212,6 +222,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.BinaryAndNot:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -221,9 +232,11 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.UnaryNeg:
 			l := vm.currentFrame.popStack().(*object.Integer)
 			vm.currentFrame.pushStack(&object.Integer{Value: -l.Value})
+
 		case opcode.UnaryNot:
 			l := vm.currentFrame.popStack().(*object.Boolean)
 			if l.Value {
@@ -231,8 +244,10 @@ mainLoop:
 			} else {
 				vm.currentFrame.pushStack(object.TrueConst)
 			}
+
 		case opcode.LoadConst:
 			vm.currentFrame.pushStack(vm.currentFrame.code.Constants[vm.getUint16()])
+
 		case opcode.StoreConst:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
@@ -244,6 +259,7 @@ mainLoop:
 			if _, err := vm.currentFrame.Env.CreateConst(name, vm.currentFrame.popStack()); err != nil {
 				fmt.Println(err)
 			}
+
 		case opcode.Return:
 			if vm.currentFrame.sp == 0 {
 				vm.returnValue = object.NullConst
@@ -257,8 +273,10 @@ mainLoop:
 				return vm.returnValue
 			}
 			vm.currentFrame.pushStack(vm.returnValue)
+
 		case opcode.Pop:
 			vm.currentFrame.popStack()
+
 		case opcode.LoadFast:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			//if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
@@ -270,6 +288,7 @@ mainLoop:
 			vm.currentFrame.pushStack(object.NewException("Unknown variable/constant %s\n", name))
 			vm.throw()
 			break
+
 		case opcode.StoreFast:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
@@ -286,6 +305,7 @@ mainLoop:
 			}
 			//vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
 			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
+
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
@@ -300,6 +320,7 @@ mainLoop:
 				break
 			}
 			vm.currentFrame.Env.Create(name, vm.currentFrame.popStack())
+
 		case opcode.LoadGlobal:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			p := vm.currentFrame.Env.Parent()
@@ -318,6 +339,7 @@ mainLoop:
 			vm.currentFrame.pushStack(object.NewException("Global %s doesn't exist\n", name))
 			vm.throw()
 			break
+
 		case opcode.StoreGlobal:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Names[vm.getUint16()]
@@ -338,6 +360,7 @@ mainLoop:
 				break
 			}
 			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
+
 		case opcode.LoadIndex:
 			left := vm.currentFrame.popStack()
 			index := vm.currentFrame.popStack()
@@ -347,6 +370,7 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.StoreIndex:
 			left := vm.currentFrame.popStack()
 			index := vm.currentFrame.popStack()
@@ -357,10 +381,12 @@ mainLoop:
 				vm.throw()
 				break
 			}
+
 		case opcode.Call:
 			numargs := vm.getUint16()
 			fn := vm.currentFrame.popStack()
 			vm.CallFunction(numargs, fn, false)
+
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
 			l := vm.currentFrame.popStack()
@@ -372,6 +398,7 @@ mainLoop:
 				break
 			}
 			vm.currentFrame.pushStack(vm.compareObjects(l, r, op))
+
 		case opcode.MakeFunction:
 			fnName := vm.currentFrame.popStack().(*object.String)
 			params := vm.currentFrame.popStack().(*object.Array)
@@ -388,6 +415,7 @@ mainLoop:
 				fn.Parameters[i] = p.(*object.String).Value
 			}
 			vm.currentFrame.pushStack(fn)
+
 		case opcode.MakeArray:
 			l := vm.getUint16()
 			array := &object.Array{
@@ -398,6 +426,7 @@ mainLoop:
 				array.Elements[i-1] = vm.currentFrame.popStack()
 			}
 			vm.currentFrame.pushStack(array)
+
 		case opcode.MakeMap:
 			l := vm.getUint16()
 			hash := &object.Hash{
@@ -420,23 +449,28 @@ mainLoop:
 				}
 			}
 			vm.currentFrame.pushStack(hash)
+
 		case opcode.PopJumpIfFalse:
 			target := vm.getUint16()
 			tos := vm.currentFrame.popStack()
 			if tos == object.FalseConst {
 				vm.currentFrame.pc = int(target)
 			}
+
 		case opcode.JumpAbsolute:
 			vm.currentFrame.pc = int(vm.getUint16())
+
 		case opcode.PopJumpIfTrue:
 			target := vm.getUint16()
 			tos := vm.currentFrame.popStack()
 			if tos == object.TrueConst {
 				vm.currentFrame.pc = int(target)
 			}
+
 		case opcode.JumpForward:
 			jump := vm.getUint16()
 			vm.currentFrame.pc += int(jump)
+
 		case opcode.JumpIfTrueOrPop:
 			target := vm.getUint16()
 			tos := vm.currentFrame.getFrontStack()
@@ -445,6 +479,7 @@ mainLoop:
 			} else {
 				vm.currentFrame.popStack()
 			}
+
 		case opcode.JumpIfFalseOrPop:
 			target := vm.getUint16()
 			tos := vm.currentFrame.getFrontStack()
@@ -456,12 +491,14 @@ mainLoop:
 
 		case opcode.PrepareBlock:
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+
 		case opcode.EndBlock:
 			vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent()
 			vm.currentFrame.popBlock()
 			if vm.currentFrame.sp == 0 {
 				vm.currentFrame.pushStack(object.NullConst)
 			}
+
 		case opcode.StartLoop:
 			loopEnd := vm.getUint16()
 			iter := vm.getUint16()
@@ -472,13 +509,17 @@ mainLoop:
 			}
 			vm.currentFrame.pushBlock(lb)
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+
 		case opcode.Continue:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).iter
+
 		case opcode.NextIter:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).start
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env.Parent())
+
 		case opcode.Break:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).end
+
 		case opcode.StartTry:
 			catch := vm.getUint16()
 			tcb := &tryBlock{
@@ -487,12 +528,14 @@ mainLoop:
 			}
 			vm.currentFrame.pushBlock(tcb)
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+
 		case opcode.Throw:
 			exc := vm.throw()
 			if exc != nil {
 				return exc
 			}
 			break
+
 		case opcode.BuildClass:
 			methodNum := vm.getUint16()
 			class := &VMClass{}
@@ -509,13 +552,16 @@ mainLoop:
 				method.Class = class
 			}
 			vm.currentFrame.pushStack(class)
+
 		case opcode.MakeInstance:
 			argLen := vm.getUint16()
 			class := vm.currentFrame.popStack()
 			vm.makeInstance(argLen, class)
+
 		case opcode.LoadAttribute:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			instance := vm.currentFrame.popStack()
+
 			switch instance := instance.(type) {
 			case *VMInstance:
 				if method := instance.GetBoundMethod(name); method != nil {
@@ -548,35 +594,45 @@ mainLoop:
 				}
 			case *object.Module:
 				vm.currentFrame.pushStack(vm.lookupModuleAttr(instance, name))
+			case *object.Hash:
+				vm.currentFrame.pushStack(vm.lookupHashIndex(instance, object.MakeStringObj(name)))
 			default:
 				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
 				vm.throw()
-				break
 			}
 
 		case opcode.StoreAttribute:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
-			instance, ok := vm.currentFrame.popStack().(*VMInstance)
-			if !ok {
-				vm.currentFrame.popStack() // The value
-				vm.currentFrame.pushStack(object.NewException("Attribute store on non-object"))
-				vm.throw()
-				break
-			}
-
+			instance := vm.currentFrame.popStack()
 			val := vm.currentFrame.popStack()
-			if _, ok := instance.Fields.Get(name); !ok {
-				vm.currentFrame.pushStack(object.NewException("Instance has no field %s", name))
+
+			switch instance := instance.(type) {
+			case *VMInstance:
+				if _, ok := instance.Fields.Get(name); !ok {
+					vm.currentFrame.pushStack(object.NewException("Instance has no field %s", name))
+					vm.throw()
+					break
+				}
+
+				if instance.Fields.IsConst(name) {
+					vm.currentFrame.pushStack(object.NewException("Assignment to constant field %s", name))
+					vm.throw()
+					break
+				}
+				instance.Fields.SetForce(name, val, false)
+			case *object.Module:
+				ret := vm.assignModuleAttr(instance, name, val)
+				if ret != object.NullConst {
+					vm.currentFrame.pushStack(ret)
+					vm.throw()
+				}
+			case *object.Hash:
+				vm.assignHashMapIndex(instance, object.MakeStringObj(name), val)
+			default:
+				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
 				vm.throw()
-				break
 			}
 
-			if instance.Fields.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Assignment to constant field %s", name))
-				vm.throw()
-				break
-			}
-			instance.Fields.SetForce(name, val, false)
 		default:
 			codename := opcode.Names[code]
 			if codename == "" {

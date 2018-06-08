@@ -28,7 +28,6 @@ if isError(os) {
 }
 
 // All of these do the same thing
-print(os->system('whoami')[0]) // Call the system function and print stdout
 print(os.system('whoami')[0]) // Call the system function and print stdout
 print(os["system"]('whoami')[0]) // Call the system function and print stdout
 ```

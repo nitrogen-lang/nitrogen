@@ -60,34 +60,11 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
 
-	if p.curTokenIs(token.Arrow) {
-		p.nextToken()
-		i := p.parseExpression(priAssign)
-		// Only strings and identifiers are valid with the arrow syntax
-		if _, ok := i.(*ast.StringLiteral); !ok {
-			ident, ok := i.(*ast.Identifier)
-			if !ok {
-				p.addErrorWithPos("Index operator requires an identifier or string")
-				return nil
-			}
-			// Convert identifier into a string for later lookup
-			i = &ast.StringLiteral{
-				Token: token.Token{
-					Type:    token.String,
-					Literal: ident.Value,
-					Pos:     p.curToken.Pos,
-				},
-				Value: ident.Value,
-			}
-		}
-		exp.Index = i
-	} else {
-		p.nextToken()
-		exp.Index = p.parseExpression(priLowest)
+	p.nextToken()
+	exp.Index = p.parseExpression(priLowest)
 
-		if !p.expectPeek(token.RSquare) {
-			return nil
-		}
+	if !p.expectPeek(token.RSquare) {
+		return nil
 	}
 	return exp
 }

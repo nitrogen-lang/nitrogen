@@ -54,8 +54,6 @@ or
 and
 
 for
-
-->
 `
 
 	tests := []struct {
@@ -202,9 +200,7 @@ for
 
 		{token.For, "for", makePos(47, 1)},
 
-		{token.Arrow, "->", makePos(49, 1)},
-
-		{token.EOF, "", makePos(50, 0)},
+		{token.EOF, "", makePos(48, 0)},
 	}
 
 	l := NewString(input)

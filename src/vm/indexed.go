@@ -5,21 +5,18 @@ import "github.com/nitrogen-lang/nitrogen/src/object"
 func (vm *VirtualMachine) evalIndexExpression(left, index object.Object) object.Object {
 	switch {
 	case left.Type() == object.ArrayObj && index.Type() == object.IntergerObj:
-		return vm.evalArrayIndexExpression(left, index)
+		return vm.evalArrayIndexExpression(left.(*object.Array), index)
 	case left.Type() == object.HashObj:
-		return vm.evalHashIndexExpression(left, index)
+		return vm.lookupHashIndex(left.(*object.Hash), index)
 	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
-		return vm.evalStringIndexExpression(left, index)
-	case left.Type() == object.ModuleObj && index.Type() == object.StringObj:
-		return vm.evalModuleLookupExpression(left, index)
+		return vm.evalStringIndexExpression(left.(*object.String), index)
 	}
 	return object.NewException("Index operator not allowed: %s", left.Type())
 }
 
-func (vm *VirtualMachine) evalArrayIndexExpression(array, index object.Object) object.Object {
-	arrObj := array.(*object.Array)
+func (vm *VirtualMachine) evalArrayIndexExpression(array *object.Array, index object.Object) object.Object {
 	idx := index.(*object.Integer).Value
-	max := int64(len(arrObj.Elements))
+	max := int64(len(array.Elements))
 
 	if idx > max-1 { // Check upper bound
 		return object.NullConst
@@ -34,18 +31,16 @@ func (vm *VirtualMachine) evalArrayIndexExpression(array, index object.Object) o
 		}
 	}
 
-	return arrObj.Elements[idx]
+	return array.Elements[idx]
 }
 
-func (vm *VirtualMachine) evalHashIndexExpression(hash, index object.Object) object.Object {
-	hashObj := hash.(*object.Hash)
-
+func (vm *VirtualMachine) lookupHashIndex(hash *object.Hash, index object.Object) object.Object {
 	key, ok := index.(object.Hashable)
 	if !ok {
 		return object.NewException("Invalid map key: %s", index.Type())
 	}
 
-	pair, ok := hashObj.Pairs[key.HashKey()]
+	pair, ok := hash.Pairs[key.HashKey()]
 	if !ok {
 		return object.NullConst
 	}
@@ -53,10 +48,9 @@ func (vm *VirtualMachine) evalHashIndexExpression(hash, index object.Object) obj
 	return pair.Value
 }
 
-func (vm *VirtualMachine) evalStringIndexExpression(array, index object.Object) object.Object {
-	strObj := array.(*object.String)
+func (vm *VirtualMachine) evalStringIndexExpression(str *object.String, index object.Object) object.Object {
 	idx := index.(*object.Integer).Value
-	max := int64(len(strObj.Value))
+	max := int64(len(str.Value))
 
 	if idx > max-1 { // Check upper bound
 		return object.NullConst
@@ -71,13 +65,7 @@ func (vm *VirtualMachine) evalStringIndexExpression(array, index object.Object) 
 		}
 	}
 
-	return &object.String{Value: string(strObj.Value[idx])}
-}
-
-func (vm *VirtualMachine) evalModuleLookupExpression(module, index object.Object) object.Object {
-	moduleObj := module.(*object.Module)
-	key := index.(*object.String)
-	return vm.lookupModuleAttr(moduleObj, key.Value)
+	return &object.String{Value: string(str.Value[idx])}
 }
 
 func (vm *VirtualMachine) lookupModuleAttr(module *object.Module, key string) object.Object {

@@ -39,7 +39,6 @@ const (
 	Asterisk
 	Slash
 	Modulo
-	Arrow
 	Dot
 
 	PlusAssign
@@ -121,7 +120,6 @@ var tokens = [...]string{
 	Asterisk: "*",
 	Slash:    "/",
 	Modulo:   "%",
-	Arrow:    "->",
 
 	PlusAssign:  "+=",
 	MinusAssign: "-=",

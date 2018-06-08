@@ -142,14 +142,6 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
-		} else if l.peekChar() == '>' {
-			tok = token.Token{
-				Type:     token.Arrow,
-				Literal:  "->",
-				Pos:      l.curPosition(),
-				Filename: l.currentFile,
-			}
-			l.readRune()
 		} else {
 			tok = l.newToken(token.Dash, l.curCh)
 		}

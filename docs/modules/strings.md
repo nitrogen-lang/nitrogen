@@ -19,7 +19,7 @@ Example:
 
 ```
 let strings = module('strings.so')
-strings->dedup("name:    John", " ") == "name: John"
+strings.dedup("name:    John", " ") == "name: John"
 ```
 
 This example replaces consecutive strings of spaces with a single space.

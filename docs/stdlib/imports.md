@@ -90,10 +90,10 @@ main.ni:
 ```
 let math = import("./math.ni")
 
-println(math->add(2, 3))
-println(math->sub(2, 3))
-println(math->mul(2, 3))
-println(math->div(6, 3))
+println(math.add(2, 3))
+println(math.sub(2, 3))
+println(math.mul(2, 3))
+println(math.div(6, 3))
 ```
 
 Here, math.ni returns a hashmap that contains several functions. These functions are effectively "exported" by the script.
