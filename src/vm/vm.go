@@ -867,7 +867,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()
 		}
-		vm.currentFrame.pushStack(object.NewPanic("TOS is not a function for CALL opcode"))
+		vm.currentFrame.pushStack(object.NewPanic("%s is not a function", fn.Type()))
 		vm.throw()
 	}
 }

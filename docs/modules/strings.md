@@ -2,14 +2,14 @@
 
 The strings module returns a Module object. All documented functions are part of this returned object.
 
-## splitN(s, sep: string, n: int): array
+## contains(s, substr: string): bool
 
-`splitN` will split `s` on `sep` and return at most `n` array elements. If n is < 0, all substrings will be returned.
-If n > 0, at most n substrings will be returned. The returned array may have less than n elements.
+Returns if string s contains sub-string substr.
 
-## trimSpace(s: string): string
+## count(s, substr: string): int
 
-`trimSpace` removes any whitespace characters from the beginning and end of the string.
+Returns the number of non-overlapping instances of substr in s. Count will throw
+if substr is empty.
 
 ## dedup(s, char: string): string
 
@@ -23,3 +23,31 @@ strings.dedup("name:    John", " ") == "name: John"
 ```
 
 This example replaces consecutive strings of spaces with a single space.
+
+## hasPrefix(s, prefix: string): bool
+
+Returns if the string begins with `prefix`.
+
+## hasSuffix(s, suffix: string): bool
+
+Returns if the string ends with `suffix`.
+
+## replace(s, old, new: string, n: int): string
+
+Returns a copy of s with the first n non-overlapping instances of old replaced
+by new. If old is an empty string, replace will throw an exception. If n < 0,
+all instances of old are replaced.
+
+## split(s, sep: string): array
+
+Shorthand for `splitN(s, sep, -1)`.
+
+## splitN(s, sep: string, n: int): array
+
+`splitN` will split `s` on `sep` and return at most `n` array elements. If n is < 0, all substrings will be returned.
+If n > 0, at most n substrings will be returned. If n == 0, an empty array is returned.
+The returned array may have less than n elements.
+
+## trimSpace(s: string): string
+
+`trimSpace` removes any whitespace characters from the beginning and end of the string.
