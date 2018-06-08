@@ -14,7 +14,11 @@ func init() {
 	vm.RegisterBuiltin("first", firstBuiltin)
 	vm.RegisterBuiltin("last", lastBuiltin)
 	vm.RegisterBuiltin("rest", restBuiltin)
+	vm.RegisterBuiltin("pop", popBuiltin)
 	vm.RegisterBuiltin("push", pushBuiltin)
+	vm.RegisterBuiltin("prepend", prependBuiltin)
+	vm.RegisterBuiltin("splice", spliceBuiltin)
+	vm.RegisterBuiltin("slice", sliceBuiltin)
 	vm.RegisterBuiltin("sort", sortArrayBuiltin)
 	vm.RegisterBuiltin("hashMerge", hashMergeBuiltin)
 	vm.RegisterBuiltin("hashKeys", hashKeysBuiltin)
@@ -30,6 +34,8 @@ func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ..
 		return &object.Integer{Value: int64(len(arg.Value))}
 	case *object.Array:
 		return &object.Integer{Value: int64(len(arg.Elements))}
+	case *object.Hash:
+		return &object.Integer{Value: int64(len(arg.Pairs))}
 	case *object.Null:
 		return &object.Integer{Value: 0}
 	}
@@ -89,6 +95,25 @@ func restBuiltin(interpreter object.Interpreter, env *object.Environment, args .
 	return object.NullConst
 }
 
+func popBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
+	}
+	if args[0].Type() != object.ArrayObj {
+		return object.NewException("Argument to `pop` must be ARRAY, got %s", args[0].Type())
+	}
+
+	arr := args[0].(*object.Array)
+	length := len(arr.Elements)
+	if length > 0 {
+		newElements := make([]object.Object, length-1, length-1)
+		copy(newElements, arr.Elements[:length-1])
+		return &object.Array{Elements: newElements}
+	}
+
+	return object.NullConst
+}
+
 func pushBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if len(args) != 2 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 2", len(args))
@@ -102,6 +127,108 @@ func pushBuiltin(interpreter object.Interpreter, env *object.Environment, args .
 	newElements := make([]object.Object, length+1, length+1)
 	copy(newElements, arr.Elements)
 	newElements[length] = args[1]
+
+	return &object.Array{Elements: newElements}
+}
+
+func prependBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 2 {
+		return object.NewException("Incorrect number of arguments. Got %d, expected 2", len(args))
+	}
+	if args[0].Type() != object.ArrayObj {
+		return object.NewException("Argument to `prepend` must be ARRAY, got %s", args[0].Type())
+	}
+
+	arr := args[0].(*object.Array)
+	length := len(arr.Elements)
+	newElements := make([]object.Object, length+1, length+1)
+	copy(newElements[1:], arr.Elements)
+	newElements[0] = args[1]
+
+	return &object.Array{Elements: newElements}
+}
+
+func spliceBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("splice", 2, args...); ac != nil {
+		return ac
+	}
+
+	if args[0].Type() != object.ArrayObj {
+		return object.NewException("Argument 1 to `splice` must be ARRAY, got %s", args[0].Type())
+	}
+	arr := args[0].(*object.Array)
+
+	offsetObj, ok := args[1].(*object.Integer)
+	if !ok {
+		return object.NewException("Argument 2 to `splice` must be INTEGER, got %s", args[1].Type())
+	}
+	offset := int(offsetObj.Value)
+	if offset == 0 {
+		return &object.Array{Elements: []object.Object{}}
+	} else if offset < 0 {
+		return object.NewException("Argument 2 to `splice` must be positive, got %d", offset)
+	}
+
+	orgLen := len(arr.Elements)
+	length := orgLen - offset
+	if len(args) > 2 {
+		lenObj, ok := args[2].(*object.Integer)
+		if !ok {
+			return object.NewException("Argument 3 to `splice` must be INTEGER, got %s", args[2].Type())
+		}
+		length = int(lenObj.Value)
+	}
+	if length == 0 {
+		return arr
+	} else if length < 0 {
+		return object.NewException("Argument 3 to `splice` must be positive, got %d", length)
+	}
+
+	newElements := make([]object.Object, orgLen-length, orgLen-length)
+	copy(newElements, arr.Elements[:offset])
+	copy(newElements[offset:], arr.Elements[offset+length:])
+
+	return &object.Array{Elements: newElements}
+}
+
+func sliceBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("slice", 2, args...); ac != nil {
+		return ac
+	}
+
+	if args[0].Type() != object.ArrayObj {
+		return object.NewException("Argument 1 to `slice` must be ARRAY, got %s", args[0].Type())
+	}
+	arr := args[0].(*object.Array)
+
+	offsetObj, ok := args[1].(*object.Integer)
+	if !ok {
+		return object.NewException("Argument 2 to `slice` must be INTEGER, got %s", args[1].Type())
+	}
+	offset := int(offsetObj.Value)
+	if offset == 0 {
+		return arr.Dup()
+	} else if offset < 0 {
+		return object.NewException("Argument 2 to `slice` must be positive, got %d", offset)
+	}
+
+	orgLen := len(arr.Elements)
+	length := orgLen - offset
+	if len(args) > 2 {
+		lenObj, ok := args[2].(*object.Integer)
+		if !ok {
+			return object.NewException("Argument 3 to `slice` must be INTEGER, got %s", args[2].Type())
+		}
+		length = int(lenObj.Value)
+	}
+	if length == 0 {
+		return arr
+	} else if length < 0 {
+		return object.NewException("Argument 3 to `slice` must be positive, got %d", length)
+	}
+
+	newElements := make([]object.Object, length, length)
+	copy(newElements, arr.Elements[offset:length+1])
 
 	return &object.Array{Elements: newElements}
 }
