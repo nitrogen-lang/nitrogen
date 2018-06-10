@@ -10,7 +10,7 @@ func main() {
     let num1 = 0
     let num2 = 1
 
-    for i = 0; num1 >= 0; i + 1 {
+    for i = 0; num1 >= 0; i += 1 {
         println(count, ": ", num1, " ")
 
         let sumOfPrevTwo = num1 + num2
