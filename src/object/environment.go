@@ -16,12 +16,14 @@ func IsConstErr(e error) bool {
 }
 
 type eco struct {
+	name     string
 	v        Object
 	readonly bool
+	n        *eco
 }
 
 type Environment struct {
-	store  map[string]*eco
+	root   *eco
 	parent *Environment
 }
 
@@ -30,9 +32,7 @@ func NewEnvironment() *Environment {
 }
 
 func NewSizedEnvironment(size int) *Environment {
-	return &Environment{
-		store: make(map[string]*eco, size),
-	}
+	return &Environment{}
 }
 
 func NewEnclosedEnv(outer *Environment) *Environment {
@@ -57,8 +57,10 @@ func (e *Environment) Parent() *Environment {
 }
 
 func (e *Environment) Print(indent string) {
-	for k, v := range e.store {
-		fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, k, v.v.Inspect(), indent, v.readonly)
+	v := e.root
+	for v != nil {
+		fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, v.name, v.v.Inspect(), indent, v.readonly)
+		v = v.n
 	}
 
 	if e.parent != nil {
@@ -71,10 +73,21 @@ func (e *Environment) Print(indent string) {
 	}
 }
 
+func (e *Environment) find(name string) *eco {
+	v := e.root
+	for v != nil {
+		if v.name == name {
+			return v
+		}
+		v = v.n
+	}
+	return nil
+}
+
 func (e *Environment) Get(name string) (Object, bool) {
-	obj, ok := e.store[name]
-	if ok {
-		return obj.v, ok
+	obj := e.find(name)
+	if obj != nil {
+		return obj.v, true
 	}
 
 	if e.parent != nil {
@@ -84,16 +97,16 @@ func (e *Environment) Get(name string) (Object, bool) {
 }
 
 func (e *Environment) GetLocal(name string) (Object, bool) {
-	obj, ok := e.store[name]
-	if ok {
-		return obj.v, ok
+	obj := e.find(name)
+	if obj == nil {
+		return nil, false
 	}
-	return nil, false
+	return obj.v, true
 }
 
 func (e *Environment) IsConst(name string) bool {
-	obj, ok := e.store[name]
-	if ok {
+	obj := e.find(name)
+	if obj != nil {
 		return obj.readonly
 	}
 
@@ -104,28 +117,36 @@ func (e *Environment) IsConst(name string) bool {
 }
 
 func (e *Environment) IsConstLocal(name string) bool {
-	obj, ok := e.store[name]
-	if ok {
+	obj := e.find(name)
+	if obj != nil {
 		return obj.readonly
 	}
 	return false
 }
 
 func (e *Environment) Create(name string, val Object) (Object, error) {
-	if _, exists := e.store[name]; exists {
+	obj := e.find(name)
+	if obj != nil {
 		return nil, errAlreadyDefined
 	}
 
-	e.store[name] = &eco{v: val}
+	e.root = &eco{
+		name: name,
+		n:    e.root,
+		v:    val,
+	}
 	return val, nil
 }
 
 func (e *Environment) CreateConst(name string, val Object) (Object, error) {
-	if _, exists := e.store[name]; exists {
+	obj := e.find(name)
+	if obj != nil {
 		return nil, errAlreadyDefined
 	}
 
-	e.store[name] = &eco{
+	e.root = &eco{
+		name:     name,
+		n:        e.root,
 		v:        val,
 		readonly: true,
 	}
@@ -133,11 +154,9 @@ func (e *Environment) CreateConst(name string, val Object) (Object, error) {
 }
 
 func (e *Environment) Set(name string, val Object) (Object, error) {
-	if v, exists := e.store[name]; exists {
-		if v.readonly {
-			return nil, constError
-		}
-		v.v = val
+	obj := e.find(name)
+	if obj != nil {
+		obj.v = val
 		return val, nil
 	}
 
@@ -148,37 +167,59 @@ func (e *Environment) Set(name string, val Object) (Object, error) {
 }
 
 func (e *Environment) SetLocal(name string, val Object) (Object, error) {
-	if v, exists := e.store[name]; exists {
-		if v.readonly {
-			return nil, constError
-		}
-		v.v = val
+	obj := e.find(name)
+	if obj != nil {
+		obj.v = val
 		return val, nil
 	}
 	return nil, errNotDefined
 }
 
 func (e *Environment) SetForce(name string, val Object, readonly bool) {
-	if v, exists := e.store[name]; exists {
-		v.v = val
-		v.readonly = readonly
+	obj := e.find(name)
+	if obj != nil {
+		obj.v = val
+		obj.readonly = readonly
 		return
 	}
 
-	e.store[name] = &eco{
+	e.root = &eco{
+		name:     name,
+		n:        e.root,
 		v:        val,
-		readonly: readonly,
+		readonly: true,
 	}
+}
+
+func (e *Environment) findParentNode(name string) *eco {
+	v := e.root
+	if v == nil {
+		return nil
+	}
+
+	for v.n != nil {
+		if v.n.name == name {
+			return v
+		}
+		v = v.n
+	}
+	return nil
 }
 
 func (e *Environment) UnsetLocal(name string) {
-	delete(e.store, name)
+	p := e.findParentNode(name)
+	if p != nil {
+		p.n = p.n.n
+	}
 }
 
 func (e *Environment) Unset(name string) {
-	if _, exists := e.store[name]; exists {
-		delete(e.store, name)
+	p := e.findParentNode(name)
+	if p != nil {
+		p.n = p.n.n
+		return
 	}
+
 	if e.parent != nil {
 		e.parent.Unset(name)
 	}
