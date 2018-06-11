@@ -25,14 +25,14 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 
 	for !p.peekTokenIs(token.RBrace) {
 		p.nextToken()
-		key := p.parseExpression(priLowest)
+		key := p.parseExpression(priLowest).(ast.Expression)
 
 		if !p.expectPeek(token.Colon) {
 			return nil
 		}
 
 		p.nextToken()
-		value := p.parseExpression(priLowest)
+		value := p.parseExpression(priLowest).(ast.Expression)
 
 		hash.Pairs[key] = value
 
@@ -54,14 +54,14 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	return hash
 }
 
-func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseIndexExpression")
 	}
 	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
 
 	p.nextToken()
-	exp.Index = p.parseExpression(priLowest)
+	exp.Index = p.parseExpression(priLowest).(ast.Expression)
 
 	if !p.expectPeek(token.RSquare) {
 		return nil
@@ -69,7 +69,7 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	return exp
 }
 
-func (p *Parser) parseAttributeExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseAttributeExpression(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseAttributeExpression")
 	}

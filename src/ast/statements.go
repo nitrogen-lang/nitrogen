@@ -71,7 +71,7 @@ type AssignStatement struct {
 	Value Expression
 }
 
-func (a *AssignStatement) expressionNode()      {}
+func (a *AssignStatement) statementNode()       {}
 func (a *AssignStatement) TokenLiteral() string { return a.Token.Literal }
 func (a *AssignStatement) String() string {
 	var out bytes.Buffer
@@ -146,7 +146,7 @@ func (bs *BlockStatement) String() string {
 type ForLoopStatement struct {
 	Init      *DefStatement
 	Condition Expression
-	Iter      Expression
+	Iter      Node
 	Body      *BlockStatement
 }
 

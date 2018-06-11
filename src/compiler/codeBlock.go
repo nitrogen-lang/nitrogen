@@ -163,6 +163,15 @@ func newStringTable() *stringTable {
 	}
 }
 
+func newStringTableOffset(offset int) *stringTable {
+	if offset < 0 {
+		offset = 0
+	}
+	return &stringTable{
+		table: make([]string, offset, offset+5),
+	}
+}
+
 func (t *stringTable) indexOf(v string) uint16 {
 	for i, s := range t.table {
 		if s == v {

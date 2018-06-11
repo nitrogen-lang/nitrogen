@@ -2,6 +2,8 @@
 
 all: go-test modules nitrogen nitrogen-test
 
+test: go-test nitrogen-test
+
 go-test:
 	go test ./...
 

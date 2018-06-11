@@ -157,16 +157,12 @@ func TestHashAssignments(t *testing.T) {
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
-			program.Statements[0])
-	}
+	stmt := program.Statements[0]
 
-	exp, ok := stmt.Expression.(*ast.AssignStatement)
+	exp, ok := stmt.(*ast.AssignStatement)
 	if !ok {
 		t.Fatalf("exp is not ast.AssignStatement. got=%T",
-			stmt.Expression)
+			stmt)
 	}
 
 	left, ok := exp.Left.(*ast.IndexExpression)
@@ -199,16 +195,12 @@ func TestHashIntAssignments(t *testing.T) {
 	program := p.ParseProgram()
 	checkParserErrors(t, p)
 
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
-			program.Statements[0])
-	}
+	stmt := program.Statements[0]
 
-	exp, ok := stmt.Expression.(*ast.AssignStatement)
+	exp, ok := stmt.(*ast.AssignStatement)
 	if !ok {
 		t.Fatalf("exp is not ast.AssignStatement. got=%T",
-			stmt.Expression)
+			stmt)
 	}
 
 	left, ok := exp.Left.(*ast.IndexExpression)

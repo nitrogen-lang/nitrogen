@@ -27,7 +27,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Throw:
 		p.nextToken()
 		t := &ast.ThrowStatement{
-			Expression: p.parseExpression(priLowest),
+			Expression: p.parseExpression(priLowest).(ast.Expression),
 		}
 		if p.peekTokenIs(token.Semicolon) {
 			p.nextToken()
@@ -85,7 +85,11 @@ func (p *Parser) parseDefStatement() ast.Statement {
 
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest)
+	thing := p.parseExpression(priLowest)
+	if thing == nil {
+		return nil
+	}
+	stmt.Value = thing.(ast.Expression)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
@@ -113,7 +117,7 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 		return stmt
 	}
 
-	stmt.Value = p.parseExpression(priLowest)
+	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -141,7 +145,7 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	p.insertToken(fToken)
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest)
+	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		fun.Name = stmt.Name.String()
@@ -174,7 +178,7 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 	p.insertToken(classToken)
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest)
+	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
 
 	if class, ok := stmt.Value.(*ast.ClassLiteral); ok {
 		class.Name = stmt.Name.String()
@@ -187,7 +191,7 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 	return stmt
 }
 
-func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
+func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseAssignmentStatement")
 	}
@@ -198,7 +202,7 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest)
+	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -210,7 +214,7 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Expression {
 // parseCompoundAssign will take a compound assignment like += and
 // turn it into a normal assignment statement using the given left
 // expression as the left side of a normal arithmatic operation
-func (p *Parser) parseCompoundAssign(left ast.Expression) ast.Expression {
+func (p *Parser) parseCompoundAssign(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseCompoundAssign")
 	}
@@ -221,7 +225,7 @@ func (p *Parser) parseCompoundAssign(left ast.Expression) ast.Expression {
 
 	p.nextToken()
 
-	right := p.parseExpression(priLowest)
+	right := p.parseExpression(priLowest).(ast.Expression)
 
 	switch stmt.Token.Type {
 	case token.PlusAssign:

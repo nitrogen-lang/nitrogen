@@ -8,8 +8,8 @@
 func arrayHasValue(array, value) {
     for (i = 0; i < len(array); i += 1) {
         if (array[i] == value) {
-	        return true
-	    }
+            return true
+        }
     }
     return false
 }

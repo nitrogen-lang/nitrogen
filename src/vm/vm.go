@@ -279,8 +279,7 @@ mainLoop:
 
 		case opcode.LoadFast:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			//if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
-			if val, ok := vm.currentFrame.Env.Get(name); ok {
+			if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
 				vm.currentFrame.pushStack(val)
 				break
 			}
@@ -297,14 +296,12 @@ mainLoop:
 				vm.throw()
 				break
 			}
-			//if _, exists := vm.currentFrame.Env.GetLocal(name); !exists {
-			if _, exists := vm.currentFrame.Env.Get(name); !exists {
+			if _, exists := vm.currentFrame.Env.GetLocal(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Variable %s undefined\n", name))
 				vm.throw()
 				break
 			}
-			//vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
-			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
+			vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
 
 		case opcode.Define:
 			// Ensure constant isn't redefined

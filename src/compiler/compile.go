@@ -263,7 +263,6 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.WriteByte(opcode.Define.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 		}
-		compileLoadNull(ccb)
 	case *ast.AssignStatement:
 		compile(ccb, node.Value)
 
@@ -271,7 +270,6 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			compile(ccb, indexed.Index)
 			compile(ccb, indexed.Left)
 			ccb.code.WriteByte(opcode.StoreIndex.ToByte())
-			compileLoadNull(ccb)
 			break
 		}
 
@@ -279,7 +277,6 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			compile(ccb, attrib.Left)
 			ccb.code.WriteByte(opcode.StoreAttribute.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(attrib.Index.Value)))
-			compileLoadNull(ccb)
 			break
 		}
 
@@ -295,7 +292,6 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.WriteByte(opcode.StoreGlobal.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(ident.Value)))
 		}
-		compileLoadNull(ccb)
 	case *ast.IfExpression:
 		compileIfStatement(ccb, node)
 	case *ast.CompareExpression:
@@ -404,10 +400,19 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 	mainCode := ccb.code
 	oldOffset := ccb.offset
 
+	bodyCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		offset:    mainCode.Len() + ccb.offset,
+	}
+
 	ccb.offset = mainCode.Len() + ccb.offset
 	ccb.code = new(bytes.Buffer)
-	compile(ccb, try.Try)
-	tryBlock := ccb.code
+	compile(bodyCCB, try.Try)
+	tryBlock := bodyCCB.code
 
 	// 6 = 2 opcodes + 2 x 2 byte args (START_TRY and JUMP_FORWARD)
 	catchBlockLoc := mainCode.Len() + tryBlock.Len() + 6
@@ -469,8 +474,6 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 		if i < l {
 			switch s.(type) {
 			case *ast.ExpressionStatement:
-				ccb.code.WriteByte(opcode.Pop.ToByte())
-			case *ast.DefStatement:
 				ccb.code.WriteByte(opcode.Pop.ToByte())
 			}
 		}
@@ -659,38 +662,82 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 		return
 	}
 
+	// A loop begins with a PREPARE_BLOCK opcode this creates the first layer environment
 	ccb.code.WriteByte(opcode.PrepareBlock.ToByte())
+	// Initialization is done in this first layer
 	compile(ccb, loop.Init)
 
+	// These values will need to be restored after compiling the loop
 	mainCode := ccb.code
 	oldOffset := ccb.offset
 
-	ccb.offset = ccb.code.Len() + ccb.offset
-	ccb.code = new(bytes.Buffer)
-	compile(ccb, loop.Condition)
-	condition := ccb.code
-
-	// 8 = 2 x opcode + 3 x 2 byte args
-	ccb.offset = mainCode.Len() + condition.Len() + oldOffset + 8
-	ccb.code = new(bytes.Buffer)
-	compile(ccb, loop.Body)
-	loopBody := ccb.code
-
-	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
-		ccb.code.WriteByte(opcode.Pop.ToByte())
+	// The loop operates in an isolated environment so locals need to be handled carefully
+	bodyCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		offset:    ccb.code.Len() + ccb.offset,
 	}
 
-	// 3 = 1 opcode + 2 byte arg
-	ccb.offset = mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 3
-	ccb.code = new(bytes.Buffer)
-	compile(ccb, loop.Iter)
-	iterator := ccb.code
+	// Compile the loop's condition check code
+	compile(bodyCCB, loop.Condition)
+	condition := bodyCCB.code
 
+	// Prepare for main body
+	bodyCCB = &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		// 8 = 2 x opcode + 3 x 2 byte args
+		offset: mainCode.Len() + condition.Len() + oldOffset + 8,
+	}
+
+	// Compile main body of loop
+	compile(bodyCCB, loop.Body)
+
+	// If the body ends in an expression, we need to pop it so the stack is correct
+	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
+		bodyCCB.code.WriteByte(opcode.Pop.ToByte())
+	}
+	loopBody := bodyCCB.code
+
+	// This copies the local variables into the outer compile block for table indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table)-1:] {
+		ccb.locals.indexOf(n)
+	}
+
+	// Prepare for iteration code
+	bodyCCB = &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		// 3 = 1 opcode + 2 byte arg
+		offset: mainCode.Len() + condition.Len() + loopBody.Len() + oldOffset + 3,
+	}
+
+	// Compile iteration
+	compile(bodyCCB, loop.Iter)
+	iterator := bodyCCB.code
+
+	// Again, copy over the locals for indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table)-1:] {
+		ccb.locals.indexOf(n)
+	}
+
+	// Restore compile block for actual loop opcodes
 	ccb.code = mainCode
 	ccb.offset = oldOffset
 
-	// 10 = 4 opcodes + 3 x 2 byte args
-	endBlock := mainCode.Len() + condition.Len() + loopBody.Len() + iterator.Len() + ccb.offset + 10
+	// Generate and build the full loop code
+
+	// 9 = 3 opcodes + 3 x 2 byte args
+	endBlock := mainCode.Len() + condition.Len() + loopBody.Len() + iterator.Len() + ccb.offset + 9
 	// 8 = 2 opcode + 3 x 2 byte args
 	iterBlock := mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 8
 	ccb.code.WriteByte(opcode.StartLoop.ToByte())
@@ -704,7 +751,6 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	ccb.code.Write(loopBody.Bytes())
 	ccb.code.Write(iterator.Bytes())
 
-	ccb.code.WriteByte(opcode.Pop.ToByte())
 	ccb.code.WriteByte(opcode.NextIter.ToByte())
 	ccb.code.WriteByte(opcode.EndBlock.ToByte())
 }

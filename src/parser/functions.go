@@ -58,7 +58,7 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	return idents
 }
 
-func (p *Parser) parseCallExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseCallExpression(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseCallExpression")
 	}

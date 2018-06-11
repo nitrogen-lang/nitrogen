@@ -54,7 +54,7 @@ var precedences = map[token.TokenType]int{
 
 type (
 	prefixParseFn func() ast.Expression
-	infixParseFn  func(ast.Expression) ast.Expression
+	infixParseFn  func(ast.Expression) ast.Node
 	Settings      struct {
 		Debug bool
 	}
@@ -243,7 +243,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return program
 }
 
-func (p *Parser) parseExpression(precedence int) ast.Expression {
+func (p *Parser) parseExpression(precedence int) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseExpression")
 	}
@@ -252,7 +252,8 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
-	leftExp := prefix()
+	var leftExp ast.Node
+	leftExp = prefix()
 
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
@@ -261,7 +262,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		}
 
 		p.nextToken()
-		leftExp = infix(leftExp)
+		leftExp = infix(leftExp.(ast.Expression))
 	}
 
 	return leftExp
@@ -271,9 +272,20 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseExpressionStatement")
 	}
-	stmt := &ast.ExpressionStatement{Token: p.curToken}
+	var stmt ast.Statement
+	curToken := p.curToken
 
-	stmt.Expression = p.parseExpression(priLowest)
+	exp := p.parseExpression(priLowest)
+	if expStmt, ok := exp.(ast.Statement); ok {
+		stmt = expStmt
+	} else if exp == nil {
+		return nil
+	} else {
+		stmt = &ast.ExpressionStatement{
+			Token:      curToken,
+			Expression: exp.(ast.Expression),
+		}
+	}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
@@ -315,7 +327,7 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 	}
 
 	p.nextToken()
-	list = append(list, p.parseExpression(priLowest))
+	list = append(list, p.parseExpression(priLowest).(ast.Expression))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
@@ -323,7 +335,7 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 		if p.curTokenIs(end) {
 			return list
 		}
-		list = append(list, p.parseExpression(priLowest))
+		list = append(list, p.parseExpression(priLowest).(ast.Expression))
 	}
 
 	if !p.expectPeek(end) {
@@ -343,11 +355,11 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	}
 
 	p.nextToken()
-	expression.Right = p.parseExpression(priPrefix)
+	expression.Right = p.parseExpression(priPrefix).(ast.Expression)
 	return expression
 }
 
-func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseInfixExpression")
 	}
@@ -359,7 +371,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 
 	precedence := p.curPrecedence()
 	p.nextToken()
-	expression.Right = p.parseExpression(precedence)
+	expression.Right = p.parseExpression(precedence).(ast.Expression)
 	return expression
 }
 
@@ -372,7 +384,7 @@ func (p *Parser) parseGroupedExpressionC(end token.TokenType) ast.Expression {
 		fmt.Println("parseGroupedExpressionC")
 	}
 	p.nextToken()
-	exp := p.parseExpression(priLowest)
+	exp := p.parseExpression(priLowest).(ast.Expression)
 
 	if !p.expectPeek(end) {
 		return nil

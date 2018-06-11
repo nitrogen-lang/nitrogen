@@ -74,7 +74,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 		}
 		p.nextToken()
 
-		loop.Condition = p.parseExpression(priLowest)
+		loop.Condition = p.parseExpression(priLowest).(ast.Expression)
 		p.nextToken()
 		if !p.curTokenIs(token.Semicolon) {
 			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
@@ -105,7 +105,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 	return loop
 }
 
-func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
+func (p *Parser) parseCompareExpression(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseCompareExpression")
 	}
@@ -115,7 +115,7 @@ func (p *Parser) parseCompareExpression(left ast.Expression) ast.Expression {
 	return &ast.CompareExpression{
 		Token: c,
 		Left:  left,
-		Right: p.parseExpression(priLowest),
+		Right: p.parseExpression(priLowest).(ast.Expression),
 	}
 }
 
