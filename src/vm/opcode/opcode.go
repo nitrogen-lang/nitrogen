@@ -59,7 +59,6 @@ const (
 	JumpIfFalseOrPop
 	JumpAbsolute
 	JumpForward
-	PrepareBlock
 	EndBlock
 	StartLoop
 	Continue
@@ -69,6 +68,8 @@ const (
 	Throw
 	BuildClass
 	MakeInstance
+	OpenScope
+	CloseScope
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 )
@@ -135,12 +136,13 @@ var HasNoArg = map[Opcode]bool{
 	Return:       true,
 	Pop:          true,
 	MakeFunction: true,
-	PrepareBlock: true,
 	EndBlock:     true,
 	Continue:     true,
 	NextIter:     true,
 	Break:        true,
 	Throw:        true,
+	OpenScope:    true,
+	CloseScope:   true,
 }
 
 var Names = map[Opcode]string{
@@ -182,7 +184,6 @@ var Names = map[Opcode]string{
 	JumpIfFalseOrPop: "JUMP_IF_FALSE_OR_POP",
 	JumpAbsolute:     "JUMP_ABSOLUTE",
 	JumpForward:      "JUMP_FORWARD",
-	PrepareBlock:     "PREPARE_BLOCK",
 	EndBlock:         "END_BLOCK",
 	StartLoop:        "START_LOOP",
 	Continue:         "CONTINUE",
@@ -192,6 +193,8 @@ var Names = map[Opcode]string{
 	Throw:            "THROW",
 	BuildClass:       "BUILD_CLASS",
 	MakeInstance:     "MAKE_INSTANCE",
+	OpenScope:        "OPEN_SCOPE",
+	CloseScope:       "CLOSE_SCOPE",
 }
 
 var CmpOps = map[byte]string{

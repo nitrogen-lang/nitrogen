@@ -82,7 +82,9 @@ These are all the opcodes used in this implementation.
 
 ### JUMP\_FORWARD
 
-### PREPARE\_BLOCK
+### OPEN\_SCOPE
+
+### CLOSE\_SCOPE
 
 ### END\_BLOCK
 

@@ -392,7 +392,7 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 }
 
 func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
-	ccb.code.WriteByte(opcode.PrepareBlock.ToByte())
+	ccb.code.WriteByte(opcode.OpenScope.ToByte())
 
 	_, tryNoNil := try.Try.Statements[len(try.Try.Statements)-1].(*ast.ExpressionStatement)
 	_, catchNoNil := try.Catch.Statements[len(try.Catch.Statements)-1].(*ast.ExpressionStatement)
@@ -465,6 +465,8 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 		compileLoadNull(ccb)
 	}
 	ccb.code.WriteByte(opcode.EndBlock.ToByte())
+	ccb.code.WriteByte(opcode.CloseScope.ToByte())
+	ccb.code.WriteByte(opcode.CloseScope.ToByte())
 }
 
 func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
@@ -664,7 +666,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	}
 
 	// A loop begins with a PREPARE_BLOCK opcode this creates the first layer environment
-	ccb.code.WriteByte(opcode.PrepareBlock.ToByte())
+	ccb.code.WriteByte(opcode.OpenScope.ToByte())
 	// Initialization is done in this first layer
 	compile(ccb, loop.Init)
 
@@ -747,6 +749,8 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 
 	ccb.code.WriteByte(opcode.NextIter.ToByte())
 	ccb.code.WriteByte(opcode.EndBlock.ToByte())
+	ccb.code.WriteByte(opcode.CloseScope.ToByte())
+	ccb.code.WriteByte(opcode.CloseScope.ToByte())
 }
 
 func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {

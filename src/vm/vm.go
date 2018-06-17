@@ -484,11 +484,13 @@ mainLoop:
 				vm.currentFrame.popStack()
 			}
 
-		case opcode.PrepareBlock:
+		case opcode.OpenScope:
 			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
 
+		case opcode.CloseScope:
+			vm.currentFrame.Env = vm.currentFrame.Env.Parent()
+
 		case opcode.EndBlock:
-			vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent()
 			vm.currentFrame.popBlock()
 			if vm.currentFrame.sp == 0 {
 				vm.currentFrame.pushStack(object.NullConst)
