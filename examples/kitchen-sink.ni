@@ -26,7 +26,7 @@ func hello2(place) {
 let helloWorld = hello("World!")
 
 // And constants
-always helloWorld2 = hello("Mars!")
+const helloWorld2 = hello("Mars!")
 
 // The following code would fail since a constant can't be reassigned
 // helloWorld2 = "Something else"

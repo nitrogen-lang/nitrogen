@@ -51,7 +51,7 @@ func (d *DefStatement) String() string {
 	var out bytes.Buffer
 
 	if d.Const {
-		out.WriteString("always ")
+		out.WriteString("const ")
 	} else {
 		out.WriteString("let ")
 	}

@@ -1,4 +1,4 @@
-always thing = 42
+const thing = 42
 
 try {
     thing = 43

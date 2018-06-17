@@ -82,7 +82,7 @@ const (
 
 	Function
 	Let
-	Always
+	Const
 	True
 	False
 	If
@@ -159,7 +159,7 @@ var tokens = [...]string{
 	// Keywords
 	Function: "func",
 	Let:      "let",
-	Always:   "always",
+	Const:    "const",
 	True:     "true",
 	False:    "false",
 	If:       "if",

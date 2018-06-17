@@ -8,7 +8,7 @@ import (
 
 func TestNextToken(t *testing.T) {
 	input := `let five = 5;
-always ten = 10;
+const ten = 10;
 
 世界
 
@@ -67,11 +67,11 @@ for
 		{token.Integer, "5", makePos(1, 12)},
 		{token.Semicolon, ";", makePos(1, 13)},
 
-		{token.Always, "always", makePos(2, 1)},
-		{token.Identifier, "ten", makePos(2, 8)},
-		{token.Assign, "=", makePos(2, 12)},
-		{token.Integer, "10", makePos(2, 14)},
-		{token.Semicolon, ";", makePos(2, 16)},
+		{token.Const, "const", makePos(2, 1)},
+		{token.Identifier, "ten", makePos(2, 7)},
+		{token.Assign, "=", makePos(2, 11)},
+		{token.Integer, "10", makePos(2, 13)},
+		{token.Semicolon, ";", makePos(2, 15)},
 
 		{token.Identifier, "世界", makePos(4, 1)},
 		{token.Semicolon, ";", makePos(4, 3)},

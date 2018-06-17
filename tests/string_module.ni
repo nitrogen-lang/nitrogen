@@ -2,7 +2,7 @@ if !modulesSupported() {
     return
 }
 
-always str = import('strings.so')
+const str = import('strings.so')
 
 let testStr = "abcefguvwxyz"
 

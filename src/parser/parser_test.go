@@ -37,8 +37,8 @@ func testDefStatement(t *testing.T, s ast.Statement, name string) bool {
 }
 
 func testConstStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "always" {
-		t.Fatalf("s.TokenLiteral not 'always'. got=%q", s.TokenLiteral())
+	if s.TokenLiteral() != "const" {
+		t.Fatalf("s.TokenLiteral not 'const'. got=%q", s.TokenLiteral())
 		return false
 	}
 

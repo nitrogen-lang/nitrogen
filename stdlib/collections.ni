@@ -1,9 +1,9 @@
-always exports = {}
+const exports = {}
 
 exports.filter = func(arr, fn)/*: arr*/ {
     let newArr = [];
 
-    always ln = len(arr)
+    const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         if fn(arr[i], i) {
             newArr = push(newArr, arr[i])
@@ -15,7 +15,7 @@ exports.filter = func(arr, fn)/*: arr*/ {
 exports.map = func(arr, fn)/*: arr*/ {
     let newArr = [];
 
-    always ln = len(arr)
+    const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         newArr = push(newArr, fn(arr[i], i))
     }
@@ -27,7 +27,7 @@ exports.reduce = func(arr, fn)/*: Object*/ {
 
     if len(arguments) > 0 { accumulator = arguments[0] }
 
-    always ln = len(arr)
+    const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         accumulator = fn(accumulator, arr[i], i)
     }
@@ -38,7 +38,7 @@ exports.arrayMatch = func(arr1, arr2)/*: bool*/ {
     if isMap(arr1) or isMap(arr2) { return false }
     if len(arr1) != len(arr2) { return false }
 
-    always ln = len(arr1)
+    const ln = len(arr1)
     for i = 0; i < ln; i+=1 {
         if arr1[i] != arr2[i] {
             return false
@@ -58,16 +58,16 @@ exports.foreach = func(collection, fn) {
 }
 
 func foreachMap(map, fn) {
-    always keys = hashKeys(map);
-    always keyLn = len(keys)
+    const keys = hashKeys(map);
+    const keyLn = len(keys)
     for i = 0; i < keyLn; i+=1 {
-        always key = keys[i]
+        const key = keys[i]
         fn(key, map[key])
     }
 }
 
 func foreachArray(arr, fn) {
-    always ln = len(arr)
+    const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         fn(i, arr[i])
     }
@@ -79,15 +79,15 @@ exports.mapMatch = func(map1, map2) {
     if !isMap(map1) or !isMap(map2) { return false }
     if len(map1) != len(map2) { return false }
 
-    always keys = hashKeys(map1);
-    always keyLn = len(keys)
+    const keys = hashKeys(map1);
+    const keyLn = len(keys)
     for i = 0; i < keyLn; i+=1 {
-        always key = keys[i]
+        const key = keys[i]
         if !hasKey(map2, key) {
             return false
         }
-        always v1 = map1[key]
-        always v2 = map2[key]
+        const v1 = map1[key]
+        const v2 = map2[key]
         if varType(v1) != varType(v2) {
             return false
         }

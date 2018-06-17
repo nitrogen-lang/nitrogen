@@ -8,7 +8,7 @@ Nitrogen source files are read as valid UTF-8 characters.
 
 |        |          |
 |--------|----------|
-| always | and      |
+| const  | and      |
 | break  | catch    |
 | class  | continue |
 | else   | false    |
@@ -192,7 +192,7 @@ happen at the same time. Here's some examples:
 let var = "Hello, Earth"
 
 // Constant
-always var2 = "Hello, Mars"
+const var2 = "Hello, Mars"
 
 // Variables must be declared before assignment
 // The following works because var was defined above
@@ -511,7 +511,7 @@ and data. Instances of a class have different field values while sharing the sam
 ```
 class name ^ parent {
     let field1
-    always field2 = "constant"
+    const field2 = "constant"
 
     func init(x) { // Initializer function
         this.x = x // The instance can be referenced with "this"
@@ -555,7 +555,7 @@ class parentPrinter {
 
 class printer ^ parentPrinter {
     let x
-    always t = "Thing"
+    const t = "Thing"
 
     func init(x) {
         parent()
@@ -588,7 +588,7 @@ method.
 ```
 class name ^ parent {
     let field1
-    always field2 = "constant"
+    const field2 = "constant"
 
     func init(x) { // Initializer function
         this.x = x // The instance can be referenced with "this"s

@@ -14,7 +14,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.Let:
 		fallthrough
-	case token.Always:
+	case token.Const:
 		return p.parseDefStatement()
 	case token.Return:
 		return p.parseReturnStatement()
@@ -61,7 +61,7 @@ func (p *Parser) parseDefStatement() ast.Statement {
 	}
 	stmt := &ast.DefStatement{Token: p.curToken}
 
-	stmt.Const = p.curTokenIs(token.Always)
+	stmt.Const = p.curTokenIs(token.Const)
 
 	if !p.expectPeek(token.Identifier) {
 		return nil

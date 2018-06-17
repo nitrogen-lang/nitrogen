@@ -1,8 +1,8 @@
-always conf = 'This thing'
+const conf = 'This thing'
 
 let printer = class {
     let x
-    always t = "Thing"
+    const t = "Thing"
 
     func init(x) {
         this.x = x

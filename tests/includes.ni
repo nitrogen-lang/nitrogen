@@ -13,7 +13,7 @@ try {
 
 // Try and optional import
 try {
-    always err = import('./includes/_not_exist.ni', false)
+    const err = import('./includes/_not_exist.ni', false)
     if !isError(err) {
         println("Test Failed: Err is not an error")
     }
@@ -22,7 +22,7 @@ try {
 }
 
 // Test a real import
-always add = import('./includes/math.ni')
+const add = import('./includes/math.ni')
 
 if isError(add) {
     println("Test Failed: Include failed")

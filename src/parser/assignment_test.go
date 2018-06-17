@@ -47,9 +47,9 @@ func TestConstStatements(t *testing.T) {
 		expectedIdentifier string
 		expectedValue      interface{}
 	}{
-		{"always x = 5;", "x", 5},
-		{"always y = true;", "y", true},
-		{"always foobar = y", "foobar", "y"},
+		{"const x = 5;", "x", 5},
+		{"const y = true;", "y", true},
+		{"const foobar = y", "foobar", "y"},
 	}
 
 	for _, tt := range tests {
