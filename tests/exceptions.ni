@@ -1,4 +1,4 @@
-let fastVar = "I'm fast"
+let fastVar = 42
 
 func myException() {
     myException2()
@@ -20,6 +20,6 @@ if m1 != expected {
     println('Expected "', expected, '", got "', m1, '"')
 }
 
-if !isDefined(fastVar) {
+if !isDefined("fastVar") {
     println('Try/catch block test failed, fastVar not defined locally')
 }

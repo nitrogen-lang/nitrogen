@@ -675,8 +675,6 @@ func (vm *VirtualMachine) throw() object.Object {
 
 	cframe := vm.currentFrame
 	for {
-		vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
-
 		// Unwind block stack until there's a try block
 		catchBlock := vm.currentFrame.popBlockUntil(tryBlockT)
 		if catchBlock != nil { // Try block found
@@ -701,6 +699,7 @@ func (vm *VirtualMachine) throw() object.Object {
 		}
 	}
 
+	vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
 	// Enclose once for new block (like a PREPARE_BLOCK) and another for block scope
 	// END_BLOCK removes two layers of environments
 	vm.currentFrame.Env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.Env))
