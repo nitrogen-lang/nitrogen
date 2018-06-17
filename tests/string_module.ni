@@ -2,7 +2,7 @@ if !modulesSupported() {
     return
 }
 
-always str = import('../built-modules/strings.so')
+always str = import('strings.so')
 
 let testStr = "abcefguvwxyz"
 

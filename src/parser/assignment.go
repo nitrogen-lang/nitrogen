@@ -117,7 +117,12 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 		return stmt
 	}
 
-	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
+	exp := p.parseExpression(priLowest)
+	if exp == nil {
+		stmt.Value = nil
+	} else {
+		stmt.Value = exp.(ast.Expression)
+	}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()

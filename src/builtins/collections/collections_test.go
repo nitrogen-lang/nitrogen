@@ -15,7 +15,7 @@ func TestBuiltinLenFunction(t *testing.T) {
 		{`len("")`, 0},
 		{`len("four")`, 4},
 		{`len("hello world")`, 11},
-		{`len(1)`, "Unsupported type INTEGER"},
+		{`len(1)`, "len(): Unsupported type INTEGER"},
 		{`len("one", "two")`, "Incorrect number of arguments. Got 2, expected 1"},
 		{`len([1, 2, 3])`, 3},
 		{`len([])`, 0},

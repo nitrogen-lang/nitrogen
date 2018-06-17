@@ -76,7 +76,7 @@ func (cb *CodeBlock) Print(indent string) {
 }
 
 func bytesToUint16(a, b byte) uint16 {
-	return uint16(b) + uint16(a<<4)
+	return (uint16(a) << 8) + uint16(b)
 }
 
 type codeBlockCompiler struct {

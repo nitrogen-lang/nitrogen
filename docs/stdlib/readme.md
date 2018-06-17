@@ -1,9 +1,17 @@
 # Nitrogen Standard Library Documentation
 
-This directory contains the documentation for all standard library functions. They are separated by category.
+The Nitrogen Standard Library (NSL) is split up into global and imported functions.
 
-- [Input/Output](io.md): Deals with writing to or reading from things.
-- [Types](types.md): Converting between types and checking types.
-- [Collections](collections.md): Functions to manipulate arrays and maps.
-- [Imports](imports.md): Documentation on including other files into a running script.
-- [Disassembly](dis.md): Functions to disassemble and view VM internals.
+Global functions are ones implemented directly in the interpreter and are available
+to all code at all times. They can not be reassigned directly but can be overshadowed
+by another variable.
+
+Imported library modules are implemented in Nitrogen and require being imported before
+they can be used. Each module exports its public api for use. Imports follow the same
+rules as user-defined modules. The NSL directory must be in the module import paths.
+This does allow alternate NSL implementations to be used instead of the default. So
+long as the public APIs match, no code would need to be updated. This can also allow
+for stripping the library of extraneous modules when not needed.
+
+- [Global](global): Globally defined NSL functions.
+- [Imported](imported): NSL modules require import before use.

@@ -673,9 +673,10 @@ func (vm *VirtualMachine) throw() object.Object {
 		panic(object.NewException("Runtime Exception: %s", exception.Inspect()))
 	}
 
-	vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
 	cframe := vm.currentFrame
 	for {
+		vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
+
 		// Unwind block stack until there's a try block
 		catchBlock := vm.currentFrame.popBlockUntil(tryBlockT)
 		if catchBlock != nil { // Try block found
@@ -808,14 +809,20 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 	case *VMFunction:
 		var env *object.Environment
 		this := vm.currentFrame.frontInstance()
+		env = object.NewEnclosedEnv(fn.Env)
 		if this != nil {
-			env = object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount+1)
 			env.SetForce("this", this, true)
 			if fn.Class != nil && fn.Class.Parent != nil {
 				env.SetForce("parent", fn.Class.Parent, true)
 			}
-		} else {
-			env = object.NewSizedEnclosedEnv(fn.Env, fn.Body.LocalCount)
+		}
+
+		paramLen := len(fn.Parameters)
+
+		if int(argc) < paramLen {
+			vm.currentFrame.pushStack(object.NewException("Func expected %d args but was given %d", paramLen, argc))
+			vm.throw()
+			return
 		}
 
 		newFrame := vm.MakeFrame(fn.Body, env)
@@ -824,8 +831,19 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 			newFrame.pushInstance(this)
 		}
 
-		for i := 0; i < int(argc); i++ {
+		for i := 0; i < paramLen; i++ {
 			newFrame.Env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
+		}
+
+		if int(argc) > paramLen {
+			remaining := int(argc) - paramLen
+			rest := make([]object.Object, remaining)
+			for i := 0; i < remaining; i++ {
+				rest[i] = vm.currentFrame.popStack()
+			}
+			newFrame.Env.SetForce("arguments", &object.Array{Elements: rest}, false)
+		} else {
+			newFrame.Env.SetForce("arguments", &object.Array{Elements: []object.Object{}}, false)
 		}
 
 		if now {

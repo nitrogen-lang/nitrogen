@@ -492,6 +492,7 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 	for _, p := range fn.Parameters {
 		ccb2.locals.indexOf(p.Value)
 	}
+	ccb2.locals.indexOf("arguments") // `arguments` holds any remaining arguments from a function call
 	if inClass {
 		ccb2.locals.indexOf("this")
 		if hasParent {
@@ -667,14 +668,10 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	// Initialization is done in this first layer
 	compile(ccb, loop.Init)
 
-	// These values will need to be restored after compiling the loop
-	mainCode := ccb.code
-	oldOffset := ccb.offset
-
 	// The loop operates in an isolated environment so locals need to be handled carefully
-	bodyCCB := &codeBlockCompiler{
+	condCCB := &codeBlockCompiler{
 		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		locals:    newStringTableOffset(len(ccb.locals.table)),
 		names:     ccb.names,
 		code:      new(bytes.Buffer),
 		filename:  ccb.filename,
@@ -682,18 +679,18 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	}
 
 	// Compile the loop's condition check code
-	compile(bodyCCB, loop.Condition)
-	condition := bodyCCB.code
+	compile(condCCB, loop.Condition)
+	condition := condCCB.code
 
 	// Prepare for main body
-	bodyCCB = &codeBlockCompiler{
+	bodyCCB := &codeBlockCompiler{
 		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		locals:    newStringTableOffset(len(ccb.locals.table)),
 		names:     ccb.names,
 		code:      new(bytes.Buffer),
 		filename:  ccb.filename,
 		// 8 = 2 x opcode + 3 x 2 byte args
-		offset: mainCode.Len() + condition.Len() + oldOffset + 8,
+		offset: ccb.code.Len() + condition.Len() + ccb.offset + 8,
 	}
 
 	// Compile main body of loop
@@ -706,40 +703,37 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	loopBody := bodyCCB.code
 
 	// This copies the local variables into the outer compile block for table indexing
-	for _, n := range bodyCCB.locals.table[len(ccb.locals.table)-1:] {
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
 		ccb.locals.indexOf(n)
 	}
 
 	// Prepare for iteration code
-	bodyCCB = &codeBlockCompiler{
+	iterCCB := &codeBlockCompiler{
 		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		locals:    newStringTableOffset(len(ccb.locals.table)),
 		names:     ccb.names,
 		code:      new(bytes.Buffer),
 		filename:  ccb.filename,
 		// 3 = 1 opcode + 2 byte arg
-		offset: mainCode.Len() + condition.Len() + loopBody.Len() + oldOffset + 3,
+		offset: ccb.code.Len() + condition.Len() + loopBody.Len() + ccb.offset + 3,
 	}
 
 	// Compile iteration
-	compile(bodyCCB, loop.Iter)
-	iterator := bodyCCB.code
+	compile(iterCCB, loop.Iter)
+	iterator := iterCCB.code
 
 	// Again, copy over the locals for indexing
-	for _, n := range bodyCCB.locals.table[len(ccb.locals.table)-1:] {
+	for _, n := range iterCCB.locals.table[len(ccb.locals.table):] {
 		ccb.locals.indexOf(n)
 	}
-
-	// Restore compile block for actual loop opcodes
-	ccb.code = mainCode
-	ccb.offset = oldOffset
 
 	// Generate and build the full loop code
 
 	// 9 = 3 opcodes + 3 x 2 byte args
-	endBlock := mainCode.Len() + condition.Len() + loopBody.Len() + iterator.Len() + ccb.offset + 9
+	endBlock := ccb.code.Len() + condition.Len() + loopBody.Len() + iterator.Len() + ccb.offset + 9
 	// 8 = 2 opcode + 3 x 2 byte args
-	iterBlock := mainCode.Len() + condition.Len() + loopBody.Len() + ccb.offset + 8
+	iterBlock := ccb.code.Len() + condition.Len() + loopBody.Len() + ccb.offset + 8
+
 	ccb.code.WriteByte(opcode.StartLoop.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
 	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))

@@ -57,6 +57,11 @@ func (e *Environment) Parent() *Environment {
 }
 
 func (e *Environment) Print(indent string) {
+	if e == nil {
+		fmt.Println("{}")
+		return
+	}
+
 	v := e.root
 	for v != nil {
 		fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, v.name, v.v.Inspect(), indent, v.readonly)
@@ -74,6 +79,10 @@ func (e *Environment) Print(indent string) {
 }
 
 func (e *Environment) find(name string) *eco {
+	if e == nil {
+		return nil
+	}
+
 	v := e.root
 	for v != nil {
 		if v.name == name {
@@ -187,11 +196,15 @@ func (e *Environment) SetForce(name string, val Object, readonly bool) {
 		name:     name,
 		n:        e.root,
 		v:        val,
-		readonly: true,
+		readonly: readonly,
 	}
 }
 
 func (e *Environment) findParentNode(name string) *eco {
+	if e == nil {
+		return nil
+	}
+
 	v := e.root
 	if v == nil {
 		return nil

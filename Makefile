@@ -9,8 +9,9 @@ go-test:
 
 nitrogen-test:
 	@echo "Run Nitrogen source test suite"
-	@for test in tests/*.ni; do \
-		./bin/nitrogen "$$test"; \
+	@p="$$(pwd)"; \
+	for test in tests/*.ni; do \
+		./bin/nitrogen -M $$p/stdlib -M $$p/built-modules "$$test"; \
 	done
 
 nitrogen:

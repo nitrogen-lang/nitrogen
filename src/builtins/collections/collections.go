@@ -22,6 +22,7 @@ func init() {
 	vm.RegisterBuiltin("sort", sortArrayBuiltin)
 	vm.RegisterBuiltin("hashMerge", hashMergeBuiltin)
 	vm.RegisterBuiltin("hashKeys", hashKeysBuiltin)
+	vm.RegisterBuiltin("hasKey", hasKeyBuiltin)
 }
 
 func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -40,7 +41,7 @@ func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ..
 		return &object.Integer{Value: 0}
 	}
 
-	return object.NewException("Unsupported type %s", args[0].Type())
+	return object.NewException("len(): Unsupported type %s", args[0].Type())
 }
 
 func firstBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -313,4 +314,23 @@ func hashKeysBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 	}
 
 	return arr
+}
+
+func hasKeyBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("hasKey", 2, args...); ac != nil {
+		return ac
+	}
+
+	hash, ok := args[0].(*object.Hash)
+	if !ok {
+		return object.NewException("hasKey arg 1 expects a hash map")
+	}
+
+	key, ok := args[1].(object.Hashable)
+	if !ok {
+		return object.NewException("hasKey arg 2 expects a valid hash key")
+	}
+
+	_, has := hash.Pairs[key.HashKey()]
+	return object.NativeBoolToBooleanObj(has)
 }
