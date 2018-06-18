@@ -24,18 +24,18 @@ if reduceTest != expect3 {
 }
 
 // Foreach test on map
-// const expect4 = {
-//     "key1": "value1",
-//     "key2": "value2",
-//     "key3": "value3",
-// }
-// const foreachTest = {}
-// col.foreach(expect4, func(k, v) {
-//     foreachTest[k] = v
-// })
-// if !col.mapMatch(expect4, foreachTest) {
-//     println("Test Failed: foreach: Expected ", expect4, ", got ", foreachTest)
-// }
+const expect4 = {
+    "key1": "value1",
+    "key2": "value2",
+    "key3": "value3",
+}
+const foreachTest = {}
+col.foreach(expect4, func(k, v) {
+    foreachTest[k] = v
+})
+if !col.mapMatch(expect4, foreachTest) {
+    println("Test Failed: foreach: Expected ", expect4, ", got ", foreachTest)
+}
 
 // Foreach test on array
 let foreachArrTest = []
@@ -53,32 +53,32 @@ try {
 } catch {pass}
 
 // Test mapMatch
-// let map1 = {
-//     "key1": "value1",
-//     "key2": "value2",
-//     "key3": "value3",
-// }
-// let map2 = {
-//     "key1": "value1",
-//     "key2": "value2",
-//     "key3": "value3",
-// }
+let map1 = {
+    "key1": "value1",
+    "key2": "value2",
+    "key3": "value3",
+}
+let map2 = {
+    "key1": "value1",
+    "key2": "value2",
+    "key3": "value3",
+}
 
-// if !col.mapMatch(map1, map2) {
-//     println("Test Failed: mapMatch")
-// }
+if !col.mapMatch(map1, map2) {
+    println("Test Failed: mapMatch")
+}
 
-// map1 = {
-//     "key1": ["value1", "value1.1", "value1.2"],
-//     "key2": "value2",
-//     "key3": "value3",
-// }
-// map2 = {
-//     "key1": ["value1", "value1.1", "value1.2"],
-//     "key2": "value2",
-//     "key3": "value3",
-// }
+map1 = {
+    "key1": ["value1", "value1.1", "value1.2"],
+    "key2": "value2",
+    "key3": "value3",
+}
+map2 = {
+    "key1": ["value1", "value1.1", "value1.2"],
+    "key2": "value2",
+    "key3": "value3",
+}
 
-// if !col.mapMatch(map1, map2) {
-//     println("Test Failed: mapMatch")
-// }
+if !col.mapMatch(map1, map2) {
+    println("Test Failed: mapMatch")
+}

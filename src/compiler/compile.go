@@ -551,11 +551,11 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass bo
 	ccb.code.WriteByte(opcode.MakeFunction.ToByte())
 }
 
-func compileInnerBlock(ccb *codeBlockCompiler, node ast.Node) *bytes.Buffer {
+func compileInnerBlock(ccb *codeBlockCompiler, node ast.Node, extraOffset int) *bytes.Buffer {
 	mainCode := ccb.code
 	oldOffset := ccb.offset
 
-	ccb.offset = ccb.code.Len() + ccb.offset
+	ccb.offset = ccb.code.Len() + ccb.offset + extraOffset
 	ccb.code = new(bytes.Buffer)
 	compile(ccb, node)
 	block := ccb.code
@@ -615,15 +615,16 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 func compileIfStatementNoElse(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	compile(ccb, ifs.Condition)
 
-	trueBranch := compileInnerBlock(ccb, ifs.Consequence)
+	// 3 to compensate for implicit nil return
+	trueBranch := compileInnerBlock(ccb, ifs.Consequence, 3)
 
 	_, noNil := ifs.Consequence.Statements[len(ifs.Consequence.Statements)-1].(*ast.ExpressionStatement)
 
 	// 6 = 2 opcodes + 2 x 2 byte args
-	afterIfStmt := ccb.code.Len() + trueBranch.Len() + ccb.offset + 6
-	if !noNil {
+	afterIfStmt := ccb.code.Len() + trueBranch.Len() + ccb.offset + 3
+	if noNil {
 		// 3 = 1 opcode + 2 byte arg
-		afterIfStmt -= 3
+		afterIfStmt += 3
 	}
 
 	ccb.code.WriteByte(opcode.PopJumpIfFalse.ToByte())
@@ -644,7 +645,7 @@ func compileLoadNull(ccb *codeBlockCompiler) {
 func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression) {
 	compile(ccb, cmp.Left)
 
-	cntBranch := compileInnerBlock(ccb, cmp.Right)
+	cntBranch := compileInnerBlock(ccb, cmp.Right, 0)
 
 	// 3 = 1 opcode + 1 x 2 byte arg
 	afterCompare := ccb.code.Len() + cntBranch.Len() + ccb.offset + 3
@@ -754,7 +755,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 }
 
 func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
-	loopBody := compileInnerBlock(ccb, loop.Body)
+	loopBody := compileInnerBlock(ccb, loop.Body, 0)
 	loopBody.WriteByte(opcode.Continue.ToByte())
 
 	// 3 = 1 opcode + 1 x 2 byte arg

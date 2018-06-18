@@ -74,8 +74,6 @@ func foreachArray(arr, fn) {
 }
 
 exports.mapMatch = func(map1, map2) {
-    throw "This function is broken, need to fix if statment compiler"
-
     if !isMap(map1) or !isMap(map2) { return false }
     if len(map1) != len(map2) { return false }
 
