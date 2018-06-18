@@ -26,7 +26,6 @@ import (
 
 const (
 	interactivePrompt = ">> "
-	version           = "0.1.0"
 )
 
 type strSliceFlag []string
@@ -52,6 +51,11 @@ var (
 
 	modulePaths     strSliceFlag
 	autoloadModules strSliceFlag
+
+	version   = "Unknown"
+	buildTime = ""
+	builder   = ""
+	goversion = ""
 )
 
 func init() {
@@ -80,7 +84,7 @@ func main() {
 	flag.Parse()
 
 	if printVersion {
-		fmt.Printf("Nitrogen Interpreter Version %s\n", version)
+		versionInfo()
 		return
 	}
 
@@ -286,4 +290,14 @@ func printParserErrors(out io.Writer, errors []string) {
 	for _, msg := range errors {
 		fmt.Fprintf(out, "ERROR: %s\n", msg)
 	}
+}
+
+func versionInfo() {
+	fmt.Printf(`Nitrogen - (C) 2018 Lee Keitel
+Version:           %s
+Built:             %s
+Compiled by:       %s
+Go version:        %s
+Modules Supported: %t
+`, version, buildTime, builder, goversion, modulesSupported)
 }

@@ -9,6 +9,8 @@ import (
 	"plugin"
 )
 
+const modulesSupported = true
+
 func loadModules(searchPaths []string, modules []string) error {
 	for _, module := range modules {
 		for _, path := range searchPaths {
