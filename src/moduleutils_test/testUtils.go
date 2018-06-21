@@ -1,4 +1,4 @@
-package moduleutils
+package moduleutils_test
 
 import (
 	"testing"

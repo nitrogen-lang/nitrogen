@@ -3,7 +3,7 @@ package typing
 import (
 	"testing"
 
-	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
+	mut "github.com/nitrogen-lang/nitrogen/src/moduleutils_test"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -19,7 +19,7 @@ func TestBuiltinIntConvFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
+		mut.TestLiteralErrorObjects(t, mut.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -35,7 +35,7 @@ func TestBuiltinFloatConvFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
+		mut.TestLiteralErrorObjects(t, mut.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -63,7 +63,7 @@ func TestIsBuiltins(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
+		mut.TestLiteralErrorObjects(t, mut.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -83,7 +83,7 @@ func TestToStringBuiltin(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaled := moduleutils.TestEval(tt.input)
+		evaled := mut.TestEval(tt.input)
 
 		str, ok := evaled.(*object.String)
 		if !ok {
@@ -109,7 +109,7 @@ func TestParseIntBuiltin(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaled := moduleutils.TestEval(tt.input)
+		evaled := mut.TestEval(tt.input)
 
 		if tt.expected == 0 {
 			if evaled != object.NullConst {
@@ -149,7 +149,7 @@ func TestParseFloatBuiltin(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		evaled := moduleutils.TestEval(tt.input)
+		evaled := mut.TestEval(tt.input)
 
 		if tt.expected == 0 {
 			if evaled != object.NullConst {

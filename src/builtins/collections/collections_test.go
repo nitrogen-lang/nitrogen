@@ -3,7 +3,7 @@ package collections
 import (
 	"testing"
 
-	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
+	mut "github.com/nitrogen-lang/nitrogen/src/moduleutils_test"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
@@ -23,7 +23,7 @@ func TestBuiltinLenFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
+		mut.TestLiteralErrorObjects(t, mut.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -39,7 +39,7 @@ func TestBuiltinFirstFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
+		mut.TestLiteralErrorObjects(t, mut.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -55,7 +55,7 @@ func TestBuiltinLastFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		moduleutils.TestLiteralErrorObjects(t, moduleutils.TestEval(tt.input), tt.expected)
+		mut.TestLiteralErrorObjects(t, mut.TestEval(tt.input), tt.expected)
 	}
 }
 
@@ -72,7 +72,7 @@ func TestBuiltinRestFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := moduleutils.TestEval(tt.input)
+		got := mut.TestEval(tt.input)
 
 		if _, ok := got.(*object.Null); ok {
 			if tt.expected != "" {
@@ -91,7 +91,7 @@ func TestBuiltinRestFunction(t *testing.T) {
 
 		errObj, ok := got.(*object.Exception)
 		if !ok {
-			t.Errorf("object is not Error. got=%T (%+v)", got, moduleutils.ShowError(got))
+			t.Errorf("object is not Error. got=%T (%+v)", got, mut.ShowError(got))
 			continue
 		}
 
@@ -115,7 +115,7 @@ func TestBuiltinPushFunction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := moduleutils.TestEval(tt.input)
+		got := mut.TestEval(tt.input)
 
 		if arrObj, ok := got.(*object.Array); ok {
 			if arrObj.Inspect() != tt.expected {
@@ -127,7 +127,7 @@ func TestBuiltinPushFunction(t *testing.T) {
 
 		errObj, ok := got.(*object.Exception)
 		if !ok {
-			t.Errorf("object is not Error. got=%T (%+v)", got, moduleutils.ShowError(got))
+			t.Errorf("object is not Error. got=%T (%+v)", got, mut.ShowError(got))
 			continue
 		}
 
@@ -150,7 +150,7 @@ func TestBuiltinHashMerge(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := moduleutils.TestEval(tt.input)
+		got := mut.TestEval(tt.input)
 
 		if hashObj, ok := got.(*object.Hash); ok {
 			inspect := hashObj.Inspect()
@@ -163,7 +163,7 @@ func TestBuiltinHashMerge(t *testing.T) {
 
 		errObj, ok := got.(*object.Exception)
 		if !ok {
-			t.Errorf("object is not Error. got=%T (%+v)", got, moduleutils.ShowError(got))
+			t.Errorf("object is not Error. got=%T (%+v)", got, mut.ShowError(got))
 			continue
 		}
 
@@ -174,7 +174,7 @@ func TestBuiltinHashMerge(t *testing.T) {
 }
 
 func TestBuiltinHashMergeSpecial(t *testing.T) {
-	evaled := moduleutils.TestEval(`hashMerge({"key": "value"}, {"key2": "value2"})`)
+	evaled := mut.TestEval(`hashMerge({"key": "value"}, {"key2": "value2"})`)
 	hashObj, ok := evaled.(*object.Hash)
 	if !ok {
 		t.Fatalf("Got error during hashMerge: %#v", evaled)
