@@ -1,13 +1,11 @@
-VERSION := $(shell git describe --tags --always --dirty)
+VERSION ?= $(shell git describe --tags --always --dirty)
 BUILDTIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILDER := $(shell echo "`git config user.name` <`git config user.email`>")
-GOVERSION := $(shell go version | cut -d' ' -f3-)
 CGO_ENABLED ?= 1
 
 LDFLAGS := -X 'main.version=$(VERSION)' \
 			-X 'main.buildTime=$(BUILDTIME)' \
 			-X 'main.builder=$(BUILDER)' \
-			-X 'main.goversion=$(GOVERSION)' \
 			-s -w
 
 .PHONY: go-test nitrogen-test build modules

@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"runtime/pprof"
 	"strings"
 	"time"
@@ -55,7 +56,6 @@ var (
 	version   = "Unknown"
 	buildTime = ""
 	builder   = ""
-	goversion = ""
 )
 
 func init() {
@@ -297,7 +297,7 @@ func versionInfo() {
 Version:           %s
 Built:             %s
 Compiled by:       %s
-Go version:        %s
+Go version:        %s %s/%s
 Modules Supported: %t
-`, version, buildTime, builder, goversion, modulesSupported)
+`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, modulesSupported)
 }
