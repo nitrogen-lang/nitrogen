@@ -1,5 +1,7 @@
 # Nitrogen Language
 
+This is not a formal specification of the Nitrogen language. This is simply a guide to the syntax and function of the language.
+
 ## Source Files
 
 Nitrogen source files are read as valid UTF-8 characters.
@@ -8,9 +10,9 @@ Nitrogen source files are read as valid UTF-8 characters.
 
 |        |          |
 |--------|----------|
-| const  | and      |
-| break  | catch    |
-| class  | continue |
+| and    | break    |
+| catch  | class    |
+| const  | continue |
 | else   | false    |
 | for    | func     |
 | if     | let      |
@@ -23,8 +25,8 @@ Nitrogen source files are read as valid UTF-8 characters.
 
 Nitrogen's formal grammar uses semicolons to denote the end of a statement or expression. However, Nitrogen code doesn't need to have
 explicit semicolons as the lexer will automatically insert a semicolon where it's needed. Namely, after an identifier, literal,
-nil, a closing parenthesis, curly or square bracket, and after the keyword "return". This requires the programmer to keep in mind
-how they're formatting code. For example, the following if statement is invalid:
+nil, a closing parenthesis, curly or square bracket, and after the keywords `return`, `break`, and `continue`. This requires the
+programmer to keep in mind how they're formatting code. For example, the following if statement is invalid:
 
 ```
 if (var == 3) // The lexer attempts to insert a semicolon here, which will fail.
@@ -37,7 +39,7 @@ else
 }
 ```
 
-But the following is ok:
+But the following is syntactically valid (though not recommended):
 
 ```
 if (var == 3) { print("It's a 3") } else { print("No, it's not 3") }
@@ -57,6 +59,11 @@ Nitrogen supports three styles of comments:
  */
 ```
 
+## Pass
+
+Empty blocks are invalid in Nitrogen and will fail compilation. If you want to use empty block, `pass` can be used. `pass` is
+effectivly a noop but ensures a block has at least one statement.
+
 ## Literals
 
 Nitrogen supports integers, floats, booleans, strings, null, arrays, and hash maps (dictionaries, associative arrays).
@@ -68,7 +75,7 @@ from other things.
 
 ### Numbers
 
-Note: Currently, ints and floats CAN NOT be compared to each other. To compare, use the toInt() or toFloat() functions to convert
+Note: Currently, ints and floats CAN NOT be compared to each other. To compare, use the `toInt()` or `toFloat()` functions to convert
 values between types.
 
 #### Integers
@@ -102,7 +109,7 @@ level to lowest level. Operators on the same level are left associative and will
 |   4   | `+ - \| ^`         |
 |   3   | `< >`              |
 |   2   | `== != <= >=`      |
-|   1   | `&& \|\|`          |
+|   1   | `and or`          |
 
 ### Arithmetic Operators
 
@@ -303,7 +310,7 @@ if a == b or (a == c and a == d) {
 }
 ```
 
-## For loops
+## Looping
 
 Nitrogen supports a version of the traditional C for loop:
 
@@ -383,45 +390,43 @@ for (i = 0; i < len(keys); i + 1) {
 //  key4: value4
 ```
 
+### Looping with collections.foreach()
+
+The [collections package](stdlib/imported/collections.ni.md) has a `foreach` method which loops over and array or map without
+having to use a loop. The functions takes a functions that receives the index and value of each element.
+
+```
+let continents = ["Asia", "Africa", "North America", "South America", "Antarctica", "Europe", "Australia"]
+
+const collections = import('collections.ni')
+
+collections.foreach(continents, func(i, v) {
+    println(v) // Prints each continent
+})
+```
+
 ## Try Catch/Exceptions
 
-Nitrogen a simple concept of exceptions and runtime errors. Exceptions can be created at runtime when a script attempts
-to perform an unsafe action. Errors are returned when something goes wrong but isn't necessarily a huge issue. For example,
-using `require()` on a file that doesn't exist will generate an exception while `include()` would simply return an error.
+Nitrogen has a simple concept of exceptions and runtime errors. Exceptions can be created at runtime when a script attempts
+to perform an unsafe action. Errors are returned when something goes wrong but isn't necessarily a huge issue.
 Some exceptions are labeled as panics. When such an exception is thrown, all execution stops. These are thrown when something
 happens internally in the interpreter that causes execution to be in a state in which the programmer can't recover from.
 
 A try/catch block allows catching non-panic exceptions and provides the programmer an opportunity to handle the exception
 gracefully. The exception can be bound to an identifier in the catch block so its message can be printed or checked.
 
-Try/catch blocks run in the same scope as the surrounding code. This means and variables created in the try/catch are available
-outside the block. This allows the programmer to do things such as attempt to import a module and assign it to a variable.
+Try and catch blocks are in their own scopes. Variables created in them will not escape to the outer scope. But outer variables
+are available inside the try/catch. Try/catch is an expression in Nitrogen and will return the last expression just like a function.
 
 Exceptions can be generated by user code using the `throw` keyword follow by an expression.
 
-**Implementation Note**: In the bytecode VM, try and catch blocks are in their own scopes. Variables created in them will
-not escape to the outer scope. This is the preferred behaviour and the interpreter will be modified to match. A try/catch
-will still return a value so the second module example below would still work.
-
 ### Try Catch Examples
 
-This example shows importing a module (**Won't work in the VM**)
-
-```
-try {
-    let m1 = module("os", true)
-} catch e {
-    println('Import failed: ', e)
-}
-
-println(m1)
-```
-
-A full try/catch is also an expression and will return whatever the try block evaluates to if an exception isn't thrown:
+A try/catch is also an expression and will return whatever the try block evaluates to if an exception isn't thrown:
 
 ```
 let m1 = try {
-    module("os", true)
+    import("os.so")
 } catch e {
     println('Import failed: ', e)
 }
@@ -429,19 +434,18 @@ let m1 = try {
 println(m1)
 ```
 
-The above example does the exact same thing as the previous example. The value of the try catch is being assigned to m1. If
-the module imports successfully, m1 will equal the module. Otherwise it will equal whatever the catch block evaluates to.
-In this case, because println returns nil m1 will also equal nil.
+The value of the try catch is being assigned to m1. If the module imports successfully, m1 will equal the module.
+Otherwise it will equal whatever the catch block evaluates to. In this case, because println returns nil m1 will also equal nil.
 
 Try blocks can be nested for fallback functionality:
 
 ```
 let m1 = try {
-    module('non-existant-module', true)
+    import('non-existant-module')
 } catch e {
     println('Import failed: ', e)
     try {
-        module('os', true)
+        import('os')
     } catch e {
         println('Import2 failed: ', e)
     }
@@ -455,7 +459,7 @@ Here, the first try block will fail, but the second one will succeed so `m1`'s v
 A catch block is required, however it can be empty. In that case it evaluates to nil.
 
 ```
-let m1 = try { module('non-existant-module', true) } catch e {}
+let m1 = try { module('non-existant-module', true) } catch { pass }
 
 println(m1) // Will be nil
 ```
@@ -530,7 +534,7 @@ class name ^ parent {
 
 ### Class Inheritance
 
-Classes can inherit methods and fields from another class using the inheritance operator `class basename ^ parent { }`.
+Classes can inherit methods and fields from another class using the inheritance operator `^`.
 Classes may have only one parent. Calling the parent init method can be done by calling `parent()`. In methods, the
 variable `parent` is bound to the parent class if one is available. If a class doesn't have a parent, `parent` is
 not defined. Parent methods can be retrieved like so: `parent.overridenMethod()`. If a method isn't redefined in a child

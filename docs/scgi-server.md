@@ -20,7 +20,7 @@ to `tcp:0.0.0.0:9000`.
 - `-scgi-workers`: The number of workers available to handle requests. Defaults to 5.
 - `-scgi-worker-timeout`: The number of seconds the server will wait for an available worker. If all workers are busy, the server
 will wait this long before closing the connection. If this timeout is reached, an error message will be printed to standard output
-saying there weren't enough workers to handle incoming requests. You can use this to adjust the number of workers available.
+saying there weren't enough workers to handle incoming requests. You can use this to adjust the number of workers available. Defaults to 10.
 
 ## Scripts
 

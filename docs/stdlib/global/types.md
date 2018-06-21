@@ -37,10 +37,10 @@ Returns the type of the variable as a string.
 
 Returns if the given identifier is defined.
 
-## is_a(i: T, className: string|class): bool
+## instanceOf(i: T, className: string|class): bool
 
 Returns if object i is an instance of `className`. `className` can be either a string or an actual class object.
-`is_a` will throw an exception if `className` is not a class or string.
+`instanceOf` will throw an exception if `className` is not a class or string.
 
 ## classOf(i: T): string
 

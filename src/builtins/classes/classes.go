@@ -7,12 +7,12 @@ import (
 )
 
 func init() {
-	vm.RegisterBuiltin("is_a", vmInstanceOf)
+	vm.RegisterBuiltin("instanceOf", vmInstanceOf)
 	vm.RegisterBuiltin("classOf", vmClassOf)
 }
 
 func vmInstanceOf(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("is_a", 2, args...); ac != nil {
+	if ac := moduleutils.CheckArgs("instanceOf", 2, args...); ac != nil {
 		return ac
 	}
 
@@ -28,7 +28,7 @@ func vmInstanceOf(interpreter object.Interpreter, env *object.Environment, args 
 		return object.NativeBoolToBooleanObj(vm.InstanceOf(class.Name, instance))
 	}
 
-	return object.NewException("is_a expected a class or string for second argument")
+	return object.NewException("instanceOf expected a class or string for second argument")
 }
 
 func vmClassOf(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

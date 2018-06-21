@@ -6,7 +6,7 @@ separate parts of a larger application into manageable pieces.
 ## import(path: string[,required: bool = true]): T
 
 `import` will do a couple different things depending on whether the imported file is a Nitrogen script,
-compiled Nitrogen script, or a shared dynamically linked plugin.
+compiled Nitrogen script, or a [shared dynamically linked plugin](../../modules).
 
 In the case of a script, compiled or not, an import statement will execute the imported script as
 if it was part of the current environment. The included script is executed within its own block scope.
@@ -20,6 +20,10 @@ during import. If required is true, which is the default, then an exception is t
 this can be used to ensure the script always has its needed dependencies. If required is false, an error
 object is returned instead which can then be dealt with accordingly. Using error objects is more performant
 then using a try/catch.
+
+## modulesSupported(): bool
+
+Returns if the platform and build supports dynamic binary modules.
 
 ## Module path resolution
 

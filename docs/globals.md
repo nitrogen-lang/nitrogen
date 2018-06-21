@@ -20,3 +20,7 @@ the path name of the main script as it was called.
 ## _FILE
 
 `_FILE` is the absolute path to the currently executing script.
+
+## _SEARCH_PATHS
+
+`_SEARCH_PATHS` is an array containing the paths used for import search.

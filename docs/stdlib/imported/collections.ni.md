@@ -20,8 +20,20 @@ containing the elements of `arr` where `fn` returned true.
 `reduce` applies a function against an accumulator and each element in the array
 `arr` (from left to right) to reduce it to a single value.
 
+## foreach(col: array|map, fn: func(key, val))
+
+`foreach` will iterate over the supplied collection calling `fn` on each element.
+The function `fn` is given the index or map key and the element value. Returned
+values are ignored. To actually modify the element, use the `map()` function
+instead.
+
 ## arrayMatch(arr1, arr2: array): bool
 
-`arrayMatch` returns if arr1 and arr2 have the same length and all elements match
+`arrayMatch` returns if `arr1` and `arr2` have the same length and all elements match
 in order. If the arrays have the same elements but in different orders, `arrayMatch`
 will return false.
+
+## mapMatch(map1, map2: map): bool
+
+`mapMatch` returns if `map1` and `map2` have the same length and all elements match.
+`mapMatch` will recursively check nested maps and arrays.

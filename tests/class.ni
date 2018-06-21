@@ -16,17 +16,17 @@ let printer = class {
 let myPrinter = make printer(1)
 let myPrinter2 = make printer(2)
 
-if !is_a(myPrinter, printer) {
+if !instanceOf(myPrinter, printer) {
     println("myPrinter isn't a printer (class)")
 }
-if !is_a(myPrinter, 'printer') {
+if !instanceOf(myPrinter, 'printer') {
     println("myPrinter isn't a printer (string)")
 }
 
-if !is_a(myPrinter2, printer) {
+if !instanceOf(myPrinter2, printer) {
     println("myPrinter2 isn't a printer (class)")
 }
-if !is_a(myPrinter2, 'printer') {
+if !instanceOf(myPrinter2, 'printer') {
     println("myPrinter2 isn't a printer (string)")
 }
 
