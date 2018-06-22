@@ -76,7 +76,7 @@ func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Enviro
 		code:       code,
 		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
 		blockStack: make([]block, code.MaxBlockSize),
-		Env:        env,
+		env:        env,
 	}
 }
 
@@ -251,12 +251,12 @@ mainLoop:
 		case opcode.StoreConst:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.Env.IsConst(name) {
+			if vm.currentFrame.env.IsConst(name) {
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 				break
 			}
-			if _, err := vm.currentFrame.Env.CreateConst(name, vm.currentFrame.popStack()); err != nil {
+			if _, err := vm.currentFrame.env.CreateConst(name, vm.currentFrame.popStack()); err != nil {
 				fmt.Println(err)
 			}
 
@@ -279,7 +279,7 @@ mainLoop:
 
 		case opcode.LoadFast:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if val, ok := vm.currentFrame.Env.GetLocal(name); ok {
+			if val, ok := vm.currentFrame.env.GetLocal(name); ok {
 				vm.currentFrame.pushStack(val)
 				break
 			}
@@ -291,38 +291,38 @@ mainLoop:
 		case opcode.StoreFast:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.Env.IsConst(name) {
+			if vm.currentFrame.env.IsConst(name) {
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 				break
 			}
-			if _, exists := vm.currentFrame.Env.GetLocal(name); !exists {
+			if _, exists := vm.currentFrame.env.GetLocal(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Variable %s undefined\n", name))
 				vm.throw()
 				break
 			}
-			vm.currentFrame.Env.SetLocal(name, vm.currentFrame.popStack())
+			vm.currentFrame.env.SetLocal(name, vm.currentFrame.popStack())
 
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.Env.IsConst(name) {
+			if vm.currentFrame.env.IsConst(name) {
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 				break
 			}
-			if _, exists := vm.currentFrame.Env.GetLocal(name); exists {
+			if _, exists := vm.currentFrame.env.GetLocal(name); exists {
 				vm.currentFrame.pushStack(object.NewException("Variable %s already defined\n", name))
 				vm.throw()
 				break
 			}
-			vm.currentFrame.Env.Create(name, vm.currentFrame.popStack())
+			vm.currentFrame.env.Create(name, vm.currentFrame.popStack())
 
 		case opcode.LoadGlobal:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
-			p := vm.currentFrame.Env.Parent()
+			p := vm.currentFrame.env.Parent()
 			if p == nil {
-				p = vm.currentFrame.Env
+				p = vm.currentFrame.env
 			}
 			if val, ok := p.Get(name); ok {
 				vm.currentFrame.pushStack(val)
@@ -340,21 +340,21 @@ mainLoop:
 		case opcode.StoreGlobal:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Names[vm.getUint16()]
-			if vm.currentFrame.Env.IsConst(name) {
+			if vm.currentFrame.env.IsConst(name) {
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 				break
 			}
-			p := vm.currentFrame.Env.Parent()
+			p := vm.currentFrame.env.Parent()
 			if p == nil {
-				p = vm.currentFrame.Env
+				p = vm.currentFrame.env
 			}
 			if _, exists := p.Get(name); !exists {
 				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
 				vm.throw()
 				break
 			}
-			vm.currentFrame.Env.Set(name, vm.currentFrame.popStack())
+			vm.currentFrame.env.Set(name, vm.currentFrame.popStack())
 
 		case opcode.LoadIndex:
 			left := vm.currentFrame.popStack()
@@ -403,7 +403,7 @@ mainLoop:
 				Name:       fnName.Value,
 				Parameters: make([]string, len(params.Elements)),
 				Body:       codeBlock,
-				Env:        object.NewEnclosedEnv(vm.currentFrame.Env),
+				Env:        object.NewEnclosedEnv(vm.currentFrame.env),
 			}
 
 			for i, p := range params.Elements {
@@ -485,10 +485,10 @@ mainLoop:
 			}
 
 		case opcode.OpenScope:
-			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
 
 		case opcode.CloseScope:
-			vm.currentFrame.Env = vm.currentFrame.Env.Parent()
+			vm.currentFrame.env = vm.currentFrame.env.Parent()
 
 		case opcode.EndBlock:
 			vm.currentFrame.popBlock()
@@ -505,14 +505,14 @@ mainLoop:
 				end:   int(loopEnd),
 			}
 			vm.currentFrame.pushBlock(lb)
-			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
 
 		case opcode.Continue:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).iter
 
 		case opcode.NextIter:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).start
-			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env.Parent())
+			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env.Parent())
 
 		case opcode.Break:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).end
@@ -529,7 +529,7 @@ mainLoop:
 				sp:    vm.currentFrame.sp,
 			}
 			vm.currentFrame.pushBlock(tcb)
-			vm.currentFrame.Env = object.NewEnclosedEnv(vm.currentFrame.Env)
+			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
 
 		case opcode.Throw:
 			exc := vm.throw()
@@ -705,10 +705,10 @@ func (vm *VirtualMachine) throw() object.Object {
 		}
 	}
 
-	vm.currentFrame.Env = vm.currentFrame.Env.Parent().Parent() // Unwind block scoping
+	vm.currentFrame.env = vm.currentFrame.env.Parent().Parent() // Unwind block scoping
 	// Enclose once for new block (like a PREPARE_BLOCK) and another for block scope
 	// END_BLOCK removes two layers of environments
-	vm.currentFrame.Env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.Env))
+	vm.currentFrame.env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.env))
 	vm.currentFrame.pushStack(exception)
 	return nil
 }
@@ -726,7 +726,7 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 		}
 
 		iFields := object.NewEnvironment()
-		iFields.SetParent(vm.currentFrame.Env)
+		iFields.SetParent(vm.currentFrame.env)
 
 		for _, c := range classChain {
 			frame := vm.MakeFrame(c.Fields, iFields)
@@ -775,7 +775,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 			args[i] = vm.currentFrame.popStack()
 		}
 
-		env := vm.currentFrame.Env
+		env := vm.currentFrame.env
 		this := vm.currentFrame.frontInstance()
 		if this != nil {
 			env = object.NewEnclosedEnv(env)
@@ -837,7 +837,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 		}
 
 		for i := 0; i < paramLen; i++ {
-			newFrame.Env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
+			newFrame.env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
 		}
 
 		if int(argc) > paramLen {
@@ -846,9 +846,9 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 			for i := 0; i < remaining; i++ {
 				rest[i] = vm.currentFrame.popStack()
 			}
-			newFrame.Env.SetForce("arguments", &object.Array{Elements: rest}, false)
+			newFrame.env.SetForce("arguments", &object.Array{Elements: rest}, false)
 		} else {
-			newFrame.Env.SetForce("arguments", &object.Array{Elements: []object.Object{}}, false)
+			newFrame.env.SetForce("arguments", &object.Array{Elements: []object.Object{}}, false)
 		}
 
 		if now {

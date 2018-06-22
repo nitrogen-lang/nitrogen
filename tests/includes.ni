@@ -12,19 +12,19 @@ try {
 } catch {pass}
 
 // Test a real import
-import './includes/math.ni' as add
+import './includes/math.ni'
 
-if isError(add) {
+if isError(math.add) {
     println("Test Failed: Include failed")
-    println(add)
+    println(math.add)
     return
 }
 
-if !isFunc(add) {
+if !isFunc(math.add) {
     println("Test Failed: Add is not a function")
     return
 }
 
-if add(2, 4) != 6 {
+if math.add(2, 4) != 6 {
     println("Test Failed: Add func failed")
 }

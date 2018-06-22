@@ -102,7 +102,11 @@ func (p *Parser) parseImport() ast.Statement {
 
 func importName(path string) string {
 	path = filepath.Base(path)
-	path = path[:strings.LastIndex(path, ".")]
+	dotIndex := strings.Index(path, ".")
+	if dotIndex > -1 {
+		path = path[:strings.Index(path, ".")]
+	}
+
 	if isIdent(path) {
 		return path
 	}

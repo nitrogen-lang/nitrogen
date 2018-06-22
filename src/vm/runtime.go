@@ -44,7 +44,7 @@ type Frame struct {
 	sp         int
 	blockStack []block
 	bp         int
-	Env        *object.Environment
+	env        *object.Environment
 	pc         int
 }
 

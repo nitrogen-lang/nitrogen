@@ -406,17 +406,20 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 
 	bodyCCB := &codeBlockCompiler{
 		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table) - 1),
+		locals:    newStringTableOffset(len(ccb.locals.table)),
 		names:     ccb.names,
 		code:      new(bytes.Buffer),
 		filename:  ccb.filename,
 		offset:    mainCode.Len() + ccb.offset,
 	}
 
-	ccb.offset = mainCode.Len() + ccb.offset
-	ccb.code = new(bytes.Buffer)
 	compile(bodyCCB, try.Try)
 	tryBlock := bodyCCB.code
+
+	// This copies the local variables into the outer compile block for table indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
+		ccb.locals.indexOf(n)
+	}
 
 	// 6 = 2 opcodes + 2 x 2 byte args (START_TRY and JUMP_FORWARD)
 	catchBlockLoc := mainCode.Len() + tryBlock.Len() + 6

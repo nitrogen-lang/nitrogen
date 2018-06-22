@@ -11,7 +11,7 @@ import (
 var included = make(map[string]*ast.Program)
 
 func (vm *VirtualMachine) importPackage(name, path string) {
-	searchPaths, ok := vm.currentFrame.Env.Get("_SEARCH_PATHS")
+	searchPaths, ok := vm.currentFrame.env.Get("_SEARCH_PATHS")
 	if !ok {
 		vm.currentFrame.pushStack(object.NewException("_SEARCH_PATHS variable not found, required for module lookup"))
 		vm.throw()
@@ -43,7 +43,10 @@ func (vm *VirtualMachine) importPackage(name, path string) {
 		return
 	}
 
-	vm.currentFrame.Env.SetForce(name, module, true)
+	_, err := vm.currentFrame.env.Set(name, module)
+	if err != nil {
+		vm.currentFrame.env.SetForce(name, module, false)
+	}
 }
 
 func importScriptFile(vm *VirtualMachine, scriptPath string) object.Object {
@@ -52,7 +55,7 @@ func importScriptFile(vm *VirtualMachine, scriptPath string) object.Object {
 		return object.NewException("importing %s failed %s", scriptPath, err.Error())
 	}
 
-	env := object.NewEnclosedEnv(vm.currentFrame.Env)
+	env := object.NewEnclosedEnv(vm.currentFrame.env)
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
 	return vm.RunFrame(vm.MakeFrame(code, env), true)
 }
