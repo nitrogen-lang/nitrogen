@@ -70,6 +70,7 @@ const (
 	MakeInstance
 	OpenScope
 	CloseScope
+	Import
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 )
@@ -110,6 +111,7 @@ var HasTwoByteArg = map[Opcode]bool{
 	StartTry:         true,
 	BuildClass:       true,
 	MakeInstance:     true,
+	Import:           true,
 }
 
 var HasOneByteArg = map[Opcode]bool{
@@ -195,6 +197,7 @@ var Names = map[Opcode]string{
 	MakeInstance:     "MAKE_INSTANCE",
 	OpenScope:        "OPEN_SCOPE",
 	CloseScope:       "CLOSE_SCOPE",
+	Import:           "IMPORT",
 }
 
 var CmpOps = map[byte]string{

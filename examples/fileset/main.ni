@@ -1,4 +1,4 @@
-let otherFile = import('./another.ni')
+import './another.ni' as otherFile
 
 func main() {
     otherFile()

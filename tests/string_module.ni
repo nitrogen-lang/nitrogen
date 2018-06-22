@@ -2,7 +2,7 @@ if !modulesSupported() {
     return
 }
 
-const str = import('strings.so')
+import 'strings.so' as str
 
 let testStr = "abcefguvwxyz"
 

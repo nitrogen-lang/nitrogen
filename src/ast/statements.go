@@ -65,6 +65,26 @@ func (d *DefStatement) String() string {
 	return out.String()
 }
 
+type ImportStatement struct {
+	Token token.Token // the token.Import token
+	Path  *StringLiteral
+	Name  *Identifier
+}
+
+func (i *ImportStatement) statementNode()       {}
+func (i *ImportStatement) TokenLiteral() string { return i.Token.Literal }
+func (i *ImportStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("import ")
+	out.WriteString(i.Path.String())
+	out.WriteString(" as ")
+	out.WriteString(i.Name.String())
+	out.WriteByte(';')
+
+	return out.String()
+}
+
 type AssignStatement struct {
 	Token token.Token // the token.DEF token
 	Left  Expression

@@ -76,7 +76,7 @@ func calculateStackSize(c []byte) int {
 		case opcode.BinaryAdd, opcode.BinarySub, opcode.BinaryMul, opcode.BinaryDivide, opcode.BinaryMod, opcode.BinaryShiftL,
 			opcode.BinaryShiftR, opcode.BinaryAnd, opcode.BinaryOr, opcode.BinaryNot, opcode.BinaryAndNot,
 			opcode.StoreConst, opcode.StoreFast, opcode.Define, opcode.StoreGlobal, opcode.LoadIndex, opcode.Compare,
-			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.Throw:
+			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.Throw, opcode.Import:
 			stackSize.sub(1)
 		case opcode.Call:
 			params := int(bytesToUint16(c[offset], c[offset+1]))
@@ -296,6 +296,10 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileIfStatement(ccb, node)
 	case *ast.CompareExpression:
 		compileCompareExpression(ccb, node)
+	case *ast.ImportStatement:
+		compile(ccb, node.Path)
+		ccb.code.WriteByte(opcode.Import.ToByte())
+		ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name.Value)))
 
 	case *ast.FunctionLiteral:
 		compileFunction(ccb, node, false, false)

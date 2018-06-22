@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"regexp"
+
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
@@ -41,4 +43,10 @@ func createKeywordToken(keyword string) token.Token {
 		Type:    token.LookupIdent(keyword),
 		Literal: keyword,
 	}
+}
+
+var identRegex = regexp.MustCompile(`^[\p{L}_][\p{L}\d_]*$`)
+
+func isIdent(s string) bool {
+	return identRegex.MatchString(s)
 }

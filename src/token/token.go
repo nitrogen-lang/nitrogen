@@ -98,6 +98,8 @@ const (
 	Class
 	Make
 	Pass
+	Import
+	As
 	keywordEnd
 )
 
@@ -177,6 +179,8 @@ var tokens = [...]string{
 	Class:    "class",
 	Make:     "make",
 	Pass:     "pass",
+	Import:   "import",
+	As:       "as",
 }
 
 var keywords map[string]TokenType

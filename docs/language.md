@@ -398,7 +398,7 @@ having to use a loop. The functions takes a functions that receives the index an
 ```
 let continents = ["Asia", "Africa", "North America", "South America", "Antarctica", "Europe", "Australia"]
 
-const collections = import('collections.ni')
+import 'collections.ni'
 
 collections.foreach(continents, func(i, v) {
     println(v) // Prints each continent
@@ -426,7 +426,7 @@ A try/catch is also an expression and will return whatever the try block evaluat
 
 ```
 let m1 = try {
-    import("os.so")
+    import "os.so"
 } catch e {
     println('Import failed: ', e)
 }
@@ -441,11 +441,11 @@ Try blocks can be nested for fallback functionality:
 
 ```
 let m1 = try {
-    import('non-existant-module')
+    import 'non-existant-module'
 } catch e {
     println('Import failed: ', e)
     try {
-        import('os')
+        import 'os'
     } catch e {
         println('Import2 failed: ', e)
     }

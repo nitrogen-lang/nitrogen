@@ -2,6 +2,8 @@ package parser
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
@@ -24,6 +26,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseClassDefStatement()
 	case token.For:
 		return p.parseForLoop()
+	case token.Import:
+		return p.parseImport()
 	case token.Throw:
 		p.nextToken()
 		t := &ast.ThrowStatement{
@@ -53,6 +57,56 @@ func (p *Parser) parseStatement() ast.Statement {
 		return stat
 	}
 	return p.parseExpressionStatement()
+}
+
+func (p *Parser) parseImport() ast.Statement {
+	stmt := &ast.ImportStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.String) {
+		return nil
+	}
+
+	if p.curToken.Literal == "" {
+		p.addErrorWithPos("import path cannot be empty")
+		return nil
+	}
+
+	stmt.Path = &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+
+		stmt.Name = &ast.Identifier{Value: importName(stmt.Path.Value)}
+		if stmt.Name.Value == "" {
+			p.addErrorWithPos("import path does not create a valid identifier")
+			return nil
+		}
+		return stmt
+	}
+
+	if !p.expectPeek(token.As) {
+		return nil
+	}
+
+	if !p.expectPeek(token.Identifier) {
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+	return stmt
+}
+
+func importName(path string) string {
+	path = filepath.Base(path)
+	path = path[:strings.LastIndex(path, ".")]
+	if isIdent(path) {
+		return path
+	}
+	return ""
 }
 
 func (p *Parser) parseDefStatement() ast.Statement {

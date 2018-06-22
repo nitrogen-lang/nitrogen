@@ -517,6 +517,11 @@ mainLoop:
 		case opcode.Break:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).end
 
+		case opcode.Import:
+			name := vm.currentFrame.code.Locals[vm.getUint16()]
+			path := vm.currentFrame.popStack().(*object.String)
+			vm.importPackage(name, path.Value)
+
 		case opcode.StartTry:
 			catch := vm.getUint16()
 			tcb := &tryBlock{
@@ -531,7 +536,6 @@ mainLoop:
 			if exc != nil {
 				return exc
 			}
-			break
 
 		case opcode.BuildClass:
 			methodNum := vm.getUint16()

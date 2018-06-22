@@ -194,7 +194,52 @@ func TestGeneralAssignments(t *testing.T) {
 	}
 
 	if ident.Value != "variable" {
-		t.Fatalf("ident is not correct. expected=\"variable\", got=%s",
-			ident.Value)
+		t.Fatalf("ident is not correct. expected=\"variable\", got=%s", ident.Value)
+	}
+}
+
+func TestImport(t *testing.T) {
+	input := `import "http.ni";`
+
+	l := lexer.NewString(input)
+	p := New(l, nil)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0]
+	imp, ok := stmt.(*ast.ImportStatement)
+	if !ok {
+		t.Fatalf("exp is not ast.ImportStatement. got=%T", stmt)
+	}
+
+	if imp.Path.Value != "http.ni" {
+		t.Fatalf("import path is not correct. Expected \"http.ni\", got %s", imp.Path.Value)
+	}
+
+	if imp.Name.Value != "http" {
+		t.Fatalf("import name is not correct. Expected \"http\", got %s", imp.Name.Value)
+	}
+}
+
+func TestImportWithAs(t *testing.T) {
+	input := `import "http.ni" as http2;`
+
+	l := lexer.NewString(input)
+	p := New(l, nil)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0]
+	imp, ok := stmt.(*ast.ImportStatement)
+	if !ok {
+		t.Fatalf("exp is not ast.ImportStatement. got=%T", stmt)
+	}
+
+	if imp.Path.Value != "http.ni" {
+		t.Fatalf("import path is not correct. Expected \"http.ni\", got %s", imp.Path.Value)
+	}
+
+	if imp.Name.Value != "http2" {
+		t.Fatalf("import name is not correct. Expected \"http2\", got %s", imp.Name.Value)
 	}
 }
