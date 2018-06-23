@@ -1,10 +1,5 @@
 image: golang:latest
 
-only:
-    - master
-    - develop
-    - web
-
 variables:
   REPO_NAME: github.com/nitrogen-lang/nitrogen
 
@@ -19,6 +14,10 @@ stages:
     - test_nitrogen
 
 lint_and_test:
+    only:
+        - master
+        - develop
+        - web
     stage: test
     script:
       - go fmt ./...
@@ -26,6 +25,10 @@ lint_and_test:
       - go test -race ./...
 
 compile:
+    only:
+        - master
+        - develop
+        - web
     stage: build
     script: make
     artifacts:
@@ -34,6 +37,10 @@ compile:
         - built-modules/
 
 test_nitrogen_scripts:
+    only:
+        - master
+        - develop
+        - web
     stage: test_nitrogen
     script: make nitrogen-test
     dependencies:
