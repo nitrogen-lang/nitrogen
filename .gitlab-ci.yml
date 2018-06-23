@@ -1,5 +1,10 @@
 image: golang:latest
 
+only:
+    - master
+    - develop
+    - web
+
 variables:
   REPO_NAME: github.com/nitrogen-lang/nitrogen
 
