@@ -1,0 +1,35 @@
+image: golang:latest
+
+variables:
+  REPO_NAME: github.com/nitrogen-lang/nitrogen
+
+before_script:
+  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+  - cd $GOPATH/src/$REPO_NAME
+
+stages:
+    - test
+    - build
+    - test_nitrogen
+
+lint_and_test:
+    stage: test
+    script:
+      - go fmt ./...
+      - go vet ./...
+      - go test -race ./...
+
+compile:
+    stage: build
+    script: make
+    artifacts:
+      paths:
+        - bin/nitrogen
+        - built-modules/
+
+test_nitrogen_scripts:
+    stage: test_nitrogen
+    script: make nitrogen-test
+    dependencies:
+        - compile
