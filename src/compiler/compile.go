@@ -292,6 +292,9 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.WriteByte(opcode.StoreGlobal.ToByte())
 			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(ident.Value)))
 		}
+	case *ast.DeleteStatement:
+		ccb.code.WriteByte(opcode.DeleteFast.ToByte())
+		ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(node.Name)))
 	case *ast.IfExpression:
 		compileIfStatement(ccb, node)
 	case *ast.CompareExpression:

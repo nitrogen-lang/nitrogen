@@ -28,6 +28,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseForLoop()
 	case token.Import:
 		return p.parseImport()
+	case token.Delete:
+		return p.parseDelete()
 	case token.Throw:
 		p.nextToken()
 		t := &ast.ThrowStatement{
@@ -57,6 +59,21 @@ func (p *Parser) parseStatement() ast.Statement {
 		return stat
 	}
 	return p.parseExpressionStatement()
+}
+
+func (p *Parser) parseDelete() ast.Statement {
+	stmt := &ast.DeleteStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.Identifier) {
+		return nil
+	}
+
+	stmt.Name = p.curToken.Literal
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+	return stmt
 }
 
 func (p *Parser) parseImport() ast.Statement {

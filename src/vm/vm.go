@@ -291,7 +291,7 @@ mainLoop:
 		case opcode.StoreFast:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.env.IsConst(name) {
+			if vm.currentFrame.env.IsConstLocal(name) {
 				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
 				vm.throw()
 				break
@@ -302,6 +302,15 @@ mainLoop:
 				break
 			}
 			vm.currentFrame.env.SetLocal(name, vm.currentFrame.popStack())
+
+		case opcode.DeleteFast:
+			name := vm.currentFrame.code.Locals[vm.getUint16()]
+			if vm.currentFrame.env.IsConstLocal(name) {
+				vm.currentFrame.pushStack(object.NewException("Cannot delete constant %s\n", name))
+				vm.throw()
+				break
+			}
+			vm.currentFrame.env.UnsetLocal(name)
 
 		case opcode.Define:
 			// Ensure constant isn't redefined

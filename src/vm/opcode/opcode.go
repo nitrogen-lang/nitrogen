@@ -26,6 +26,7 @@ const (
 	StoreConst
 	LoadFast
 	StoreFast
+	DeleteFast
 	Define
 	LoadGlobal
 	StoreGlobal
@@ -94,6 +95,7 @@ var HasTwoByteArg = map[Opcode]bool{
 	StoreConst:       true,
 	LoadFast:         true,
 	StoreFast:        true,
+	DeleteFast:       true,
 	Define:           true,
 	LoadGlobal:       true,
 	StoreGlobal:      true,
@@ -153,6 +155,7 @@ var Names = map[Opcode]string{
 	StoreConst:       "STORE_CONST",
 	LoadFast:         "LOAD_FAST",
 	StoreFast:        "STORE_FAST",
+	DeleteFast:       "DELETE_FAST",
 	Define:           "DEFINE",
 	LoadGlobal:       "LOAD_GLOBAL",
 	StoreGlobal:      "STORE_GLOBAL",

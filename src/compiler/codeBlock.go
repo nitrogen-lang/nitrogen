@@ -47,7 +47,7 @@ func (cb *CodeBlock) Print(indent string) {
 		case opcode.LoadConst:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t%d (%s)", index, cb.Constants[index].Inspect())
-		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst:
+		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst, opcode.DeleteFast:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t%d (%s)", index, cb.Locals[index])
 		case opcode.Define, opcode.Import:

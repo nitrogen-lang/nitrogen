@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
@@ -74,15 +75,18 @@ type ImportStatement struct {
 func (i *ImportStatement) statementNode()       {}
 func (i *ImportStatement) TokenLiteral() string { return i.Token.Literal }
 func (i *ImportStatement) String() string {
-	var out bytes.Buffer
+	return fmt.Sprintf("import %s as %s;", i.Path.String(), i.Name.String())
+}
 
-	out.WriteString("import ")
-	out.WriteString(i.Path.String())
-	out.WriteString(" as ")
-	out.WriteString(i.Name.String())
-	out.WriteByte(';')
+type DeleteStatement struct {
+	Token token.Token
+	Name  string
+}
 
-	return out.String()
+func (d *DeleteStatement) statementNode()       {}
+func (d *DeleteStatement) TokenLiteral() string { return d.Token.Literal }
+func (d *DeleteStatement) String() string {
+	return fmt.Sprintf("delete %s;", d.Name)
 }
 
 type AssignStatement struct {

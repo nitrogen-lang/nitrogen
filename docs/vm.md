@@ -20,6 +20,8 @@ These are all the opcodes used in this implementation.
 
 ### STORE\_FAST
 
+### DELETE\_FAST
+
 ### DEFINE
 
 ### LOAD\_GLOBAL

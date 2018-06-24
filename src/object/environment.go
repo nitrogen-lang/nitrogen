@@ -200,36 +200,47 @@ func (e *Environment) SetForce(name string, val Object, readonly bool) {
 	}
 }
 
-func (e *Environment) findParentNode(name string) *eco {
+func (e *Environment) findParentNode(name string) (*eco, *eco) {
 	if e == nil {
-		return nil
+		return nil, nil // No environment
 	}
 
 	v := e.root
 	if v == nil {
-		return nil
+		return nil, nil // Environment has no items
+	}
+
+	if v.name == name {
+		return nil, v // Element is the root, no parent
 	}
 
 	for v.n != nil {
 		if v.n.name == name {
-			return v
+			return v, v.n // Element was found and has parent
 		}
 		v = v.n
 	}
-	return nil
+	return nil, nil // Element not found
 }
 
 func (e *Environment) UnsetLocal(name string) {
-	p := e.findParentNode(name)
+	p, el := e.findParentNode(name)
 	if p != nil {
 		p.n = p.n.n
+	}
+	if p == nil && el != nil {
+		e.root = nil
 	}
 }
 
 func (e *Environment) Unset(name string) {
-	p := e.findParentNode(name)
+	p, el := e.findParentNode(name)
 	if p != nil {
 		p.n = p.n.n
+		return
+	}
+	if p == nil && el != nil {
+		e.root = nil
 		return
 	}
 

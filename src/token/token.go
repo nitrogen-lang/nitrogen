@@ -100,6 +100,7 @@ const (
 	Pass
 	Import
 	As
+	Delete
 	keywordEnd
 )
 
@@ -181,6 +182,7 @@ var tokens = [...]string{
 	Pass:     "pass",
 	Import:   "import",
 	As:       "as",
+	Delete:   "delete",
 }
 
 var keywords map[string]TokenType
