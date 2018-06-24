@@ -538,7 +538,6 @@ mainLoop:
 				sp:    vm.currentFrame.sp,
 			}
 			vm.currentFrame.pushBlock(tcb)
-			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
 
 		case opcode.Throw:
 			exc := vm.throw()
@@ -710,14 +709,10 @@ func (vm *VirtualMachine) throw() object.Object {
 			}
 
 			vm.currentFrame = cframe // Reset frame for stack trace
-			panic(object.NewException("Uncaught Exception: %s", exception.Inspect()))
+			panic(exc)
 		}
 	}
 
-	vm.currentFrame.env = vm.currentFrame.env.Parent().Parent() // Unwind block scoping
-	// Enclose once for new block (like a PREPARE_BLOCK) and another for block scope
-	// END_BLOCK removes two layers of environments
-	vm.currentFrame.env = object.NewEnclosedEnv(object.NewEnclosedEnv(vm.currentFrame.env))
 	vm.currentFrame.pushStack(exception)
 	return nil
 }

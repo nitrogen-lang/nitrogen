@@ -229,7 +229,7 @@ func (e *Environment) UnsetLocal(name string) {
 		p.n = p.n.n
 	}
 	if p == nil && el != nil {
-		e.root = nil
+		e.root = el.n
 	}
 }
 
@@ -240,7 +240,7 @@ func (e *Environment) Unset(name string) {
 		return
 	}
 	if p == nil && el != nil {
-		e.root = nil
+		e.root = el.n
 		return
 	}
 

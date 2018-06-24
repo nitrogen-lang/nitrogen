@@ -399,30 +399,16 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 }
 
 func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
-	ccb.code.WriteByte(opcode.OpenScope.ToByte())
-
 	_, tryNoNil := try.Try.Statements[len(try.Try.Statements)-1].(*ast.ExpressionStatement)
 	_, catchNoNil := try.Catch.Statements[len(try.Catch.Statements)-1].(*ast.ExpressionStatement)
 
 	mainCode := ccb.code
 	oldOffset := ccb.offset
 
-	bodyCCB := &codeBlockCompiler{
-		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table)),
-		names:     ccb.names,
-		code:      new(bytes.Buffer),
-		filename:  ccb.filename,
-		offset:    mainCode.Len() + ccb.offset,
-	}
-
-	compile(bodyCCB, try.Try)
-	tryBlock := bodyCCB.code
-
-	// This copies the local variables into the outer compile block for table indexing
-	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
-		ccb.locals.indexOf(n)
-	}
+	ccb.offset = mainCode.Len() + ccb.offset
+	ccb.code = new(bytes.Buffer)
+	compile(ccb, try.Try)
+	tryBlock := ccb.code
 
 	// 6 = 2 opcodes + 2 x 2 byte args (START_TRY and JUMP_FORWARD)
 	catchBlockLoc := mainCode.Len() + tryBlock.Len() + 6
@@ -439,7 +425,7 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 
 	catchSymOffset := 1 // Catch doesn't bind exception, just pops it
 	if try.Symbol != nil {
-		catchSymOffset = 3 // Catch binds exception to a variable
+		catchSymOffset = 6 // Catch binds exception to a variable
 	}
 	if tryNoNil && !catchNoNil {
 		catchSymOffset += 3 // Skip load nil from catch block
@@ -456,7 +442,7 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 	ccb.code.Write(uint16ToBytes(uint16(catchBlockLoc)))
 	ccb.code.Write(tryBlock.Bytes())
 
-	ccb.code.WriteByte(opcode.JumpForward.ToByte())
+	ccb.code.WriteByte(opcode.JumpForward.ToByte()) // No exception, jump past catch block
 	ccb.code.Write(uint16ToBytes(uint16(catchBlock.Len() + catchSymOffset)))
 
 	if try.Symbol == nil {
@@ -467,6 +453,10 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 	}
 
 	ccb.code.Write(catchBlock.Bytes())
+	if try.Symbol != nil {
+		ccb.code.WriteByte(opcode.DeleteFast.ToByte())
+		ccb.code.Write(uint16ToBytes(ccb.locals.indexOf(try.Symbol.Value)))
+	}
 	if catchNoNil && !tryNoNil {
 		ccb.code.WriteByte(opcode.JumpForward.ToByte())
 		ccb.code.Write(uint16ToBytes(3))
@@ -475,8 +465,6 @@ func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
 		compileLoadNull(ccb)
 	}
 	ccb.code.WriteByte(opcode.EndBlock.ToByte())
-	ccb.code.WriteByte(opcode.CloseScope.ToByte())
-	ccb.code.WriteByte(opcode.CloseScope.ToByte())
 }
 
 func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {

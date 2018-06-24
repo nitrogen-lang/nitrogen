@@ -23,3 +23,7 @@ if m1 != expected {
 if !isDefined("fastVar") {
     println('Try/catch block test failed, fastVar not defined locally')
 }
+
+if isDefined("e") {
+    println('Test Failed: e is defined outside catch block')
+}
