@@ -95,6 +95,14 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) object.Object
 			} else {
 				fmt.Fprintln(vm.GetStderr(), r)
 				fmt.Fprintln(vm.GetStderr(), string(debug.Stack()))
+
+				fmt.Fprintln(vm.GetStderr(), "VM Stack Trace:")
+				frame := vm.currentFrame
+				for frame != nil {
+					fmt.Fprintf(vm.GetStderr(), "\t%s: %s\n", frame.code.Filename, frame.code.Name)
+					frame = frame.lastFrame
+				}
+				vm.unwind = true
 			}
 		}
 	}()

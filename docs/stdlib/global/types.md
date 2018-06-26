@@ -8,6 +8,10 @@ Convert a number to an int. Some information will be lost when converting from a
 
 Convert a number to a float.
 
+## toString(in: T): string
+
+Convert any value into its stringified form.
+
 ## isFloat(in: T): bool
 ## isInt(in: T): bool
 ## isBool(in: T): bool

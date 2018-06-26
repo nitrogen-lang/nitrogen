@@ -327,7 +327,11 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 	}
 
 	p.nextToken()
-	list = append(list, p.parseExpression(priLowest).(ast.Expression))
+	expr := p.parseExpression(priLowest)
+	if expr == nil {
+		return nil
+	}
+	list = append(list, expr.(ast.Expression))
 
 	for p.peekTokenIs(token.Comma) {
 		p.nextToken()
@@ -335,7 +339,11 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 		if p.curTokenIs(end) {
 			return list
 		}
-		list = append(list, p.parseExpression(priLowest).(ast.Expression))
+		expr := p.parseExpression(priLowest)
+		if expr == nil {
+			return nil
+		}
+		list = append(list, expr.(ast.Expression))
 	}
 
 	if !p.expectPeek(end) {

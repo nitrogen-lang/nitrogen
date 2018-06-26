@@ -111,6 +111,8 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		converted = strconv.FormatBool(arg.Value)
 	case *object.Null:
 		converted = "nil"
+	default:
+		converted = arg.Inspect()
 	}
 
 	return &object.String{Value: converted}

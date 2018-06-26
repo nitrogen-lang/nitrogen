@@ -228,6 +228,10 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		funcName := stmt.Name.String()
+		if funcName == "" {
+			funcName = "(anonymous)"
+		}
 		fun.Name = stmt.Name.String()
 		fun.FQName = stmt.Name.String()
 	}

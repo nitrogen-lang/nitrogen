@@ -11,7 +11,11 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	if p.settings.Debug {
 		fmt.Println("parseFunctionLiteral")
 	}
-	lit := &ast.FunctionLiteral{Token: p.curToken}
+	lit := &ast.FunctionLiteral{
+		Token:  p.curToken,
+		Name:   "(anonymous)",
+		FQName: "(anonymous)",
+	}
 
 	if !p.expectPeek(token.LParen) {
 		return nil
