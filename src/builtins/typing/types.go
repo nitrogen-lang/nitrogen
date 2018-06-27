@@ -75,7 +75,7 @@ func makeIsTypeBuiltin(t object.ObjectType) object.BuiltinFunction {
 }
 
 func varTypeBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	return &object.String{Value: args[0].Type().String()}
+	return object.MakeStringObj(args[0].Type().String())
 }
 
 func getErrorVal(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -85,12 +85,12 @@ func getErrorVal(interpreter object.Interpreter, env *object.Environment, args .
 
 	switch arg := args[0].(type) {
 	case *object.Error:
-		return &object.String{Value: arg.Message}
+		return object.MakeStringObj(arg.Message)
 	case *object.Exception:
-		return &object.String{Value: arg.Message}
+		return object.MakeStringObj(arg.Message)
 	}
 
-	return &object.String{Value: ""}
+	return object.MakeStringObj("")
 }
 
 func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -102,7 +102,7 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 
 	switch arg := args[0].(type) {
 	case *object.String:
-		converted = arg.Value
+		converted = arg.String()
 	case *object.Float:
 		converted = strconv.FormatFloat(arg.Value, 'G', -1, 64)
 	case *object.Integer:
@@ -115,7 +115,7 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		converted = arg.Inspect()
 	}
 
-	return &object.String{Value: converted}
+	return object.MakeStringObj(converted)
 }
 
 func parseIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -128,7 +128,7 @@ func parseIntBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		return object.NewException("parseInt expected a string, got %s", args[0].Type().String())
 	}
 
-	i, err := strconv.ParseInt(str.Value, 10, 64)
+	i, err := strconv.ParseInt(str.String(), 10, 64)
 	if err != nil {
 		return object.NullConst
 	}
@@ -146,7 +146,7 @@ func parseFloatBuiltin(interpreter object.Interpreter, env *object.Environment, 
 		return object.NewException("parseFloat expected a string, got %s", args[0].Type().String())
 	}
 
-	f, err := strconv.ParseFloat(str.Value, 64)
+	f, err := strconv.ParseFloat(str.String(), 64)
 	if err != nil {
 		return object.NullConst
 	}
@@ -164,6 +164,6 @@ func isDefinedBuiltin(interpreter object.Interpreter, env *object.Environment, a
 		return object.NewException("isDefined expects a string, got %s", args[0].Type().String())
 	}
 
-	_, ok = env.Get(ident.Value)
+	_, ok = env.Get(ident.String())
 	return object.NativeBoolToBooleanObj(ok)
 }

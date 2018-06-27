@@ -256,7 +256,7 @@ type arraySorter struct {
 
 func (s *arraySorter) Len() int { return len(s.a.Elements) }
 func (s *arraySorter) Less(i, j int) bool {
-	return s.a.Elements[i].(*object.String).Value < s.a.Elements[j].(*object.String).Value
+	return s.a.Elements[i].(*object.String).String() < s.a.Elements[j].(*object.String).String()
 }
 func (s *arraySorter) Swap(i, j int) {
 	s.a.Elements[i], s.a.Elements[j] = s.a.Elements[j], s.a.Elements[i]

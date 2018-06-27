@@ -113,7 +113,7 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 				return uint16(i)
 			}
 		case *object.String:
-			if node.Value == o.(*object.String).Value {
+			if node.Inspect() == o.(*object.String).Inspect() {
 				return uint16(i)
 			}
 		case *object.Float:

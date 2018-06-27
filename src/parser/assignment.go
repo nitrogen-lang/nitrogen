@@ -88,12 +88,12 @@ func (p *Parser) parseImport() ast.Statement {
 		return nil
 	}
 
-	stmt.Path = &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Path = &ast.StringLiteral{Token: p.curToken, Value: []rune(p.curToken.Literal)}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 
-		stmt.Name = &ast.Identifier{Value: importName(stmt.Path.Value)}
+		stmt.Name = &ast.Identifier{Value: importName(stmt.Path.String())}
 		if stmt.Name.Value == "" {
 			p.addErrorWithPos("import path does not create a valid identifier")
 			return nil

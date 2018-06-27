@@ -87,7 +87,7 @@ func (vm *VirtualMachine) evalStringBinaryExpression(op string, left, right obje
 
 	switch op {
 	case "+":
-		return &object.String{Value: leftVal + rightVal}
+		return &object.String{Value: append(leftVal, rightVal...)}
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())

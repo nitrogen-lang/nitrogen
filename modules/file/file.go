@@ -68,12 +68,12 @@ func openFile(interpreter object.Interpreter, env *object.Environment, args ...o
 		return object.NewException("openFile expected a string, got %s", args[0].Type().String())
 	}
 
-	fileMode, ok := modes[mode.Value]
+	fileMode, ok := modes[mode.String()]
 	if !ok {
-		return object.NewException("Invalid file mode %s", mode.Value)
+		return object.NewException("Invalid file mode %s", mode.String())
 	}
 
-	file, err := os.OpenFile(filepath.Value, fileMode, 0644)
+	file, err := os.OpenFile(filepath.String(), fileMode, 0644)
 	if err != nil {
 		return object.NewException("Error opening file %s", err.Error())
 	}
@@ -111,7 +111,7 @@ func writeFile(interpreter object.Interpreter, env *object.Environment, args ...
 		return object.NewException("writeFile expected a string, got %s", args[1].Type().String())
 	}
 
-	written, err := file.file.WriteString(str.Value)
+	written, err := file.file.WriteString(str.String())
 	if err != nil {
 		fmt.Fprintln(interpreter.GetStderr(), err)
 	}
@@ -129,12 +129,12 @@ func readFullFile(interpreter object.Interpreter, env *object.Environment, args 
 		return object.NewException("readFullFile expected a string, got %s", args[0].Type().String())
 	}
 
-	file, err := ioutil.ReadFile(filepath.Value)
+	file, err := ioutil.ReadFile(filepath.String())
 	if err != nil {
 		return object.NewException("Error reading file %s", err.Error())
 	}
 
-	return &object.String{Value: string(file)}
+	return object.MakeStringObj(string(file))
 }
 
 func deleteFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -147,11 +147,11 @@ func deleteFile(interpreter object.Interpreter, env *object.Environment, args ..
 		return object.NewException("deleteFile expected a string, got %s", args[0].Type().String())
 	}
 
-	if !fileExistsCheck(filepath.Value) {
+	if !fileExistsCheck(filepath.String()) {
 		return object.NullConst
 	}
 
-	if err := os.Remove(filepath.Value); err != nil {
+	if err := os.Remove(filepath.String()); err != nil {
 		return object.NewException("Error reading file %s", err.Error())
 	}
 
@@ -168,7 +168,7 @@ func fileExists(interpreter object.Interpreter, env *object.Environment, args ..
 		return object.NewException("fileExists expected a string, got %s", args[0].Type().String())
 	}
 
-	return &object.Boolean{Value: fileExistsCheck(filepath.Value)}
+	return &object.Boolean{Value: fileExistsCheck(filepath.String())}
 }
 
 func fileExistsCheck(file string) bool {
@@ -191,7 +191,7 @@ func renameFile(interpreter object.Interpreter, env *object.Environment, args ..
 		return object.NewException("renameFile expected a string, got %s", args[0].Type().String())
 	}
 
-	if err := os.Rename(oldPath.Value, newPath.Value); err != nil {
+	if err := os.Rename(oldPath.String(), newPath.String()); err != nil {
 		return object.NewError("Error renaming file %s", err.Error())
 	}
 
@@ -208,7 +208,7 @@ func directoryList(interpreter object.Interpreter, env *object.Environment, args
 		return object.NewException("dirList expected a string, got %s", args[0].Type().String())
 	}
 
-	file, err := os.Open(filepath.Value)
+	file, err := os.Open(filepath.String())
 	if err != nil {
 		return object.NewException("Error opening directory %s", err.Error())
 	}
@@ -231,7 +231,7 @@ func isDirectory(interpreter object.Interpreter, env *object.Environment, args .
 		return object.NewException("dirList expected a string, got %s", args[0].Type().String())
 	}
 
-	file, err := os.Stat(filepath.Value)
+	file, err := os.Stat(filepath.String())
 	if err != nil {
 		return object.NewException("Error opening directory %s", err.Error())
 	}

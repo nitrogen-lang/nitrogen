@@ -417,14 +417,14 @@ mainLoop:
 			codeBlock := vm.currentFrame.popStack().(*compiler.CodeBlock)
 
 			fn := &VMFunction{
-				Name:       fnName.Value,
+				Name:       fnName.String(),
 				Parameters: make([]string, len(params.Elements)),
 				Body:       codeBlock,
 				Env:        object.NewEnclosedEnv(vm.currentFrame.env),
 			}
 
 			for i, p := range params.Elements {
-				fn.Parameters[i] = p.(*object.String).Value
+				fn.Parameters[i] = p.(*object.String).String()
 			}
 			vm.currentFrame.pushStack(fn)
 
@@ -537,7 +537,7 @@ mainLoop:
 		case opcode.Import:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			path := vm.currentFrame.popStack().(*object.String)
-			vm.importPackage(name, path.Value)
+			vm.importPackage(name, path.String())
 
 		case opcode.StartTry:
 			catch := vm.getUint16()
@@ -556,7 +556,7 @@ mainLoop:
 		case opcode.BuildClass:
 			methodNum := vm.getUint16()
 			class := &VMClass{}
-			class.Name = vm.currentFrame.popStack().(*object.String).Value
+			class.Name = vm.currentFrame.popStack().(*object.String).String()
 			parent := vm.currentFrame.popStack()
 			if parent != object.NullConst {
 				class.Parent = parent.(*VMClass)

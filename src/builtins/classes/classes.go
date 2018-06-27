@@ -23,7 +23,7 @@ func vmInstanceOf(interpreter object.Interpreter, env *object.Environment, args 
 
 	switch class := args[1].(type) {
 	case *object.String:
-		return object.NativeBoolToBooleanObj(vm.InstanceOf(class.Value, instance))
+		return object.NativeBoolToBooleanObj(vm.InstanceOf(class.String(), instance))
 	case *vm.VMClass:
 		return object.NativeBoolToBooleanObj(vm.InstanceOf(class.Name, instance))
 	}

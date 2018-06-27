@@ -276,7 +276,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		if attrib, ok := node.Left.(*ast.AttributeExpression); ok {
 			compile(ccb, attrib.Left)
 			ccb.code.WriteByte(opcode.StoreAttribute.ToByte())
-			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(attrib.Index.Value)))
+			ccb.code.Write(uint16ToBytes(ccb.names.indexOf(attrib.Index.String())))
 			break
 		}
 
@@ -337,7 +337,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.AttributeExpression:
 		compile(ccb, node.Left)
 		ccb.code.WriteByte(opcode.LoadAttribute.ToByte())
-		ccb.code.Write(uint16ToBytes(ccb.names.indexOf(node.Index.Value)))
+		ccb.code.Write(uint16ToBytes(ccb.names.indexOf(node.Index.String())))
 	case *ast.PassStatement:
 		// Ignore
 

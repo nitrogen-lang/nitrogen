@@ -90,7 +90,7 @@ func (p *Parser) parseAttributeExpression(left ast.Expression) ast.Node {
 			Literal: ident.Value,
 			Pos:     p.curToken.Pos,
 		},
-		Value: ident.Value,
+		Value: []rune(ident.Value),
 	}
 
 	return exp

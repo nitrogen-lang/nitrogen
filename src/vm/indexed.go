@@ -65,7 +65,7 @@ func (vm *VirtualMachine) evalStringIndexExpression(str *object.String, index ob
 		}
 	}
 
-	return &object.String{Value: string(str.Value[idx])}
+	return &object.String{Value: []rune{str.Value[idx]}}
 }
 
 func (vm *VirtualMachine) lookupModuleAttr(module *object.Module, key string) object.Object {

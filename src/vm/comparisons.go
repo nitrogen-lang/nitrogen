@@ -67,8 +67,8 @@ func (vm *VirtualMachine) evalFloatInfixExpression(op byte, left, right object.O
 }
 
 func (vm *VirtualMachine) evalStringInfixExpression(op byte, left, right object.Object) object.Object {
-	leftVal := left.(*object.String).Value
-	rightVal := right.(*object.String).Value
+	leftVal := left.(*object.String).String()
+	rightVal := right.(*object.String).String()
 
 	switch op {
 	case opcode.CmpEq:

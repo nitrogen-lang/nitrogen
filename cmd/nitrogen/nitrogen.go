@@ -227,10 +227,10 @@ func getExtEnvMap() map[string]string {
 func stringMapToHash(env map[string]string) *object.Hash {
 	m := &object.Hash{Pairs: make(map[object.HashKey]object.HashPair)}
 	for k, v := range env {
-		key := &object.String{Value: k}
+		key := object.MakeStringObj(k)
 		m.Pairs[key.HashKey()] = object.HashPair{
 			Key:   key,
-			Value: &object.String{Value: v},
+			Value: object.MakeStringObj(v),
 		}
 	}
 	return m
@@ -240,9 +240,9 @@ func getScriptArgs(filepath string) *object.Array {
 	s := flag.Args()[1:]
 	length := len(s) + 1
 	newElements := make([]object.Object, length, length)
-	newElements[0] = &object.String{Value: filepath}
+	newElements[0] = object.MakeStringObj(filepath)
 	for i, v := range s {
-		newElements[i+1] = &object.String{Value: v}
+		newElements[i+1] = object.MakeStringObj(v)
 	}
 	return &object.Array{Elements: newElements}
 }

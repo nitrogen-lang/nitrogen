@@ -112,15 +112,16 @@ func MakeFloatObj(v float64) *Float {
 }
 
 type String struct {
-	Value string
+	Value []rune
 }
 
-func (s *String) Inspect() string  { return s.Value }
+func (s *String) Inspect() string  { return string(s.Value) }
+func (s *String) String() string   { return string(s.Value) } // Dedicated to the stringified value, no inspection
 func (s *String) Type() ObjectType { return StringObj }
-func (s *String) Dup() Object      { return &String{Value: s.Value} }
+func (s *String) Dup() Object      { return &String{Value: s.Value[:]} }
 
 func MakeStringObj(s string) *String {
-	return &String{Value: s}
+	return &String{Value: []rune(s)}
 }
 
 type Boolean struct {
@@ -273,7 +274,7 @@ func MakeStringArray(e []string) *Array {
 	length := len(e)
 	newElements := make([]Object, length, length)
 	for i, s := range e {
-		newElements[i] = &String{Value: s}
+		newElements[i] = MakeStringObj(s)
 	}
 	return &Array{Elements: newElements}
 }
@@ -288,7 +289,7 @@ func ArrayToStringSlice(a *Array) []string {
 		if !(e.Type() == StringObj) {
 			continue
 		}
-		strs = append(strs, (e.(*String)).Value)
+		strs = append(strs, string((e.(*String)).Value))
 	}
 	return strs
 }
@@ -315,7 +316,7 @@ func (i *Integer) HashKey() HashKey {
 
 func (s *String) HashKey() HashKey {
 	h := fnv.New64a()
-	h.Write([]byte(s.Value))
+	h.Write([]byte(string(s.Value)))
 	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
 

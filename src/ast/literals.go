@@ -36,12 +36,12 @@ func (f *FloatLiteral) String() string       { return f.Token.Literal }
 
 type StringLiteral struct {
 	Token token.Token
-	Value string
+	Value []rune
 }
 
 func (s *StringLiteral) expressionNode()      {}
 func (s *StringLiteral) TokenLiteral() string { return s.Token.Literal }
-func (s *StringLiteral) String() string       { return s.Token.Literal }
+func (s *StringLiteral) String() string       { return string(s.Value) }
 
 type Boolean struct {
 	Token token.Token

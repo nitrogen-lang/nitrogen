@@ -51,7 +51,7 @@ func runSystem(interpreter object.Interpreter, env *object.Environment, args ...
 			if !ok {
 				return object.NewException("system arguments must be a string %s", element.Inspect())
 			}
-			cmdArgs[i] = arg.Value
+			cmdArgs[i] = arg.String()
 		}
 	}
 
@@ -60,7 +60,7 @@ func runSystem(interpreter object.Interpreter, env *object.Environment, args ...
 		stderr bytes.Buffer
 	)
 
-	cmd := exec.Command(cmdName.Value, cmdArgs...)
+	cmd := exec.Command(cmdName.String(), cmdArgs...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
@@ -69,8 +69,8 @@ func runSystem(interpreter object.Interpreter, env *object.Environment, args ...
 
 	return &object.Array{
 		Elements: []object.Object{
-			&object.String{Value: stdout.String()},
-			&object.String{Value: stderr.String()},
+			object.MakeStringObj(stdout.String()),
+			object.MakeStringObj(stderr.String()),
 		},
 	}
 }
@@ -98,11 +98,11 @@ func runSystemPT(interpreter object.Interpreter, env *object.Environment, args .
 			if !ok {
 				return object.NewException("system arguments must be a string %s", element.Inspect())
 			}
-			cmdArgs[i] = arg.Value
+			cmdArgs[i] = arg.String()
 		}
 	}
 
-	cmd := exec.Command(cmdName.Value, cmdArgs...)
+	cmd := exec.Command(cmdName.String(), cmdArgs...)
 	cmd.Stdin = interpreter.GetStdin()
 	cmd.Stdout = interpreter.GetStdout()
 	cmd.Stderr = interpreter.GetStderr()

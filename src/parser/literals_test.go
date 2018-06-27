@@ -114,8 +114,8 @@ func TestStringLiteralExpression(t *testing.T) {
 		t.Fatalf("exp not *ast.StringLiteral. got=%T", stmt.Expression)
 	}
 
-	if literal.Value != "hello world" {
-		t.Errorf("literal.Value not %q. got=%q", "hello world", literal.Value)
+	if literal.String() != "hello world" {
+		t.Errorf("literal.Value not %q. got=%q", "hello world", literal.String())
 	}
 }
 

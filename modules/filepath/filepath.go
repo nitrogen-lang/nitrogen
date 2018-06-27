@@ -42,7 +42,7 @@ func filepathDirectory(interpreter object.Interpreter, env *object.Environment, 
 		return object.NewException("dir expected a string, got %s", args[0].Type().String())
 	}
 
-	return object.MakeStringObj(filepath.Dir(path.Value))
+	return object.MakeStringObj(filepath.Dir(path.String()))
 }
 
 func filepathBasename(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -55,7 +55,7 @@ func filepathBasename(interpreter object.Interpreter, env *object.Environment, a
 		return object.NewException("basename expected a string, got %s", args[0].Type().String())
 	}
 
-	return object.MakeStringObj(filepath.Base(path.Value))
+	return object.MakeStringObj(filepath.Base(path.String()))
 }
 
 func filepathExt(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -68,7 +68,7 @@ func filepathExt(interpreter object.Interpreter, env *object.Environment, args .
 		return object.NewException("ext expected a string, got %s", args[0].Type().String())
 	}
 
-	return object.MakeStringObj(filepath.Ext(path.Value))
+	return object.MakeStringObj(filepath.Ext(path.String()))
 }
 
 func filepathAbs(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -81,7 +81,7 @@ func filepathAbs(interpreter object.Interpreter, env *object.Environment, args .
 		return object.NewException("abs expected a string, got %s", args[0].Type().String())
 	}
 
-	abs, _ := filepath.Abs(path.Value)
+	abs, _ := filepath.Abs(path.String())
 	return object.MakeStringObj(abs)
 }
 
@@ -101,7 +101,7 @@ func filepathJoin(interpreter object.Interpreter, env *object.Environment, args 
 		if !ok {
 			return object.NewException("join expected a string, got %s", v.Type().String())
 		}
-		pathParts[i] = path.Value
+		pathParts[i] = path.String()
 	}
 
 	return object.MakeStringObj(filepath.Join(pathParts...))

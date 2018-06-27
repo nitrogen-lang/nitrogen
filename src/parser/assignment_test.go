@@ -212,12 +212,12 @@ func TestImport(t *testing.T) {
 		t.Fatalf("exp is not ast.ImportStatement. got=%T", stmt)
 	}
 
-	if imp.Path.Value != "http.ni" {
-		t.Fatalf("import path is not correct. Expected \"http.ni\", got %s", imp.Path.Value)
+	if imp.Path.String() != "http.ni" {
+		t.Fatalf("import path is not correct. Expected \"http.ni\", got %s", imp.Path.String())
 	}
 
-	if imp.Name.Value != "http" {
-		t.Fatalf("import name is not correct. Expected \"http\", got %s", imp.Name.Value)
+	if imp.Name.String() != "http" {
+		t.Fatalf("import name is not correct. Expected \"http\", got %s", imp.Name.String())
 	}
 }
 
@@ -235,11 +235,11 @@ func TestImportWithAs(t *testing.T) {
 		t.Fatalf("exp is not ast.ImportStatement. got=%T", stmt)
 	}
 
-	if imp.Path.Value != "http.ni" {
-		t.Fatalf("import path is not correct. Expected \"http.ni\", got %s", imp.Path.Value)
+	if imp.Path.String() != "http.ni" {
+		t.Fatalf("import path is not correct. Expected \"http.ni\", got %s", imp.Path.String())
 	}
 
-	if imp.Name.Value != "http2" {
-		t.Fatalf("import name is not correct. Expected \"http2\", got %s", imp.Name.Value)
+	if imp.Name.String() != "http2" {
+		t.Fatalf("import name is not correct. Expected \"http2\", got %s", imp.Name.String())
 	}
 }

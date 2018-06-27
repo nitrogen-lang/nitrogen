@@ -78,5 +78,5 @@ func readLineBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 	text, _ := reader.ReadString('\n')
 
 	// Return read line without the ending newline byte
-	return &object.String{Value: text[:len(text)-1]}
+	return object.MakeStringObj(text[:len(text)-1])
 }

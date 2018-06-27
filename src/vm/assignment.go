@@ -37,10 +37,7 @@ func (vm *VirtualMachine) assignStringIndex(
 		return object.NewException("Invalid string index value type %s", val.Type())
 	}
 
-	old := []byte(str.Value)
-	old[in.Value] = replace.Value[0]
-
-	str.Value = string(old)
+	str.Value[in.Value] = replace.Value[0]
 	return object.NullConst
 }
 

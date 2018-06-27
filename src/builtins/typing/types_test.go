@@ -90,8 +90,8 @@ func TestToStringBuiltin(t *testing.T) {
 			t.Fatalf("%d: Expected string, got %#v", i+1, evaled)
 		}
 
-		if str.Value != tt.expected {
-			t.Fatalf("%d: toString failed. Expected `%s`, got `%s`", i+1, tt.expected, str.Value)
+		if str.String() != tt.expected {
+			t.Fatalf("%d: toString failed. Expected `%s`, got `%s`", i+1, tt.expected, str.String())
 		}
 	}
 }

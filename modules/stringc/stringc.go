@@ -67,7 +67,7 @@ func strSplitN(interpreter object.Interpreter, self *object.Instance, env *objec
 		return object.NewException("splitN expected an int, got %s", args[1].Type().String())
 	}
 
-	return object.MakeStringArray(strings.SplitN(target.Value, sep.Value, int(count.Value)))
+	return object.MakeStringArray(strings.SplitN(target.String(), sep.String(), int(count.Value)))
 }
 
 func strTrim(interpreter object.Interpreter, self *object.Instance, env *object.Environment, args ...object.Object) object.Object {
@@ -77,7 +77,7 @@ func strTrim(interpreter object.Interpreter, self *object.Instance, env *object.
 		return object.NewException("str field is not a string")
 	}
 
-	return object.MakeStringObj(strings.TrimSpace(target.Value))
+	return object.MakeStringObj(strings.TrimSpace(target.String()))
 }
 
 func strDedup(interpreter object.Interpreter, self *object.Instance, env *object.Environment, args ...object.Object) object.Object {
@@ -103,12 +103,11 @@ func strDedup(interpreter object.Interpreter, self *object.Instance, env *object
 	return object.MakeStringObj(dedupString(target.Value, dedup.Value[0]))
 }
 
-func dedupString(str string, c byte) string {
-	bstr := []byte(str)
-	newstr := make([]byte, 0, int(float32(len(str))*0.75))
+func dedupString(str []rune, c rune) string {
+	newstr := make([]rune, 0, int(float32(len(str))*0.75))
 
-	var lastc byte
-	for _, char := range bstr {
+	var lastc rune
+	for _, char := range str {
 		if char == c && char == lastc {
 			continue
 		}
@@ -150,7 +149,7 @@ func vmStrSplitN(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *objec
 		return object.NewException("splitN expected an int, got %s", args[1].Type().String())
 	}
 
-	return object.MakeStringArray(strings.SplitN(target.Value, sep.Value, int(count.Value)))
+	return object.MakeStringArray(strings.SplitN(target.String(), sep.String(), int(count.Value)))
 }
 
 func vmStrTrim(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
@@ -160,7 +159,7 @@ func vmStrTrim(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.
 		return object.NewException("str field is not a string")
 	}
 
-	return object.MakeStringObj(strings.TrimSpace(target.Value))
+	return object.MakeStringObj(strings.TrimSpace(target.String()))
 }
 
 func vmStrDedup(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {

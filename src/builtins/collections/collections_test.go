@@ -181,8 +181,8 @@ func TestBuiltinHashMergeSpecial(t *testing.T) {
 	}
 
 	expected := map[object.HashKey]string{
-		(&object.String{Value: "key"}).HashKey():  "value",
-		(&object.String{Value: "key2"}).HashKey(): "value2",
+		(object.MakeStringObj("key")).HashKey():  "value",
+		(object.MakeStringObj("key2")).HashKey(): "value2",
 	}
 
 	for k, v := range expected {
@@ -191,7 +191,7 @@ func TestBuiltinHashMergeSpecial(t *testing.T) {
 			t.Fatalf("Map missing key %q", k)
 		}
 
-		valStr := val.Value.(*object.String).Value
+		valStr := val.Value.(*object.String).String()
 		if valStr != v {
 			t.Fatalf("Incorrect map value for key %q: %q", k, v)
 		}

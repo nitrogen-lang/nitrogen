@@ -124,8 +124,8 @@ func TestStringMarshal(t *testing.T) {
 		}
 		s1newo, _, _ := Unmarshal(bytes1)
 		s1new := s1newo.(*object.String)
-		if s1new.Value != test.s {
-			t.Errorf("Test %d: Incorrect unmarshaled value. Expected -2, got %s", i+1, s1new.Value)
+		if s1new.String() != test.s {
+			t.Errorf("Test %d: Incorrect unmarshaled value. Expected -2, got %s", i+1, s1new.String())
 		}
 	}
 }

@@ -23,11 +23,12 @@ func Marshal(o object.Object) ([]byte, error) {
 		copy(out[1:], encodeUint64(math.Float64bits(o.Value)))
 		return out, nil
 	case *object.String:
-		slen := len(o.Value)
+		val := string(o.Value)
+		slen := len(val)
 		out := make([]byte, slen+5)
 		out[0] = 's'
 		binary.BigEndian.PutUint32(out[1:5], uint32(slen))
-		copy(out[5:], []byte(o.Value))
+		copy(out[5:], []byte(val))
 		return out, nil
 	case *object.Boolean:
 		out := make([]byte, 2)
@@ -46,7 +47,7 @@ func Marshal(o object.Object) ([]byte, error) {
 		res, _ := Marshal(tmpStr)
 		buf.Write(res)
 
-		tmpStr.Value = o.Filename
+		tmpStr.Value = []rune(o.Filename)
 		res, _ = Marshal(tmpStr)
 		buf.Write(res)
 
@@ -60,13 +61,13 @@ func Marshal(o object.Object) ([]byte, error) {
 		}
 		buf.Write(encodeUint16(uint16(len(o.Locals))))
 		for _, l := range o.Locals {
-			tmpStr.Value = l
+			tmpStr.Value = []rune(l)
 			res, _ := Marshal(tmpStr)
 			buf.Write(res)
 		}
 		buf.Write(encodeUint16(uint16(len(o.Names))))
 		for _, l := range o.Names {
-			tmpStr.Value = l
+			tmpStr.Value = []rune(l)
 			res, _ := Marshal(tmpStr)
 			buf.Write(res)
 		}
@@ -108,10 +109,10 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 
 		cb := &compiler.CodeBlock{}
 		name, inslice, _ := Unmarshal(inslice)
-		cb.Name = name.(*object.String).Value
+		cb.Name = string(name.(*object.String).Value)
 
 		filename, inslice, _ := Unmarshal(inslice)
-		cb.Filename = filename.(*object.String).Value
+		cb.Filename = string(filename.(*object.String).Value)
 
 		cb.LocalCount = int(decodeUint16(inslice[:2]))
 		inslice = inslice[2:]
@@ -136,7 +137,7 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		for i := range cb.Locals {
 			var tmpStr object.Object
 			tmpStr, inslice, _ = Unmarshal(inslice)
-			cb.Locals[i] = tmpStr.(*object.String).Value
+			cb.Locals[i] = string(tmpStr.(*object.String).Value)
 		}
 
 		namesLen := int(decodeUint16(inslice[:2]))
@@ -145,7 +146,7 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		for i := range cb.Names {
 			var tmpStr object.Object
 			tmpStr, inslice, _ = Unmarshal(inslice)
-			cb.Names[i] = tmpStr.(*object.String).Value
+			cb.Names[i] = string(tmpStr.(*object.String).Value)
 		}
 
 		codeLen := int(decodeUint16(inslice[:2]))

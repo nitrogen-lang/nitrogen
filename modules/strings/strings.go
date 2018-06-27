@@ -54,7 +54,7 @@ func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...
 		return object.NewException("splitN expected an int, got %s", args[1].Type().String())
 	}
 
-	return object.MakeStringArray(strings.SplitN(target.Value, sep.Value, int(count.Value)))
+	return object.MakeStringArray(strings.SplitN(target.String(), sep.String(), int(count.Value)))
 }
 
 func strSplit(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -75,7 +75,7 @@ func strTrim(interpreter object.Interpreter, env *object.Environment, args ...ob
 		return object.NewException("trimSpace expected a string, got %s", args[0].Type().String())
 	}
 
-	return object.MakeStringObj(strings.TrimSpace(target.Value))
+	return object.MakeStringObj(strings.TrimSpace(target.String()))
 }
 
 func strDedup(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -100,12 +100,11 @@ func strDedup(interpreter object.Interpreter, env *object.Environment, args ...o
 	return object.MakeStringObj(dedupString(target.Value, dedup.Value[0]))
 }
 
-func dedupString(str string, c byte) string {
-	bstr := []byte(str)
-	newstr := make([]byte, 0, int(float32(len(str))*0.75))
+func dedupString(str []rune, c rune) string {
+	newstr := make([]rune, 0, int(float32(len(str))*0.75))
 
-	var lastc byte
-	for _, char := range bstr {
+	var lastc rune
+	for _, char := range str {
 		if char == c && char == lastc {
 			continue
 		}
@@ -131,7 +130,7 @@ func strHasPrefix(interpreter object.Interpreter, env *object.Environment, args 
 		return object.NewException("hasPrefix expected a string, got %s", args[1].Type().String())
 	}
 
-	return object.NativeBoolToBooleanObj(strings.HasPrefix(target.Value, prefix.Value))
+	return object.NativeBoolToBooleanObj(strings.HasPrefix(target.String(), prefix.String()))
 }
 
 func strHasSuffix(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -149,7 +148,7 @@ func strHasSuffix(interpreter object.Interpreter, env *object.Environment, args 
 		return object.NewException("hasSuffix expected a string, got %s", args[1].Type().String())
 	}
 
-	return object.NativeBoolToBooleanObj(strings.HasSuffix(target.Value, prefix.Value))
+	return object.NativeBoolToBooleanObj(strings.HasSuffix(target.String(), prefix.String()))
 }
 
 func strContains(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -167,7 +166,7 @@ func strContains(interpreter object.Interpreter, env *object.Environment, args .
 		return object.NewException("contains expected a string, got %s", args[1].Type().String())
 	}
 
-	return object.NativeBoolToBooleanObj(strings.Contains(target.Value, sub.Value))
+	return object.NativeBoolToBooleanObj(strings.Contains(target.String(), sub.String()))
 }
 
 func strCount(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -184,11 +183,11 @@ func strCount(interpreter object.Interpreter, env *object.Environment, args ...o
 	if !ok {
 		return object.NewException("count expected a string, got %s", args[1].Type().String())
 	}
-	if sub.Value == "" {
+	if len(sub.Value) == 0 {
 		return object.NewException("count argument 2 can't be empty")
 	}
 
-	return object.MakeIntObj(int64(strings.Count(target.Value, sub.Value)))
+	return object.MakeIntObj(int64(strings.Count(target.String(), sub.String())))
 }
 
 func strReplace(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -205,7 +204,7 @@ func strReplace(interpreter object.Interpreter, env *object.Environment, args ..
 	if !ok {
 		return object.NewException("replace expected a string, got %s", args[1].Type().String())
 	}
-	if old.Value == "" {
+	if len(old.Value) == 0 {
 		return object.NewException("replace argument 2 can't be empty")
 	}
 
@@ -219,5 +218,5 @@ func strReplace(interpreter object.Interpreter, env *object.Environment, args ..
 		return object.NewException("replace expected an integer, got %s", args[3].Type().String())
 	}
 
-	return object.MakeStringObj(strings.Replace(target.Value, old.Value, new.Value, int(n.Value)))
+	return object.MakeStringObj(strings.Replace(target.String(), old.String(), new.String(), int(n.Value)))
 }
