@@ -78,8 +78,8 @@ func TestToStringBuiltin(t *testing.T) {
 		{`toString(true)`, "true"},
 		{`toString(false)`, "false"},
 		{`toString(nil)`, "nil"},
-		{`toString([1, 2, 3])`, ""},
-		{`toString({"key": "value"})`, ""},
+		{`toString([1, 2, 3])`, "[1, 2, 3]"},
+		{`toString({"key": "value"})`, "{key: value}"},
 	}
 
 	for i, tt := range tests {
