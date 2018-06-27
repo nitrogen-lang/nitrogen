@@ -48,7 +48,7 @@ if !col.arrayMatch(testArr, foreachArrTest) {
 
 // Foreach test on non-collection
 try {
-    col.foreach("Hello", func(){})
+    col.foreach(42, func(){})
     println("Test Failed: foreach: Expected exception for non-collection object")
 } catch {pass}
 
@@ -81,4 +81,15 @@ map2 = {
 
 if !col.mapMatch(map1, map2) {
     println("Test Failed: mapMatch")
+}
+
+const testStr = "Hello"
+let counter = 0
+
+col.foreach(testStr, func(i, c) {
+    counter += 1
+})
+
+if counter != 5 {
+    println("Test Failed string foreach: Expected 5, got ", counter)
 }

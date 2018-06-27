@@ -51,10 +51,10 @@ exports.foreach = func(collection, fn) {
     if isMap(collection) {
         return foreachMap(collection, fn)
     }
-    if isArray(collection) {
+    if isArray(collection) or isString(collection) {
         return foreachArray(collection, fn)
     }
-    throw "foreach(): collection must be a map or array"
+    throw "foreach(): collection must be a map, array, or string"
 }
 
 func foreachMap(map, fn) {
