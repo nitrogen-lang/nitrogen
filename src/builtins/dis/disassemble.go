@@ -17,9 +17,17 @@ func disassemble(machine object.Interpreter, env *object.Environment, args ...ob
 		return ac
 	}
 
-	fn, ok := args[0].(*vm.VMFunction)
+	var fnObj object.Object
+
+	if bm, ok := args[0].(*vm.BoundMethod); ok {
+		fnObj = bm.Method
+	} else {
+		fnObj = args[0]
+	}
+
+	fn, ok := fnObj.(*vm.VMFunction)
 	if !ok {
-		return object.NewException("dis expected a func, got %s", args[0].Type().String())
+		return object.NewException("dis expected a func, got %s", fnObj.Type().String())
 	}
 
 	cb := fn.Body

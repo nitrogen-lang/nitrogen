@@ -75,6 +75,14 @@ func (vm *VirtualMachine) evalStringInfixExpression(op byte, left, right object.
 		return object.NativeBoolToBooleanObj(leftVal == rightVal)
 	case opcode.CmpNotEq:
 		return object.NativeBoolToBooleanObj(leftVal != rightVal)
+	case opcode.CmpGT:
+		return object.NativeBoolToBooleanObj(leftVal > rightVal)
+	case opcode.CmpGTEq:
+		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
+	case opcode.CmpLT:
+		return object.NativeBoolToBooleanObj(leftVal < rightVal)
+	case opcode.CmpLTEq:
+		return object.NativeBoolToBooleanObj(leftVal <= rightVal)
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())

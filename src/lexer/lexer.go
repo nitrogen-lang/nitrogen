@@ -396,6 +396,8 @@ func (l *Lexer) readString() token.Token {
 		if l.curCh == '\\' {
 			l.readRune()
 			switch l.curCh {
+			case '0': // null
+				ident.WriteRune(0)
 			case 'b': // backspace
 				ident.WriteRune('\b')
 			case 'n': // newline

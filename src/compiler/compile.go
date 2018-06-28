@@ -327,8 +327,8 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.ClassLiteral:
 		compileClassLiteral(ccb, node)
 	case *ast.MakeInstance:
-		for _, p := range node.Arguments {
-			compile(ccb, p)
+		for i := len(node.Arguments) - 1; i >= 0; i-- {
+			compile(ccb, node.Arguments[i])
 		}
 		compile(ccb, node.Class)
 
@@ -753,13 +753,43 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 }
 
 func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
-	loopBody := compileInnerBlock(ccb, loop.Body, 0)
-	loopBody.WriteByte(opcode.Continue.ToByte())
+	// loopBody := compileInnerBlock(ccb, loop.Body, 0)
+	// loopBody.WriteByte(opcode.Continue.ToByte())
 
-	// 3 = 1 opcode + 1 x 2 byte arg
-	loopEnd := ccb.code.Len() + loopBody.Len() + 3
+	bodyCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table)),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		// 8 = 2 x opcode + 3 x 2 byte args
+		offset: ccb.code.Len() + ccb.offset + 5,
+	}
+	compile(bodyCCB, loop.Body)
+
+	// If the body ends in an expression, we need to pop it so the stack is correct
+	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
+		bodyCCB.code.WriteByte(opcode.Pop.ToByte())
+	}
+	loopBody := bodyCCB.code
+
+	// This copies the local variables into the outer compile block for table indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
+		ccb.locals.indexOf(n)
+	}
+
+	// 9 = 3 opcodes + 3 x 2 byte args
+	endBlock := ccb.code.Len() + loopBody.Len() + ccb.offset + 6
+	// 8 = 2 opcode + 3 x 2 byte args
+	iterBlock := ccb.code.Len() + loopBody.Len() + ccb.offset + 5
+
 	ccb.code.WriteByte(opcode.StartLoop.ToByte())
-	ccb.code.Write(uint16ToBytes(uint16(loopEnd)))
+	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
+	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))
 
 	ccb.code.Write(loopBody.Bytes())
+
+	ccb.code.WriteByte(opcode.NextIter.ToByte())
+	ccb.code.WriteByte(opcode.EndBlock.ToByte())
+	ccb.code.WriteByte(opcode.CloseScope.ToByte())
 }
