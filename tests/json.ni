@@ -1,4 +1,4 @@
-import "json.ni"
+import "json/index.ni" as json
 import "collections.ni" as col
 
 let tests = [
