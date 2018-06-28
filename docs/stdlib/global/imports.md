@@ -35,6 +35,14 @@ until a valid file is found. If a file is found, it will be imported according t
 script, or shared library). The working directory is always added as the first search path. Any other search
 path needs to be added at execution time.
 
+Each path is tried with the following extensions in order: ["", ".nib", ".ni", ".so"]. The first simply meaning
+the path is checked by itself incase the path includes the extension. Leaving off the extension allows the interpreter
+to include a file with the same basename. For example, a compiled `.nib` file can be loaded instead of a `.ni` thereby
+removing the need to compile the code before execution. Note, the interpreter does not yet check source mod time or hashes.
+This means, if a source file is changed, the corresponding `.nib` file must be compiled manually. The interpreter
+won't attempt to create an up-to-date version. If the file is not compiled, the older `.nib` file will continue to be
+loaded instead of the `.ni` source file. This is being worked on.
+
 ## Examples
 
 ### Simple

@@ -32,9 +32,9 @@ func (vm *VirtualMachine) importPackage(name, path string) {
 
 	var module object.Object
 	if filepath.Ext(includedFile) == ".so" {
-		module = importSharedModule(vm, includedFile)
+		module = importSharedModule(vm, includedFile, name)
 	} else {
-		module = importScriptFile(vm, includedFile)
+		module = importScriptFile(vm, includedFile, name)
 	}
 
 	if object.ObjectIs(module, object.ExceptionObj) {
@@ -49,10 +49,10 @@ func (vm *VirtualMachine) importPackage(name, path string) {
 	}
 }
 
-func importScriptFile(vm *VirtualMachine, scriptPath string) object.Object {
+func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object {
 	code, err := moduleutils.CodeBlockCache.GetBlock(scriptPath)
 	if err != nil {
-		return object.NewException("importing %s failed %s", scriptPath, err.Error())
+		return object.NewException("importing %s failed %s", name, err.Error())
 	}
 
 	env := object.NewEnclosedEnv(vm.currentFrame.env)
@@ -60,22 +60,33 @@ func importScriptFile(vm *VirtualMachine, scriptPath string) object.Object {
 	return vm.RunFrame(vm.MakeFrame(code, env), true)
 }
 
+var extensions = []string{"", ".nib", ".ni", ".so"}
+
 func findModule(name, scriptPath string, searchPaths []string) string {
 	if name[0] == '/' { // Absolute path
-		if moduleutils.FileExists(name) {
-			return name
+		for _, ext := range extensions {
+			fullname := name + ext
+			if moduleutils.FileExists(fullname) {
+				return fullname
+			}
 		}
 	} else if name[0] == '.' { // Relative path to script file
 		fullpath := filepath.Clean(filepath.Join(filepath.Dir(scriptPath), name))
-		if moduleutils.FileExists(fullpath) {
-			return fullpath
+		for _, ext := range extensions {
+			fullname := fullpath + ext
+			if moduleutils.FileExists(fullname) {
+				return fullname
+			}
 		}
 	} else { // Search for module
 		// TODO: Use the _SEARCH_PATHS variable when loading instead
 		for _, path := range searchPaths {
 			fullpath := filepath.Join(path, name)
-			if moduleutils.FileExists(fullpath) {
-				return fullpath
+			for _, ext := range extensions {
+				fullname := fullpath + ext
+				if moduleutils.FileExists(fullname) {
+					return fullname
+				}
 			}
 		}
 	}

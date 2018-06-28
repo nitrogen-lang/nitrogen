@@ -51,7 +51,7 @@ func (c *codeBlockCache) GetBlock(file string) (*compiler.CodeBlock, error) {
 	}
 
 	if filepath.Ext(file) == ".nib" {
-		code, err := marshal.ReadFile(file)
+		code, _, err := marshal.ReadFile(file)
 		if err != nil {
 			return nil, err
 		}

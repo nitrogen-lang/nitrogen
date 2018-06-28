@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,6 +51,8 @@ var (
 	memprofile   string
 	outputFile   string
 
+	infoCmd bool
+
 	modulePaths     strSliceFlag
 	autoloadModules strSliceFlag
 
@@ -78,6 +81,8 @@ func init() {
 
 	flag.Var(&modulePaths, "M", "Module search paths")
 	flag.Var(&autoloadModules, "al", "Autoload modules")
+
+	flag.BoolVar(&infoCmd, "info", false, "Print information about a .nib file")
 }
 
 func main() {
@@ -85,6 +90,11 @@ func main() {
 
 	if printVersion {
 		versionInfo()
+		return
+	}
+
+	if infoCmd {
+		runInfoCmd()
 		return
 	}
 
@@ -122,19 +132,21 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	env := makeEnv()
+	sourceFile := flag.Arg(0)
+
+	env := makeEnv(sourceFile)
 
 	var code *compiler.CodeBlock
 	var program *ast.Program
 	var err error
-	if filepath.Ext(flag.Arg(0)) == ".nib" {
-		code, err = marshal.ReadFile(flag.Arg(0))
+	if filepath.Ext(sourceFile) == ".nib" {
+		code, _, err = marshal.ReadFile(sourceFile)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
 	} else {
-		program, err = moduleutils.ASTCache.GetTree(flag.Arg(0))
+		program, err = moduleutils.ASTCache.GetTree(sourceFile)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
@@ -154,7 +166,7 @@ func main() {
 	}
 
 	if outputFile != "" {
-		marshal.WriteFile(outputFile, code)
+		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile))
 		return
 	}
 
@@ -202,10 +214,10 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	return machine.Execute(code, env)
 }
 
-func makeEnv() *object.Environment {
+func makeEnv(filepath string) *object.Environment {
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getExternalEnv())
-	env.CreateConst("_ARGV", getScriptArgs(flag.Arg(0)))
+	env.CreateConst("_ARGV", getScriptArgs(filepath))
 	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
 	return env
 }
@@ -249,7 +261,7 @@ func getScriptArgs(filepath string) *object.Array {
 
 func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := makeEnv()
+	env := makeEnv("")
 
 	var code *compiler.CodeBlock
 	for {
@@ -300,4 +312,30 @@ Compiled by:       %s
 Go version:        %s %s/%s
 Modules Supported: %t
 `, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, modulesSupported)
+}
+
+func runInfoCmd() {
+	sourceFile := flag.Arg(0)
+	if sourceFile == "" {
+		return
+	}
+
+	code, fileinfo, err := marshal.ReadFile(sourceFile)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Printf("Filename: %s\n", fileinfo.Filename)
+	fmt.Printf("Version:  %s\n", bytesToVersionNumber(fileinfo.Version))
+	fmt.Printf("ModTime:  %s\n", fileinfo.ModTime)
+	code.Print("")
+}
+
+func bytesToVersionNumber(b []byte) string {
+	ver := ""
+	for _, v := range b {
+		ver += strconv.Itoa(int(v)) + "."
+	}
+	return strings.TrimRight(ver, ".")
 }

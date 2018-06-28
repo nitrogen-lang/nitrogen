@@ -13,10 +13,10 @@ import (
 
 var (
 	ByteFileHeader = []byte{31, 'N', 'I', 'B'}
-	VersionNumber  = []byte{0, 0, 0, 1}
+	VersionNumber  = []byte{0, 0, 0, 2}
 )
 
-func WriteFile(name string, cb *compiler.CodeBlock) error {
+func WriteFile(name string, cb *compiler.CodeBlock, ts time.Time) error {
 	marshaled, err := Marshal(cb)
 	if err != nil {
 		return err
@@ -28,45 +28,60 @@ func WriteFile(name string, cb *compiler.CodeBlock) error {
 	}
 	defer file.Close()
 
+	if ts.IsZero() {
+		ts = time.Now()
+	}
+
 	file.Write(ByteFileHeader)
 	file.Write(VersionNumber)
 	t := make([]byte, 8)
-	binary.BigEndian.PutUint64(t, uint64(time.Now().Unix()))
+	binary.BigEndian.PutUint64(t, uint64(ts.Unix()))
 	file.Write(t)
 	file.Write(marshaled)
 	return nil
 }
 
-func ReadFile(name string) (*compiler.CodeBlock, error) {
+type FileInfo struct {
+	Filename string
+	Version  []byte
+	ModTime  time.Time
+}
+
+func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
 	file, err := os.Open(name)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer file.Close()
+
+	fi := &FileInfo{Filename: name}
 
 	fileHeader := make([]byte, 4)
 	file.Read(fileHeader)
 	if !bytes.Equal(ByteFileHeader, fileHeader) {
-		return nil, errors.New("File is not Nitrogen bytecode")
+		return nil, nil, errors.New("File is not Nitrogen bytecode")
 	}
 
 	fileVersion := make([]byte, 4)
 	file.Read(fileVersion)
 	if !bytes.Equal(VersionNumber, fileVersion) {
-		return nil, errors.New("File does not match current version")
+		return nil, nil, errors.New("File does not match current version")
 	}
+	fi.Version = fileVersion
 
 	fileTime := make([]byte, 8)
-	if n, _ := file.Read(fileTime); n != 8 {
-		return nil, errors.New("Invalid timestamp")
+	n, _ := file.Read(fileTime)
+	if n != 8 {
+		return nil, nil, errors.New("Invalid timestamp")
 	}
 	// Eventually check fileTime against the main source file
+	fi.ModTime = time.Unix(int64(binary.BigEndian.Uint64(fileTime)), 0)
 
 	rest, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	cb, _, err := Unmarshal(rest)
-	return cb.(*compiler.CodeBlock), err
+	return cb.(*compiler.CodeBlock), fi, err
 }

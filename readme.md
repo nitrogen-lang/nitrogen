@@ -47,6 +47,7 @@ Usage: `nitrogen [options] SCRIPT`
 - `-M /module/path`: Directory to search for imported modules. This flag can be used multiple times.
 - `-al module.so`: Autoload a module from the search path. This flag can be used multiple times.
 Autoloaded modules are loaded before any script is executed.
+- `-info file.nib`: Print information about a compiled Nitrogen file.
 
 ## Contributing
 

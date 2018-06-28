@@ -35,7 +35,7 @@ func (cb *CodeBlock) Print(indent string) {
 		offset++
 
 		switch code {
-		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry, opcode.BuildClass, opcode.LoadAttribute, opcode.StoreAttribute, opcode.MakeInstance:
+		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry, opcode.BuildClass, opcode.MakeInstance:
 			fmt.Printf("\t\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 		case opcode.JumpAbsolute, opcode.JumpForward:
 			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
@@ -56,7 +56,7 @@ func (cb *CodeBlock) Print(indent string) {
 		case opcode.Call:
 			params := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t\t%d (%d positional parameters)", params, params)
-		case opcode.LoadGlobal, opcode.StoreGlobal:
+		case opcode.LoadGlobal, opcode.StoreGlobal, opcode.LoadAttribute, opcode.StoreAttribute:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t%d (%s)", index, cb.Names[index])
 		case opcode.Compare:
