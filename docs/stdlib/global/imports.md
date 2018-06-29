@@ -36,12 +36,15 @@ script, or shared library). The working directory is always added as the first s
 path needs to be added at execution time.
 
 Each path is tried with the following extensions in order: ["", ".nib", ".ni", ".so"]. The first simply meaning
-the path is checked by itself incase the path includes the extension. Leaving off the extension allows the interpreter
+the path is checked by itself in case the path includes the extension. Leaving off the extension allows the interpreter
 to include a file with the same basename. For example, a compiled `.nib` file can be loaded instead of a `.ni` thereby
 removing the need to compile the code before execution. Note, the interpreter does not yet check source mod time or hashes.
 This means, if a source file is changed, the corresponding `.nib` file must be compiled manually. The interpreter
 won't attempt to create an up-to-date version. If the file is not compiled, the older `.nib` file will continue to be
 loaded instead of the `.ni` source file. This is being worked on.
+
+Directories can also be imported similar to Javascript. The interpreter looks for a file named `mod.ni` in the directory
+and if found loads that. The `mod.ni` file is responsible for exporting everything the modules needs for its public API.
 
 ## Examples
 
@@ -60,7 +63,7 @@ return otherFile
 main.ni:
 
 ```
-import './another.ni' as otherFile
+import './second.ni' as otherFile
 
 func main() {
     otherFile()
@@ -76,15 +79,15 @@ That variable is then called like any other function.
 
 ### Module Emulation
 
-Modules can be emulated by returning a hashmap and using the arrow syntax:
+Modules can be emulated by returning a map:
 
 math.ni:
 
 ```
-func add(a, b) { a + b}
-func sub(a, b) { a - b}
-func mul(a, b) { a * b}
-func div(a, b) { a / b}
+func add(a, b) { a + b }
+func sub(a, b) { a - b }
+func mul(a, b) { a * b }
+func div(a, b) { a / b }
 
 return {
     "add": add,
@@ -105,5 +108,5 @@ println(math.mul(2, 3))
 println(math.div(6, 3))
 ```
 
-Here, math.ni returns a hashmap that contains several functions. These functions are effectively "exported" by the script.
-These functions can then be called from the main script. Here the arrow syntax is used to make it look a but nicer.
+Here, math.ni returns a map that contains several functions. These functions are effectively "exported" by the script.
+These functions can then be called from the main script.

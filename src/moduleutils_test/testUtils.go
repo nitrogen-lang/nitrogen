@@ -19,7 +19,8 @@ func TestEval(input string) object.Object {
 	vmSettings.ReturnExceptions = true
 	machine := vm.NewVM(vmSettings)
 
-	return machine.Execute(code, env)
+	ret, _ := machine.Execute(code, env)
+	return ret
 }
 
 // Verification functions

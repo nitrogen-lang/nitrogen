@@ -5,14 +5,8 @@
  * This script tests script imports
  */
 
-// Try a required import
-try {
-    import './includes/_not_exist.ni'
-    println("Test Failed: Import didn't throw")
-} catch {pass}
-
-// Test absolute import
-import './includes/math.ni'
+// Test directory import
+import './includes/math2' as math
 
 if isError(math.add) {
     println("Test Failed: Include failed")

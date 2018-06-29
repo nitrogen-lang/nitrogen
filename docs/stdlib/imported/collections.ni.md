@@ -3,7 +3,7 @@
 This module contains several utility and convenience functions for managing and
 working with collections such as arrays and maps.
 
-To use: `import 'collections.ni'`
+To use: `import 'collections'`
 
 ## map(arr: array, fn: func(element, index): T): array
 

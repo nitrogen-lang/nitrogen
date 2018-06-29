@@ -5,7 +5,7 @@
  * This script tests script imports
  */
 
-// Test a real import
+// Test no extension import
 import './includes/math'
 
 if isError(math.add) {

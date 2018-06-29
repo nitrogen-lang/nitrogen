@@ -6,8 +6,13 @@ import (
 )
 
 func FileExists(file string) bool {
-	_, err := os.Stat(file)
-	return !os.IsNotExist(err)
+	stat, err := os.Stat(file)
+	return !os.IsNotExist(err) && !stat.IsDir()
+}
+
+func IsDir(file string) bool {
+	stat, err := os.Stat(file)
+	return !os.IsNotExist(err) && stat.IsDir()
 }
 
 func FileModTime(file string) time.Time {

@@ -64,30 +64,33 @@ var extensions = []string{"", ".nib", ".ni", ".so"}
 
 func findModule(name, scriptPath string, searchPaths []string) string {
 	if name[0] == '/' { // Absolute path
-		for _, ext := range extensions {
-			fullname := name + ext
-			if moduleutils.FileExists(fullname) {
-				return fullname
-			}
-		}
+		return testModulePath(name)
 	} else if name[0] == '.' { // Relative path to script file
 		fullpath := filepath.Clean(filepath.Join(filepath.Dir(scriptPath), name))
-		for _, ext := range extensions {
-			fullname := fullpath + ext
-			if moduleutils.FileExists(fullname) {
-				return fullname
+		return testModulePath(fullpath)
+	}
+
+	// Search for module
+	for _, path := range searchPaths {
+		mp := testModulePath(filepath.Join(path, name))
+		if mp != "" {
+			return mp
+		}
+	}
+	return ""
+}
+
+func testModulePath(path string) string {
+	for _, ext := range extensions {
+		fullname := path + ext
+		if moduleutils.IsDir(fullname) {
+			mp := testModulePath(filepath.Join(path, "mod.ni"))
+			if mp != "" {
+				return mp
 			}
 		}
-	} else { // Search for module
-		// TODO: Use the _SEARCH_PATHS variable when loading instead
-		for _, path := range searchPaths {
-			fullpath := filepath.Join(path, name)
-			for _, ext := range extensions {
-				fullname := fullpath + ext
-				if moduleutils.FileExists(fullname) {
-					return fullname
-				}
-			}
+		if moduleutils.FileExists(fullname) {
+			return fullname
 		}
 	}
 	return ""

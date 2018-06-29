@@ -1,5 +1,5 @@
-import "json/index.ni" as json
-import "collections.ni" as col
+import "json"
+import "collections" as col
 
 let tests = [
     {

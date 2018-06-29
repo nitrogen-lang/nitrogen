@@ -2,7 +2,7 @@
 
 Functions for encoding and decoding JSON.
 
-To use: `import 'json.ni'`
+To use: `import 'json'`
 
 ## encode(obj: T): string
 

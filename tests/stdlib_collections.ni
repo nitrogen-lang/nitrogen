@@ -1,4 +1,4 @@
-import 'collections.ni' as col
+import 'collections' as col
 
 const testArr = ["asia", "north america", "south america", "africa", "europe", "australia", "antarctica"]
 
