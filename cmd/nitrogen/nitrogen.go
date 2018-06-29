@@ -218,12 +218,60 @@ func makeEnv(filepath string) *object.Environment {
 	env := object.NewEnvironment()
 	env.CreateConst("_ENV", getExternalEnv())
 	env.CreateConst("_ARGV", getScriptArgs(filepath))
+	env.CreateConst("_SERVER", getServerEnv())
 	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
 	return env
 }
 
+var cgiHeaderNames = []string{
+	"AUTH_TYPE",
+	"DOCUMENT_ROOT",
+	"DOCUMENT_URI",
+	"GATEWAY_INTERFACE",
+	"HTTP_ACCEPT_CHARSET",
+	"HTTP_ACCEPT_ENCODING",
+	"HTTP_ACCEPT_LANGUAGE",
+	"HTTP_ACCEPT",
+	"HTTP_CONNECTION",
+	"HTTP_HOST",
+	"HTTP_REFERER",
+	"HTTP_USER_AGENT",
+	"HTTPS",
+	"QUERY_STRING",
+	"REDIRECT_REMOTE_USER",
+	"REMOTE_ADDR",
+	"REMOTE_HOST",
+	"REMOTE_PORT",
+	"REMOTE_USER",
+	"REQUEST_METHOD",
+	"REQUEST_TIME",
+	"REQUEST_URI",
+	"SCRIPT_FILENAME",
+	"SCRIPT_NAME",
+	"SERVER_ADDR",
+	"SERVER_ADMIN",
+	"SERVER_NAME",
+	"SERVER_PORT",
+	"SERVER_PROTOCOL",
+	"SERVER_SIGNATURE",
+	"SERVER_SOFTWARE",
+}
+
+func getServerEnv() object.Object {
+	if os.Getenv("GATEWAY_INTERFACE") != "CGI/1.1" {
+		return object.NullConst
+	}
+
+	headers := make(map[string]string, len(cgiHeaderNames))
+	for _, header := range cgiHeaderNames {
+		headers[header] = os.Getenv(header)
+	}
+
+	return object.StringMapToHash(headers)
+}
+
 func getExternalEnv() *object.Hash {
-	return stringMapToHash(getExtEnvMap())
+	return object.StringMapToHash(getExtEnvMap())
 }
 
 func getExtEnvMap() map[string]string {
@@ -236,20 +284,11 @@ func getExtEnvMap() map[string]string {
 	return m
 }
 
-func stringMapToHash(env map[string]string) *object.Hash {
-	m := &object.Hash{Pairs: make(map[object.HashKey]object.HashPair)}
-	for k, v := range env {
-		key := object.MakeStringObj(k)
-		m.Pairs[key.HashKey()] = object.HashPair{
-			Key:   key,
-			Value: object.MakeStringObj(v),
-		}
-	}
-	return m
-}
-
 func getScriptArgs(filepath string) *object.Array {
-	s := flag.Args()[1:]
+	var s []string
+	if flag.NArg() > 1 {
+		s = flag.Args()[1:]
+	}
 	length := len(s) + 1
 	newElements := make([]object.Object, length, length)
 	newElements[0] = object.MakeStringObj(filepath)

@@ -24,3 +24,8 @@ the path name of the main script as it was called.
 ## _SEARCH_PATHS
 
 `_SEARCH_PATHS` is an array containing the paths used for import search.
+
+## _SERVER
+
+`_SERVER` is a map containing values given by a web server when using CGI or SCGI.
+If a script is run in another way, `_SERVER` will be nil.

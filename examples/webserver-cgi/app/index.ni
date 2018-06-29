@@ -1,5 +1,18 @@
 #!/usr/local/bin/nitrogen
-print("Content-Type: text/html\n\n") // HTTP header section ends with two newlines
+
+func printMap(map) {
+    println('<ul>')
+
+    let keys = sort(hashKeys(map))
+    for i = 0; i < len(keys); i += 1 {
+        println('<li>', keys[i], ': ', map[keys[i]], '</li>')
+    }
+
+    println('</ul>')
+}
+
+print("Content-Type: text/html\n")
+print("\n") // HTTP header section ends with an empty line
 
 println('<!DOCTYPE html>
 <html>
@@ -10,13 +23,9 @@ println('<!DOCTYPE html>
 println('<h2>Hello from Nitrogen! CGI</h2>')
 
 println('<h3>Script Environment:</h3>')
-println('<ul>')
 
-let keys = sort(hashKeys(_ENV))
-for i = 0; i < len(keys); i += 1 {
-    println('<li>', keys[i], ': ', _ENV[keys[i]], '</li>')
-}
+printMap(_ENV)
+printMap(_SERVER)
 
-println('</ul>
-</body>
+println('</body>
 </html>')

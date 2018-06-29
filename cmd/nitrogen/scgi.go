@@ -155,18 +155,19 @@ func (w *worker) run(conn net.Conn) {
 		os.Stderr.WriteString("Invalid SCGI header\n")
 	}
 
-	// Get interpreter environment and merge with headers. Header values take precedence
-	appEnv := getExtEnvMap()
-	for k, v := range headers {
-		appEnv[k] = v
-	}
-
 	// Get script file path
 	scriptFilename := headers["SCRIPT_FILENAME"]
 	if scriptFilename == "" {
 		scriptName := headers["SCRIPT_NAME"]
 		docRoot := headers["DOCUMENT_ROOT"]
 		scriptFilename = filepath.Join(docRoot, scriptName)
+	}
+
+	// Ensure all expected headers are set
+	for _, header := range cgiHeaderNames {
+		if headers[header] == "" {
+			headers[header] = ""
+		}
 	}
 
 	// Execute script
@@ -177,11 +178,9 @@ func (w *worker) run(conn net.Conn) {
 		return
 	}
 
-	// Inject environment variables into execution environment
-	env := object.NewEnvironment()
-	env.CreateConst("_ENV", stringMapToHash(appEnv))
+	env := makeEnv(code.Filename)
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
-	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
+	env.SetForce("_SERVER", object.StringMapToHash(headers), true)
 
 	vmsettings := vm.NewSettings()
 	vmsettings.Stdout = conn

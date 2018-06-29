@@ -361,6 +361,18 @@ func (h *Hash) Dup() Object {
 	return &Hash{Pairs: newElements}
 }
 
+func StringMapToHash(src map[string]string) *Hash {
+	m := &Hash{Pairs: make(map[HashKey]HashPair)}
+	for k, v := range src {
+		key := MakeStringObj(k)
+		m.Pairs[key.HashKey()] = HashPair{
+			Key:   key,
+			Value: MakeStringObj(v),
+		}
+	}
+	return m
+}
+
 type LoopControl struct {
 	Continue bool
 }
