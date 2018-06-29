@@ -185,7 +185,7 @@ func (w *worker) run(conn net.Conn) {
 	vmsettings := vm.NewSettings()
 	vmsettings.Stdout = conn
 
-	result := vm.NewVM(vmsettings).Execute(code, env)
+	result, _ := vm.NewVM(vmsettings).Execute(code, env)
 
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {

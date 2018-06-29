@@ -16,6 +16,7 @@ func init() {
 	vm.RegisterBuiltin("println", printlnBuiltin)
 	vm.RegisterBuiltin("printenv", printEnvBuiltin)
 	vm.RegisterBuiltin("varDump", varDump)
+	vm.RegisterBuiltin("exit", exitScript)
 
 	vm.RegisterBuiltin("readline", readLineBuiltin)
 }
@@ -26,6 +27,22 @@ func varDump(interpreter object.Interpreter, env *object.Environment, args ...ob
 	}
 
 	return printBuiltin(interpreter, env, args...)
+}
+
+func exitScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	code := 0
+
+	if len(args) > 0 {
+		c, ok := args[0].(*object.Integer)
+		if !ok {
+			return object.NewException("exit expected an int. Got %s", args[0].Type().String())
+		}
+		code = int(c.Value)
+	}
+
+	machine := interpreter.(*vm.VirtualMachine)
+	machine.Exit(code)
+	return object.NullConst
 }
 
 func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

@@ -20,3 +20,9 @@ printenv() was called.
 readline() will read a line from standard input. If a string argument is given, it
 will be printed before taking input. Calling readline() with more than one argument
 or with an argument that's not a string, will cause the interpreter to error.
+
+## exit(code: int)
+
+`exit()` terminates script execution and returns with the error code given.
+If the script is running in response to an SCGI request, the request is immediately
+returned.

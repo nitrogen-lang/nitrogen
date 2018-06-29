@@ -5,12 +5,21 @@ import (
 	"io"
 	"os"
 	"runtime/debug"
+	"strconv"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
 )
+
+type ErrExitCode struct {
+	Code int
+}
+
+func (e ErrExitCode) Error() string {
+	return strconv.Itoa(e.Code)
+}
 
 type Settings struct {
 	Debug            bool
@@ -33,6 +42,7 @@ type VirtualMachine struct {
 	callStack    *frameStack
 	currentFrame *Frame
 	returnValue  object.Object
+	returnErr    error
 	settings     *Settings
 
 	unwind bool
@@ -60,15 +70,21 @@ func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.settings.Std
 func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.settings.Stderr }
 func (vm *VirtualMachine) GetStdin() io.Reader          { return vm.settings.Stdin }
 
-func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment) object.Object {
+func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment) (object.Object, error) {
 	if env == nil {
 		env = object.NewEnvironment()
 	}
-	return vm.RunFrame(vm.MakeFrame(code, env), false)
+	return vm.RunFrame(vm.MakeFrame(code, env), false), vm.returnErr
 }
 
 func (vm *VirtualMachine) CurrentFrame() *Frame {
 	return vm.currentFrame
+}
+
+func (vm *VirtualMachine) Exit(code int) {
+	vm.returnValue = object.MakeIntObj(int64(code))
+	vm.returnErr = ErrExitCode{code}
+	vm.unwind = true
 }
 
 func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Environment) *Frame {

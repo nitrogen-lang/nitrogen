@@ -211,7 +211,13 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	vmsettings.Debug = fullDebug
 	machine := vm.NewVM(vmsettings)
 
-	return machine.Execute(code, env)
+	ret, err := machine.Execute(code, env)
+	if err != nil {
+		if ex, ok := err.(vm.ErrExitCode); ok {
+			os.Exit(ex.Code)
+		}
+	}
+	return ret
 }
 
 func makeEnv(filepath string) *object.Environment {
