@@ -67,7 +67,7 @@ if !grandparentInitRan {
 }
 
 let expected = 'ID: 1 Msg: Hello'
-let test = myPrinter.doStuff('Hello')
+let test = myPrinter.doStuff('Hello') // Overloaded method
 if test != expected {
     println("Test Failed: instance function failed. Expected ", expected, ", got ", test)
     exit(1)

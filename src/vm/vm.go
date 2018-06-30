@@ -413,7 +413,17 @@ mainLoop:
 		case opcode.Call:
 			numargs := vm.getUint16()
 			fn := vm.currentFrame.popStack()
-			vm.CallFunction(numargs, fn, false)
+			this, exists := vm.currentFrame.env.GetLocal("this")
+			if !exists {
+				vm.CallFunction(numargs, fn, false, nil)
+				break
+			}
+			instance, ok := this.(*VMInstance)
+			if !ok {
+				vm.CallFunction(numargs, fn, false, nil)
+				break
+			}
+			vm.CallFunction(numargs, fn, false, instance)
 
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
@@ -593,14 +603,14 @@ mainLoop:
 
 		case opcode.LoadAttribute:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
-			instance := vm.currentFrame.popStack()
+			obj := vm.currentFrame.popStack()
 
-			switch instance := instance.(type) {
+			switch obj := obj.(type) {
 			case *VMInstance:
-				if method := instance.GetBoundMethod(name); method != nil {
+				if method := obj.GetBoundMethod(name); method != nil {
 					vm.currentFrame.pushStack(method)
 				} else {
-					val, ok := instance.Fields.Get(name)
+					val, ok := obj.Fields.Get(name)
 					if ok {
 						vm.currentFrame.pushStack(val)
 					} else {
@@ -608,27 +618,34 @@ mainLoop:
 					}
 				}
 			case *VMClass:
-				this := vm.currentFrame.frontInstance()
-				if this == nil {
+				this, exists := vm.currentFrame.env.GetLocal("this")
+				if !exists {
 					vm.currentFrame.pushStack(object.NewException("Method call outside instance"))
 					vm.throw()
 					break
 				}
 
-				method := instance.GetMethod(name)
+				instance, ok := this.(*VMInstance)
+				if !ok {
+					vm.currentFrame.pushStack(object.NewException("Method call outside instance"))
+					vm.throw()
+					break
+				}
+
+				method := obj.GetMethod(name)
 				if method != nil {
 					vm.currentFrame.pushStack(&BoundMethod{
 						Method:   method,
-						Instance: vm.currentFrame.frontInstance(),
-						Parent:   vm.currentFrame.frontInstance().Class.Parent,
+						Instance: instance,
+						Parent:   instance.Class.Parent,
 					})
 				} else {
 					vm.currentFrame.pushStack(object.NullConst)
 				}
 			case *object.Module:
-				vm.currentFrame.pushStack(vm.lookupModuleAttr(instance, name))
+				vm.currentFrame.pushStack(vm.lookupModuleAttr(obj, name))
 			case *object.Hash:
-				vm.currentFrame.pushStack(vm.lookupHashIndex(instance, object.MakeStringObj(name)))
+				vm.currentFrame.pushStack(vm.lookupHashIndex(obj, object.MakeStringObj(name)))
 			default:
 				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
 				vm.throw()
@@ -790,12 +807,12 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 		return
 	}
 
-	vm.CallFunction(argLen, init, true)
+	vm.CallFunction(argLen, init, true, nil)
 	vm.currentFrame.pushStack(instance)
 	return
 }
 
-func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) {
+func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, this *VMInstance) {
 	switch fn := fn.(type) {
 	case *object.Builtin:
 		args := make([]object.Object, argc)
@@ -804,7 +821,6 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 		}
 
 		env := vm.currentFrame.env
-		this := vm.currentFrame.frontInstance()
 		if this != nil {
 			env = object.NewEnclosedEnv(env)
 			env.SetForce("this", this, true)
@@ -827,7 +843,6 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 			args[i] = vm.currentFrame.popStack()
 		}
 
-		this := vm.currentFrame.frontInstance()
 		result := fn.Fn(vm, this, this.Fields, args...)
 		if result == nil {
 			result = object.NullConst
@@ -841,7 +856,6 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 		}
 	case *VMFunction:
 		var env *object.Environment
-		this := vm.currentFrame.frontInstance()
 		env = object.NewEnclosedEnv(fn.Env)
 		if this != nil {
 			env.SetForce("this", this, true)
@@ -860,9 +874,6 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 
 		newFrame := vm.MakeFrame(fn.Body, env)
 		newFrame.lastFrame = vm.currentFrame
-		if this != nil {
-			newFrame.pushInstance(this)
-		}
 
 		for i := 0; i < paramLen; i++ {
 			newFrame.env.SetForce(fn.Parameters[i], vm.currentFrame.popStack(), false)
@@ -886,11 +897,8 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 			vm.callStack.Push(newFrame)
 		}
 	case *BoundMethod:
-		vm.currentFrame.pushInstance(fn.Instance)
-		vm.CallFunction(argc, fn.Method, true)
-		vm.currentFrame.popInstance()
+		vm.CallFunction(argc, fn.Method, true, fn.Instance)
 	case *VMClass:
-		this := vm.currentFrame.frontInstance()
 		if this == nil {
 			vm.currentFrame.pushStack(object.NewPanic("Can't call class method outside of object"))
 			vm.throw()
@@ -910,7 +918,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool) 
 			}
 			return
 		}
-		vm.CallFunction(argc, init, true)
+		vm.CallFunction(argc, init, true, this)
 	default:
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()
