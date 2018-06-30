@@ -18,12 +18,15 @@ const expected = "Nope"
 if m1 != expected {
     println('m1 is not the correct value')
     println('Expected "', expected, '", got "', m1, '"')
+    exit(1)
 }
 
 if !isDefined("fastVar") {
     println('Try/catch block test failed, fastVar not defined locally')
+    exit(1)
 }
 
 if isDefined("e") {
     println('Test Failed: e is defined outside catch block')
+    exit(1)
 }

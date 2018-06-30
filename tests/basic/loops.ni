@@ -15,7 +15,7 @@ func main() {
 
     if (outer != 10) {
         println("outer should be 10, got ", outer)
-        return
+        exit(1)
     }
 
     // Test skipping every other iteration
@@ -28,7 +28,7 @@ func main() {
 
     if (outer != 5) {
         println("outer should be 5, got ", outer)
-        return
+        exit(1)
     }
 
     // Test breaking
@@ -41,7 +41,7 @@ func main() {
 
     if (outer != 10) {
         println("outer should be 10, got ", outer)
-        return
+        exit(1)
     }
 }
 

@@ -5,34 +5,35 @@
  * This file tests to ensure lexical scoping is handled correctly.
  */
 
-let string = "Hello, world!";
+let string = "Hello, world!"
 
 // Ensure this function changes the outer scope variable
 func change_string(next) {
-    string = next;
+    string = next
 }
 
 // Ensure this one doesn't
 func not_change_string(next) {
     // Overshadow the global string variable
-    let string = "";
-    string = next;
+    let string = ""
+    string = next
 }
 
 if (string != "Hello, world!") {
-    println("Outer scope initial value incorrect");
-    return;
+    println("Outer scope initial value incorrect")
+    exit(1)
 }
 
-change_string("Hello, mars!");
+change_string("Hello, mars!")
 
 if (string != "Hello, mars!") {
-    println("Outer scope variable wasn't changed");
-    return;
+    println("Outer scope variable wasn't changed")
+    exit(1)
 }
 
-not_change_string("Hello, earth!");
+not_change_string("Hello, earth!")
 
 if (string != "Hello, mars!") {
-    println("Outer scope variable was changed");
+    println("Outer scope variable was changed")
+    exit(1)
 }

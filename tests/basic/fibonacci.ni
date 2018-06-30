@@ -17,6 +17,7 @@ func main() {
     let fibTest = fib(10)
     if (fibTest != 55) {
         println("Fibonacci is broken!\nGot: ", fibTest, ", Expected: 55")
+        exit(1)
     }
 }
 

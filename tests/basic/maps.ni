@@ -27,12 +27,13 @@ func main() {
 
     if (len(keys) != len(expectedKeys)) {
         println("Not enough keys. Expected ", len(expectedKeys), " got ", len(keys))
+        exit(1)
     }
 
     for (i = 0; i < len(expectedKeys); i += 1) {
         if (!arrayHasValue(keys, expectedKeys[i])) {
             println("hash keys doesn't have ", expectedKeys[i])
-            return
+            exit(1)
         }
     }
 }

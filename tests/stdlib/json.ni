@@ -32,10 +32,12 @@ col.foreach(tests, func(i, el) {
     const encoded = json.encode(el.in)
     if encoded != el.out {
         println("JSON Test Failed: Expected ", el.out, ", got ", encoded)
+        exit(1)
     }
 })
 
 try {
     json.encode(func() {pass})
     println("JSON Test Failed: Expected encode to throw when given func")
+    exit(1)
 } catch { pass }

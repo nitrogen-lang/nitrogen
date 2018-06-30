@@ -10,27 +10,26 @@
 func fac(in) {
     // Don't mess with negative numbers, too complex
     if (in < 0) {
-        println("in must be non-negative");
-        return;
+        println("in must be non-negative")
+        return
     }
 
     // 0! is defined as 1
-    if (in == 0) { return 1; }
+    if (in == 0) { return 1 }
 
     // n! = n * (n-1)!
-    return in * fac(in - 1);
+    return in * fac(in - 1)
 }
 
 func main() {
-    let facTest = fac(20);
+    let facTest = fac(20)
 
     if (facTest != 2432902008176640000) {
-        println("Factorial is broken!");
-        print("Got: ");
-        print(facTest);
-        print(", Expected: 2432902008176640000");
+        println("Factorial is broken!")
+        println("Got: ", facTest, ", Expected: 2432902008176640000")
+        exit(1)
     }
 }
 
 // Call entry method
-main();
+main()

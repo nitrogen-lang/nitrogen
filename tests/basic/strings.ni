@@ -8,6 +8,7 @@ World!'
 		println("ERROR: Expected raw string and interpreted string to be the same.")
         println("str1: \"", str1, "\"")
         println("str2: \"", str2, "\"")
+		exit(1)
 	}
 }
 testStringsTypes();
@@ -20,6 +21,7 @@ func testStringTypes2() {
 
 	if str1 != expected {
 		println("String Test Failed: Expected ", expected, ", got ", str1)
+		exit(1)
 	}
 }
 testStringTypes2();
@@ -32,6 +34,7 @@ func testStringTypes3() {
 
 	if indexed != expected {
 		println("String Test Failed: Expected ", expected, ", got ", indexed)
+		exit(1)
 	}
 }
 testStringTypes3();

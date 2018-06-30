@@ -6,19 +6,20 @@
  */
 
 // Test directory import
-import './includes/math2' as math
+import '../../testdata/math2' as math
 
 if isError(math.add) {
     println("Test Failed: Include failed")
     println(math.add)
-    return
+    exit(1)
 }
 
 if !isFunc(math.add) {
     println("Test Failed: Add is not a function")
-    return
+    exit(1)
 }
 
 if math.add(2, 4) != 6 {
     println("Test Failed: Add func failed")
+    exit(1)
 }

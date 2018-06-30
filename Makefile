@@ -22,9 +22,13 @@ go-test:
 
 nitrogen-test:
 	@echo "Run Nitrogen source test suite"
+	@echo
 	@p="$$(pwd)"; \
-	for test in tests/*.ni; do \
+	for test in tests/**/*.ni; do \
+		/bin/echo -n -e "$$test - \e[31m"; \
 		./bin/nitrogen -M $$p/stdlib -M $$p/built-modules "$$test"; \
+		if [ $$? -ne 0 ]; then /bin/echo -e "\e[0m"; exit 1; fi; \
+		/bin/echo -e "\e[32mpassed\e[0m"; \
 	done
 
 modules:
