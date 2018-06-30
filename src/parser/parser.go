@@ -315,6 +315,24 @@ func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 	return block
 }
 
+func (p *Parser) parseSingleStmtBlock() *ast.BlockStatement {
+	if p.settings.Debug {
+		fmt.Println("parseSingleStmtBlock")
+	}
+	block := &ast.BlockStatement{
+		Token:      p.curToken,
+		Statements: make([]ast.Statement, 1),
+	}
+	p.nextToken()
+
+	stmt := p.parseStatement()
+	if stmt != nil {
+		block.Statements[0] = stmt
+	}
+
+	return block
+}
+
 func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 	if p.settings.Debug {
 		fmt.Println("parseExpressionList")
@@ -398,4 +416,12 @@ func (p *Parser) parseGroupedExpressionC(end token.TokenType) ast.Expression {
 		return nil
 	}
 	return exp
+}
+
+func (p *Parser) parseGroupedExpressionE() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseGroupedExpressionC")
+	}
+	p.nextToken()
+	return p.parseExpression(priLowest).(ast.Expression)
 }

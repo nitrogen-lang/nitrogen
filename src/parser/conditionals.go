@@ -14,16 +14,24 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	expression := &ast.IfExpression{Token: p.curToken}
 
 	if p.curTokenIs(token.LParen) {
-		p.nextToken()
-		expression.Condition = p.parseGroupedExpression()
-		if !p.expectPeek(token.LBrace) {
+		expression.Condition = p.parseGroupedExpressionE()
+		if !p.expectPeek(token.RParen) {
 			return nil
 		}
 	} else {
-		expression.Condition = p.parseGroupedExpressionC(token.LBrace)
+		expression.Condition = p.parseGroupedExpressionE()
 	}
 
-	if expression.Condition == nil {
+	if p.peekTokenIs(token.Colon) {
+		p.nextToken()
+		expression.Consequence = p.parseSingleStmtBlock()
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+		return expression
+	}
+
+	if !p.expectPeek(token.LBrace) {
 		return nil
 	}
 

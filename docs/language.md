@@ -310,6 +310,13 @@ if a == b or (a == c and a == d) {
 }
 ```
 
+Blocks that would otherwise contain a single statement do not require surrounding braces.
+Instead, add a colon after the condition and write the statement.
+
+```
+if a == b: return c
+```
+
 ## Looping
 
 Nitrogen supports a version of the traditional C for loop:
