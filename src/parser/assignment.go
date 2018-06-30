@@ -262,7 +262,11 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 	p.insertToken(classToken)
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
+	exp, ok := p.parseExpression(priLowest).(ast.Expression)
+	if !ok {
+		return nil
+	}
+	stmt.Value = exp
 
 	if class, ok := stmt.Value.(*ast.ClassLiteral); ok {
 		class.Name = stmt.Name.String()

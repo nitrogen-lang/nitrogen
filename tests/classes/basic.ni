@@ -1,6 +1,4 @@
-const conf = 'This thing'
-
-let printer = class {
+class printer {
     let x
     const t = "Thing"
 
