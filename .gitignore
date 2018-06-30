@@ -1,2 +1,3 @@
 built-modules/
 bin/
+*.nib

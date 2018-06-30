@@ -31,6 +31,7 @@ func WriteFile(name string, cb *compiler.CodeBlock, ts time.Time) error {
 	if ts.IsZero() {
 		ts = time.Now()
 	}
+	ts = ts.Round(time.Second)
 
 	file.Write(ByteFileHeader)
 	file.Write(VersionNumber)

@@ -171,7 +171,7 @@ func (w *worker) run(conn net.Conn) {
 	}
 
 	// Execute script
-	code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename)
+	code, err := moduleutils.CodeBlockCache.GetBlock(scriptFilename, "__main")
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
 		os.Stderr.Write([]byte{'\n'})

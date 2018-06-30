@@ -50,7 +50,7 @@ func (vm *VirtualMachine) importPackage(name, path string) {
 }
 
 func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object {
-	code, err := moduleutils.CodeBlockCache.GetBlock(scriptPath)
+	code, err := moduleutils.CodeBlockCache.GetBlock(scriptPath, name)
 	if err != nil {
 		return object.NewException("importing %s failed %s", name, err.Error())
 	}
@@ -84,7 +84,12 @@ func testModulePath(path string) string {
 	for _, ext := range extensions {
 		fullname := path + ext
 		if moduleutils.IsDir(fullname) {
-			mp := testModulePath(filepath.Join(path, "mod.ni"))
+			mp := testModulePath(filepath.Join(path, "mod.nib"))
+			if mp != "" {
+				return mp
+			}
+
+			mp = testModulePath(filepath.Join(path, "mod.ni"))
 			if mp != "" {
 				return mp
 			}

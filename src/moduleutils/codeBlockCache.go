@@ -1,7 +1,9 @@
 package moduleutils
 
 import (
+	"errors"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 	"time"
@@ -31,17 +33,17 @@ func newCodeBlockCache() *codeBlockCache {
 	}
 }
 
-func (c *codeBlockCache) GetBlock(file string) (*compiler.CodeBlock, error) {
+func (c *codeBlockCache) GetBlock(file string, name string) (*compiler.CodeBlock, error) {
 	fileinfo, err := os.Stat(file)
 	if err != nil {
 		return nil, err
 	}
 
 	c.m.Lock()
-	defer c.m.Unlock()
 
 	cachedItem, cached := c.cache[file]
 	if cached && cachedItem.modTime.Equal(fileinfo.ModTime()) { // hit
+		c.m.Unlock()
 		return cachedItem.block, nil
 	}
 
@@ -51,21 +53,44 @@ func (c *codeBlockCache) GetBlock(file string) (*compiler.CodeBlock, error) {
 	}
 
 	if filepath.Ext(file) == ".nib" {
-		code, _, err := marshal.ReadFile(file)
+		srcfile := file[:len(file)-1]
+		srcinfo, err := os.Stat(srcfile)
 		if err != nil {
+			c.m.Unlock()
+			if os.IsNotExist(err) {
+				return nil, errors.New("source file for compiled nib not found")
+			}
 			return nil, err
 		}
+
+		code, modinfo, err := marshal.ReadFile(file)
+		if err != nil {
+			c.m.Unlock()
+			return nil, err
+		}
+
+		if !modinfo.ModTime.Equal(srcinfo.ModTime().Round(time.Second)) {
+			c.m.Unlock()
+			return c.GetBlock(srcfile, name)
+		}
+
 		cachedItem.block = code
 	} else {
 		program, err := ASTCache.GetTree(file)
 		if err != nil {
+			c.m.Unlock()
 			return nil, err
 		}
-		cachedItem.block = compiler.Compile(program, "__main")
+		cachedItem.block = compiler.Compile(program, name)
+
+		ext := path.Ext(file)
+		outfile := file[:len(file)-len(ext)] + ".nib"
+		marshal.WriteFile(outfile, cachedItem.block, fileinfo.ModTime())
 	}
 	cachedItem.modTime = fileinfo.ModTime()
 	c.cache[file] = cachedItem
 
+	c.m.Unlock()
 	return cachedItem.block, nil
 }
 
