@@ -30,9 +30,11 @@ If n > 0, at most n substrings will be returned. The returned array may have les
 ##### Example
 
 ```
-let stringc = module('strings.so')
-let str = make stringc.string("Hello")
-println(str.str)
+import "string"
+const str = make string.String("Hello")
+const dedupped = str.dedup("l")
+
+dedupped == "Helo"
 ```
 
 #### format(args...: T): string
@@ -43,7 +45,8 @@ in order by `args`.
 ##### Example
 
 ```
-const str = make String("My name is {} and I'm {} years old")
+import "string"
+const str = make string.String("My name is {} and I'm {} years old")
 const formatted = str.format("John", 25)
 
 formatted == "My name is John and I'm 25 years old"
