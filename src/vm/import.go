@@ -3,14 +3,22 @@ package vm
 import (
 	"path/filepath"
 
-	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
-var included = make(map[string]*ast.Program)
+var included = make(map[string]object.Object)
 
 func (vm *VirtualMachine) importPackage(name, path string) {
+	mod := GetModule(name)
+	if mod != nil {
+		_, err := vm.currentFrame.env.Set(name, mod)
+		if err != nil {
+			vm.currentFrame.env.SetForce(name, mod, false)
+		}
+		return
+	}
+
 	searchPaths, ok := vm.currentFrame.env.Get("_SEARCH_PATHS")
 	if !ok {
 		vm.currentFrame.pushStack(object.NewException("_SEARCH_PATHS variable not found, required for module lookup"))
@@ -50,6 +58,11 @@ func (vm *VirtualMachine) importPackage(name, path string) {
 }
 
 func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object {
+	res, imported := included[scriptPath]
+	if imported {
+		return res
+	}
+
 	code, err := moduleutils.CodeBlockCache.GetBlock(scriptPath, name)
 	if err != nil {
 		return object.NewException("importing %s failed %s", name, err.Error())
@@ -57,7 +70,10 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 
 	env := object.NewEnclosedEnv(vm.currentFrame.env)
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
-	return vm.RunFrame(vm.MakeFrame(code, env), true)
+
+	res = vm.RunFrame(vm.MakeFrame(code, env), true)
+	included[scriptPath] = res
+	return res
 }
 
 var extensions = []string{"", ".nib", ".ni", ".so"}

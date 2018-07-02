@@ -1,8 +1,10 @@
-# Stringc
+# string
 
-stringc exposes a string object that can be used to manipulate strings.
+string exposes a String class that can be used to manipulate strings.
 
-## class string(s: string)
+To use: `import 'string'`
+
+## class String(s: string)
 
 The initializer takes a string literal.
 
@@ -25,10 +27,24 @@ If n > 0, at most n substrings will be returned. The returned array may have les
 
 `dedup` will reduce any consecutive substring of `char` to a single occurrence of `char`. `char` must be a single character.
 
-## Example
+##### Example
 
 ```
 let stringc = module('strings.so')
 let str = make stringc.string("Hello")
 println(str.str)
+```
+
+#### format(args...: T): string
+
+Format inserts values into the string. `{}` is used to mark a replacement. Replacements are done
+in order by `args`.
+
+##### Example
+
+```
+const str = make String("My name is {} and I'm {} years old")
+const formatted = str.format("John", 25)
+
+formatted == "My name is John and I'm 25 years old"
 ```

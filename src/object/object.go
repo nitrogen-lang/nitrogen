@@ -421,9 +421,11 @@ func ObjectsAre(t ObjectType, o ...Object) bool {
 }
 
 func ObjectIs(o Object, t ...ObjectType) bool {
-	for _, ot := range t {
-		if o.Type() == ot {
-			return true
+	if o != nil {
+		for _, ot := range t {
+			if o.Type() == ot {
+				return true
+			}
 		}
 	}
 	return false

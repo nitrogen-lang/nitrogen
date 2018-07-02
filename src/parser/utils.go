@@ -6,12 +6,22 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
-func (p *Parser) curTokenIs(t token.TokenType) bool {
-	return p.curToken.Type == t
+func (p *Parser) curTokenIs(t ...token.TokenType) bool {
+	for _, tt := range t {
+		if p.curToken.Type == tt {
+			return true
+		}
+	}
+	return false
 }
 
-func (p *Parser) peekTokenIs(t token.TokenType) bool {
-	return p.peekToken.Type == t
+func (p *Parser) peekTokenIs(t ...token.TokenType) bool {
+	for _, tt := range t {
+		if p.peekToken.Type == tt {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Parser) expectPeek(t token.TokenType) bool {

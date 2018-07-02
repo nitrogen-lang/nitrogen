@@ -8,7 +8,7 @@ import (
 func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) object.Object {
 	switch {
 	case left.Type() != right.Type():
-		panic(object.NewException("type mismatch: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type()))
+		return object.NewException("type mismatch: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
 	case object.ObjectsAre(object.IntergerObj, left, right):
 		return vm.evalIntegerInfixExpression(op, left, right)
 	case object.ObjectsAre(object.FloatObj, left, right):

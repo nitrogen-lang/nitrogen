@@ -1,4 +1,4 @@
-package main
+package string
 
 import (
 	"strings"
@@ -8,12 +8,14 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
+var moduleName = "string"
+
 func init() {
-	vm.RegisterModule(ModuleName, &object.Module{
-		Name:    ModuleName,
+	vm.RegisterModule(moduleName, &object.Module{
+		Name:    moduleName,
 		Methods: map[string]object.BuiltinFunction{},
 		Vars: map[string]object.Object{
-			"string": &vm.BuiltinClass{
+			"String": &vm.BuiltinClass{
 				Fields: map[string]object.Object{
 					"str": object.NullConst,
 				},
@@ -25,82 +27,12 @@ func init() {
 						"splitN":    vm.MakeBuiltinMethod(vmStrSplitN),
 						"trimSpace": vm.MakeBuiltinMethod(vmStrTrim),
 						"dedup":     vm.MakeBuiltinMethod(vmStrDedup),
+						"format":    vm.MakeBuiltinMethod(vmStrFormat),
 					},
 				},
 			},
 		},
 	})
-}
-
-func main() {}
-
-var ModuleName = "stringc"
-
-func stringInit(interpreter object.Interpreter, self *object.Instance, env *object.Environment, args ...object.Object) object.Object {
-	_, ok := args[0].(*object.String)
-	if !ok {
-		return object.NewException("string expected a string, got %s", args[1].Type().String())
-	}
-
-	env.Set("str", args[0])
-	return object.NullConst
-}
-
-func strSplitN(interpreter object.Interpreter, self *object.Instance, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("strSplitN", 2, args...); ac != nil {
-		return ac
-	}
-
-	selfStr, _ := self.Fields.Get("str")
-	target, ok := selfStr.(*object.String)
-	if !ok {
-		return object.NewException("str field is not a string")
-	}
-
-	sep, ok := args[0].(*object.String)
-	if !ok {
-		return object.NewException("splitN expected a string, got %s", args[1].Type().String())
-	}
-
-	count, ok := args[1].(*object.Integer)
-	if !ok {
-		return object.NewException("splitN expected an int, got %s", args[1].Type().String())
-	}
-
-	return object.MakeStringArray(strings.SplitN(target.String(), sep.String(), int(count.Value)))
-}
-
-func strTrim(interpreter object.Interpreter, self *object.Instance, env *object.Environment, args ...object.Object) object.Object {
-	selfStr, _ := self.Fields.Get("str")
-	target, ok := selfStr.(*object.String)
-	if !ok {
-		return object.NewException("str field is not a string")
-	}
-
-	return object.MakeStringObj(strings.TrimSpace(target.String()))
-}
-
-func strDedup(interpreter object.Interpreter, self *object.Instance, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("strDedup", 1, args...); ac != nil {
-		return ac
-	}
-
-	selfStr, _ := self.Fields.Get("str")
-	target, ok := selfStr.(*object.String)
-	if !ok {
-		return object.NewException("str field is not a string")
-	}
-
-	dedup, ok := args[0].(*object.String)
-	if !ok {
-		return object.NewException("strDedup expected a string, got %s", args[0].Type().String())
-	}
-
-	if len(dedup.Value) != 1 {
-		return object.NewException("Dedup string must be one byte")
-	}
-
-	return object.MakeStringObj(dedupString(target.Value, dedup.Value[0]))
 }
 
 func dedupString(str []rune, c rune) string {
@@ -125,7 +57,7 @@ func vmStringInit(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *obje
 	}
 
 	env.Set("str", args[0])
-	return object.NullConst
+	return nil
 }
 
 func vmStrSplitN(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
@@ -183,4 +115,37 @@ func vmStrDedup(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object
 	}
 
 	return object.MakeStringObj(dedupString(target.Value, dedup.Value[0]))
+}
+
+func vmStrFormat(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	selfStr, _ := self.Fields.Get("str")
+	target, ok := selfStr.(*object.String)
+	if !ok {
+		return object.NewException("str field is not a string")
+	}
+
+	t := string(target.Value)
+
+	for _, arg := range args {
+		if !strings.Contains(t, "{}") {
+			break
+		}
+
+		s := objectToString(arg, interpreter)
+		t = strings.Replace(t, "{}", s, 1)
+	}
+
+	return object.MakeStringObj(t)
+}
+
+func objectToString(obj object.Object, machine *vm.VirtualMachine) string {
+	if instance, ok := obj.(*vm.VMInstance); ok {
+		toString := instance.GetBoundMethod("toString")
+		if toString != nil {
+			machine.CallFunction(0, toString, true, nil)
+			return objectToString(machine.PopStack(), machine)
+		}
+	}
+
+	return obj.Inspect()
 }

@@ -140,7 +140,7 @@ mainLoop:
 		}
 		code := vm.fetchOpcode()
 		if vm.settings.Debug {
-			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s\n", vm.currentFrame.pc-1, opcode.Names[code])
+			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s", vm.currentFrame.pc-1, opcode.Names[code])
 		}
 
 		switch code {
@@ -276,7 +276,7 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
 				vm.throw()
 				break
 			}
@@ -308,7 +308,7 @@ mainLoop:
 				break
 			}
 
-			vm.currentFrame.pushStack(object.NewException("Unknown variable/constant %s\n", name))
+			vm.currentFrame.pushStack(object.NewException("Unknown variable/constant %s", name))
 			vm.throw()
 			break
 
@@ -316,12 +316,12 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.env.IsConstLocal(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
 				vm.throw()
 				break
 			}
 			if _, exists := vm.currentFrame.env.GetLocal(name); !exists {
-				vm.currentFrame.pushStack(object.NewException("Variable %s undefined\n", name))
+				vm.currentFrame.pushStack(object.NewException("Variable %s undefined", name))
 				vm.throw()
 				break
 			}
@@ -330,7 +330,7 @@ mainLoop:
 		case opcode.DeleteFast:
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.env.IsConstLocal(name) {
-				vm.currentFrame.pushStack(object.NewException("Cannot delete constant %s\n", name))
+				vm.currentFrame.pushStack(object.NewException("Cannot delete constant %s", name))
 				vm.throw()
 				break
 			}
@@ -340,12 +340,12 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
 				vm.throw()
 				break
 			}
 			if _, exists := vm.currentFrame.env.GetLocal(name); exists {
-				vm.currentFrame.pushStack(object.NewException("Variable %s already defined\n", name))
+				vm.currentFrame.pushStack(object.NewException("Variable %s already defined", name))
 				vm.throw()
 				break
 			}
@@ -366,7 +366,7 @@ mainLoop:
 				break
 			}
 
-			vm.currentFrame.pushStack(object.NewException("Global %s doesn't exist\n", name))
+			vm.currentFrame.pushStack(object.NewException("Global %s doesn't exist", name))
 			vm.throw()
 			break
 
@@ -374,7 +374,7 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s\n", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
 				vm.throw()
 				break
 			}
@@ -383,7 +383,7 @@ mainLoop:
 				p = vm.currentFrame.env
 			}
 			if _, exists := p.Get(name); !exists {
-				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined\n", name))
+				vm.currentFrame.pushStack(object.NewException("Global variable %s not defined", name))
 				vm.throw()
 				break
 			}
@@ -435,7 +435,12 @@ mainLoop:
 				vm.throw()
 				break
 			}
-			vm.currentFrame.pushStack(vm.compareObjects(l, r, op))
+
+			res := vm.compareObjects(l, r, op)
+			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+			}
 
 		case opcode.MakeFunction:
 			fnName := vm.currentFrame.popStack().(*object.String)
@@ -808,6 +813,7 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 	}
 
 	vm.CallFunction(argLen, init, true, nil)
+	vm.currentFrame.popStack() // Pop return value of init function
 	vm.currentFrame.pushStack(instance)
 	return
 }

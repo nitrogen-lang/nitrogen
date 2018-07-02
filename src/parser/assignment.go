@@ -186,15 +186,19 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	}
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
-	p.nextToken()
-	if p.curTokenIs(token.Semicolon) {
+	if p.peekTokenIs(token.Semicolon, token.RBrace) {
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+
 		stmt.Value = &ast.NullLiteral{Token: createKeywordToken("null")}
 		return stmt
 	}
+	p.nextToken()
 
 	exp := p.parseExpression(priLowest)
 	if exp == nil {
-		stmt.Value = nil
+		stmt.Value = &ast.NullLiteral{Token: createKeywordToken("null")}
 	} else {
 		stmt.Value = exp.(ast.Expression)
 	}

@@ -67,7 +67,7 @@ func (f *Frame) getFrontStack() object.Object {
 }
 
 func (f *Frame) printStack() {
-	for i := f.sp; i >= 0; i-- {
+	for i := f.sp - 1; i >= 0; i-- {
 		fmt.Printf(" %d: %s\n", i, f.stack[i].Inspect())
 	}
 }
