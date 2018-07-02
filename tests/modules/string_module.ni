@@ -3,81 +3,63 @@ if !modulesSupported() {
 }
 
 import 'strings.so' as str
+import "test"
 
-let testStr = "abcefguvwxyz"
+test.run("String module prefix/suffix", func(assert) {
+    const testStr = "abcefguvwxyz"
 
-if !str.hasPrefix(testStr, "abc") {
-    println("Test Failed: Test string expected to have prefix but didn't")
-    exit(1)
-}
-if !str.hasSuffix(testStr, "xyz") {
-    println("Test Failed: Test string expected to have suffix but didn't")
-    exit(1)
-}
+    assert.isTrue(str.hasPrefix(testStr, "abc"))
+    assert.isTrue(str.hasSuffix(testStr, "xyz"))
+    assert.isFalse(str.hasPrefix(testStr, "abcf"))
+    assert.isFalse(str.hasSuffix(testStr, "vxyz"))
+})
 
-testStr = "name:    John"
+test.run("String module dedup", func(assert) {
+    const testStr = "name:    John"
+    const expected = "name: John"
+    assert.isEq(str.dedup(testStr, " "), expected)
+})
 
-let dedupStr = str.dedup(testStr, " ")
-if dedupStr != "name: John" {
-    println("Test Failed: Expected 'name: John', got ", dedupStr)
-    exit(1)
-}
+test.run("String module trim space", func(assert) {
+    const testStr = "       test        "
+    const expected = "test"
+    assert.isEq(str.trimSpace(testStr), expected)
+})
 
-testStr = "       test        "
+test.run("String module split", func(assert) {
+    const testStr = "one,two,three"
 
-let trimStr = str.trimSpace(testStr)
-if trimStr != "test" {
-    println("Test Failed: Expected 'test', got '", trimStr, "'")
-    exit(1)
-}
+    let splits = str.split(testStr, ",")
+    assert.isEq(len(splits), 3)
 
-testStr = "one,two,three"
+    splits = str.splitN(testStr, ",", 2)
+    assert.isEq(len(splits), 2)
+})
 
-let splits = str.split(testStr, ",")
-if len(splits) != 3 {
-    println("Test Failed: Expected len of 3, got ", len(splits))
-    exit(1)
-}
+test.run("String module contains", func(assert) {
+    const testStr = "one,two,three"
+    assert.isTrue(str.contains(testStr, "two"))
+    assert.isFalse(str.contains(testStr, "Two"))
+})
 
-splits = str.splitN(testStr, ",", 2)
-if len(splits) != 2 {
-    println("Test Failed: Expected len of 2, got ", len(splits))
-    exit(1)
-}
+test.run("String module count", func(assert) {
+    const testStr = "one,two,three"
+    assert.isEq(str.count(testStr, ","), 2)
+    assert.shouldThrow(func() {
+        str.count(testStr, "")
+    })
+})
 
-if !str.contains(testStr, "two") {
-    println("Test Failed: String expected to contain 'two'")
-    exit(1)
-}
+test.run("String module replace", func(assert) {
+    const testStr = "oink oink oink"
 
-let commaCount = str.count(testStr, ",")
-if commaCount != 2 {
-    println("Test Failed: commaCount expected to be 2, got ", commaCount)
-    exit(1)
-}
+    let expected = "oinky oinky oink"
+    assert.isEq(str.replace(testStr, "k", "ky", 2), expected)
 
-try {
-    str.count(testStr, "")
-    println("Test Failed: count didn't throw")
-    exit(1)
-} catch {pass}
+    expected = "moo moo moo"
+    assert.isEq(str.replace(testStr, "oink", "moo", -1), expected)
 
-testStr = "oink oink oink"
-
-let replaced = str.replace(testStr, "k", "ky", 2)
-if replaced != "oinky oinky oink" {
-    println("Test Failed: repalced not right, got ", replaced)
-    exit(1)
-}
-
-replaced = str.replace(testStr, "oink", "moo", -1)
-if replaced != "moo moo moo" {
-    println("Test Failed: repalced not right, got ", replaced)
-    exit(1)
-}
-
-try {
-    str.replace(testStr, "", "moo", -1)
-    println("Test Failed: replace didn't throw")
-    exit(1)
-} catch {pass}
+    assert.shouldThrow(func() {
+        str.replace(testStr, "", "moo", -1)
+    })
+})

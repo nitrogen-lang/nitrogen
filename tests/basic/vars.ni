@@ -1,16 +1,17 @@
-const thing = 42
+import "test"
 
-try {
-    thing = 43
-    println("Test Failed: Constant reassigned")
-    exit(1)
-} catch {pass}
+test.run("Attempt to redefine constant", func(assert) {
+    const thing = 42
 
-try {
-    let me_out = "please"
-} catch { pass }
+    assert.shouldThrow(func() {
+        thing = 43
+    })
+})
 
-if !isDefined("me_out") {
-    println("Test Failed: var in try block no available outside")
-    exit(1)
-}
+test.run("Variable in try goes out", func(assert) {
+    try {
+        let me_out = "please"
+    } catch { pass }
+
+    assert.isTrue(isDefined("me_out"))
+})

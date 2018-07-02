@@ -1,3 +1,4 @@
+import "test"
 import "json"
 import "collections" as col
 
@@ -28,16 +29,14 @@ let tests = [
     },
 ]
 
-col.foreach(tests, func(i, el) {
-    const encoded = json.encode(el.in)
-    if encoded != el.out {
-        println("JSON Test Failed: Expected ", el.out, ", got ", encoded)
-        exit(1)
-    }
+test.run("JSON encode", func(assert) {
+    col.foreach(tests, func(i, el) {
+        assert.isEq(json.encode(el.in), el.out)
+    })
 })
 
-try {
-    json.encode(func() {pass})
-    println("JSON Test Failed: Expected encode to throw when given func")
-    exit(1)
-} catch { pass }
+test.run("JSON encode bad value", func(assert) {
+    assert.shouldThrow(func() {
+        json.encode(func() {pass})
+    })
+})

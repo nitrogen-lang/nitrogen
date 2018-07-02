@@ -1,18 +1,18 @@
-// This test mainly checks the parser to ensure single line if statements are parsed correctly
+import "test"
 
-let counter = 0
+test.run("Single statement if expressions", func(assert) {
+    let counter = 0
 
-if true {
-    counter += 1
-}
+    if true {
+        counter += 1
+    }
 
-if (true) {
-    counter += 1
-}
+    if (true) {
+        counter += 1
+    }
 
-if true: counter += 1
-if (true): counter += 1
+    if true: counter += 1
+    if (true): counter += 1
 
-if counter != 4 {
-    println("Test Failed: counter should be 4, got ", counter)
-}
+    assert.isEq(counter, 4)
+})

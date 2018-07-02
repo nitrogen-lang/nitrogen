@@ -1,4 +1,5 @@
-const conf = 'This thing'
+import "test"
+
 let grandparentInitRan = false
 
 class grandParent {
@@ -59,44 +60,22 @@ class printer ^ parentPrinter {
     }
 }
 
-let myPrinter = make printer(1)
+test.run("Class inheritance", func(assert) {
+    let myPrinter = make printer(1)
+    assert.isTrue(grandparentInitRan)
 
-if !grandparentInitRan {
-    println("Test Failed: Grandparent init() did not run")
-    exit(1)
-}
+    let expected = 'ID: 1 Msg: Hello'
+    assert.isEq(myPrinter.doStuff('Hello'), expected) // Overloaded method
 
-let expected = 'ID: 1 Msg: Hello'
-let test = myPrinter.doStuff('Hello') // Overloaded method
-if test != expected {
-    println("Test Failed: instance function failed. Expected ", expected, ", got ", test)
-    exit(1)
-}
+    expected = 'parent thing'
+    assert.isEq(myPrinter.z, expected)
 
-expected = 'parent thing'
-test = myPrinter.z
-if test != expected {
-    println("Test Failed: inherited property not right. Expected ", expected, ", got ", test)
-    exit(1)
-}
+    expected = "I'm the parent"
+    assert.isEq(myPrinter.parentOnly(), expected)
 
-expected = "I'm the parent"
-test = myPrinter.parentOnly()
-if test != expected {
-    println("Test Failed: parent only method failed. Expected ", expected, ", got ", test)
-    exit(1)
-}
+    expected = 'Parent: parent thing Msg: Hello'
+    assert.isEq(myPrinter.doStuff2('Hello'), expected)
 
-expected = 'Parent: parent thing Msg: Hello'
-test = myPrinter.doStuff2('Hello')
-if test != expected {
-    println("Test Failed: calling parent method. Expected ", expected, ", got ", test)
-    exit(1)
-}
-
-expected = 'Grandparent: Hello'
-test = myPrinter.doStuff3('Hello')
-if test != expected {
-    println("Test Failed: calling grand-parent method. Expected ", expected, ", got ", test)
-    exit(1)
-}
+    expected = 'Grandparent: Hello'
+    assert.isEq(myPrinter.doStuff3('Hello'), expected)
+})

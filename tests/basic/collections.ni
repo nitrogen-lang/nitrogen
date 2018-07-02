@@ -1,100 +1,75 @@
-let arr = ["one", "two"]
+import "test"
 
-let prependArr = prepend(arr, "zero")
-if prependArr[0] != "zero" {
-    println("Test Failed: Expected \"zero\", got ", prependArr[0])
-    exit(1)
-}
+const arr = ["one", "two"]
 
-let pushArr = push(arr, "three")
-if len(pushArr) != 3 {
-    println("Test Failed: Expected 3, got ", len(pushArr))
-    exit(1)
-}
-if pushArr[2] != "three" {
-    println("Test Failed: Expected \"three\", got ", pushArr[2])
-    exit(1)
-}
+test.run("array prepend", func(assert) {
+    const prependArr = prepend(arr, "zero")
+    assert.isEq(prependArr[0], "zero")
+})
 
-let popArr = pop(arr)
-if len(popArr) != 1 {
-    println("Test Failed: Expected 1, got ", len(popArr))
-    exit(1)
-}
-if popArr[0] != "one" {
-    println("Test Failed: Expected \"one\", got ", popArr[0])
-    exit(1)
-}
+test.run("array push", func(assert) {
+    const pushArr = push(arr, "three")
+    assert.isEq(len(pushArr), 3)
+    assert.isEq(pushArr[2], "three")
+})
 
-let arr2 = arr + ["three", "four"]
-let spliceArr = splice(arr2, 1, 2)
-if len(spliceArr) != 2 {
-    println("Test Failed: Expected 2, got ", len(spliceArr))
-    exit(1)
-}
-if spliceArr[0] != "one" {
-    println("Test Failed: Expected \"one\", got ", spliceArr[0])
-    exit(1)
-}
-if spliceArr[1] != "four" {
-    println("Test Failed: Expected \"four\", got ", spliceArr[1])
-    exit(1)
-}
+test.run("array pop", func(assert) {
+    const popArr = pop(arr)
+    assert.isEq(len(popArr), 1)
+    assert.isEq(popArr[0], "one")
+})
 
-let spliceArr2 = splice(arr2, 2)
-if len(spliceArr2) != 2 {
-    println("Test Failed: Expected 2, got ", len(spliceArr2))
-    exit(1)
-}
-if spliceArr2[0] != "one" {
-    println("Test Failed: Expected \"one\", got ", spliceArr2[0])
-    exit(1)
-}
-if spliceArr2[1] != "two" {
-    println("Test Failed: Expected \"two\", got ", spliceArr2[1])
-    exit(1)
-}
+const arr2 = arr + ["three", "four"]
 
-let noopSplice = splice(arr2, 0)
-if len(noopSplice) != 0 {
-    println("Test Failed: Expected 0, got ", len(noopSplice))
-    exit(1)
-}
+test.run("array splice with offset and length", func(assert) {
+    const spliceArr = splice(arr2, 1, 2)
 
-try {
-    noopSplice = splice(arr2, -1)
-    println("Test Failed: Negative args didn't throw")
-    exit(1)
-} catch {pass}
+    assert.isEq(len(spliceArr), 2)
+    assert.isEq(spliceArr[0], "one")
+    assert.isEq(spliceArr[1], "four")
+})
 
-noopSplice = splice(arr2, 1, 0)
-if len(noopSplice) != 4 {
-    println("Test Failed: Expected 4, got ", len(noopSplice))
-    exit(1)
-}
+test.run("array splice with offset", func(assert) {
+    const spliceArr = splice(arr2, 2)
 
-try {
-    noopSplice = splice(arr2, 1, -1)
-    println("Test Failed: Negative args didn't throw")
-    exit(1)
-} catch {pass}
+    assert.isEq(len(spliceArr), 2)
+    assert.isEq(spliceArr[0], "one")
+    assert.isEq(spliceArr[1], "two")
+})
 
-let sliceArr = slice(arr2, 0)
-if len(sliceArr) != 4 {
-    println("Test Failed: Expected 4, got ", len(sliceArr))
-    exit(1)
-}
+test.run("array splice 0 offset, no length", func(assert) {
+    const spliceArr = splice(arr2, 0)
 
-sliceArr = slice(arr2, 1, 2)
-if len(sliceArr) != 2 {
-    println("Test Failed: Expected 2, got ", len(sliceArr))
-    exit(1)
-}
-if sliceArr[0] != "two" {
-    println("Test Failed: Expected \"one\", got ", sliceArr[0])
-    exit(1)
-}
-if sliceArr[1] != "three" {
-    println("Test Failed: Expected \"four\", got ", sliceArr[1])
-    exit(1)
-}
+    assert.isEq(len(spliceArr), 0)
+})
+
+test.run("array splice with negative offset and length", func(assert) {
+    assert.shouldThrow(func() {
+        splice(arr2, -1)
+    })
+
+    assert.shouldThrow(func() {
+        splice(arr2, 1, -1)
+    })
+
+    assert.shouldThrow(func() {
+        splice(arr2, -1, -1)
+    })
+})
+
+test.run("array splice with 0 length", func(assert) {
+    const spliceArr = splice(arr2, 1, 0)
+    assert.isEq(len(spliceArr), 4)
+})
+
+test.run("array slice with 0 offset", func(assert) {
+    const sliceArr = slice(arr2, 0)
+    assert.isEq(len(sliceArr), 4)
+})
+
+test.run("array slice with offset and length", func(assert) {
+    const sliceArr = slice(arr2, 1, 2)
+    assert.isEq(len(sliceArr), 2)
+    assert.isEq(sliceArr[0], "two")
+    assert.isEq(sliceArr[1], "three")
+})

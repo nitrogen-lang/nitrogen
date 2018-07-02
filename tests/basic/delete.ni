@@ -1,27 +1,16 @@
-let hello = "world"
+import "test"
 
-if !isDefined("hello") {
-    println("Test Failed: hello is not defined")
-    exit(1)
-}
+test.run("delete variable", func(assert) {
+    let hello = "world"
+    assert.isTrue(isDefined("hello"))
 
-delete hello
+    delete hello
+    assert.isFalse(isDefined("hello"))
+})
 
-if isDefined("hello") {
-    println("Test Failed: hello is still defined")
-    exit(1)
-}
-
-
-const place = "Earth"
-
-if !isDefined("place") {
-    println("Test Failed: place is not defined")
-    exit(1)
-}
-
-try {
-    delete place
-    println("Test Failed: deleting constant didn't throw")
-    exit(1)
-} catch { pass }
+test.run("delete constant", func(assert) {
+    assert.shouldThrow(func() {
+        const place = "Earth"
+        delete place
+    })
+})

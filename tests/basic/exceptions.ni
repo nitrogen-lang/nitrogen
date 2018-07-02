@@ -1,32 +1,23 @@
-let fastVar = 42
+import "test"
 
-func myException() {
-    myException2()
-}
+test.run("Exceptions", func(assert) {
+    let fastVar = 42
 
-func myException2() {
-    throw "Nope"
-}
+    func myException() {
+        myException2()
+    }
 
-let m1 = try {
-    myException()
-} catch e {
-    errorVal(e)
-}
+    func myException2() {
+        throw "Nope"
+    }
 
-const expected = "Nope"
-if m1 != expected {
-    println('m1 is not the correct value')
-    println('Expected "', expected, '", got "', m1, '"')
-    exit(1)
-}
+    let m1 = try {
+        myException()
+    } catch e {
+        errorVal(e)
+    }
 
-if !isDefined("fastVar") {
-    println('Try/catch block test failed, fastVar not defined locally')
-    exit(1)
-}
-
-if isDefined("e") {
-    println('Test Failed: e is defined outside catch block')
-    exit(1)
-}
+    assert.isEq(m1, "Nope")
+    assert.isTrue(isDefined("fastVar"))
+    assert.isFalse(isDefined("e"))
+})

@@ -1,40 +1,23 @@
-func testStringsTypes() {
-	let str1 = 'Hello,
+import "test"
+
+test.run("Check equality of raw and escaped strings", func(assert) {
+	const str1 = 'Hello,
 World!'
+	const str2 = "Hello,\nWorld!"
+	assert.isEq(str1, str2)
+})
 
-	let str2 = "Hello,\nWorld!"
-
-	if str1 != str2 {
-		println("ERROR: Expected raw string and interpreted string to be the same.")
-        println("str1: \"", str1, "\"")
-        println("str2: \"", str2, "\"")
-		exit(1)
-	}
-}
-testStringsTypes();
-
-func testStringTypes2() {
-	let str1 = "Hello, world!"
-	let expected = "Hello, World!"
+test.run("Check changing string index", func(assert) {
+	const str1 = "Hello, world!"
+	const expected = "Hello, World!"
 
 	str1[7] = "W"
 
-	if str1 != expected {
-		println("String Test Failed: Expected ", expected, ", got ", str1)
-		exit(1)
-	}
-}
-testStringTypes2();
+	assert.isEq(str1, expected)
+})
 
-func testStringTypes3() {
+test.run("Indexing UTF-8 string", func(assert) {
 	const str1 = "Hello, 世界!"
 	const expected = "世"
-
-	const indexed = str1[7]
-
-	if indexed != expected {
-		println("String Test Failed: Expected ", expected, ", got ", indexed)
-		exit(1)
-	}
-}
-testStringTypes3();
+	assert.isEq(str1[7], expected)
+})
