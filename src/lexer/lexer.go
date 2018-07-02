@@ -410,6 +410,8 @@ func (l *Lexer) readString() token.Token {
 				ident.WriteRune('\v')
 			case 'f': // form feed
 				ident.WriteRune('\f')
+			case 'e': // escape
+				ident.WriteRune('\033')
 			case '\\': // back slash
 				ident.WriteRune('\\')
 			case '"': // double quote

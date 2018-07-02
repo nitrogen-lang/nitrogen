@@ -8,18 +8,19 @@ Nitrogen source files are read as valid UTF-8 characters.
 
 ## Keywords
 
-|        |          |
-|--------|----------|
-| and    | break    |
-| catch  | class    |
-| const  | continue |
-| else   | false    |
-| for    | func     |
-| if     | let      |
-| make   | nil      |
-| or     | pass     |
-| return | throw    |
-| true   | try      |
+|          |          |
+|----------|----------|
+| and      | as       |
+| break    | catch    |
+| class    | const    |
+| continue | else     |
+| false    | for      |
+| func     | if       |
+| import   | let      |
+| make     | nil      |
+| or       | pass     |
+| return   | throw    |
+| true     | try      |
 
 ## Semicolons
 
@@ -143,11 +144,12 @@ interpreted strings and raw strings.
 Interpreted strings are surrounded by double quotes and cannot contain any new lines (it can't span lines), but it can contain escape sequences:
 
 - \b - Backspace
+- \e - Escape
+- \f - Form feed
 - \n - Newline
 - \r - Carriage return
 - \t - Horizontal tab
 - \v - Vertical tab
-- \f - Form feed
 - \\\\ - Backspace
 - \\" - Double quote
 
