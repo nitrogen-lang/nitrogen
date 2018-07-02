@@ -20,14 +20,20 @@ func init() {
 					"str": object.NullConst,
 				},
 				VMClass: &vm.VMClass{
-					Name:   "string",
+					Name:   "String",
 					Parent: nil,
 					Methods: map[string]object.ClassMethod{
-						"init":      vm.MakeBuiltinMethod(vmStringInit),
-						"splitN":    vm.MakeBuiltinMethod(vmStrSplitN),
-						"trimSpace": vm.MakeBuiltinMethod(vmStrTrim),
+						"contains":  vm.MakeBuiltinMethod(vmStrContains),
+						"count":     vm.MakeBuiltinMethod(vmStrCount),
 						"dedup":     vm.MakeBuiltinMethod(vmStrDedup),
 						"format":    vm.MakeBuiltinMethod(vmStrFormat),
+						"hasPrefix": vm.MakeBuiltinMethod(vmStrHasPrefix),
+						"hasSuffix": vm.MakeBuiltinMethod(vmStrHasSuffix),
+						"init":      vm.MakeBuiltinMethod(vmStringInit),
+						"replace":   vm.MakeBuiltinMethod(vmStrReplace),
+						"split":     vm.MakeBuiltinMethod(vmStrSplit),
+						"splitN":    vm.MakeBuiltinMethod(vmStrSplitN),
+						"trimSpace": vm.MakeBuiltinMethod(vmStrTrim),
 					},
 				},
 			},
@@ -82,6 +88,14 @@ func vmStrSplitN(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *objec
 	}
 
 	return object.MakeStringArray(strings.SplitN(target.String(), sep.String(), int(count.Value)))
+}
+
+func vmStrSplit(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("split", 1, args...); ac != nil {
+		return ac
+	}
+
+	return vmStrSplitN(interpreter, self, env, args[0], object.MakeIntObj(-1))
 }
 
 func vmStrTrim(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
@@ -148,4 +162,115 @@ func objectToString(obj object.Object, machine *vm.VirtualMachine) string {
 	}
 
 	return obj.Inspect()
+}
+
+func vmStrContains(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("contains", 1, args...); ac != nil {
+		return ac
+	}
+
+	selfStr, _ := self.Fields.Get("str")
+	target, ok := selfStr.(*object.String)
+	if !ok {
+		return object.NewException("str field is not a string")
+	}
+
+	sub, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("contains expected a string, got %s", args[1].Type().String())
+	}
+
+	return object.NativeBoolToBooleanObj(strings.Contains(target.String(), sub.String()))
+}
+
+func vmStrCount(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("count", 1, args...); ac != nil {
+		return ac
+	}
+
+	selfStr, _ := self.Fields.Get("str")
+	target, ok := selfStr.(*object.String)
+	if !ok {
+		return object.NewException("str field is not a string")
+	}
+
+	sub, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("count expected a string, got %s", args[0].Type().String())
+	}
+	if len(sub.Value) == 0 {
+		return object.NewException("count argument 2 can't be empty")
+	}
+
+	return object.MakeIntObj(int64(strings.Count(target.String(), sub.String())))
+}
+
+func vmStrHasPrefix(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("hasPrefix", 1, args...); ac != nil {
+		return ac
+	}
+
+	selfStr, _ := self.Fields.Get("str")
+	target, ok := selfStr.(*object.String)
+	if !ok {
+		return object.NewException("str field is not a string")
+	}
+
+	prefix, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("hasPrefix expected a string, got %s", args[0].Type().String())
+	}
+
+	return object.NativeBoolToBooleanObj(strings.HasPrefix(target.String(), prefix.String()))
+}
+
+func vmStrHasSuffix(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("hasSuffix", 1, args...); ac != nil {
+		return ac
+	}
+
+	selfStr, _ := self.Fields.Get("str")
+	target, ok := selfStr.(*object.String)
+	if !ok {
+		return object.NewException("str field is not a string")
+	}
+
+	prefix, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("hasSuffix expected a string, got %s", args[0].Type().String())
+	}
+
+	return object.NativeBoolToBooleanObj(strings.HasSuffix(target.String(), prefix.String()))
+}
+
+func vmStrReplace(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("replace", 3, args...); ac != nil {
+		return ac
+	}
+
+	selfStr, _ := self.Fields.Get("str")
+	target, ok := selfStr.(*object.String)
+	if !ok {
+		return object.NewException("str field is not a string")
+	}
+
+	old, ok := args[0].(*object.String)
+	if !ok {
+		return object.NewException("replace expected a string, got %s", args[0].Type().String())
+	}
+	if len(old.Value) == 0 {
+		return object.NewException("replace argument 2 can't be empty")
+	}
+
+	new, ok := args[1].(*object.String)
+	if !ok {
+		return object.NewException("replace expected a string, got %s", args[1].Type().String())
+	}
+
+	n, ok := args[2].(*object.Integer)
+	if !ok {
+		return object.NewException("replace expected an integer, got %s", args[2].Type().String())
+	}
+
+	return object.MakeStringObj(strings.Replace(target.String(), old.String(), new.String(), int(n.Value)))
 }
