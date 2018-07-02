@@ -31,7 +31,7 @@ If n > 0, at most n substrings will be returned. The returned array may have les
 
 ```
 import "string"
-const str = make string.String("Hello")
+const str = new string.String("Hello")
 const dedupped = str.dedup("l")
 
 dedupped == "Helo"
@@ -46,7 +46,7 @@ in order by `args`.
 
 ```
 import "string"
-const str = make string.String("My name is {} and I'm {} years old")
+const str = new string.String("My name is {} and I'm {} years old")
 const formatted = str.format("John", 25)
 
 formatted == "My name is John and I'm 25 years old"

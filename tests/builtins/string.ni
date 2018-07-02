@@ -2,7 +2,7 @@ import 'string'
 import "test"
 
 func String(s) {
-    return make string.String(s)
+    return new string.String(s)
 }
 
 test.run("String module contains", func(assert) {
@@ -26,7 +26,7 @@ test.run("String module dedup", func(assert) {
 })
 
 test.run("String module format", func(assert) {
-    const str = make string.String("My name is {} and I'm {} years old")
+    const str = new string.String("My name is {} and I'm {} years old")
     const expected = "My name is John and I'm 25 years old"
     assert.isEq(str.format("John", 25), expected)
 })

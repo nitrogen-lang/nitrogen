@@ -17,7 +17,7 @@ Nitrogen source files are read as valid UTF-8 characters.
 | false    | for      |
 | func     | if       |
 | import   | let      |
-| make     | nil      |
+| new      | nil      |
 | or       | pass     |
 | return   | throw    |
 | true     | try      |
@@ -585,7 +585,7 @@ class printer ^ parentPrinter {
     }
 }
 
-let myPrinter = make printer(1)
+let myPrinter = new printer(1)
 
 println(myPrinter.doStuff('Hello')) // Redefined on child class
 println(myPrinter.z) // Field from parent class
@@ -595,7 +595,7 @@ println(myPrinter.doStuff2('Hello')) // Method that calls the parent's doStuff()
 
 ### Creating an Instance
 
-An instance of a class can be created using the `make` keyword followed by the class and any arguments to the init
+An instance of a class can be created using the `new` keyword followed by the class and any arguments to the init
 method.
 
 ```
@@ -617,7 +617,7 @@ class name ^ parent {
     }
 }
 
-let myObject = make name(10)
+let myObject = new name(10)
 
 println(classOf(myObject)) // Prints "name"
 ```

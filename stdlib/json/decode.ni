@@ -69,7 +69,7 @@ class lexer {
         }
         this.readChar()
 
-        make token(STRING, str)
+        new token(STRING, str)
     }
 
     func readNumber() {
@@ -80,7 +80,7 @@ class lexer {
         if this.curChar == '"' {
             return this.readString()
         }
-        make token(INVALID, "")
+        new token(INVALID, "")
     }
 }
 
@@ -108,8 +108,8 @@ class parser {
 }
 
 func decode(str, str2) {
-    const l = make lexer(str)
-    const p = make parser(l)
+    const l = new lexer(str)
+    const p = new parser(l)
     p.parse()
 }
 

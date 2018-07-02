@@ -14,8 +14,8 @@ class printer {
 }
 
 test.run("Basic classes", func(assert) {
-    const myPrinter = make printer(1)
-    const myPrinter2 = make printer(2)
+    const myPrinter = new printer(1)
+    const myPrinter2 = new printer(2)
 
     assert.isTrue(instanceOf(myPrinter, printer))
     assert.isTrue(instanceOf(myPrinter, 'printer'))

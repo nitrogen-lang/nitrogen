@@ -56,7 +56,7 @@ func (p *Parser) parseMakeExpression() ast.Expression {
 	if p.settings.Debug {
 		fmt.Println("parseMakeExpression")
 	}
-	m := &ast.MakeInstance{}
+	m := &ast.NewInstance{}
 
 	p.nextToken()
 	cExpression := p.parseExpression(priLowest)

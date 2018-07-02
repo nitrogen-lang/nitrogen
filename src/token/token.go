@@ -96,7 +96,7 @@ const (
 	Catch
 	Throw
 	Class
-	Make
+	New
 	Pass
 	Import
 	As
@@ -178,7 +178,7 @@ var tokens = [...]string{
 	Catch:    "catch",
 	Throw:    "throw",
 	Class:    "class",
-	Make:     "make",
+	New:      "new",
 	Pass:     "pass",
 	Import:   "import",
 	As:       "as",

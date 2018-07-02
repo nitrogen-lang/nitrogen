@@ -326,7 +326,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		ccb.code.WriteByte(opcode.Throw.ToByte())
 	case *ast.ClassLiteral:
 		compileClassLiteral(ccb, node)
-	case *ast.MakeInstance:
+	case *ast.NewInstance:
 		for i := len(node.Arguments) - 1; i >= 0; i-- {
 			compile(ccb, node.Arguments[i])
 		}

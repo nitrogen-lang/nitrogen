@@ -1,7 +1,7 @@
 import "string"
 
 func String(s) {
-    return make string.String(s)
+    return new string.String(s)
 }
 
 const exports = {}

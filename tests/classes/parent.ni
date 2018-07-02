@@ -61,7 +61,7 @@ class printer ^ parentPrinter {
 }
 
 test.run("Class inheritance", func(assert) {
-    let myPrinter = make printer(1)
+    let myPrinter = new printer(1)
     assert.isTrue(grandparentInitRan)
 
     let expected = 'ID: 1 Msg: Hello'
