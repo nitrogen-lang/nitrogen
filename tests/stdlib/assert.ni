@@ -57,7 +57,7 @@ shouldThrow("009", func() {
     assert.isNeq("hello", "hello")
 })
 
-shouldNotThrow("010", func() {
+shouldThrow("010", func() {
     assert.isNeq("hello", 42)
 })
 
@@ -66,15 +66,15 @@ shouldNotThrow("011", func() {
     assert.shouldThrow(func() { throw "Hello" })
 })
 
-shouldThrow("011", func() {
+shouldThrow("012", func() {
     assert.shouldThrow(func() { 42 })
 })
 
 // shouldNotThrow
-shouldNotThrow("011", func() {
+shouldNotThrow("013", func() {
     assert.shouldNotThrow(func() { 42 })
 })
 
-shouldThrow("011", func() {
+shouldThrow("014", func() {
     assert.shouldNotThrow(func() { throw "Hello" })
 })

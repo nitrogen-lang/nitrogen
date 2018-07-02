@@ -4,13 +4,15 @@ Utilities for asserting things during testing.
 
 To use: `import 'assert'`
 
-## isTrue(x: bool): nil
+## isTrue(x: bool|func): nil
 
-Check if `x` is true or throw an exception. `isTrue` will also throw if x is not a boolean type.
+Check if `x` is true or throw an exception. If `x` is a function, it will be executed and its
+return value checked. `isTrue` will throw if x, or the return value of x, is not a boolean type.
 
-## isFalse(x: bool): nil
+## isFalse(x: bool|func): nil
 
-Check if `x` is false or throw an exception. `isFalse` will also throw if x is not a boolean type.
+Check if `x` is false or throw an exception. If `x` is a function, it will be executed and its
+return value checked. `isFalse` will throw if x, or the return value of x, is not a boolean type.
 
 ## isEq(a, b: T): nil
 

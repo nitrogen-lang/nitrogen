@@ -8,7 +8,7 @@ import (
 func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) object.Object {
 	switch {
 	case left.Type() != right.Type():
-		return object.NewException("type mismatch: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
+		return object.FalseConst
 	case object.ObjectsAre(object.IntergerObj, left, right):
 		return vm.evalIntegerInfixExpression(op, left, right)
 	case object.ObjectsAre(object.FloatObj, left, right):
@@ -19,7 +19,7 @@ func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) obj
 		return vm.evalBoolInfixExpression(op, left, right)
 	}
 
-	return object.NullConst
+	return object.NewException("comparison not implemented for type %s", left.Type())
 }
 
 func (vm *VirtualMachine) evalIntegerInfixExpression(op byte, left, right object.Object) object.Object {
