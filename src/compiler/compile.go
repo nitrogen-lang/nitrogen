@@ -569,32 +569,29 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 		return
 	}
 
+	compile(ccb, ifs.Condition)
+
 	_, trueNoNil := ifs.Consequence.Statements[len(ifs.Consequence.Statements)-1].(*ast.ExpressionStatement)
 	_, falseNoNil := ifs.Alternative.Statements[len(ifs.Alternative.Statements)-1].(*ast.ExpressionStatement)
 
-	compile(ccb, ifs.Condition)
+	trueBranch := compileInnerBlock(ccb, ifs.Consequence, 3)
 
-	mainCode := ccb.code
-	oldOffset := ccb.offset
-
-	ccb.offset = ccb.code.Len() + ccb.offset
-	ccb.code = new(bytes.Buffer)
-	compile(ccb, ifs.Consequence)
-	trueBranch := ccb.code
-
-	// 1 = 1 opcode
-	falseBranchLoc := mainCode.Len() + trueBranch.Len() + ccb.offset + 1
-	if trueNoNil {
+	falseBranchLoc := ccb.code.Len() + trueBranch.Len() + ccb.offset + 6
+	if !trueNoNil {
 		// 3 = 1 opcode + 2 byte arg (implicit nil from true branch)
-		falseBranchLoc -= 3
+		falseBranchLoc += 3
 	}
-	ccb.offset = falseBranchLoc
-	ccb.code = new(bytes.Buffer)
-	compile(ccb, ifs.Alternative)
-	falseBranch := ccb.code
 
-	ccb.code = mainCode
-	ccb.offset = oldOffset
+	extraOffset := trueBranch.Len() + 6
+	if !trueNoNil {
+		extraOffset += 3
+	}
+	falseBranch := compileInnerBlock(ccb, ifs.Alternative, extraOffset)
+
+	jmpForw := falseBranch.Len()
+	if !falseNoNil {
+		jmpForw += 3
+	}
 
 	ccb.code.WriteByte(opcode.PopJumpIfFalse.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(falseBranchLoc)))
@@ -602,8 +599,9 @@ func compileIfStatement(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	if !trueNoNil {
 		compileLoadNull(ccb)
 	}
+
 	ccb.code.WriteByte(opcode.JumpForward.ToByte())
-	ccb.code.Write(uint16ToBytes(uint16(falseBranch.Len())))
+	ccb.code.Write(uint16ToBytes(uint16(jmpForw)))
 	ccb.code.Write(falseBranch.Bytes())
 	if !falseNoNil {
 		compileLoadNull(ccb)
@@ -643,7 +641,7 @@ func compileLoadNull(ccb *codeBlockCompiler) {
 func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression) {
 	compile(ccb, cmp.Left)
 
-	cntBranch := compileInnerBlock(ccb, cmp.Right, 0)
+	cntBranch := compileInnerBlock(ccb, cmp.Right, 3)
 
 	// 3 = 1 opcode + 1 x 2 byte arg
 	afterCompare := ccb.code.Len() + cntBranch.Len() + ccb.offset + 3

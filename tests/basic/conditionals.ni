@@ -33,3 +33,84 @@ test.run("Various if expressions", func(assert) {
         return false
     })
 })
+
+test.run("If statement with else", func(assert) {
+    func test(a) {
+        if a {
+            return "Hello"
+        } else {
+            return "Good bye"
+        }
+    }
+
+    assert.isEq(test(true), "Hello")
+    assert.isEq(test(false), "Good bye")
+})
+
+test.run("If statement with else and compound conditional", func(assert) {
+    func test(a, b) {
+        if a or b {
+            return "Hello"
+        } else {
+            return "Good bye"
+        }
+    }
+
+    assert.isEq(test(true, false), "Hello")
+    assert.isEq(test(false, true), "Hello")
+    assert.isEq(test(true, true), "Hello")
+    assert.isEq(test(false, false), "Good bye")
+})
+
+test.run("If statement with else assigned to variable", func(assert) {
+    func test(a) {
+        const msg = if a {
+            "Hello"
+        } else {
+            "Good bye"
+        }
+
+        return msg
+    }
+
+    assert.isEq(test(true), "Hello")
+    assert.isEq(test(false), "Good bye")
+})
+
+test.run("If statement within an if true branch", func(assert) {
+    func test(a, b) {
+        if a {
+            if b {
+                return "Hello1"
+            } else {
+                return "Hello2"
+            }
+        } else {
+            return "Good bye"
+        }
+    }
+
+    assert.isEq(test(true, true), "Hello1")
+    assert.isEq(test(true, false), "Hello2")
+    assert.isEq(test(false, true), "Good bye")
+    assert.isEq(test(false, false), "Good bye")
+})
+
+test.run("If statement within an if false branch", func(assert) {
+    func test(a, b) {
+        if a {
+            return "Hello"
+        } else {
+            if b {
+                return "Good bye1"
+            } else {
+                return "Good bye2"
+            }
+        }
+    }
+
+    assert.isEq(test(true, true), "Hello")
+    assert.isEq(test(true, false), "Hello")
+    assert.isEq(test(false, true), "Good bye1")
+    assert.isEq(test(false, false), "Good bye2")
+})
