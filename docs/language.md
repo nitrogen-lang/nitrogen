@@ -2,6 +2,10 @@
 
 This is not a formal specification of the Nitrogen language. This is simply a guide to the syntax and function of the language.
 
+## Packages
+
+For information on importing modules and Nitrogen packages, please see the [import docs](stdlib/global/imports.md).
+
 ## Source Files
 
 Nitrogen source files are read as valid UTF-8 characters.

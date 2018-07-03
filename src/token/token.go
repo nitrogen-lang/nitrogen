@@ -101,6 +101,7 @@ const (
 	Import
 	As
 	Delete
+	Use
 	keywordEnd
 )
 
@@ -183,6 +184,7 @@ var tokens = [...]string{
 	Import:   "import",
 	As:       "as",
 	Delete:   "delete",
+	Use:      "use",
 }
 
 var keywords map[string]TokenType

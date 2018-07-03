@@ -30,6 +30,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseImport()
 	case token.Delete:
 		return p.parseDelete()
+	case token.Use:
+		return p.parseUseStatement()
 	case token.Throw:
 		p.nextToken()
 		t := &ast.ThrowStatement{
@@ -59,6 +61,49 @@ func (p *Parser) parseStatement() ast.Statement {
 		return stat
 	}
 	return p.parseExpressionStatement()
+}
+
+func (p *Parser) parseUseStatement() ast.Statement {
+	stmt := &ast.DefStatement{
+		Token: p.curToken,
+		Const: true,
+	}
+
+	p.nextToken()
+
+	node := p.parseExpression(priLowest)
+	exp, ok := node.(*ast.AttributeExpression)
+	if !ok {
+		p.addErrorWithPos("use expected an attribute expression")
+		return nil
+	}
+	stmt.Value = exp
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+
+		stmt.Name = &ast.Identifier{Value: importName(exp.Index.String())}
+		if stmt.Name.Value == "" {
+			p.addErrorWithPos("use statement does not create a valid identifier")
+			return nil
+		}
+		return stmt
+	}
+
+	if !p.expectPeek(token.As) {
+		return nil
+	}
+
+	if !p.expectPeek(token.Identifier) {
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+	return stmt
 }
 
 func (p *Parser) parseDelete() ast.Statement {
