@@ -3,12 +3,7 @@ func encode(buf, obj) {
         return buf + '"' + obj + '"'
     }
 
-    if isInt(obj) or isFloat(obj) {
-        return buf + toString(obj)
-    }
-
-    // Due to a bug in if compilation, this is not part of the above if statement
-    if isBool(obj) {
+    if isInt(obj) or isFloat(obj) or isBool(obj) {
         return buf + toString(obj)
     }
 
@@ -34,9 +29,7 @@ func encodeArray(buf, arr) {
 
     for i = 0; i < ln; i += 1 {
         buf = encode(buf, arr[i])
-        if i < ln-1 {
-            buf += ','
-        }
+        if i < ln-1: buf += ','
     }
 
     return buf + ']'
@@ -54,9 +47,7 @@ func encodeMap(buf, obj) {
         buf += ':'
         buf = encode(buf, obj[key])
 
-        if i < ln-1 {
-            buf += ','
-        }
+        if i < ln-1: buf += ','
     }
 
     return buf + '}'

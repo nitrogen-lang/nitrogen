@@ -61,9 +61,7 @@ class lexer {
         for {
             this.readChar()
 
-            if this.curChar == '"' {
-                break
-            }
+            if this.curChar == '"': break
 
             str += this.curChar
         }
@@ -77,9 +75,7 @@ class lexer {
     }
 
     func nextToken() {
-        if this.curChar == '"' {
-            return this.readString()
-        }
+        if this.curChar == '"': return this.readString()
         new token(INVALID, "")
     }
 }
@@ -99,9 +95,7 @@ class parser {
     func parse() {
         this.nextToken()
 
-        if this.curToken.type == INVALID {
-            throw "Invalid JSON"
-        }
+        if this.curToken.type == INVALID: throw "Invalid JSON"
 
         this.curToken.value
     }
