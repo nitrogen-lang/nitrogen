@@ -10,7 +10,7 @@ import (
 var included = make(map[string]object.Object)
 
 func (vm *VirtualMachine) importPackage(name, path string) {
-	mod := GetModule(name)
+	mod := GetModule(path)
 	if mod != nil {
 		_, err := vm.currentFrame.env.Set(name, mod)
 		if err != nil {

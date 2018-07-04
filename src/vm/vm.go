@@ -43,7 +43,7 @@ type VirtualMachine struct {
 	currentFrame *Frame
 	returnValue  object.Object
 	returnErr    error
-	settings     *Settings
+	Settings     *Settings
 
 	unwind bool
 }
@@ -58,7 +58,7 @@ func NewVM(settings *Settings) *VirtualMachine {
 	}
 	return &VirtualMachine{
 		callStack: newFrameStack(),
-		settings:  settings,
+		Settings:  settings,
 	}
 }
 
@@ -66,9 +66,9 @@ func (vm *VirtualMachine) Eval(node ast.Node, env *object.Environment) object.Ob
 	return object.NullConst
 }
 func (vm *VirtualMachine) GetCurrentScriptPath() string { return vm.currentFrame.code.Filename }
-func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.settings.Stdout }
-func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.settings.Stderr }
-func (vm *VirtualMachine) GetStdin() io.Reader          { return vm.settings.Stdin }
+func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.Settings.Stdout }
+func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.Settings.Stderr }
+func (vm *VirtualMachine) GetStdin() io.Reader          { return vm.Settings.Stdin }
 
 func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment) (object.Object, error) {
 	if env == nil {
@@ -139,7 +139,7 @@ mainLoop:
 			panic(fmt.Sprintf("Program counter %d outside bounds of bytecode %d", vm.currentFrame.pc, len(vm.currentFrame.code.Code)-1))
 		}
 		code := vm.fetchOpcode()
-		if vm.settings.Debug {
+		if vm.Settings.Debug {
 			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s", vm.currentFrame.pc-1, opcode.Names[code])
 		}
 
@@ -750,7 +750,7 @@ func (vm *VirtualMachine) throw() object.Object {
 		if vm.currentFrame == nil {                 // Call stack exhausted
 			exc := object.NewException("Uncaught Exception: %s", exception.Inspect())
 
-			if vm.settings.ReturnExceptions {
+			if vm.Settings.ReturnExceptions {
 				return exc
 			}
 

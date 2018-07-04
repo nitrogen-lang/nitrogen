@@ -8,6 +8,7 @@ import (
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/dis"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/imports"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/io"
+	_ "github.com/nitrogen-lang/nitrogen/src/builtins/opbuf"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/string"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/typing"
 )
