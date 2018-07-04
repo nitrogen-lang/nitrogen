@@ -17,6 +17,8 @@ func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) obj
 		return vm.evalStringInfixExpression(op, left, right)
 	case object.ObjectsAre(object.BooleanObj, left, right):
 		return vm.evalBoolInfixExpression(op, left, right)
+	case object.ObjectsAre(object.NullObj, left, right):
+		return vm.evalNullInfixExpression(op)
 	}
 
 	return object.NewException("comparison not implemented for type %s", left.Type())
@@ -100,4 +102,15 @@ func (vm *VirtualMachine) evalBoolInfixExpression(op byte, left, right object.Ob
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+}
+
+func (vm *VirtualMachine) evalNullInfixExpression(op byte) object.Object {
+	switch op {
+	case opcode.CmpEq:
+		return object.TrueConst
+	case opcode.CmpNotEq:
+		return object.FalseConst
+	}
+
+	return object.NewException("unknown operator: nil %s nil", op)
 }
