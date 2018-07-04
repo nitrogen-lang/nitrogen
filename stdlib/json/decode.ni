@@ -46,8 +46,7 @@ class lexer {
     func readKeyword() {
         let str = ""
 
-        for {
-            if !this.isLetter(this.curChar): break
+        while this.isLetter(this.curChar) {
             str += this.curChar
             this.readChar()
         }
@@ -66,12 +65,12 @@ class lexer {
     func readString() {
         let str = ""
 
-        for {
-            this.readChar()
-            if this.curChar == '"': break
+        this.readChar() // Move pass open quote
+        while this.curChar != '"' {
             str += this.curChar
+            this.readChar()
         }
-        this.readChar()
+        this.readChar() // Move pass close quote
 
         new token(STRING, str)
     }
@@ -81,8 +80,7 @@ class lexer {
         let str = ""
         let isFloat = false
 
-        for {
-            if !this.isDigit(this.curChar): break
+        while this.isDigit(this.curChar) {
             if this.curChar == ".": isFloat = true
             str += this.curChar
             this.readChar()

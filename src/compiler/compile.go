@@ -312,7 +312,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compile(ccb, node.Left)
 		ccb.code.WriteByte(opcode.LoadIndex.ToByte())
 
-	case *ast.ForLoopStatement:
+	case *ast.LoopStatement:
 		compileLoop(ccb, node)
 	case *ast.ContinueStatement:
 		ccb.code.WriteByte(opcode.Continue.ToByte())
@@ -656,9 +656,13 @@ func compileCompareExpression(ccb *codeBlockCompiler, cmp *ast.CompareExpression
 	ccb.code.Write(cntBranch.Bytes())
 }
 
-func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
+func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	if loop.Init == nil {
-		compileInfiniteLoop(ccb, loop)
+		if loop.Condition == nil {
+			compileInfiniteLoop(ccb, loop)
+		} else {
+			compileWhileLoop(ccb, loop)
+		}
 		return
 	}
 
@@ -750,7 +754,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	ccb.code.WriteByte(opcode.CloseScope.ToByte())
 }
 
-func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
+func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	// loopBody := compileInnerBlock(ccb, loop.Body, 0)
 	// loopBody.WriteByte(opcode.Continue.ToByte())
 
@@ -784,6 +788,64 @@ func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.ForLoopStatement) {
 	ccb.code.WriteByte(opcode.StartLoop.ToByte())
 	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
 	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))
+
+	ccb.code.Write(loopBody.Bytes())
+
+	ccb.code.WriteByte(opcode.NextIter.ToByte())
+	ccb.code.WriteByte(opcode.EndBlock.ToByte())
+	ccb.code.WriteByte(opcode.CloseScope.ToByte())
+}
+
+func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
+	// loopBody := compileInnerBlock(ccb, loop.Body, 0)
+	// loopBody.WriteByte(opcode.Continue.ToByte())
+
+	condCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table)),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		offset:    ccb.code.Len() + ccb.offset,
+	}
+
+	// Compile the loop's condition check code
+	compile(condCCB, loop.Condition)
+	condition := condCCB.code
+
+	bodyCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table)),
+		names:     ccb.names,
+		code:      new(bytes.Buffer),
+		filename:  ccb.filename,
+		offset:    ccb.code.Len() + ccb.offset + condition.Len() + 12,
+	}
+	compile(bodyCCB, loop.Body)
+
+	// If the body ends in an expression, we need to pop it so the stack is correct
+	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
+		bodyCCB.code.WriteByte(opcode.Pop.ToByte())
+	}
+	loopBody := bodyCCB.code
+
+	// This copies the local variables into the outer compile block for table indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
+		ccb.locals.indexOf(n)
+	}
+
+	// 9 = 3 opcodes + 3 x 2 byte args
+	endBlock := ccb.code.Len() + condition.Len() + loopBody.Len() + ccb.offset + 9
+	// 8 = 2 opcode + 3 x 2 byte args
+	iterBlock := ccb.code.Len() + condition.Len() + loopBody.Len() + ccb.offset + 8
+
+	ccb.code.WriteByte(opcode.StartLoop.ToByte())
+	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
+	ccb.code.Write(uint16ToBytes(uint16(iterBlock)))
+
+	ccb.code.Write(condition.Bytes())
+	ccb.code.WriteByte(opcode.PopJumpIfFalse.ToByte())
+	ccb.code.Write(uint16ToBytes(uint16(endBlock)))
 
 	ccb.code.Write(loopBody.Bytes())
 

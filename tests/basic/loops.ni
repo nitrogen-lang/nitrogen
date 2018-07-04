@@ -31,3 +31,19 @@ test.run("Loop with break", func(assert) {
 
     assert.isEq(outer, 10)
 })
+
+test.run("While loop", func(assert) {
+    func testWhile() {
+        let finished = false
+        let i = 0
+
+        while !finished {
+            i += 1
+            if i == 5: finished = true
+        }
+
+        i
+    }
+
+    assert.isEq(testWhile(), 5)
+})

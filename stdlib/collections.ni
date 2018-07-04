@@ -115,7 +115,7 @@ func arrayContains(arr, needle) {
     const arrLen = len(arr)
     const needleType = varType(needle)
 
-    for (i = 0; i < arrLen; i += 1) {
+    for i = 0; i < arrLen; i += 1 {
         const v = arr[i]
         if varType(v) != needleType: continue
         if (arr[i] == needle): return true

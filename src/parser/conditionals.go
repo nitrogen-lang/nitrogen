@@ -57,7 +57,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseForLoop")
 	}
-	loop := &ast.ForLoopStatement{}
+	loop := &ast.LoopStatement{}
 	expectClosingParen := false
 
 	if p.peekTokenIs(token.LParen) {
@@ -94,6 +94,51 @@ func (p *Parser) parseForLoop() ast.Statement {
 		p.nextToken()
 
 		loop.Iter = p.parseExpression(priLowest)
+	}
+
+	if expectClosingParen && !p.expectPeek(token.RParen) {
+		return nil
+	}
+
+	if !p.peekTokenIs(token.LBrace) {
+		p.peekError(token.LBrace)
+		return nil
+	}
+
+	p.nextToken()
+	loop.Body = p.parseBlockStatements()
+	p.nextToken()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return loop
+}
+
+func (p *Parser) parseWhileLoop() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseWhileLoop")
+	}
+	loop := &ast.LoopStatement{}
+	expectClosingParen := false
+
+	if p.peekTokenIs(token.LParen) {
+		expectClosingParen = true
+		p.nextToken()
+	}
+
+	if p.peekTokenIs(token.LBrace) || (expectClosingParen && p.peekTokenIs(token.RParen)) {
+		loop.Init = nil
+		loop.Condition = nil
+		loop.Iter = nil
+	} else {
+		p.nextToken()
+		condExp, ok := p.parseExpression(priLowest).(ast.Expression)
+		if !ok {
+			return nil
+		}
+		loop.Condition = condExp
 	}
 
 	if expectClosingParen && !p.expectPeek(token.RParen) {

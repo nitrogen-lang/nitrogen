@@ -275,7 +275,7 @@ func TestForLoop(t *testing.T) {
 			1, len(program.Statements))
 	}
 
-	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	fl, ok := program.Statements[0].(*ast.LoopStatement)
 	if !ok {
 		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
 	}
@@ -310,7 +310,7 @@ func TestForLoopNoParens(t *testing.T) {
 			1, len(program.Statements))
 	}
 
-	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	fl, ok := program.Statements[0].(*ast.LoopStatement)
 	if !ok {
 		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
 	}
@@ -345,7 +345,7 @@ func TestInfiniteForLoop(t *testing.T) {
 			1, len(program.Statements))
 	}
 
-	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	fl, ok := program.Statements[0].(*ast.LoopStatement)
 	if !ok {
 		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
 	}
@@ -380,7 +380,7 @@ func TestInfiniteForLoopEmptyParens(t *testing.T) {
 			1, len(program.Statements))
 	}
 
-	fl, ok := program.Statements[0].(*ast.ForLoopStatement)
+	fl, ok := program.Statements[0].(*ast.LoopStatement)
 	if !ok {
 		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
 	}

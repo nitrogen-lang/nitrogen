@@ -317,7 +317,8 @@ if a == b or (a == c and a == d) {
 ```
 
 Blocks that would otherwise contain a single statement do not require surrounding braces.
-Instead, add a colon after the condition and write the statement.
+Instead, add a colon after the condition and write the statement. This form cannot be
+used with else or elif branches.
 
 ```
 if a == b: return c
@@ -325,7 +326,7 @@ if a == b: return c
 
 ## Looping
 
-Nitrogen supports a version of the traditional C for loop:
+Nitrogen supports traditional for and while loops:
 
 ```
 // Limited loop
@@ -342,29 +343,38 @@ for i = 0; i < 10; i += 1 {
 for {
     println("Infinity")
 }
+
+let finished = false
+while !finished {
+    // Do work eventually setting finished to true
+}
 ```
 
 The initlizer, condition, and incrementor may be enclosed in parentheses, but they are completely optional.
 
-A for loop has three parts in the header. An initializer which is ran before the loop starts, a condition which is evaluated before each
-iteration, and an iterator which is ran after the body but before the next condition check.
+A for loop has three parts in the header. An initializer which is ran before the loop starts,
+a condition which is evaluated before each iteration, and an iterator which is ran after the
+body but before the next condition check.
 
-The initializer must be an assign statement. The keyword `let` is not needed. The condition needs to return a boolean value. See Nitrogen's
-boolean logic for what constitutes as true/false. The iterator may be any expression but should increment the loop counter somehow
-otherwise it will go in an infinite loop.
+The initializer must be an assign statement. The keyword `let` is not needed. The condition
+needs to return a boolean value. See Nitrogen's boolean logic for what constitutes as true/false.
+The iterator may be any expression but should increment the loop counter somehow otherwise it
+will go in an infinite loop.
 
 Only one variable can be assigned in the initializer.
 
-An inifinate loop can be achieved my simply omitting the entire loop header.
+An infinite loop can be achieved my simply omitting the entire loop header.
 
 ### Loop control
 
-The statements `continue` and `break` can be used to control a loop. `continue` will stop executing the body and begin the next iteration.
-`break` will stop the loop completely and continue execution after the loop body.
+The statements `continue` and `break` can be used to control a loop. `continue` will stop
+executing the body and begin the next iteration. `break` will stop the loop completely and
+continue execution after the loop body.
 
 ### Looping over arrays/maps
 
-Loops over arrays can be done by using the length of the array and then getting the value from the array by index.
+Loops over arrays can be done by using the length of the array and then getting the
+value from the array by index.
 
 ```
 let arr = ["one", "two", "three"]
@@ -379,7 +389,8 @@ for (i = 0; i < len(arr); i + 1) {
 //  three
 ```
 
-Hash maps can be iterated over by getting the map keys with `hashKeys()` and then iterating over the returned array like above.
+Hash maps can be iterated over by getting the map keys with `hashKeys()` and then iterating
+over the returned array like above.
 
 ```
 let map = {
@@ -405,8 +416,9 @@ for (i = 0; i < len(keys); i + 1) {
 
 ### Looping with collections.foreach()
 
-The [collections package](stdlib/imported/collections.ni.md) has a `foreach` method which loops over and array or map without
-having to use a loop. The functions takes a functions that receives the index and value of each element.
+The [collections package](stdlib/imported/collections.ni.md) has a `foreach` method which
+loops over an array, map, or string without having to use a loop. The functions take a user
+function that receives the index and value of each element.
 
 ```
 let continents = ["Asia", "Africa", "North America", "South America", "Antarctica", "Europe", "Australia"]

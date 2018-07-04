@@ -91,6 +91,7 @@ const (
 	Return
 	Nil
 	For
+	While
 	Continue
 	Break
 	Try
@@ -175,6 +176,7 @@ var tokens = [...]string{
 	LAnd:     "and",
 	LOr:      "or",
 	For:      "for",
+	While:    "while",
 	Continue: "continue",
 	Break:    "break",
 	Try:      "try",

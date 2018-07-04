@@ -26,6 +26,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseClassDefStatement()
 	case token.For:
 		return p.parseForLoop()
+	case token.While:
+		return p.parseWhileLoop()
 	case token.Import:
 		return p.parseImport()
 	case token.Delete:

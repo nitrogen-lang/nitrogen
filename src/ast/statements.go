@@ -167,26 +167,36 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
-type ForLoopStatement struct {
+type LoopStatement struct {
 	Init      *DefStatement
 	Condition Expression
 	Iter      Node
 	Body      *BlockStatement
 }
 
-func (fl *ForLoopStatement) statementNode()       {}
-func (fl *ForLoopStatement) TokenLiteral() string { return "for" }
-func (fl *ForLoopStatement) String() string {
+func (fl *LoopStatement) statementNode() {}
+func (fl *LoopStatement) TokenLiteral() string {
+	if fl.Init == nil {
+		return "while"
+	}
+	return "for"
+}
+func (fl *LoopStatement) String() string {
 	var out bytes.Buffer
-	out.WriteString("for (")
-	out.WriteString(fl.Init.String())
-	out.WriteString("; ")
+	out.WriteString(fl.TokenLiteral())
+	out.WriteByte(' ')
+	if fl.Init != nil {
+		out.WriteString(fl.Init.String())
+		out.WriteString("; ")
+	}
 	out.WriteString(fl.Condition.String())
-	out.WriteString("; ")
-	out.WriteString(fl.Iter.String())
-	out.WriteString(") {")
+	if fl.Iter != nil {
+		out.WriteString("; ")
+		out.WriteString(fl.Iter.String())
+	}
+	out.WriteString(" { ")
 	out.WriteString(fl.Body.String())
-	out.WriteByte('}')
+	out.WriteString(" }")
 	return out.String()
 }
 
