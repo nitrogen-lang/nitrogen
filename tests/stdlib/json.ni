@@ -27,6 +27,22 @@ let tests = [
         "in": {"key1": "val1"},
         "out": '{"key1":"val1"}',
     },
+    {
+        "in": ["Hello", [true, false]],
+        "out": '["Hello",[true,false]]',
+    },
+    {
+        "in": ["Hello", {"key1": "key2"}],
+        "out": '["Hello",{"key1":"key2"}]',
+    },
+    {
+        "in": ["Hello", {"key1": "key2"}, 42, [true, false]],
+        "out": '["Hello",{"key1":"key2"},42,[true,false]]',
+    },
+    {
+        "in": {"key1": ["Hello", 42, true, nil]},
+        "out": '{"key1":["Hello",42,true,null]}',
+    },
 ]
 
 test.run("JSON encode", func(assert) {
@@ -38,5 +54,19 @@ test.run("JSON encode", func(assert) {
 test.run("JSON encode bad value", func(assert) {
     assert.shouldThrow(func() {
         json.encode(func() {pass})
+    })
+})
+
+test.run("JSON decode", func(assert) {
+    col.foreach(tests, func(i, el) {
+        const decoded = json.decode(el.out)
+
+        if isArray(el.in){
+            assert.isTrue(col.arrayMatch(decoded, el.in))
+        } elif isMap(el.in) {
+            assert.isTrue(col.mapMatch(decoded, el.in))
+        } else {
+            assert.isEq(decoded, el.in)
+        }
     })
 })

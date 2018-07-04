@@ -12,11 +12,11 @@ func encode(buf, obj) {
     }
 
     if isArray(obj) {
-        return buf + encodeArray(buf, obj)
+        return encodeArray(buf, obj)
     }
 
     if isMap(obj) {
-        return buf + encodeMap(buf, obj)
+        return encodeMap(buf, obj)
     }
 
     throw "Unsupported JSON object type: " + varType(obj)
