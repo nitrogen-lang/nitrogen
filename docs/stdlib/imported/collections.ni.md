@@ -38,7 +38,8 @@ will return false.
 `mapMatch` returns if `map1` and `map2` have the same length and all elements match.
 `mapMatch` will recursively check nested maps and arrays.
 
-## arrayContains(arr: array, needle: T): bool
+## contains(haystack: array|map, needle: T): bool
 
-`arrayContains` searches `arr` for `needle` and returns true if the needle is in the
-array, false otherwise.
+`contains` searches `haystack` for `needle` and returns true if the needle is in the
+array, false otherwise. If `haystack` is a map, then `contains` returns if the map
+has a key `needle`.

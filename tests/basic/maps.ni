@@ -15,6 +15,6 @@ test.run("Maps", func(assert) {
     assert.isEq(len(keys), len(expectedKeys))
 
     col.foreach(expectedKeys, func(i, v) {
-        assert.isTrue(col.arrayContains(keys, v))
+        assert.isTrue(col.contains(keys, v))
     })
 })
