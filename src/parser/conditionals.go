@@ -37,7 +37,10 @@ func (p *Parser) parseIfExpression() ast.Expression {
 
 	expression.Consequence = p.parseBlockStatements()
 
-	if p.peekTokenIs(token.Else) {
+	if p.peekTokenIs(token.Elif) {
+		p.peekToken.Type = token.If
+		expression.Alternative = p.parseSingleStmtBlock()
+	} else if p.peekTokenIs(token.Else) {
 		p.nextToken()
 
 		if !p.expectPeek(token.LBrace) {

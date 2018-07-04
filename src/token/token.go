@@ -86,6 +86,7 @@ const (
 	True
 	False
 	If
+	Elif
 	Else
 	Return
 	Nil
@@ -167,6 +168,7 @@ var tokens = [...]string{
 	True:     "true",
 	False:    "false",
 	If:       "if",
+	Elif:     "elif",
 	Else:     "else",
 	Return:   "return",
 	Nil:      "nil",

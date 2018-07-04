@@ -25,16 +25,21 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 
 	for !p.peekTokenIs(token.RBrace) {
 		p.nextToken()
-		key := p.parseExpression(priLowest).(ast.Expression)
+		key := p.parseExpression(priLowest)
+		keyExp, ok := key.(ast.Expression)
 
-		if !p.expectPeek(token.Colon) {
+		if !ok || !p.expectPeek(token.Colon) {
 			return nil
 		}
 
 		p.nextToken()
-		value := p.parseExpression(priLowest).(ast.Expression)
+		value := p.parseExpression(priLowest)
+		valueExp, ok := value.(ast.Expression)
+		if !ok {
+			return nil
+		}
 
-		hash.Pairs[key] = value
+		hash.Pairs[keyExp] = valueExp
 
 		if p.peekToken.Type == token.Semicolon {
 			p.addErrorWithPos("Hash pairs must end with a comma")

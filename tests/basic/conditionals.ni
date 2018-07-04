@@ -114,3 +114,22 @@ test.run("If statement within an if false branch", func(assert) {
     assert.isEq(test(false, true), "Good bye1")
     assert.isEq(test(false, false), "Good bye2")
 })
+
+test.run("If statement with elif block", func(assert) {
+    func test(a) {
+        if a == 42 {
+            return 82
+        } elif a == 43 {
+            return 83
+        } elif a == 44 {
+            return 84
+        } else {
+            return 90
+        }
+    }
+
+    assert.isEq(test(42), 82)
+    assert.isEq(test(43), 83)
+    assert.isEq(test(44), 84)
+    assert.isEq(test(45), 90)
+})
