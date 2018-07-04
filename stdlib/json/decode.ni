@@ -54,11 +54,9 @@ class lexer {
 
         if str == "true" {
             return new token(TRUE, true)
-        }
-        if str == "false" {
+        } elif str == "false" {
             return new token(FALSE, false)
-        }
-        if str == "null" {
+        } elif str == "null" {
             return new token(NULL, nil)
         }
 
@@ -70,9 +68,7 @@ class lexer {
 
         for {
             this.readChar()
-
             if this.curChar == '"': break
-
             str += this.curChar
         }
         this.readChar()
@@ -139,20 +135,9 @@ class lexer {
         new token(INVALID, "")
     }
 
-    func isDigit(c) {
-        if (c >= "0" and c <= "9") or c == ".": return true
-        return false
-    }
-
-    func isLetter(c) {
-        if (c >= "a" and c <= "z") or (c >= "A" and c <= "Z"): return true
-        return false
-    }
-
-    func beginsKeyword(c) {
-        if c == "f" or c == "t" or c == "n": return true
-        return false
-    }
+    func isDigit(c) { (c >= "0" and c <= "9") or c == "." }
+    func isLetter(c) { (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") }
+    func beginsKeyword(c) { c == "f" or c == "t" or c == "n" }
 }
 
 class parser {

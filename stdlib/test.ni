@@ -3,9 +3,7 @@ import "assert"
 
 const verbose = isString(_ENV['VERBOSE_TEST'])
 
-func String(s) {
-    return new string.String(s)
-}
+func String(s) { new string.String(s) }
 
 const exports = {
     "fatal": true

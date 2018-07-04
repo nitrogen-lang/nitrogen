@@ -1,8 +1,6 @@
 import "string"
 
-func String(s) {
-    return new string.String(s)
-}
+func String(s) { new string.String(s) }
 
 const exports = {}
 

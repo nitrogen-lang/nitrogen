@@ -1,23 +1,13 @@
 func encode(buf, obj) {
-    if isString(obj) {
-        return buf + '"' + obj + '"'
-    }
+    if isString(obj): return buf + '"' + obj + '"'
 
-    if isInt(obj) or isFloat(obj) or isBool(obj) {
-        return buf + toString(obj)
-    }
+    if isInt(obj) or isFloat(obj) or isBool(obj): return buf + toString(obj)
 
-    if isNull(obj) {
-        return buf + "null"
-    }
+    if isNull(obj): return buf + "null"
 
-    if isArray(obj) {
-        return encodeArray(buf, obj)
-    }
+    if isArray(obj): return encodeArray(buf, obj)
 
-    if isMap(obj) {
-        return encodeMap(buf, obj)
-    }
+    if isMap(obj): return encodeMap(buf, obj)
 
     throw "Unsupported JSON object type: " + varType(obj)
 }
@@ -32,7 +22,7 @@ func encodeArray(buf, arr) {
         if i < ln-1: buf += ','
     }
 
-    return buf + ']'
+    buf + ']'
 }
 
 func encodeMap(buf, obj) {
@@ -50,7 +40,7 @@ func encodeMap(buf, obj) {
         if i < ln-1: buf += ','
     }
 
-    return buf + '}'
+    buf + '}'
 }
 
 return {

@@ -7,7 +7,8 @@ func filter(arr, fn)/*: arr*/ {
     for i = 0; i < ln; i+=1 {
         if fn(arr[i], i): newArr = push(newArr, arr[i])
     }
-    return newArr
+
+    newArr
 }
 exports.filter = filter
 
@@ -18,7 +19,8 @@ func map(arr, fn)/*: arr*/ {
     for i = 0; i < ln; i+=1 {
         newArr = push(newArr, fn(arr[i], i))
     }
-    return newArr
+
+    newArr
 }
 exports.map = map
 
@@ -31,7 +33,8 @@ func reduce(arr, fn)/*: Object*/ {
     for i = 0; i < ln; i+=1 {
         accumulator = fn(accumulator, arr[i], i)
     }
-    return accumulator
+
+    accumulator
 }
 exports.reduce = reduce
 
@@ -43,7 +46,8 @@ func arrayMatch(arr1, arr2)/*: bool*/ {
     for i = 0; i < ln; i+=1 {
         if !valuesEqual(arr1[i], arr2[i]): return false
     }
-    return true
+
+    true
 }
 exports.arrayMatch = arrayMatch
 
@@ -58,7 +62,8 @@ func mapMatch(map1, map2) {
         if !hasKey(map2, key): return false
         if !valuesEqual(map1[key], map2[key]): return false
     }
-    return true
+
+    true
 }
 exports.mapMatch = mapMatch
 
@@ -73,7 +78,7 @@ func valuesEqual(v1, v2) {
         if v1 == v2: return true
     }
 
-    return false
+    false
 }
 
 func foreach(collection, fn) {
@@ -116,7 +121,7 @@ func arrayContains(arr, needle) {
         if (arr[i] == needle): return true
     }
 
-    return false
+    false
 }
 
 return exports
