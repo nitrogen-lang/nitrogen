@@ -304,7 +304,7 @@ func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 	}
 	p.nextToken()
 
-	for !p.curTokenIs(token.RBrace) {
+	for !p.curTokenIs(token.RBrace) && !p.curTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
