@@ -23,6 +23,7 @@ func init() {
 			"get":        get,
 			"stopAndGet": stopAndGet,
 			"stop":       stop,
+			"isStarted":  isStarted,
 		},
 		Vars: map[string]object.Object{},
 	})
@@ -101,4 +102,8 @@ func get(interpreter object.Interpreter, env *object.Environment, args ...object
 	buf := theVM.Settings.Stdout.(*bytes.Buffer)
 
 	return object.MakeStringObj(buf.String())
+}
+
+func isStarted(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return object.NativeBoolToBooleanObj(oldOut != nil)
 }

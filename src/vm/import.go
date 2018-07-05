@@ -68,8 +68,12 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 		return object.NewException("importing %s failed %s", name, err.Error())
 	}
 
+	if filepath.Ext(scriptPath) == ".nib" {
+		scriptPath = scriptPath[:len(scriptPath)-1]
+	}
+
 	env := object.NewEnclosedEnv(vm.currentFrame.env)
-	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
+	env.CreateConst("_FILE", object.MakeStringObj(scriptPath))
 
 	res = vm.RunFrame(vm.MakeFrame(code, env), true)
 	included[scriptPath] = res

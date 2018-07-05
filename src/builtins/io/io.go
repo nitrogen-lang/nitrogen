@@ -14,6 +14,8 @@ func init() {
 	vm.RegisterBuiltin("print", printBuiltin)
 	vm.RegisterBuiltin("printlnb", printBinaryBuiltin)
 	vm.RegisterBuiltin("println", printlnBuiltin)
+	vm.RegisterBuiltin("printerr", printerrBuiltin)
+	vm.RegisterBuiltin("printerrln", printerrlnBuiltin)
 	vm.RegisterBuiltin("printenv", printEnvBuiltin)
 	vm.RegisterBuiltin("varDump", varDump)
 	vm.RegisterBuiltin("exit", exitScript)
@@ -65,6 +67,29 @@ func printBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 func printlnBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	printBuiltin(interpreter, env, args...)
 	fmt.Fprint(interpreter.GetStdout(), "\n")
+	return object.NullConst
+}
+
+func printerrBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	for _, arg := range args {
+		if instance, ok := arg.(*vm.VMInstance); ok {
+			machine := interpreter.(*vm.VirtualMachine)
+			toString := instance.GetBoundMethod("toString")
+			if toString != nil {
+				machine.CallFunction(0, toString, true, nil)
+				printBuiltin(interpreter, env, machine.PopStack())
+				continue
+			}
+		}
+
+		fmt.Fprint(interpreter.GetStderr(), arg.Inspect())
+	}
+	return object.NullConst
+}
+
+func printerrlnBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	printerrBuiltin(interpreter, env, args...)
+	fmt.Fprint(interpreter.GetStderr(), "\n")
 	return object.NullConst
 }
 
