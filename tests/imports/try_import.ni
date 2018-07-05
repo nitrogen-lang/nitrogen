@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 test.run("Import directory", func(assert) {
     try {

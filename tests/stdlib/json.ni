@@ -1,6 +1,6 @@
-import "test"
-import "json"
-import "collections" as col
+import "stdlib/test"
+import "stdlib/json"
+import "stdlib/collections" as col
 
 let tests = [
     {

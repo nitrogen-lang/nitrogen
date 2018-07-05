@@ -26,7 +26,7 @@ nitrogen-test:
 	@p="$$(pwd)"; \
 	for test in tests/**/*.ni; do \
 		/bin/echo -n -e "$$test - \e[31m"; \
-		./bin/nitrogen -M $$p/stdlib -M $$p/built-modules "$$test"; \
+		./bin/nitrogen -M $$p/nitrogen -M $$p/built-modules "$$test"; \
 		if [ $$? -ne 0 ]; then /bin/echo -e "\e[0m"; exit 1; fi; \
 		/bin/echo -e "\e[32mpassed\e[0m"; \
 	done

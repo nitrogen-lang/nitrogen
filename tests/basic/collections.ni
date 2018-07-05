@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 const arr = ["one", "two"]
 

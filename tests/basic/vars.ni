@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 test.run("Attempt to redefine constant", func(assert) {
     const thing = 42

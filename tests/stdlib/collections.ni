@@ -1,5 +1,5 @@
-import "test"
-import "collections" as col
+import "stdlib/test"
+import "stdlib/collections" as col
 
 const testArr = ["asia", "north america", "south america", "africa", "europe", "australia", "antarctica"]
 

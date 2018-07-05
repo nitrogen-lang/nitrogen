@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 test.run("Single statement if expressions", func(assert) {
     let counter = 0

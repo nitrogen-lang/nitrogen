@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 test.run("Non-existant import", func(assert) {
     assert.shouldThrow(func() {

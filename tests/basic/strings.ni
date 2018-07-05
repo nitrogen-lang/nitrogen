@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 test.run("Check equality of raw and escaped strings", func(assert) {
 	const str1 = 'Hello,

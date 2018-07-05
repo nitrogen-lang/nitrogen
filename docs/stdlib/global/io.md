@@ -10,6 +10,14 @@ will be printed.
 
 Same as print() but will also output a newline after printing args.
 
+## printerr(args...): null
+
+Same as `print` but writes to stderr.
+
+## printerrln(args...): null
+
+Same as `println` but writes to stderr.
+
 ## printenv(): null
 
 For debugging. Prints the current symbol table as seen by the environment where

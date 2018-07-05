@@ -3,7 +3,7 @@ if !modulesSupported() {
 }
 
 import 'strings.so' as str
-import "test"
+import "stdlib/test"
 
 test.run("String module prefix/suffix", func(assert) {
     const testStr = "abcefguvwxyz"

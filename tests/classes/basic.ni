@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 class printer {
     let x

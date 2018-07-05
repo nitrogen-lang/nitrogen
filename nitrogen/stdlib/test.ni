@@ -1,5 +1,5 @@
-import "string"
-import "assert"
+import "stdlib/string"
+import "stdlib/assert"
 
 const verbose = isString(_ENV['VERBOSE_TEST'])
 
@@ -15,7 +15,7 @@ func run(desc, fn) {
     try {
         fn(assert)
     } catch e {
-        println(String("Test '{}' failed: {}").format(desc, e))
+        printerrln(String("Test '{}' failed: {}").format(desc, e))
         if exports.fatal: exit(1)
     }
 }

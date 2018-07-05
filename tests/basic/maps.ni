@@ -1,5 +1,5 @@
-import "test"
-import "collections" as col
+import "stdlib/test"
+import "stdlib/collections" as col
 
 test.run("Maps", func(assert) {
     const hash = {

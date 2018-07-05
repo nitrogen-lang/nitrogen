@@ -11,7 +11,9 @@ they can be used. Each module exports its public api for use. Imports follow the
 rules as user-defined modules. The NSL directory must be in the module import paths.
 This does allow alternate NSL implementations to be used instead of the default. So
 long as the public APIs match, no code would need to be updated. This can also allow
-for stripping the library of extraneous modules when not needed.
+for stripping the library of extraneous modules when not needed. The prefix "stdlib/"
+is reserved for use by the Nitrogen Standard Library and alternative implementations.
+It should not be used for user-defined code.
 
 - [Global](global): Globally defined NSL functions.
 - [Imported](imported): NSL modules require import before use.

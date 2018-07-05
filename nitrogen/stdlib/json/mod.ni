@@ -1,5 +1,5 @@
-import './encode.ni'
-import './decode.ni'
+import './encode'
+import './decode'
 
 return {
     "encode": encode.encode,

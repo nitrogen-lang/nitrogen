@@ -1,4 +1,4 @@
-import "test"
+import "stdlib/test"
 
 test.run("Import with no extension", func(assert) {
     import '../../testdata/math' as math

@@ -2,7 +2,7 @@
 
 string exposes a String class that can be used to manipulate strings.
 
-To use: `import 'string'`
+To use: `import 'stdlib/string'`
 
 ## class String(s: string)
 
