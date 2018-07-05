@@ -360,6 +360,21 @@ func (h *Hash) Dup() Object {
 
 	return &Hash{Pairs: newElements}
 }
+func (h *Hash) LookupKey(key string) Object {
+	keyObj := MakeStringObj(key)
+	pair, ok := h.Pairs[keyObj.HashKey()]
+	if !ok {
+		return nil
+	}
+	return pair.Value
+}
+func (h *Hash) SetKey(key string, val Object) {
+	keyObj := MakeStringObj(key)
+	h.Pairs[keyObj.HashKey()] = HashPair{
+		Key:   keyObj,
+		Value: val,
+	}
+}
 
 func StringMapToHash(src map[string]string) *Hash {
 	m := &Hash{Pairs: make(map[HashKey]HashPair)}
