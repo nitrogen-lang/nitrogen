@@ -106,7 +106,7 @@ func foreachArray(arr, fn) {
 
 func contains(arr, needle) {
     if isArray(arr): return arrayContains(arr, needle)
-    if isMap(arr): return arrayContains(hashKeys(map), needle)
+    if isMap(arr): return arrayContains(hashKeys(arr), needle)
     throw "contains expected an array or map but received " + varType(arr)
 }
 exports.contains = contains

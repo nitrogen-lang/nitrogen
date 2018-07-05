@@ -69,4 +69,21 @@ test.run("JSON decode", func(assert) {
             assert.isEq(decoded, el.in)
         }
     })
+
+    const whitespaceTest = '{
+    "title": "foo",
+    "userId": 1,
+    "body": "bar",
+    "id": 101
+}'
+
+    const wsExpected = {
+        "title": "foo",
+        "userId": 1,
+        "body": "bar",
+        "id": 101,
+    }
+
+    const decoded = json.decode(whitespaceTest)
+    assert.isTrue(col.mapMatch(decoded, wsExpected))
 })

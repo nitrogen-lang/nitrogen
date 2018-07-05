@@ -97,6 +97,7 @@ class lexer {
     }
 
     func nextToken() {
+        this.skipWhitespace()
         const char = this.curChar
 
         // Punctuation and delimiters
@@ -133,9 +134,16 @@ class lexer {
         new token(INVALID, "")
     }
 
+    func skipWhitespace() {
+        while this.isWhitespace(this.curChar) {
+            this.readChar()
+        }
+    }
+
     func isDigit(c) { (c >= "0" and c <= "9") or c == "." }
     func isLetter(c) { (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") }
     func beginsKeyword(c) { c == "f" or c == "t" or c == "n" }
+    func isWhitespace(c) { c == " " or c == "\t" or c == "\r" or c == "\n" }
 }
 
 class parser {
