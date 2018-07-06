@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 
@@ -83,10 +82,8 @@ type codeBlockCompiler struct {
 	constants *constantTable
 	locals    *stringTable
 	names     *stringTable
-	code      *bytes.Buffer
+	code      InstSet
 	filename  string
-	offset    int
-	stackSize int
 }
 
 type constantTable struct {
