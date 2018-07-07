@@ -3,12 +3,15 @@
 func printMap(map) {
     println('<ul>')
 
-    let keys = sort(hashKeys(map))
-    for i = 0; i < len(keys); i += 1 {
-        println('<li>', keys[i], ': ', map[keys[i]], '</li>')
+    const keys = sort(hashKeys(map))
+    const keyLen = len(keys)
+
+    for i = 0; i < keyLen; i += 1 {
+        let key = keys[i]
+        println('<li>', key, ': ', map[key], '</li>')
     }
 
-    println('</ul>')
+    println(res, '</ul>')
 }
 
 print("Content-Type: text/html\n")

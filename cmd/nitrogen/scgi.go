@@ -182,10 +182,13 @@ func (w *worker) run(conn net.Conn) {
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
 	env.SetForce("_SERVER", object.StringMapToHash(headers), true)
 
+	buf := bufio.NewWriter(conn)
 	vmsettings := vm.NewSettings()
-	vmsettings.Stdout = conn
+	vmsettings.Stdout = buf
 
 	result, _ := vm.NewVM(vmsettings).Execute(code, env)
+
+	buf.Flush()
 
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {

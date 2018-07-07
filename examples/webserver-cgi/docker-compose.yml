@@ -17,3 +17,6 @@ services:
         volumes:
             - ./app:/app
             - ../../bin/nitrogen:/usr/local/bin/nitrogen
+            - ../../nitrogen:/nitrogen
+        environment:
+            NITROGEN_MODULES: /nitrogen

@@ -13,7 +13,8 @@ services:
     app:
         image: debian:latest
         container_name: app
-        entrypoint: ["/usr/local/bin/nitrogen", "-scgi"] # Add "-compile" to use bytecode virtual machine
+        entrypoint: ["/usr/local/bin/nitrogen", "-scgi", "-M", "/nitrogen"]
         volumes:
             - ./app:/app
             - ../../bin/nitrogen:/usr/local/bin/nitrogen
+            - ../../nitrogen:/nitrogen
