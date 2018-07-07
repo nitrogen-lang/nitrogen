@@ -376,6 +376,10 @@ func (h *Hash) SetKey(key string, val Object) {
 	}
 }
 
+func MakeEmptyHash() *Hash {
+	return &Hash{Pairs: make(map[HashKey]HashPair)}
+}
+
 func StringMapToHash(src map[string]string) *Hash {
 	m := &Hash{Pairs: make(map[HashKey]HashPair)}
 	for k, v := range src {

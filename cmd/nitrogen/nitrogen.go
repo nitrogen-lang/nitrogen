@@ -265,7 +265,7 @@ var cgiHeaderNames = []string{
 
 func getServerEnv() object.Object {
 	if os.Getenv("GATEWAY_INTERFACE") != "CGI/1.1" {
-		return object.NullConst
+		return object.MakeEmptyHash()
 	}
 
 	headers := make(map[string]string, len(cgiHeaderNames))

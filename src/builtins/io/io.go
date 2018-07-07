@@ -48,6 +48,7 @@ func exitScript(interpreter object.Interpreter, env *object.Environment, args ..
 }
 
 func printBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	out := interpreter.GetStdout()
 	for _, arg := range args {
 		if instance, ok := arg.(*vm.VMInstance); ok {
 			machine := interpreter.(*vm.VirtualMachine)
@@ -59,7 +60,7 @@ func printBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 			}
 		}
 
-		fmt.Fprint(interpreter.GetStdout(), arg.Inspect())
+		fmt.Fprint(out, arg.Inspect())
 	}
 	return object.NullConst
 }
