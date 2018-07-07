@@ -2,8 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
@@ -86,7 +84,7 @@ func (p *Parser) parseUseStatement() ast.Statement {
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 
-		stmt.Name = &ast.Identifier{Value: importName(exp.Index.String())}
+		stmt.Name = &ast.Identifier{Value: ImportName(exp.Index.String())}
 		if stmt.Name.Value == "" {
 			p.addErrorWithPos("use statement does not create a valid identifier")
 			return nil
@@ -142,7 +140,7 @@ func (p *Parser) parseImport() ast.Statement {
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 
-		stmt.Name = &ast.Identifier{Value: importName(stmt.Path.String())}
+		stmt.Name = &ast.Identifier{Value: ImportName(stmt.Path.String())}
 		if stmt.Name.Value == "" {
 			p.addErrorWithPos("import path does not create a valid identifier")
 			return nil
@@ -164,19 +162,6 @@ func (p *Parser) parseImport() ast.Statement {
 		p.nextToken()
 	}
 	return stmt
-}
-
-func importName(path string) string {
-	path = filepath.Base(path)
-	dotIndex := strings.Index(path, ".")
-	if dotIndex > -1 {
-		path = path[:strings.Index(path, ".")]
-	}
-
-	if isIdent(path) {
-		return path
-	}
-	return ""
 }
 
 func (p *Parser) parseDefStatement() ast.Statement {

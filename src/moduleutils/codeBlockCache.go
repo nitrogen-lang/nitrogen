@@ -66,6 +66,9 @@ func (c *codeBlockCache) GetBlock(file string, name string) (*compiler.CodeBlock
 		code, modinfo, err := marshal.ReadFile(file)
 		if err != nil {
 			c.m.Unlock()
+			if marshal.IsErrVersion(err) {
+				return c.GetBlock(srcfile, name)
+			}
 			return nil, err
 		}
 

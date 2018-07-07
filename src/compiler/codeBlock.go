@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 
@@ -37,20 +36,23 @@ func (cb *CodeBlock) Print(indent string) {
 		switch code {
 		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry, opcode.BuildClass, opcode.MakeInstance:
 			fmt.Printf("\t\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
-		case opcode.JumpAbsolute, opcode.JumpForward:
+		case opcode.JumpForward:
 			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 			fmt.Printf("\t\t%d (%d)", target, offset+2+target)
+		case opcode.JumpAbsolute:
+			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
+			fmt.Printf("\t\t%d", target)
 		case opcode.StartLoop:
 			fmt.Printf("\t\t%d %d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]), bytesToUint16(cb.Code[offset+2], cb.Code[offset+3]))
 		case opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.JumpIfTrueOrPop, opcode.JumpIfFalseOrPop:
 			fmt.Printf("\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
-		case opcode.LoadConst:
+		case opcode.LoadConst, opcode.Import:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t%d (%s)", index, cb.Constants[index].Inspect())
 		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst, opcode.DeleteFast:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t%d (%s)", index, cb.Locals[index])
-		case opcode.Define, opcode.Import:
+		case opcode.Define:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t\t%d (%s)", index, cb.Locals[index])
 		case opcode.Call:
@@ -83,10 +85,8 @@ type codeBlockCompiler struct {
 	constants *constantTable
 	locals    *stringTable
 	names     *stringTable
-	code      *bytes.Buffer
+	code      *InstSet
 	filename  string
-	offset    int
-	stackSize int
 }
 
 type constantTable struct {

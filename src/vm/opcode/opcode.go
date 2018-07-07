@@ -74,6 +74,7 @@ const (
 	Import
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
+	Label
 )
 
 const (
@@ -86,10 +87,12 @@ const (
 	MaxCmpCodes
 )
 
+// 2 16-bit arguments
 var HasFourByteArg = map[Opcode]bool{
 	StartLoop: true,
 }
 
+// 1 16-bit argument
 var HasTwoByteArg = map[Opcode]bool{
 	LoadConst:        true,
 	StoreConst:       true,
@@ -116,6 +119,7 @@ var HasTwoByteArg = map[Opcode]bool{
 	Import:           true,
 }
 
+// 1 8-bit argument
 var HasOneByteArg = map[Opcode]bool{
 	Compare: true,
 }
