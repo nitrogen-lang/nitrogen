@@ -19,7 +19,7 @@ var testCases = []struct {
 
 func TestIdentMatch(t *testing.T) {
 	for _, tcase := range testCases {
-		res := isIdent(tcase.i)
+		res := IsIdent(tcase.i)
 		if res != tcase.e {
 			t.Fatalf("isIdent failed for %s. Expected %t, got %t", tcase.i, tcase.e, res)
 		}
