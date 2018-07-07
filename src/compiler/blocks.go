@@ -198,15 +198,19 @@ func compileIfStatementNoElse(ccb *codeBlockCompiler, ifs *ast.IfExpression) {
 	compile(ccb, ifs.Condition)
 
 	_, noNil := ifs.Consequence.Statements[len(ifs.Consequence.Statements)-1].(*ast.ExpressionStatement)
+	falseBrnLbl := randomLabel("false_")
 	afterIfStmt := randomLabel("afterIf_")
 
-	ccb.code.addLabeledArgs(opcode.PopJumpIfFalse, afterIfStmt)
+	ccb.code.addLabeledArgs(opcode.PopJumpIfFalse, falseBrnLbl)
 	compile(ccb, ifs.Consequence)
-	ccb.code.addLabel(afterIfStmt)
-	if noNil {
-		ccb.code.addInst(opcode.JumpForward, 3)
+	if !noNil {
+		compileLoadNull(ccb)
 	}
+
+	ccb.code.addLabeledArgs(opcode.JumpAbsolute, afterIfStmt)
+	ccb.code.addLabel(falseBrnLbl)
 	compileLoadNull(ccb)
+	ccb.code.addLabel(afterIfStmt)
 }
 
 func compileLoadNull(ccb *codeBlockCompiler) {
