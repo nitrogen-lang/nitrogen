@@ -14,7 +14,13 @@ import (
 var (
 	ByteFileHeader = []byte{31, 'N', 'I', 'B'}
 	VersionNumber  = []byte{0, 0, 0, 2}
+
+	ErrVersion = errors.New("File does not match current version")
 )
+
+func IsErrVersion(err error) bool {
+	return err == ErrVersion
+}
 
 func WriteFile(name string, cb *compiler.CodeBlock, ts time.Time) error {
 	marshaled, err := Marshal(cb)
@@ -66,7 +72,7 @@ func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
 	fileVersion := make([]byte, 4)
 	file.Read(fileVersion)
 	if !bytes.Equal(VersionNumber, fileVersion) {
-		return nil, nil, errors.New("File does not match current version")
+		return nil, nil, ErrVersion
 	}
 	fi.Version = fileVersion
 

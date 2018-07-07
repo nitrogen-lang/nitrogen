@@ -82,7 +82,7 @@ type codeBlockCompiler struct {
 	constants *constantTable
 	locals    *stringTable
 	names     *stringTable
-	code      InstSet
+	code      *InstSet
 	filename  string
 }
 

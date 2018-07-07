@@ -11,6 +11,7 @@ type Instruction struct {
 	Args      []uint16 // len = 1 or 2
 	ArgLabels []string // len = 1 or 2, name of label for corresponding argument, prefix "~" means relative
 	Label     string   // Label names this instruction for linking later
+	Next      *Instruction
 }
 
 func (i *Instruction) String() string {
@@ -18,11 +19,25 @@ func (i *Instruction) String() string {
 }
 
 func (i *Instruction) Is(code opcode.Opcode) bool {
+	if i == nil {
+		return false
+	}
 	return i.Instr == code
 }
 
+func (i *Instruction) IsLoad() bool {
+	switch i.Instr {
+	case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal, opcode.LoadIndex, opcode.LoadAttribute:
+		return true
+	default:
+		return false
+	}
+}
+
 func (i *Instruction) Size() uint16 {
-	if opcode.HasOneByteArg[i.Instr] {
+	if i.Instr == opcode.Label {
+		return 0
+	} else if opcode.HasOneByteArg[i.Instr] {
 		return 2
 	} else if opcode.HasTwoByteArg[i.Instr] {
 		return 3
@@ -32,48 +47,82 @@ func (i *Instruction) Size() uint16 {
 	return 1
 }
 
-type InstSet []*Instruction
-
-func NewInstSet() InstSet {
-	return make(InstSet, 0, 20)
+type InstSet struct {
+	Head *Instruction
+	Tail *Instruction
 }
 
-func (i InstSet) last() *Instruction {
-	if len(i) == 0 {
+func NewInstSet() *InstSet {
+	return &InstSet{}
+}
+
+func (i *InstSet) last() *Instruction {
+	if i.Tail == nil {
 		return &Instruction{}
 	}
-	return i[len(i)-1]
+	return i.Tail
 }
 
 func (i *InstSet) addInst(code opcode.Opcode, args ...uint16) {
 	checkArgLength(code, len(args))
-	*i = append(*i, &Instruction{
+	inst := &Instruction{
 		Instr: code,
 		Args:  args,
-	})
+	}
+
+	if i.Head == nil {
+		i.Head = inst
+		i.Tail = inst
+	} else {
+		i.Tail.Next = inst
+		i.Tail = inst
+	}
 }
 
 func (i *InstSet) addLabel(label string) {
-	*i = append(*i, &Instruction{
+	inst := &Instruction{
 		Instr: opcode.Label,
 		Label: label,
-	})
+	}
+
+	if i.Head == nil {
+		i.Head = inst
+		i.Tail = inst
+	} else {
+		i.Tail.Next = inst
+		i.Tail = inst
+	}
 }
 
 func (i *InstSet) addLabeledArgs(code opcode.Opcode, argLabels ...string) {
-	*i = append(*i, &Instruction{
+	checkArgLength(code, len(argLabels))
+	inst := &Instruction{
 		Instr:     code,
 		Args:      make([]uint16, len(argLabels)),
 		ArgLabels: argLabels,
-	})
+	}
+
+	if i.Head == nil {
+		i.Head = inst
+		i.Tail = inst
+	} else {
+		i.Tail.Next = inst
+		i.Tail = inst
+	}
 }
 
-func (i *InstSet) merge(j InstSet) {
-	*i = append(*i, j...)
+func (i *InstSet) merge(j *InstSet) {
+	i.Tail.Next = j.Head
+	i.Tail = j.Tail
 }
 
-func args(a ...uint16) []uint16  { return a }
-func argsl(a ...string) []string { return a }
+type Optimization func(*InstSet)
+
+var optimizations = []Optimization{}
+
+func AddOptimizer(o Optimization) {
+	optimizations = append(optimizations, o)
+}
 
 func checkArgLength(code opcode.Opcode, argLen int) {
 	if (opcode.HasOneByteArg[code] || opcode.HasTwoByteArg[code]) && argLen != 1 {
@@ -83,79 +132,87 @@ func checkArgLength(code opcode.Opcode, argLen int) {
 	}
 }
 
-func (i InstSet) Len() uint16 {
+func (i *InstSet) Len() uint16 {
 	var size uint16
-	for _, i := range i {
-		if !i.Is(opcode.Label) {
-			size += i.Size()
-		}
+	in := i.Head
+	for in != nil {
+		size += in.Size()
+		in = in.Next
 	}
 	return size
 }
 
-func (i InstSet) Link() {
+func (i *InstSet) Link() {
 	labels := make(map[string]uint16)
 
 	var offset uint16
 
-	for _, i := range i {
-		if i.Is(opcode.Label) {
-			labels[i.Label] = offset
+	in := i.Head
+	for in != nil {
+		if in.Is(opcode.Label) {
+			labels[in.Label] = offset
+			in = in.Next
 			continue
 		}
-		offset += i.Size()
+		offset += in.Size()
+		in = in.Next
 	}
 
 	offset = 0
-	for _, i := range i {
-		if i.ArgLabels != nil {
-			for arg, lbl := range i.ArgLabels {
-				if lbl == "" {
-					continue
-				}
-				if lbl[0] == '>' {
-					i.Args[arg] = labels[lbl] - offset
-				} else {
-					i.Args[arg] = labels[lbl]
+	in = i.Head
+	for in != nil {
+		if in.ArgLabels != nil {
+			for arg, lbl := range in.ArgLabels {
+				if lbl != "" {
+					in.Args[arg] = labels[lbl]
 				}
 			}
 		}
-		offset += i.Size()
+		offset += in.Size()
+		in = in.Next
 	}
 }
 
-func (i InstSet) Assemble() []byte {
+func (i *InstSet) Assemble() []byte {
+	for _, o := range optimizations {
+		o(i)
+	}
+
 	i.Link()
+
 	size := i.Len()
 	bytes := make([]byte, size)
 	offset := 0
 
-	for _, i := range i {
-		if i.Is(opcode.Label) {
+	in := i.Head
+	for in != nil {
+		if in.Is(opcode.Label) {
+			in = in.Next
 			continue
 		}
 
-		bytes[offset] = i.Instr.ToByte()
+		bytes[offset] = in.Instr.ToByte()
 		offset++
 
-		if opcode.HasOneByteArg[i.Instr] {
-			bytes[offset] = byte(i.Args[0])
+		if opcode.HasOneByteArg[in.Instr] {
+			bytes[offset] = byte(in.Args[0])
 			offset++
-		} else if opcode.HasTwoByteArg[i.Instr] {
-			arg := uint16ToBytes(i.Args[0])
+		} else if opcode.HasTwoByteArg[in.Instr] {
+			arg := uint16ToBytes(in.Args[0])
 			bytes[offset] = arg[0]
 			bytes[offset+1] = arg[1]
 			offset += 2
-		} else if opcode.HasFourByteArg[i.Instr] {
-			arg := uint16ToBytes(i.Args[0])
+		} else if opcode.HasFourByteArg[in.Instr] {
+			arg := uint16ToBytes(in.Args[0])
 			bytes[offset] = arg[0]
 			bytes[offset+1] = arg[1]
 
-			arg = uint16ToBytes(i.Args[1])
+			arg = uint16ToBytes(in.Args[1])
 			bytes[offset+2] = arg[0]
 			bytes[offset+3] = arg[1]
 			offset += 4
 		}
+		in = in.Next
 	}
 
 	return bytes

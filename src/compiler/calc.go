@@ -19,10 +19,11 @@ func (s *maxsizer) add(delta int) {
 	}
 }
 
-func calculateStackSize(c InstSet) int {
+func calculateStackSize(c *InstSet) int {
 	stackSize := &maxsizer{}
 
-	for _, i := range c {
+	i := c.Head
+	for i != nil {
 		switch i.Instr {
 		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal, opcode.StartTry:
 			stackSize.add(1)
@@ -44,21 +45,24 @@ func calculateStackSize(c InstSet) int {
 		case opcode.MakeFunction, opcode.StoreAttribute:
 			stackSize.sub(2)
 		}
+		i = i.Next
 	}
 
 	return stackSize.max
 }
 
-func calculateBlockSize(c InstSet) int {
+func calculateBlockSize(c *InstSet) int {
 	blockLen := &maxsizer{}
 
-	for _, i := range c {
+	i := c.Head
+	for i != nil {
 		switch i.Instr {
 		case opcode.StartLoop, opcode.StartTry:
 			blockLen.add(1)
 		case opcode.EndBlock:
 			blockLen.sub(1)
 		}
+		i = i.Next
 	}
 
 	return blockLen.max
