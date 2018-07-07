@@ -25,14 +25,14 @@ func calculateStackSize(c *InstSet) int {
 	i := c.Head
 	for i != nil {
 		switch i.Instr {
-		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal, opcode.StartTry:
+		case opcode.LoadConst, opcode.LoadFast, opcode.LoadGlobal, opcode.StartTry, opcode.Import:
 			stackSize.add(1)
 		case opcode.StoreIndex:
 			stackSize.sub(3)
 		case opcode.BinaryAdd, opcode.BinarySub, opcode.BinaryMul, opcode.BinaryDivide, opcode.BinaryMod, opcode.BinaryShiftL,
 			opcode.BinaryShiftR, opcode.BinaryAnd, opcode.BinaryOr, opcode.BinaryNot, opcode.BinaryAndNot,
 			opcode.StoreConst, opcode.StoreFast, opcode.Define, opcode.StoreGlobal, opcode.LoadIndex, opcode.Compare,
-			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.Throw, opcode.Import:
+			opcode.Return, opcode.Pop, opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.Throw:
 			stackSize.sub(1)
 		case opcode.Call:
 			stackSize.sub(int(i.Args[0]))

@@ -5,19 +5,19 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
 var included = make(map[string]object.Object)
 
-func (vm *VirtualMachine) importPackage(name, path string) {
+func (vm *VirtualMachine) importPackage(path string) {
 	mod := GetModule(path)
 	if mod != nil {
-		_, err := vm.currentFrame.env.Set(name, mod)
-		if err != nil {
-			vm.currentFrame.env.SetForce(name, mod, false)
-		}
+		vm.currentFrame.pushStack(mod)
 		return
 	}
+
+	name := parser.ImportName(path)
 
 	searchPaths, ok := vm.currentFrame.env.Get("_SEARCH_PATHS")
 	if !ok {
@@ -51,10 +51,7 @@ func (vm *VirtualMachine) importPackage(name, path string) {
 		return
 	}
 
-	_, err := vm.currentFrame.env.Set(name, module)
-	if err != nil {
-		vm.currentFrame.env.SetForce(name, module, false)
-	}
+	vm.currentFrame.pushStack(module)
 }
 
 func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object {

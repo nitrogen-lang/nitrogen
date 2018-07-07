@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
@@ -57,6 +59,19 @@ func createKeywordToken(keyword string) token.Token {
 
 var identRegex = regexp.MustCompile(`^[\p{L}_][\p{L}\d_]*$`)
 
-func isIdent(s string) bool {
+func IsIdent(s string) bool {
 	return identRegex.MatchString(s)
+}
+
+func ImportName(path string) string {
+	path = filepath.Base(path)
+	dotIndex := strings.Index(path, ".")
+	if dotIndex > -1 {
+		path = path[:strings.Index(path, ".")]
+	}
+
+	if IsIdent(path) {
+		return path
+	}
+	return ""
 }

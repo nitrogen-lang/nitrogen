@@ -205,8 +205,9 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileCompareExpression(ccb, node)
 
 	case *ast.ImportStatement:
-		compile(ccb, node.Path)
-		ccb.code.addInst(opcode.Import, ccb.locals.indexOf(node.Name.Value))
+		str := &object.String{Value: node.Path.Value}
+		ccb.code.addInst(opcode.Import, ccb.constants.indexOf(str))
+		ccb.code.addInst(opcode.Define, ccb.locals.indexOf(node.Name.Value))
 
 	case *ast.FunctionLiteral:
 		compileFunction(ccb, node, false, false)

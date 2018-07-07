@@ -566,9 +566,8 @@ mainLoop:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).end
 
 		case opcode.Import:
-			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			path := vm.currentFrame.popStack().(*object.String)
-			vm.importPackage(name, path.String())
+			path := vm.currentFrame.code.Constants[vm.getUint16()].(*object.String)
+			vm.importPackage(path.String())
 
 		case opcode.StartTry:
 			catch := vm.getUint16()

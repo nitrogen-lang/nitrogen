@@ -13,7 +13,7 @@ import (
 
 var (
 	ByteFileHeader = []byte{31, 'N', 'I', 'B'}
-	VersionNumber  = []byte{0, 0, 0, 2}
+	VersionNumber  = []byte{0, 0, 0, 3}
 
 	ErrVersion = errors.New("File does not match current version")
 )
