@@ -276,10 +276,12 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 	curToken := p.curToken
 
 	exp := p.parseExpression(priLowest)
+	if exp == nil {
+		return nil
+	}
+
 	if expStmt, ok := exp.(ast.Statement); ok {
 		stmt = expStmt
-	} else if exp == nil {
-		return nil
 	} else {
 		stmt = &ast.ExpressionStatement{
 			Token:      curToken,

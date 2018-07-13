@@ -65,11 +65,12 @@ func (cb *CodeBlock) Print(indent string) {
 			fmt.Printf("\t\t\t%d (%s)", cb.Code[offset], opcode.CmpOps[cb.Code[offset]])
 		}
 
-		if opcode.HasOneByteArg[code] {
+		switch {
+		case opcode.HasOneByteArg[code]:
 			offset++
-		} else if opcode.HasTwoByteArg[code] {
+		case opcode.HasTwoByteArg[code]:
 			offset += 2
-		} else if opcode.HasFourByteArg[code] {
+		case opcode.HasFourByteArg[code]:
 			offset += 4
 		}
 

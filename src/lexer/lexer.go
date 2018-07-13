@@ -216,7 +216,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.newToken(token.Assign, l.curCh)
 		}
 	case '<':
-		if l.peekChar() == '=' {
+		switch l.peekChar() {
+		case '=':
 			tok = token.Token{
 				Type:     token.LessThanEq,
 				Literal:  "<=",
@@ -224,7 +225,7 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
-		} else if l.peekChar() == '<' {
+		case '<':
 			tok = token.Token{
 				Type:     token.ShiftLeft,
 				Literal:  "<<",
@@ -232,11 +233,12 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
-		} else {
+		default:
 			tok = l.newToken(token.LessThan, l.curCh)
 		}
 	case '>':
-		if l.peekChar() == '=' {
+		switch l.peekChar() {
+		case '=':
 			tok = token.Token{
 				Type:     token.GreaterThanEq,
 				Literal:  ">=",
@@ -244,7 +246,7 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
-		} else if l.peekChar() == '>' {
+		case '>':
 			tok = token.Token{
 				Type:     token.ShiftRight,
 				Literal:  ">>",
@@ -252,7 +254,7 @@ func (l *Lexer) NextToken() token.Token {
 				Filename: l.currentFile,
 			}
 			l.readRune()
-		} else {
+		default:
 			tok = l.newToken(token.GreaterThan, l.curCh)
 		}
 

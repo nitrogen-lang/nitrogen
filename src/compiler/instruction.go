@@ -35,13 +35,14 @@ func (i *Instruction) IsLoad() bool {
 }
 
 func (i *Instruction) Size() uint16 {
-	if i.Instr == opcode.Label {
+	switch {
+	case i.Instr == opcode.Label:
 		return 0
-	} else if opcode.HasOneByteArg[i.Instr] {
+	case opcode.HasOneByteArg[i.Instr]:
 		return 2
-	} else if opcode.HasTwoByteArg[i.Instr] {
+	case opcode.HasTwoByteArg[i.Instr]:
 		return 3
-	} else if opcode.HasFourByteArg[i.Instr] {
+	case opcode.HasFourByteArg[i.Instr]:
 		return 5
 	}
 	return 1
@@ -194,15 +195,16 @@ func (i *InstSet) Assemble() []byte {
 		bytes[offset] = in.Instr.ToByte()
 		offset++
 
-		if opcode.HasOneByteArg[in.Instr] {
+		switch {
+		case opcode.HasOneByteArg[in.Instr]:
 			bytes[offset] = byte(in.Args[0])
 			offset++
-		} else if opcode.HasTwoByteArg[in.Instr] {
+		case opcode.HasTwoByteArg[in.Instr]:
 			arg := uint16ToBytes(in.Args[0])
 			bytes[offset] = arg[0]
 			bytes[offset+1] = arg[1]
 			offset += 2
-		} else if opcode.HasFourByteArg[in.Instr] {
+		case opcode.HasFourByteArg[in.Instr]:
 			arg := uint16ToBytes(in.Args[0])
 			bytes[offset] = arg[0]
 			bytes[offset+1] = arg[1]
@@ -242,13 +244,14 @@ func (c *Code) NextInstruction() *Instruction {
 	}
 	c.i++
 
-	if opcode.HasOneByteArg[curr] {
+	switch {
+	case opcode.HasOneByteArg[curr]:
 		i.Args = []uint16{uint16(c.code[c.i])}
 		c.i++
-	} else if opcode.HasTwoByteArg[curr] {
+	case opcode.HasTwoByteArg[curr]:
 		i.Args = []uint16{bytesToUint16(c.code[c.i], c.code[c.i+1])}
 		c.i += 2
-	} else if opcode.HasFourByteArg[curr] {
+	case opcode.HasFourByteArg[curr]:
 		i.Args = []uint16{
 			bytesToUint16(c.code[c.i], c.code[c.i+1]),
 			bytesToUint16(c.code[c.i+2], c.code[c.i+3]),

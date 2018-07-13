@@ -94,8 +94,7 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 	for i, s := range block.Statements {
 		compile(ccb, s)
 		if i < l {
-			switch s.(type) {
-			case *ast.ExpressionStatement:
+			if _, ok := s.(*ast.ExpressionStatement); ok {
 				ccb.code.addInst(opcode.Pop)
 			}
 		}

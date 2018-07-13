@@ -33,7 +33,7 @@ func newCodeBlockCache() *codeBlockCache {
 	}
 }
 
-func (c *codeBlockCache) GetBlock(file string, name string) (*compiler.CodeBlock, error) {
+func (c *codeBlockCache) GetBlock(file, name string) (*compiler.CodeBlock, error) {
 	fileinfo, err := os.Stat(file)
 	if err != nil {
 		return nil, err

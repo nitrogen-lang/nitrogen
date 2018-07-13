@@ -2,10 +2,7 @@ package vm
 
 import "github.com/nitrogen-lang/nitrogen/src/object"
 
-func (vm *VirtualMachine) assignIndexedValue(
-	indexed object.Object,
-	index object.Object,
-	val object.Object) object.Object {
+func (vm *VirtualMachine) assignIndexedValue(indexed, index, val object.Object) object.Object {
 
 	switch i := indexed.(type) {
 	case *object.Array:
@@ -20,8 +17,7 @@ func (vm *VirtualMachine) assignIndexedValue(
 
 func (vm *VirtualMachine) assignStringIndex(
 	str *object.String,
-	index object.Object,
-	val object.Object) object.Object {
+	index, val object.Object) object.Object {
 
 	in, ok := index.(*object.Integer)
 	if !ok {
@@ -43,8 +39,7 @@ func (vm *VirtualMachine) assignStringIndex(
 
 func (vm *VirtualMachine) assignArrayIndex(
 	array *object.Array,
-	index object.Object,
-	val object.Object) object.Object {
+	index, val object.Object) object.Object {
 
 	in, ok := index.(*object.Integer)
 	if !ok {
@@ -61,8 +56,7 @@ func (vm *VirtualMachine) assignArrayIndex(
 
 func (vm *VirtualMachine) assignHashMapIndex(
 	hashmap *object.Hash,
-	index object.Object,
-	val object.Object) object.Object {
+	index, val object.Object) object.Object {
 
 	hashable, ok := index.(object.Hashable)
 	if !ok {

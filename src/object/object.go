@@ -118,7 +118,11 @@ type String struct {
 func (s *String) Inspect() string  { return string(s.Value) }
 func (s *String) String() string   { return string(s.Value) } // Dedicated to the stringified value, no inspection
 func (s *String) Type() ObjectType { return StringObj }
-func (s *String) Dup() Object      { return &String{Value: s.Value[:]} }
+func (s *String) Dup() Object {
+	dup := make([]rune, len(s.Value))
+	copy(dup, s.Value)
+	return &String{Value: dup}
+}
 
 func MakeStringObj(s string) *String {
 	return &String{Value: []rune(s)}

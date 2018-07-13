@@ -11,7 +11,7 @@ import (
 
 const modulesSupported = true
 
-func loadModules(searchPaths []string, modules []string) error {
+func loadModules(searchPaths, modules []string) error {
 	for _, module := range modules {
 		for _, path := range searchPaths {
 			fullpath := filepath.Join(path, module)

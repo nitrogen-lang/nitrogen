@@ -85,8 +85,7 @@ func (vm *VirtualMachine) evalStringBinaryExpression(op string, left, right obje
 	leftVal := left.(*object.String).Value
 	rightVal := right.(*object.String).Value
 
-	switch op {
-	case "+":
+	if op == "+" {
 		return &object.String{Value: append(leftVal, rightVal...)}
 	}
 
@@ -97,8 +96,7 @@ func (vm *VirtualMachine) evalArrayBinaryExpression(op string, left, right objec
 	leftVal := left.(*object.Array)
 	rightVal := right.(*object.Array)
 
-	switch op {
-	case "+":
+	if op == "+" {
 		leftLen := len(leftVal.Elements)
 		rightLen := len(rightVal.Elements)
 		newElements := make([]object.Object, leftLen+rightLen, leftLen+rightLen)
