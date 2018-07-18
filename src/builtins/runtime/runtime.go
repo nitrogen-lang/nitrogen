@@ -2,14 +2,26 @@ package dis
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
+var moduleName = "stdlib/runtime"
+
 func init() {
-	vm.RegisterBuiltin("dis", disassemble)
+	vm.RegisterModule(moduleName, &object.Module{
+		Name: moduleName,
+		Methods: map[string]object.BuiltinFunction{
+			"dis": disassemble,
+		},
+		Vars: map[string]object.Object{
+			"osName": object.MakeStringObj(runtime.GOOS),
+			"osArch": object.MakeStringObj(runtime.GOARCH),
+		},
+	})
 }
 
 func disassemble(machine object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
