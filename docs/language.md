@@ -25,6 +25,7 @@ Nitrogen source files are read as valid UTF-8 characters.
 | or       | pass     |
 | return   | throw    |
 | true     | try      |
+| use      |          |
 
 ## Semicolons
 

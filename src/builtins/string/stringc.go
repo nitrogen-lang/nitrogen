@@ -12,8 +12,19 @@ var moduleName = "stdlib/string"
 
 func init() {
 	vm.RegisterModule(moduleName, &object.Module{
-		Name:    moduleName,
-		Methods: map[string]object.BuiltinFunction{},
+		Name: moduleName,
+		Methods: map[string]object.BuiltinFunction{
+			"contains":  strContains,
+			"count":     strCount,
+			"dedup":     strDedup,
+			"format":    strFormat,
+			"hasPrefix": strHasPrefix,
+			"hasSuffix": strHasSuffix,
+			"replace":   strReplace,
+			"split":     strSplit,
+			"splitN":    strSplitN,
+			"trimSpace": strTrim,
+		},
 		Vars: map[string]object.Object{
 			"String": &vm.BuiltinClass{
 				Fields: map[string]object.Object{
