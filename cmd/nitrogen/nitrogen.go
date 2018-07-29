@@ -56,9 +56,10 @@ var (
 	modulePaths     strSliceFlag
 	autoloadModules strSliceFlag
 
-	version   = "Unknown"
-	buildTime = ""
-	builder   = ""
+	version         = "Unknown"
+	buildTime       = ""
+	builder         = ""
+	builtinModPaths = ""
 )
 
 func init() {
@@ -67,7 +68,7 @@ func init() {
 
 	envModPath := os.Getenv("NITROGEN_MODULES")
 	if envModPath != "" {
-		modulePaths = append(modulePaths, envModPath)
+		modulePaths = append(modulePaths, strings.Split(envModPath, ":")...)
 	}
 
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
@@ -87,6 +88,10 @@ func init() {
 
 func main() {
 	flag.Parse()
+
+	if builtinModPaths != "" {
+		modulePaths = append(modulePaths, strings.Split(builtinModPaths, ":")...)
+	}
 
 	if printVersion {
 		versionInfo()
@@ -356,7 +361,8 @@ Built:             %s
 Compiled by:       %s
 Go version:        %s %s/%s
 Modules Supported: %t
-`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, modulesSupported)
+Builtin Mod Path:  %s
+`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, modulesSupported, builtinModPaths)
 }
 
 func runInfoCmd() {
