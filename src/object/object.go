@@ -128,6 +128,10 @@ func MakeStringObj(s string) *String {
 	return &String{Value: []rune(s)}
 }
 
+func MakeStringObjRunes(r []rune) *String {
+	return &String{Value: r}
+}
+
 type Boolean struct {
 	Value bool
 }

@@ -1,7 +1,9 @@
-package main
+package file
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -10,39 +12,43 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
+const (
+	moduleName     = "stdlib/file"
+	fileResourceID = "stdlib.file"
+)
+
 func init() {
-	fileModule := &object.Module{
-		Name: ModuleName,
+	vm.RegisterModule(moduleName, &object.Module{
+		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
-			"open":    openFile,
-			"close":   closeFile,
-			"write":   writeFile,
-			"readAll": readFullFile,
-			"delete":  deleteFile,
-			"exists":  fileExists,
-			"rename":  renameFile,
-			"dirlist": directoryList,
-			"isdir":   isDirectory,
+			"open":     openFile,
+			"close":    closeFile,
+			"write":    writeFile,
+			"readAll":  readFullFile,
+			"readLine": readLine,
+			"readChar": readChar,
+			"delete":   deleteFile,
+			"exists":   fileExists,
+			"rename":   renameFile,
+			"dirlist":  directoryList,
+			"isdir":    isDirectory,
 		},
 		Vars: map[string]object.Object{
-			"name": object.MakeStringObj(ModuleName),
+			"name":           object.MakeStringObj(moduleName),
+			"fileResourceID": object.MakeStringObj(fileResourceID),
 		},
-	}
-
-	vm.RegisterModule(ModuleName, fileModule)
+	})
 }
 
-func main() {}
-
-var ModuleName = "file"
-
 type fileResource struct {
-	file *os.File
+	file   *os.File
+	reader *bufio.Reader
 }
 
 func (f *fileResource) Inspect() string         { return "File resource" }
 func (f *fileResource) Type() object.ObjectType { return object.ResourceObj }
 func (f *fileResource) Dup() object.Object      { return object.NullConst } // Duplicating a file resource isn't allowed
+func (f *fileResource) ResourceID() string      { return fileResourceID }
 
 var modes = map[string]int{
 	"r":  os.O_RDONLY,
@@ -78,7 +84,10 @@ func openFile(interpreter object.Interpreter, env *object.Environment, args ...o
 		return object.NewException("Error opening file %s", err.Error())
 	}
 
-	return &fileResource{file}
+	return &fileResource{
+		file:   file,
+		reader: bufio.NewReader(file),
+	}
 }
 
 func closeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -135,6 +144,54 @@ func readFullFile(interpreter object.Interpreter, env *object.Environment, args 
 	}
 
 	return object.MakeStringObj(string(file))
+}
+
+func readLine(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("readLine", 1, args...); ac != nil {
+		return ac
+	}
+
+	file, ok := args[0].(*fileResource)
+	if !ok {
+		return object.NewException("readLine expected a file resource, got %s", args[0].Type().String())
+	}
+
+	line, err := file.reader.ReadString('\n')
+	if err != nil {
+		if err == io.EOF {
+			if line != "" {
+				object.MakeStringObj(line)
+			}
+			return object.NullConst
+		}
+		return object.NewException(err.Error())
+	}
+
+	return object.MakeStringObj(line[:len(line)-1])
+}
+
+func readChar(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("readChar", 1, args...); ac != nil {
+		return ac
+	}
+
+	file, ok := args[0].(*fileResource)
+	if !ok {
+		return object.NewException("readChar expected a file resource, got %s", args[0].Type().String())
+	}
+
+	r, _, err := file.reader.ReadRune()
+	if err != nil {
+		if err == io.EOF {
+			if r != 0 {
+				return object.MakeStringObjRunes([]rune{r})
+			}
+			return object.NullConst
+		}
+		return object.NewException(err.Error())
+	}
+
+	return object.MakeStringObjRunes([]rune{r})
 }
 
 func deleteFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

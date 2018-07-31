@@ -12,7 +12,7 @@ LDFLAGS := -X 'main.version=$(VERSION)' \
 
 .PHONY: go-test nitrogen-test build modules
 
-all: build modules
+all: build
 
 build:
 	go build -o bin/nitrogen -ldflags="$(LDFLAGS)" ./cmd/nitrogen/...

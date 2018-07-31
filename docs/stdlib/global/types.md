@@ -20,6 +20,7 @@ Convert any value into its stringified form.
 ## isFunc(in: T): bool
 ## isArray(in: T): bool
 ## isMap(in: T): bool
+## isResource(in: T): bool
 ## isClass(in: T): bool
 ## isInstance(in: T): bool
 
@@ -49,3 +50,7 @@ Returns if object i is an instance of `className`. `className` can be either a s
 ## classOf(i: T): string
 
 Returns the name of the class that i is an instance of. Returns empty string if i is not an object.
+
+## resourceID(i: resource): string
+
+Return the internal ID name of a resource object.

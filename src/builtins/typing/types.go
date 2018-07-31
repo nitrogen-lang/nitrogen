@@ -23,15 +23,18 @@ func init() {
 	vm.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.IntergerObj))
 	vm.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BooleanObj))
 	vm.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NullObj))
+	vm.RegisterBuiltin("isNil", makeIsTypeBuiltin(object.NullObj))
 	vm.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FunctionObj))
 	vm.RegisterBuiltin("isString", makeIsTypeBuiltin(object.StringObj))
 	vm.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
 	vm.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
 	vm.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
+	vm.RegisterBuiltin("isResource", makeIsTypeBuiltin(object.ResourceObj))
 	vm.RegisterBuiltin("isClass", makeIsTypeBuiltin(object.ClassObj))
 	vm.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))
 
 	vm.RegisterBuiltin("errorVal", getErrorVal)
+	vm.RegisterBuiltin("resourceID", getResourceID)
 }
 
 func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -91,6 +94,27 @@ func getErrorVal(interpreter object.Interpreter, env *object.Environment, args .
 	}
 
 	return object.MakeStringObj("")
+}
+
+type resource interface {
+	ResourceID() string
+}
+
+func getResourceID(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckArgs("resourceID", 1, args...); ac != nil {
+		return ac
+	}
+
+	if !object.ObjectIs(args[0], object.ResourceObj) {
+		return object.NewException("cannot retrieve resource ID from non-resource object")
+	}
+
+	arg, ok := args[0].(resource)
+	if !ok {
+		return object.NewPanic("object marked as a ResourceObj doesn't implement resource ID interface")
+	}
+
+	return object.MakeStringObj(arg.ResourceID())
 }
 
 func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

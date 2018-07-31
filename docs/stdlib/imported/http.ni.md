@@ -1,6 +1,6 @@
 # http.ni
 
-Functions for encoding and decoding http.
+Functions for making HTTP requests.
 
 To use: `import 'stdlib/http'`
 

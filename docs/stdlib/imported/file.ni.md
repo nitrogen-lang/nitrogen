@@ -1,11 +1,18 @@
-# Files
+# file.ni
 
-The files module returns a Module object. All documented functions are part of this returned object.
+The files module exposes functions to open, close, and manipulate files and directories.
+
+To use: `import 'stdlib/file'`
+
+## fileResourceID: string
+
+The internal ID of a file resource. This can be used with `resourceID()` to check
+if a resource is a file.
 
 ## open(path, mode: string): resource
 
-`open` will attempt to open the file at `path` using mode `mode`. The returned value is file resource that is used
-by other file methods in this module.
+`open` will attempt to open the file at `path` using mode `mode`. The returned
+value is a file resource that is used by other file methods in this module.
 
 | mode | description                                                                                                                        |
 |------|------------------------------------------------------------------------------------------------------------------------------------|
@@ -22,8 +29,9 @@ Closes an open file. If the file is already closed, nothing happens.
 
 ## write(file: resource, data: string): int
 
-Writes `data` to `file`. `file` must have been open using a mode that allows writing otherwise a runtime exception will occur.
-The function returns the number of bytes written.
+Writes `data` to `file`. `file` must have been open using a mode that allows
+writing otherwise a runtime exception will occur. The function returns the
+number of bytes written.
 
 ## readAll(filepath: string): string
 
@@ -39,11 +47,13 @@ Returns if the file at `filepath` exists.
 
 ## rename(oldPath, newPath: string): error
 
-Attempts to rename a file from `oldPath` to `newPath`. If no error occurs, nil is returned.
+Attempts to rename a file from `oldPath` to `newPath`. If no error occurs, nil
+is returned.
 
 ## dirlist(path: string): array
 
-Returns an array which is the directory listing of path. If path is not a directory, an exception is thrown.
+Returns an array which is the directory listing of path. If path is not a
+directory, an exception is thrown.
 
 ## isdir(path: string): bool
 

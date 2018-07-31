@@ -1,4 +1,4 @@
-package main
+package os
 
 import (
 	"bytes"
@@ -9,24 +9,20 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
+var moduleName = "stdlib/os"
+
 func init() {
-	osModule := &object.Module{
-		Name: ModuleName,
+	vm.RegisterModule(moduleName, &object.Module{
+		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
 			"system": runSystem,
 			"exec":   runSystemPT,
 		},
 		Vars: map[string]object.Object{
-			"name": object.MakeStringObj(ModuleName),
+			"name": object.MakeStringObj(moduleName),
 		},
-	}
-
-	vm.RegisterModule(ModuleName, osModule)
+	})
 }
-
-func main() {}
-
-var ModuleName = "os"
 
 func runSystem(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := moduleutils.CheckMinArgs("system", 1, args...); ac != nil {

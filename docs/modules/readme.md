@@ -5,10 +5,6 @@ These are typically sets of functionality that are still in active development a
 part of the core library yet. Once they are stable and have a fixed API, they'll be
 considered for the core library.
 
-- [file](file.md): File IO and management
-- [filepath](filepath.md): Functions dealing with file paths
-- [os](os.md): Interfacing with the OS
-
 ## Support
 
 Binary shared object modules are only supported in Linux and macOS. This is a limitation of the underlying Go runtime
