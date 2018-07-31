@@ -3,6 +3,7 @@ package moduleutils
 import (
 	"errors"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -56,7 +57,7 @@ func (c *astCache) GetTree(file string) (*ast.Program, error) {
 	p := parser.New(l, ParserSettings)
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {
-		return nil, errors.New(p.Errors()[0])
+		return nil, errors.New(strings.Join(p.Errors(), "\n"))
 	}
 
 	if cachedItem == nil {

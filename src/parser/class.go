@@ -45,6 +45,18 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 		}
 	}
 
+	errored := false
+	for _, f := range c.Fields {
+		if fn, exists := c.Methods[f.Name.Value]; exists {
+			p.addErrorWithCPos(fn.Token.Pos.Line, fn.Token.Pos.Col, "Duplicate named function %s", fn.Name)
+			errored = true
+		}
+	}
+
+	if errored {
+		return nil
+	}
+
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()
 	}

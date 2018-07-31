@@ -163,18 +163,22 @@ func (p *Parser) addError(format string, args ...interface{}) {
 }
 
 func (p *Parser) addErrorWithPos(format string, args ...interface{}) {
+	p.addErrorWithCPos(p.curToken.Pos.Line, p.curToken.Pos.Col, format, args...)
+}
+
+func (p *Parser) addErrorWithCPos(line, col int, format string, args ...interface{}) {
 	if len(args) > 0 {
-		args = append([]interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}, args...)
+		args = append([]interface{}{line, col}, args...)
 	} else {
-		args = []interface{}{p.curToken.Pos.Line, p.curToken.Pos.Col}
+		args = []interface{}{line, col}
 	}
-	msg := fmt.Sprintf("at line %d, col %d "+format, args...)
+	msg := fmt.Sprintf("line %d, col %d "+format, args...)
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) peekError(t token.TokenType) {
 	p.addError(
-		"at line %d, col %d Incorrect next token. Expected %q, got %q",
+		"line %d, col %d Incorrect next token. Expected %q, got %q",
 		p.peekToken.Pos.Line,
 		p.peekToken.Pos.Col,
 		t.String(),
@@ -399,7 +403,11 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Node {
 
 	precedence := p.curPrecedence()
 	p.nextToken()
-	expression.Right = p.parseExpression(precedence).(ast.Expression)
+	var ok bool
+	expression.Right, ok = p.parseExpression(precedence).(ast.Expression)
+	if !ok {
+		return nil
+	}
 	return expression
 }
 

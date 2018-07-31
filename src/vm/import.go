@@ -62,7 +62,7 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 
 	code, err := moduleutils.CodeBlockCache.GetBlock(scriptPath, name)
 	if err != nil {
-		return object.NewException("importing %s failed %s", name, err.Error())
+		return object.NewException("importing %s failed:\n%s", name, err.Error())
 	}
 
 	if filepath.Ext(scriptPath) == ".nib" {

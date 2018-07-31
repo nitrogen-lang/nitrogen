@@ -1,5 +1,5 @@
 import "stdlib/native/http"
-import "stdlib/json"
+import "stdlib/encoding/json"
 
 use http.do
 

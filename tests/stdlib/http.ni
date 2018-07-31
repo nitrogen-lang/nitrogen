@@ -1,5 +1,5 @@
 import "stdlib/http"
-import "stdlib/json"
+import "stdlib/encoding/json"
 import "stdlib/test"
 import "stdlib/collections"
 

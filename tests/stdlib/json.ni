@@ -1,5 +1,5 @@
 import "stdlib/test"
-import "stdlib/json"
+import "stdlib/encoding/json"
 import "stdlib/collections" as col
 
 let tests = [

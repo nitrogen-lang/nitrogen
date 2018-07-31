@@ -263,7 +263,11 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	p.insertToken(fToken)
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
+	var ok bool
+	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
+	if !ok {
+		return nil
+	}
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
 		funcName := stmt.Name.String()
