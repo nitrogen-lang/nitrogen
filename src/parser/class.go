@@ -11,6 +11,8 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 	if p.settings.Debug {
 		fmt.Println("parseClassLiteral")
 	}
+
+	classToken := p.curToken
 	c := &ast.ClassLiteral{
 		Fields:  make([]*ast.DefStatement, 0),
 		Methods: make(map[string]*ast.FunctionLiteral),
@@ -33,7 +35,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 	for _, statement := range body.Statements {
 		def, ok := statement.(*ast.DefStatement)
 		if !ok {
-			p.addErrorWithPos("Only function and variable statements are allowed in a class definition")
+			p.addErrorWithCPos(classToken.Pos, "Only function and variable statements are allowed in a class definition")
 			return nil
 		}
 
@@ -48,7 +50,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 	errored := false
 	for _, f := range c.Fields {
 		if fn, exists := c.Methods[f.Name.Value]; exists {
-			p.addErrorWithCPos(fn.Token.Pos.Line, fn.Token.Pos.Col, "Duplicate named function %s", fn.Name)
+			p.addErrorWithCPos(fn.Token.Pos, "Duplicate named function %s", fn.Name)
 			errored = true
 		}
 	}

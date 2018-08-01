@@ -163,14 +163,14 @@ func (p *Parser) addError(format string, args ...interface{}) {
 }
 
 func (p *Parser) addErrorWithPos(format string, args ...interface{}) {
-	p.addErrorWithCPos(p.curToken.Pos.Line, p.curToken.Pos.Col, format, args...)
+	p.addErrorWithCPos(p.curToken.Pos, format, args...)
 }
 
-func (p *Parser) addErrorWithCPos(line, col int, format string, args ...interface{}) {
+func (p *Parser) addErrorWithCPos(pos token.Position, format string, args ...interface{}) {
 	if len(args) > 0 {
-		args = append([]interface{}{line, col}, args...)
+		args = append([]interface{}{pos.Line, pos.Col}, args...)
 	} else {
-		args = []interface{}{line, col}
+		args = []interface{}{pos.Line, pos.Col}
 	}
 	msg := fmt.Sprintf("line %d, col %d "+format, args...)
 	p.errors = append(p.errors, msg)
