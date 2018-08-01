@@ -48,6 +48,7 @@ Usage: `nitrogen [options] SCRIPT`
 - `-al module.so`: Autoload a module from the search path. This flag can be used multiple times.
 Autoloaded modules are loaded before any script is executed.
 - `-info file.nib`: Print information about a compiled Nitrogen file.
+- `-c`: Parse and compile script, print errors if any, and exit
 
 ## Contributing
 

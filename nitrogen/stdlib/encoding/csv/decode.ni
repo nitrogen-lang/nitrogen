@@ -101,6 +101,18 @@ class fileReader {
         return this.l.readRecord()
     }
 
+    func readAllRecords() {
+        let records = [];
+
+        let record = this.l.readRecord()
+        while !isNull(record) {
+            records = push(records, record)
+            record = this.l.readRecord()
+        }
+
+        return records
+    }
+
     func delimiter(c) {
         this.l.setDelimiter(c)
     }
