@@ -16,7 +16,8 @@ Convert any value into its stringified form.
 ## isInt(in: T): bool
 ## isBool(in: T): bool
 ## isString(in: T): bool
-## isNull(in: T): bool
+## isNull(in: T): bool (alias for isNil)
+## isNil(in: T): bool
 ## isFunc(in: T): bool
 ## isArray(in: T): bool
 ## isMap(in: T): bool
