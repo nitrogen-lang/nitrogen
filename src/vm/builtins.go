@@ -13,6 +13,7 @@ import (
 var (
 	builtins   = map[string]*object.Builtin{}
 	modules    = map[string]*object.Module{}
+	nativeFn   = map[string]*object.Builtin{}
 	identRegex = regexp.MustCompile(`[a-zA-Z_][a-zA-Z0-9_]*`)
 )
 
@@ -45,6 +46,15 @@ func RegisterModule(name string, m *object.Module) {
 	modules[name] = m
 }
 
+func RegisterNative(name string, fn object.BuiltinFunction) {
+	if _, defined := nativeFn[name]; defined {
+		// Panic because this should NEVER happen when built
+		panic("VM native func " + name + " already defined")
+	}
+
+	nativeFn[name] = &object.Builtin{Fn: fn}
+}
+
 func validBuiltinIdent(ident string) bool {
 	return identRegex.Match([]byte(ident))
 }
@@ -67,6 +77,7 @@ func GetModule(name string) *object.Module {
 type VMFunction struct {
 	Name       string
 	Parameters []string
+	Native     bool
 	Body       *compiler.CodeBlock
 	Env        *object.Environment
 	Class      *VMClass

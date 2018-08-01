@@ -19,6 +19,7 @@ func compileFrame(node ast.Node, name, filename string) *CodeBlock {
 		names:     newStringTable(),
 		code:      NewInstSet(),
 		filename:  filename,
+		name:      name,
 	}
 
 	compile(ccb, node)

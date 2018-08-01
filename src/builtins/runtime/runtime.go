@@ -37,6 +37,17 @@ func disassemble(machine object.Interpreter, env *object.Environment, args ...ob
 		fnObj = args[0]
 	}
 
+	if cl, ok := fnObj.(*vm.VMClass); ok {
+		fmt.Printf("Field Count: %d\nMethod Count: %d\n", 0, len(cl.Methods))
+		return object.NullConst
+	}
+
+	if cl, ok := fnObj.(*vm.VMInstance); ok {
+		fmt.Printf("%#v\n", cl.Class.Methods)
+		fmt.Printf("Field Count: %d\nMethod Count: %d\n", 0, len(cl.Class.Methods))
+		return object.NullConst
+	}
+
 	fn, ok := fnObj.(*vm.VMFunction)
 	if !ok {
 		return object.NewException("dis expected a func, got %s", fnObj.Type().String())

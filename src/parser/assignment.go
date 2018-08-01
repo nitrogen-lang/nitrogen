@@ -248,20 +248,9 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseFuncDefStatement")
 	}
-	if !p.peekTokenIs(token.Identifier) {
-		return p.parseExpressionStatement()
-	}
 
-	fToken := p.curToken
-	if !p.expectPeek(token.Identifier) {
-		return nil
-	}
-
+	startToken := p.curToken
 	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-	p.insertToken(fToken)
-	p.nextToken()
 
 	var ok bool
 	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
@@ -269,14 +258,13 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 		return nil
 	}
 
-	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
-		funcName := stmt.Name.String()
-		if funcName == "" {
-			funcName = "(anonymous)"
-		}
-		fun.Name = stmt.Name.String()
-		fun.FQName = stmt.Name.String()
+	fun, ok := stmt.Value.(*ast.FunctionLiteral)
+	if !ok {
+		p.addErrorWithCPos(startToken.Pos, "Expected something else")
+		return nil
 	}
+
+	stmt.Name = &ast.Identifier{Token: startToken, Value: fun.Name}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()

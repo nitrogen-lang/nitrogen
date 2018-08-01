@@ -140,7 +140,7 @@ mainLoop:
 		}
 		code := vm.fetchOpcode()
 		if vm.Settings.Debug {
-			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s", vm.currentFrame.pc-1, opcode.Names[code])
+			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s\n", vm.currentFrame.pc-1, opcode.Names[code])
 		}
 
 		switch code {
@@ -446,6 +446,18 @@ mainLoop:
 			fnName := vm.currentFrame.popStack().(*object.String)
 			params := vm.currentFrame.popStack().(*object.Array)
 			codeBlock := vm.currentFrame.popStack().(*compiler.CodeBlock)
+
+			if codeBlock.Native {
+				fn, exists := nativeFn[codeBlock.Name]
+				if !exists {
+					ex := object.NewPanic("Native function not implemented %s", codeBlock.Name)
+					vm.currentFrame.pushStack(ex)
+					vm.throw()
+					break
+				}
+				vm.currentFrame.pushStack(fn)
+				break
+			}
 
 			fn := &VMFunction{
 				Name:       fnName.String(),

@@ -11,19 +11,12 @@ import (
 )
 
 var (
-	moduleName = "stdlib/native/http"
-	client     = &http.Client{}
+	client = &http.Client{}
 )
 
 func init() {
-	vm.RegisterModule(moduleName, &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"do":                 do,
-			"canonicalHeaderKey": canonicalHeaderKey,
-		},
-		Vars: map[string]object.Object{},
-	})
+	vm.RegisterNative("stdlib.http.do", do)
+	vm.RegisterNative("stdlib.http.canonicalHeaderKey", canonicalHeaderKey)
 }
 
 func do(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

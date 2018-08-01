@@ -2,13 +2,23 @@ package vm
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/parser"
 )
 
 var included = make(map[string]object.Object)
+
+func pathToName(path string) string {
+	path = strings.Replace(path, "/", ".", -1)
+	path = strings.Replace(path, "\\", ".", -1)
+	path = strings.Replace(path, "..", ".", -1)
+	if path[0] == '.' {
+		path = path[1:]
+	}
+	return path
+}
 
 func (vm *VirtualMachine) importPackage(path string) {
 	mod := GetModule(path)
@@ -17,7 +27,7 @@ func (vm *VirtualMachine) importPackage(path string) {
 		return
 	}
 
-	name := parser.ImportName(path)
+	name := pathToName(path)
 
 	searchPaths, ok := vm.currentFrame.env.Get("_SEARCH_PATHS")
 	if !ok {

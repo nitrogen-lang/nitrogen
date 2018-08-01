@@ -17,11 +17,27 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 		FQName: "(anonymous)",
 	}
 
-	if !p.expectPeek(token.LParen) {
+	p.nextToken()
+	if p.curTokenIs(token.Native) {
+		lit.Native = true
+		p.nextToken()
+	}
+
+	if p.curTokenIs(token.Identifier) {
+		lit.Name = p.curToken.Literal
+		lit.FQName = p.curToken.Literal
+		p.nextToken()
+	}
+
+	if !p.curTokenIs(token.LParen) {
 		return nil
 	}
 
 	lit.Parameters = p.parseFunctionParameters()
+
+	if lit.Native {
+		return lit
+	}
 
 	if !p.expectPeek(token.LBrace) {
 		return nil
