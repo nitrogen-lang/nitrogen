@@ -56,6 +56,7 @@ type FunctionLiteral struct {
 	Token      token.Token // The 'func' token
 	Name       string
 	FQName     string
+	Native     bool
 	Parameters []*Identifier
 	Body       *BlockStatement
 }

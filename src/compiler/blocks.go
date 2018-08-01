@@ -21,6 +21,7 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 		names:     newStringTable(),
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 
 	for _, f := range class.Fields {
@@ -102,56 +103,66 @@ func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 }
 
 func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass, hasParent bool) {
-	ccb2 := &codeBlockCompiler{
-		constants: newConstantTable(),
-		locals:    newStringTable(),
-		names:     newStringTable(),
-		code:      NewInstSet(),
-		filename:  ccb.filename,
-	}
-
-	for _, p := range fn.Parameters {
-		ccb2.locals.indexOf(p.Value)
-	}
-	ccb2.locals.indexOf("arguments") // `arguments` holds any remaining arguments from a function call
-	if inClass {
-		ccb2.locals.indexOf("this")
-		if hasParent {
-			ccb2.locals.indexOf("parent")
-		}
-	}
-
-	compile(ccb2, fn.Body)
-
-	if len(fn.Body.Statements) > 0 {
-		switch fn.Body.Statements[len(fn.Body.Statements)-1].(type) {
-		case *ast.ExpressionStatement:
-			break
-		case *ast.ReturnStatement:
-			break
-		default:
-			compileLoadNull(ccb2)
-		}
-
-		if !ccb2.code.last().Is(opcode.Return) {
-			ccb2.code.addInst(opcode.Return)
+	var body *CodeBlock
+	if fn.Native {
+		body = &CodeBlock{
+			Name:     ccb.name + "." + fn.FQName,
+			Filename: ccb.filename,
+			Native:   true,
 		}
 	} else {
-		compileLoadNull(ccb2)
-		ccb2.code.addInst(opcode.Return)
-	}
+		ccb2 := &codeBlockCompiler{
+			constants: newConstantTable(),
+			locals:    newStringTable(),
+			names:     newStringTable(),
+			code:      NewInstSet(),
+			filename:  ccb.filename,
+			name:      ccb.name,
+		}
 
-	code := ccb2.code
-	body := &CodeBlock{
-		Name:         fn.FQName,
-		Filename:     ccb.filename,
-		LocalCount:   len(ccb2.locals.table),
-		Code:         code.Assemble(),
-		Constants:    ccb2.constants.table,
-		Names:        ccb2.names.table,
-		Locals:       ccb2.locals.table,
-		MaxStackSize: calculateStackSize(code),
-		MaxBlockSize: calculateBlockSize(code),
+		for _, p := range fn.Parameters {
+			ccb2.locals.indexOf(p.Value)
+		}
+		ccb2.locals.indexOf("arguments") // `arguments` holds any remaining arguments from a function call
+		if inClass {
+			ccb2.locals.indexOf("this")
+			if hasParent {
+				ccb2.locals.indexOf("parent")
+			}
+		}
+
+		compile(ccb2, fn.Body)
+
+		if len(fn.Body.Statements) > 0 {
+			switch fn.Body.Statements[len(fn.Body.Statements)-1].(type) {
+			case *ast.ExpressionStatement:
+				break
+			case *ast.ReturnStatement:
+				break
+			default:
+				compileLoadNull(ccb2)
+			}
+
+			if !ccb2.code.last().Is(opcode.Return) {
+				ccb2.code.addInst(opcode.Return)
+			}
+		} else {
+			compileLoadNull(ccb2)
+			ccb2.code.addInst(opcode.Return)
+		}
+
+		code := ccb2.code
+		body = &CodeBlock{
+			Name:         ccb.name + "." + fn.FQName,
+			Filename:     ccb.filename,
+			LocalCount:   len(ccb2.locals.table),
+			Code:         code.Assemble(),
+			Constants:    ccb2.constants.table,
+			Names:        ccb2.names.table,
+			Locals:       ccb2.locals.table,
+			MaxStackSize: calculateStackSize(code),
+			MaxBlockSize: calculateBlockSize(code),
+		}
 	}
 
 	ccb.code.addInst(opcode.LoadConst, ccb.constants.indexOf(body))
@@ -255,6 +266,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 
 	// Compile the loop's condition check code
@@ -267,6 +279,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 
 	// Compile main body of loop
@@ -289,6 +302,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 
 	// Compile iteration
@@ -326,6 +340,7 @@ func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 	compile(bodyCCB, loop.Body)
 
@@ -357,6 +372,7 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 
 	// Compile the loop's condition check code
@@ -369,6 +385,7 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
+		name:      ccb.name,
 	}
 
 	// Compile main body of loop

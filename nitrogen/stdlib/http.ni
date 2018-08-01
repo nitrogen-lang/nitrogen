@@ -1,11 +1,11 @@
-import "stdlib/native/http"
 import "stdlib/encoding/json"
 
-use http.do
+func native do(method, url)
+func native canonicalHeaderKey(header)
 
 const exports = {
     "req": do,
-    "canonicalHeaderKey": http.canonicalHeaderKey,
+    "canonicalHeaderKey": canonicalHeaderKey,
 }
 
 func getJSON(url) {

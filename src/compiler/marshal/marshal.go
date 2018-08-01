@@ -51,6 +51,11 @@ func Marshal(o object.Object) ([]byte, error) {
 		res, _ = Marshal(tmpStr)
 		buf.Write(res)
 
+		if o.Native {
+			buf.WriteByte(1)
+		} else {
+			buf.WriteByte(0)
+		}
 		buf.Write(encodeUint16(uint16(o.LocalCount)))
 		buf.Write(encodeUint16(uint16(o.MaxStackSize)))
 		buf.Write(encodeUint16(uint16(o.MaxBlockSize)))
@@ -114,6 +119,8 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		filename, inslice, _ := Unmarshal(inslice)
 		cb.Filename = string(filename.(*object.String).Value)
 
+		cb.Native = inslice[0] == 1
+		inslice = inslice[1:]
 		cb.LocalCount = int(decodeUint16(inslice[:2]))
 		inslice = inslice[2:]
 		cb.MaxStackSize = int(decodeUint16(inslice[:2]))

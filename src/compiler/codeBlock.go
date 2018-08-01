@@ -19,6 +19,7 @@ type CodeBlock struct {
 	Locals       []string        // Created by compile time
 	Names        []string        // Created at compile time
 	Code         []byte
+	Native       bool
 }
 
 // Implement object.Object interface
@@ -83,11 +84,11 @@ func bytesToUint16(a, b byte) uint16 {
 }
 
 type codeBlockCompiler struct {
-	constants *constantTable
-	locals    *stringTable
-	names     *stringTable
-	code      *InstSet
-	filename  string
+	constants      *constantTable
+	locals         *stringTable
+	names          *stringTable
+	code           *InstSet
+	filename, name string
 }
 
 type constantTable struct {
