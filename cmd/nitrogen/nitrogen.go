@@ -47,6 +47,7 @@ var (
 	startSCGI    bool
 	printVersion bool
 	fullDebug    bool
+	compileOnly  bool
 	cpuprofile   string
 	memprofile   string
 	outputFile   string
@@ -72,6 +73,7 @@ func init() {
 	}
 
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
+	flag.BoolVar(&compileOnly, "c", false, "Compile code, print any errors, and exit")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
@@ -154,6 +156,7 @@ func main() {
 		program, err = moduleutils.ASTCache.GetTree(sourceFile)
 		if err != nil {
 			fmt.Println(err.Error())
+			os.Exit(1)
 			return
 		}
 
@@ -168,6 +171,10 @@ func main() {
 
 	if code == nil {
 		code = compiler.Compile(program, "__main")
+	}
+
+	if compileOnly {
+		return
 	}
 
 	if outputFile != "" {
