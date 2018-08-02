@@ -448,12 +448,27 @@ mainLoop:
 			codeBlock := vm.currentFrame.popStack().(*compiler.CodeBlock)
 
 			if codeBlock.Native {
-				fn, exists := nativeFn[codeBlock.Name]
-				if !exists {
-					ex := object.NewPanic("Native function not implemented %s", codeBlock.Name)
-					vm.currentFrame.pushStack(ex)
-					vm.throw()
-					break
+				var (
+					fn     object.Object
+					exists bool
+				)
+
+				if codeBlock.ClassMethod {
+					fn, exists = nativeMethods[codeBlock.Name]
+					if !exists {
+						ex := object.NewPanic("Native method not implemented %s", codeBlock.Name)
+						vm.currentFrame.pushStack(ex)
+						vm.throw()
+						break
+					}
+				} else {
+					fn, exists = nativeFn[codeBlock.Name]
+					if !exists {
+						ex := object.NewPanic("Native function not implemented %s", codeBlock.Name)
+						vm.currentFrame.pushStack(ex)
+						vm.throw()
+						break
+					}
 				}
 				vm.currentFrame.pushStack(fn)
 				break
@@ -606,9 +621,14 @@ mainLoop:
 			class.Fields = vm.currentFrame.popStack().(*compiler.CodeBlock)
 			class.Methods = make(map[string]object.ClassMethod, methodNum)
 			for i := methodNum; i > 0; i-- {
-				method := vm.currentFrame.popStack().(*VMFunction)
-				class.Methods[method.Name] = method
-				method.Class = class
+				method := vm.currentFrame.popStack()
+				switch method := method.(type) {
+				case *VMFunction:
+					class.Methods[method.Name] = method
+					method.Class = class
+				case *BuiltinMethod:
+					class.Methods[method.Name] = method
+				}
 			}
 			vm.currentFrame.pushStack(class)
 
@@ -940,7 +960,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()
 		}
-		vm.currentFrame.pushStack(object.NewPanic("%s is not a function", fn.Type()))
+		vm.currentFrame.pushStack(object.NewPanic("%s is not a function", fn.Type(), fn))
 		vm.throw()
 	}
 }

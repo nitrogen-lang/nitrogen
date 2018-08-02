@@ -20,6 +20,7 @@ type CodeBlock struct {
 	Names        []string        // Created at compile time
 	Code         []byte
 	Native       bool
+	ClassMethod  bool
 }
 
 // Implement object.Object interface

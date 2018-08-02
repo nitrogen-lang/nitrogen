@@ -57,7 +57,7 @@ func (e *Environment) Parent() *Environment {
 }
 
 func (e *Environment) Print(indent string) {
-	if e == nil {
+	if e == nil || e.root == nil {
 		fmt.Println("{}")
 		return
 	}

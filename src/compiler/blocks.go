@@ -165,6 +165,8 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass, h
 		}
 	}
 
+	body.ClassMethod = inClass
+
 	ccb.code.addInst(opcode.LoadConst, ccb.constants.indexOf(body))
 
 	for _, p := range fn.Parameters {

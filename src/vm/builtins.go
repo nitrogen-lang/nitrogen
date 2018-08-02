@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	builtins   = map[string]*object.Builtin{}
-	modules    = map[string]*object.Module{}
-	nativeFn   = map[string]*object.Builtin{}
-	identRegex = regexp.MustCompile(`[a-zA-Z_][a-zA-Z0-9_]*`)
+	builtins      = map[string]*object.Builtin{}
+	modules       = map[string]*object.Module{}
+	nativeFn      = map[string]*object.Builtin{}
+	nativeMethods = map[string]*BuiltinMethod{}
+	identRegex    = regexp.MustCompile(`[a-zA-Z_][a-zA-Z0-9_]*`)
 )
 
 // RegisterBuiltin allows other packages to register functions for availability in user code
@@ -53,6 +54,18 @@ func RegisterNative(name string, fn object.BuiltinFunction) {
 	}
 
 	nativeFn[name] = &object.Builtin{Fn: fn}
+}
+
+func RegisterNativeMethod(name string, fn BuiltinMethodFunction) {
+	if _, defined := nativeMethods[name]; defined {
+		// Panic because this should NEVER happen when built
+		panic("VM native method " + name + " already defined")
+	}
+
+	nativeMethods[name] = &BuiltinMethod{
+		Name: name[strings.LastIndex(name, ".")+1:],
+		Fn:   fn,
+	}
 }
 
 func validBuiltinIdent(ident string) bool {
@@ -161,7 +174,8 @@ func (b *BoundMethod) Dup() object.Object      { return object.NullConst }
 type BuiltinMethodFunction func(i *VirtualMachine, self *VMInstance, env *object.Environment, args ...object.Object) object.Object
 
 type BuiltinMethod struct {
-	Fn BuiltinMethodFunction
+	Fn   BuiltinMethodFunction
+	Name string
 }
 
 func (b *BuiltinMethod) Inspect() string         { return "builtin method" }
