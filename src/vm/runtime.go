@@ -48,7 +48,7 @@ func (f *Frame) pushStack(obj object.Object) {
 	}
 
 	if f.sp == len(f.stack) {
-		panic("Stack overflow")
+		panic(fmt.Sprintf("VM stack exhausted - %s (%d)", f.code.Name, f.pc))
 	}
 	f.stack[f.sp] = obj
 	f.sp++
@@ -56,7 +56,7 @@ func (f *Frame) pushStack(obj object.Object) {
 
 func (f *Frame) popStack() object.Object {
 	if f.sp == 0 {
-		panic("Stack exhausted")
+		panic(fmt.Sprintf("VM stack exhausted - %s (%d)", f.code.Name, f.pc))
 	}
 	f.sp--
 	return f.stack[f.sp]

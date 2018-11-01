@@ -852,6 +852,10 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, this *VMInstance) {
 	switch fn := fn.(type) {
 	case *object.Builtin:
+		if vm.Settings.Debug {
+			fmt.Fprintf(vm.GetStdout(), "Calling builtin\n")
+		}
+
 		args := make([]object.Object, argc)
 		for i := uint16(0); i < argc; i++ {
 			args[i] = vm.currentFrame.popStack()
@@ -875,6 +879,10 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 			vm.throw()
 		}
 	case *BuiltinMethod:
+		if vm.Settings.Debug {
+			fmt.Fprintf(vm.GetStdout(), "Calling builtin method %s\n", fn.Name)
+		}
+
 		args := make([]object.Object, argc)
 		for i := uint16(0); i < argc; i++ {
 			args[i] = vm.currentFrame.popStack()
@@ -892,6 +900,10 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 			vm.throw()
 		}
 	case *VMFunction:
+		if vm.Settings.Debug {
+			fmt.Fprintf(vm.GetStdout(), "Calling function %s\n", fn.Name)
+		}
+
 		var env *object.Environment
 		env = object.NewEnclosedEnv(fn.Env)
 		if this != nil {
