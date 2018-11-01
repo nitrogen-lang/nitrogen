@@ -90,6 +90,7 @@ type codeBlockCompiler struct {
 	names          *stringTable
 	code           *InstSet
 	filename, name string
+	inLoop         bool
 }
 
 type constantTable struct {

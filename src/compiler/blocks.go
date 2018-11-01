@@ -22,6 +22,7 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 		code:      NewInstSet(),
 		filename:  ccb.filename,
 		name:      ccb.name,
+		inLoop:    ccb.inLoop,
 	}
 
 	for _, f := range class.Fields {
@@ -118,6 +119,7 @@ func compileFunction(ccb *codeBlockCompiler, fn *ast.FunctionLiteral, inClass, h
 			code:      NewInstSet(),
 			filename:  ccb.filename,
 			name:      ccb.name,
+			inLoop:    ccb.inLoop,
 		}
 
 		for _, p := range fn.Parameters {
@@ -282,6 +284,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		code:      NewInstSet(),
 		filename:  ccb.filename,
 		name:      ccb.name,
+		inLoop:    true,
 	}
 
 	// Compile main body of loop
@@ -343,6 +346,7 @@ func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		code:      NewInstSet(),
 		filename:  ccb.filename,
 		name:      ccb.name,
+		inLoop:    true,
 	}
 	compile(bodyCCB, loop.Body)
 
@@ -388,6 +392,7 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 		code:      NewInstSet(),
 		filename:  ccb.filename,
 		name:      ccb.name,
+		inLoop:    true,
 	}
 
 	// Compile main body of loop

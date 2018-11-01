@@ -222,9 +222,15 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileLoop(ccb, node)
 
 	case *ast.ContinueStatement:
+		if !ccb.inLoop {
+			panic("continue used in non-loop block")
+		}
 		ccb.code.addInst(opcode.Continue)
 
 	case *ast.BreakStatement:
+		if !ccb.inLoop {
+			panic("break used in non-loop block")
+		}
 		ccb.code.addInst(opcode.Break)
 
 	case *ast.TryCatchExpression:
