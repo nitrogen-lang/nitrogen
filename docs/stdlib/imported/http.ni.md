@@ -59,8 +59,9 @@ Response is a map with the following structure:
 
 ```
 {
-    "body": string
-    "headers": map
+    "body": "",
+    "headers": {},
+    "status_code": 200,
 }
 ```
 
@@ -76,6 +77,10 @@ The body of the returned request. No processing is done once received.
 sent or received. When received, the map keys will be in canonical header format.
 If multiple headers with the same are received, the values will be concatenated
 and separated by ", ".
+
+#### status_code
+
+The HTTP response code from the server.
 
 ## HTTPOptions: map
 

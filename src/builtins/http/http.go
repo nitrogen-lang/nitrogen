@@ -131,6 +131,7 @@ func buildReturnValue(resp *http.Response) object.Object {
 
 	hash.SetKey("body", object.MakeStringObj(string(body)))
 	hash.SetKey("headers", object.StringMapToHash(headers))
+	hash.SetKey("status_code", object.MakeIntObj(int64(resp.StatusCode)))
 
 	return hash
 }
