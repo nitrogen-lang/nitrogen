@@ -140,7 +140,7 @@ class lexer {
         }
     }
 
-    func isDigit(c) { (c >= "0" and c <= "9") or c == "." }
+    func isDigit(c) { (c >= "0" and c <= "9") or c == "." or c == "-" }
     func isLetter(c) { (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") }
     func beginsKeyword(c) { c == "f" or c == "t" or c == "n" }
     func isWhitespace(c) { c == " " or c == "\t" or c == "\r" or c == "\n" }
@@ -170,7 +170,7 @@ class parser {
         if ct == STRING: return this.curToken.value
         if ct == NUMBER: return this.curToken.value
 
-        throw "Invalid JSON"
+        throw "Invalid JSON, expected { [ true false null \" or a number"
     }
 
     func parseArray() {
@@ -183,7 +183,7 @@ class parser {
             this.nextToken()
 
             if this.curToken.type == RSQUARE: break
-            if this.curToken.type != COMMA: throw "Invalid JSON array"
+            if this.curToken.type != COMMA: throw "Invalid JSON array, expected a comma"
             this.nextToken()
         }
 
@@ -196,18 +196,18 @@ class parser {
 
         for {
             if this.curToken.type == RCURLY: break
-            if this.curToken.type != STRING: throw "Invalid JSON object key"
+            if this.curToken.type != STRING: throw "Invalid JSON object key, expected a string"
             const key = this.curToken.value
 
             this.nextToken()
-            if this.curToken.type != COLON: throw "Invalid JSON object value pair"
+            if this.curToken.type != COLON: throw "Invalid JSON object value pair, expected a colon"
 
             this.nextToken()
             obj[key] = this.parse()
 
             this.nextToken()
             if this.curToken.type == RCURLY: break
-            if this.curToken.type != COMMA: throw "Invalid JSON object"
+            if this.curToken.type != COMMA: throw "Invalid JSON object, expected a comma"
             this.nextToken()
         }
 
