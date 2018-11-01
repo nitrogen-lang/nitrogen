@@ -83,7 +83,8 @@ HTTPOptions is a map with the following structure:
 
 ```
 {
-    "headers": map
+    "headers": {},
+    "tls_verify": true,
 }
 ```
 
@@ -94,3 +95,9 @@ HTTPOptions is a map with the following structure:
 `headers` is a map of string keys to string values containing the HTTP headers
 sent or received. When received, the map keys will be in canonical header format.
 It is not currently possible to send multiple headers with the same name.
+
+#### tls_verify
+
+This option controls if the server TLS certificate is validated or not. The default
+value is true. If this is false, the certificate is not validated. The user should
+be aware of the security implications that come with doing so.

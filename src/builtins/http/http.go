@@ -1,6 +1,7 @@
 package string
 
 import (
+	"crypto/tls"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -8,10 +9,6 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
-)
-
-var (
-	client = &http.Client{}
 )
 
 func init() {
@@ -65,6 +62,8 @@ func do(interpreter object.Interpreter, env *object.Environment, args ...object.
 		optionsObj = dataObj
 	}
 
+	client := &http.Client{}
+
 	req, err := http.NewRequest(method, url, strings.NewReader(data))
 	if err != nil {
 		return object.NewException("error making HTTP request: %s", err.Error())
@@ -76,7 +75,7 @@ func do(interpreter object.Interpreter, env *object.Environment, args ...object.
 		if headers != nil {
 			headersMap, ok := headers.(*object.Hash)
 			if !ok {
-				return object.NewException("headers option must be map")
+				return object.NewException("headers option must be a map")
 			}
 
 			for _, pair := range headersMap.Pairs {
@@ -87,6 +86,22 @@ func do(interpreter object.Interpreter, env *object.Environment, args ...object.
 					continue
 				}
 				req.Header.Set(pair.Key.(*object.String).String(), pair.Value.(*object.String).String())
+			}
+		}
+
+		tlsVerify := optionsObj.LookupKey("tls_verify")
+		if tlsVerify != nil {
+			verifyBool, ok := tlsVerify.(*object.Boolean)
+			if !ok {
+				return object.NewException("tls_verify option must be a boolean")
+			}
+
+			if !verifyBool.Value {
+				client.Transport = &http.Transport{
+					TLSClientConfig: &tls.Config{
+						InsecureSkipVerify: true,
+					},
+				}
 			}
 		}
 	}
