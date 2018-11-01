@@ -91,4 +91,16 @@ test.run("collections map match", func(assert) {
         "key3": "value3",
     }
     assert.isTrue(col.mapMatch(map1, map2))
+
+    map1 = {
+        "key1": ["value8", "value1.1", "value1.2"],
+        "key2": "value2",
+        "key3": "value3",
+    }
+    map2 = {
+        "key1": ["value1", "value1.1", "value1.2"],
+        "key2": "value2",
+        "key5": "value3",
+    }
+    assert.isFalse(col.mapMatch(map1, map2))
 })

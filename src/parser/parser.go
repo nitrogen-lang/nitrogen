@@ -266,7 +266,12 @@ func (p *Parser) parseExpression(precedence int) ast.Node {
 		}
 
 		p.nextToken()
-		leftExp = infix(leftExp.(ast.Expression))
+		lexp, ok := leftExp.(ast.Expression)
+		if !ok {
+			p.addErrorWithPos("Failed parsing expression")
+			return nil
+		}
+		leftExp = infix(lexp)
 	}
 
 	return leftExp

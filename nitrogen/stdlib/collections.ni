@@ -71,14 +71,12 @@ func valuesEqual(v1, v2) {
     if varType(v1) != varType(v2): return false
 
     if isArray(v1) {
-        if arrayMatch(v1, v2): return true
+        return arrayMatch(v1, v2)
     } elif isMap(v1) {
-        if mapMatch(v1, v2): return true
-    } else {
-        if v1 == v2: return true
+        return mapMatch(v1, v2)
     }
 
-    false
+    return (v1 == v2)
 }
 
 func foreach(collection, fn) {

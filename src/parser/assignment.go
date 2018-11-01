@@ -320,7 +320,12 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Node {
 
 	p.nextToken()
 
-	stmt.Value = p.parseExpression(priLowest).(ast.Expression)
+	var ok bool
+	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
+	if !ok {
+		p.addErrorWithCPos(p.curToken.Pos, "Invalid assignment")
+		return nil
+	}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()

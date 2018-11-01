@@ -960,7 +960,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()
 		}
-		vm.currentFrame.pushStack(object.NewPanic("%s is not a function", fn.Type(), fn))
+		vm.currentFrame.pushStack(object.NewPanic("%s is not a function", fn.Type()))
 		vm.throw()
 	}
 }
