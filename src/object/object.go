@@ -350,8 +350,15 @@ func (h *Hash) Inspect() string {
 
 	pairs := []string{}
 	for _, pair := range h.Pairs {
-		pairs = append(pairs, fmt.Sprintf("%s: %s",
-			pair.Key.Inspect(), pair.Value.Inspect()))
+		var val string
+
+		if pair.Value.Type() == StringObj {
+			val = fmt.Sprintf(`"%s"`, pair.Value.Inspect())
+		} else {
+			val = pair.Value.Inspect()
+		}
+
+		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), val))
 	}
 
 	out.WriteByte('{')
