@@ -8,7 +8,7 @@ func isTrue(x) {
     if isFunc(x): x = x()
     if !isBool(x): throw "assertion must be a boolean to isTrue"
     if x: return
-    throw String("Assertion Failed: Expected {} to be true.").format(x)
+    throw String("Assertion Failed: Expected `{}` to be true.").format(x)
 }
 exports.isTrue = isTrue
 
@@ -16,19 +16,19 @@ func isFalse(x) {
     if isFunc(x): x = x()
     if !isBool(x): throw "assertion must be a boolean to isFalse"
     if !x: return
-    throw String("Assertion Failed: Expected {} to be true.").format(x)
+    throw String("Assertion Failed: Expected `{}` to be true.").format(x)
 }
 exports.isFalse = isFalse
 
 func isEq(a, b) {
     if a == b: return
-    throw String("Assertion Failed: Expected {} and {} to be equal.").format(a, b)
+    throw String("Assertion Failed: Expected `{}` and `{}` to be equal.").format(a, b)
 }
 exports.isEq = isEq
 
 func isNeq(a, b) {
     if a != b: return
-    throw String("Assertion Failed: Expected {} and {} to not be equal.").format(a, b)
+    throw String("Assertion Failed: Expected `{}` and `{}` to not be equal.").format(a, b)
 }
 exports.isNeq = isNeq
 
