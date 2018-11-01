@@ -928,7 +928,8 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 		}
 
 		if now {
-			vm.currentFrame.pushStack(vm.RunFrame(newFrame, true))
+			val := vm.RunFrame(newFrame, true)
+			vm.currentFrame.pushStack(val)
 		} else {
 			vm.currentFrame = newFrame
 			vm.callStack.Push(newFrame)
