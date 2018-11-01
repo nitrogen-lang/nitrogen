@@ -9,32 +9,73 @@ const exports = {
 }
 
 func getJSON(url) {
-    const resp = get(url)
+    let options = if len(arguments) >= 1 { arguments[0] } else { nil }
+    const resp = get(url, options)
     return json.decode(resp.body)
 }
 exports.getJSON = getJSON
 
 func get(url) {
-    let options
-    if len(arguments) >= 1: options = arguments[0]
+    let options = if len(arguments) >= 1 { arguments[0] } else { nil }
     return do("GET", url, "", options)
 }
 exports.get = get
 
-func post(url) {
-    let data
-    let options = {}
+func head(url) {
+    let options = if len(arguments) >= 1 { arguments[0] } else { nil }
+    return do("HEAD", url, "", options)
+}
+exports.head = head
 
-    if len(arguments) >= 1: data = arguments[0]
-    if len(arguments) >= 2: options = arguments[1]
+func del(url) {
+    let options = if len(arguments) >= 1 { arguments[0] } else { nil }
+    return do("DELETE", url, "", options)
+}
+exports.del = del
+
+func post(url) {
+    let data = if len(arguments) >= 1 { arguments[0] } else { nil }
+    let options = if len(arguments) >= 2 { arguments[1] } else { nil }
 
     if !isNull(data) and !isString(data) {
         data = json.encode(data)
-        options["Content-Type"] = "application/json"
+
+        if isNull(options): options = {}
+        options["headers"] = { "Content-Type": "application/json" }
     }
 
     return do("POST", url, data, options)
 }
 exports.post = post
+
+func put(url) {
+    let data = if len(arguments) >= 1 { arguments[0] } else { nil }
+    let options = if len(arguments) >= 2 { arguments[1] } else { nil }
+
+    if !isNull(data) and !isString(data) {
+        data = json.encode(data)
+
+        if isNull(options): options = {}
+        options["headers"] = { "Content-Type": "application/json" }
+    }
+
+    return do("PUT", url, data, options)
+}
+exports.put = put
+
+func patch(url) {
+    let data = if len(arguments) >= 1 { arguments[0] } else { nil }
+    let options = if len(arguments) >= 2 { arguments[1] } else { nil }
+
+    if !isNull(data) and !isString(data) {
+        data = json.encode(data)
+
+        if isNull(options): options = {}
+        options["headers"] = { "Content-Type": "application/json" }
+    }
+
+    return do("PATCH", url, data, options)
+}
+exports.patch = patch
 
 return exports

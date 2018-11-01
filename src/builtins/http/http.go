@@ -73,19 +73,21 @@ func do(interpreter object.Interpreter, env *object.Environment, args ...object.
 
 	if optionsObj != nil {
 		headers := optionsObj.LookupKey("headers")
-		headersMap, ok := headers.(*object.Hash)
-		if !ok {
-			return object.NewException("headers option must be map")
-		}
+		if headers != nil {
+			headersMap, ok := headers.(*object.Hash)
+			if !ok {
+				return object.NewException("headers option must be map")
+			}
 
-		for _, pair := range headersMap.Pairs {
-			if pair.Key.Type() != object.StringObj {
-				continue
+			for _, pair := range headersMap.Pairs {
+				if pair.Key.Type() != object.StringObj {
+					continue
+				}
+				if pair.Value.Type() != object.StringObj {
+					continue
+				}
+				req.Header.Set(pair.Key.(*object.String).String(), pair.Value.(*object.String).String())
 			}
-			if pair.Value.Type() != object.StringObj {
-				continue
-			}
-			req.Header.Set(pair.Key.(*object.String).String(), pair.Value.(*object.String).String())
 		}
 	}
 
@@ -105,7 +107,7 @@ func buildReturnValue(resp *http.Response) object.Object {
 	headers := make(map[string]string, len(resp.Header))
 
 	for name, values := range resp.Header {
-		headers[name] = values[0]
+		headers[name] = strings.Join(values, ", ")
 	}
 
 	hash := &object.Hash{
