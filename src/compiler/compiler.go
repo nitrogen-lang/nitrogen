@@ -32,7 +32,7 @@ func compileFrame(node ast.Node, name, filename string) *CodeBlock {
 		Name:         name,
 		Filename:     filename,
 		LocalCount:   len(ccb.locals.table),
-		Code:         code.Assemble(),
+		Code:         code.Assemble(ccb),
 		Constants:    ccb.constants.table,
 		Names:        ccb.names.table,
 		Locals:       ccb.locals.table,

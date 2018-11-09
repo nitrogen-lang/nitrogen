@@ -117,7 +117,7 @@ func (i *InstSet) merge(j *InstSet) {
 	i.Tail = j.Tail
 }
 
-type Optimization func(*InstSet)
+type Optimization func(*InstSet, *codeBlockCompiler)
 
 var optimizations = []Optimization{}
 
@@ -174,9 +174,9 @@ func (i *InstSet) Link() {
 	}
 }
 
-func (i *InstSet) Assemble() []byte {
+func (i *InstSet) Assemble(ccb *codeBlockCompiler) []byte {
 	for _, o := range optimizations {
-		o(i)
+		o(i, ccb)
 	}
 
 	i.Link()
