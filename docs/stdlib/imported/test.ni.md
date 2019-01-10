@@ -2,7 +2,7 @@
 
 A simple testing framework.
 
-To use: `import 'stdlib/test'`
+To use: `import 'std/test'`
 
 To print information on each test, set the environment variable `VERBOSE_TEST`
 to anything when executing the test script.

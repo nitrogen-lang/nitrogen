@@ -1,4 +1,4 @@
-import "stdlib/string"
+import "std/string"
 
 func String(s) { new string.String(s) }
 

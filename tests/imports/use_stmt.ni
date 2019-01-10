@@ -1,5 +1,5 @@
-import "stdlib/test"
-import "stdlib/string"
+import "std/test"
+import "std/string"
 
 use string.String
 use string.String as str

@@ -2,7 +2,7 @@
 
 The os module returns a Module object. All documented functions are part of this returned object.
 
-To use: `import 'stdlib/os'`
+To use: `import 'std/os'`
 
 ## system(cmd: string[, args: array]): array|error|nil
 

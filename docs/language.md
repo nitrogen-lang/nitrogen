@@ -4,7 +4,7 @@ This is not a formal specification of the Nitrogen language. This is simply a gu
 
 ## Packages
 
-For information on importing modules and Nitrogen packages, please see the [import docs](stdlib/global/imports.md).
+For information on importing modules and Nitrogen packages, please see the [import docs](std/global/imports.md).
 
 ## Source Files
 
@@ -417,7 +417,7 @@ for (i = 0; i < len(keys); i + 1) {
 
 ### Looping with collections.foreach()
 
-The [collections package](stdlib/imported/collections.ni.md) has a `foreach` method which
+The [collections package](std/imported/collections.ni.md) has a `foreach` method which
 loops over an array, map, or string without having to use a loop. The functions take a user
 function that receives the index and value of each element.
 

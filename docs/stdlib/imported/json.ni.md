@@ -2,7 +2,7 @@
 
 Functions for encoding and decoding JSON.
 
-To use: `import 'stdlib/json'`
+To use: `import 'std/json'`
 
 ## encode(obj: T): string
 

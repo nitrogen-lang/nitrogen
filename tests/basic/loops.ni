@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 test.run("Simple loop", func(assert) {
     let outer = 0

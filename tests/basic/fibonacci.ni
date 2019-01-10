@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 func fib(x) {
     if x == 0 or x == 1: return x

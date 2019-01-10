@@ -1,8 +1,8 @@
-import "stdlib/collections" as col
-import "stdlib/encoding/csv"
-import "stdlib/file"
-import "stdlib/filepath"
-import "stdlib/test"
+import "std/collections" as col
+import "std/encoding/csv"
+import "std/file"
+import "std/filepath"
+import "std/test"
 
 const testdataDir = _ENV['TESTDATA_DIR']
 if isNil(testdataDir) {

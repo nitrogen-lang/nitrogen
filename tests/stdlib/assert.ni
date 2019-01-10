@@ -1,4 +1,4 @@
-import "stdlib/assert"
+import "std/assert"
 
 // This script doesn't use the "test" module since assert is used by test and that's what
 // we're testing here. We're testing the test harness.

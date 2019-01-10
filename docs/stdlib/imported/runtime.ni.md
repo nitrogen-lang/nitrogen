@@ -2,7 +2,7 @@
 
 Runtime information and utilities.
 
-To use: `import 'stdlib/runtime'`
+To use: `import 'std/runtime'`
 
 ## osName: string
 

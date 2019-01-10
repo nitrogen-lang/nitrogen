@@ -2,7 +2,7 @@
 
 Manage the output buffer.
 
-To use: `import 'stdlib/opbuf'`
+To use: `import 'std/opbuf'`
 
 ## start(): nil
 

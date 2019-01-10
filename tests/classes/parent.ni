@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 let grandparentInitRan = false
 

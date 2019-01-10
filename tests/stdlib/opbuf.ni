@@ -1,5 +1,5 @@
-import "stdlib/test"
-import "stdlib/opbuf"
+import "std/test"
+import "std/opbuf"
 
 test.run("Stop output buffer", func(assert) {
     opbuf.start()

@@ -8,7 +8,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var moduleName = "stdlib/string"
+var moduleName = "std/string"
 
 func init() {
 	vm.RegisterModule(moduleName, &object.Module{

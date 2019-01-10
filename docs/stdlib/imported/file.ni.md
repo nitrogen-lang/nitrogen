@@ -2,7 +2,7 @@
 
 The files module exposes functions to open, close, and manipulate files and directories.
 
-To use: `import 'stdlib/file'`
+To use: `import 'std/file'`
 
 ## fileResourceID: string
 

@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 test.run("Exceptions", func(assert) {
     let fastVar = 42

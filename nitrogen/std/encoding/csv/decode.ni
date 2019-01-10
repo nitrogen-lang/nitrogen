@@ -1,4 +1,4 @@
-import "stdlib/file"
+import "std/file"
 
 const DEFAULT_DELIM = ','
 const DEFAULT_QUOTE = '"'

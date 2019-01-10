@@ -2,8 +2,8 @@ if !modulesSupported() {
     return
 }
 
-import 'stdlib/string' as str
-import "stdlib/test"
+import 'std/string' as str
+import "std/test"
 
 test.run("String module contains", func(assert) {
     const testStr = "one,two,three"

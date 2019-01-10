@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 func fac(in) {
     if in == 0: return 1

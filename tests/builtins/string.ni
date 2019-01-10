@@ -1,5 +1,5 @@
-import 'stdlib/string'
-import "stdlib/test"
+import 'std/string'
+import "std/test"
 
 func String(s) {
     return new string.String(s)

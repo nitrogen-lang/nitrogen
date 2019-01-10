@@ -17,7 +17,7 @@ flag to specify import search directories (the working directory is added by def
 specific modules. Scripts still need to use the `import` statement to retrieve any module object created by the module.
 Pre-loading modules can be used to add extra global objects or provide some other extra functionality before any script is executed.
 
-Importing modules uses the same mechanism as importing other files. Please see the [import docs](../stdlib/global/imports.md).
+Importing modules uses the same mechanism as importing other files. Please see the [import docs](../std/global/imports.md).
 
 Example:
 

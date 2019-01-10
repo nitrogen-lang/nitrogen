@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 test.run("Compound equality", func(assert) {
     const a = 5

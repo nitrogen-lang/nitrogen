@@ -1,7 +1,7 @@
-import "stdlib/http"
-import "stdlib/encoding/json"
-import "stdlib/test"
-import "stdlib/collections"
+import "std/http"
+import "std/encoding/json"
+import "std/test"
+import "std/collections"
 
 use collections.contains
 

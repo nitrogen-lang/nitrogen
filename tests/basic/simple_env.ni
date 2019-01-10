@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 test.run("Basic environment", func(assert) {
     let string = "Hello, world!"

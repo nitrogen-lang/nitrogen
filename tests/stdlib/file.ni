@@ -1,6 +1,6 @@
-import "stdlib/file"
-import "stdlib/filepath"
-import "stdlib/test"
+import "std/file"
+import "std/filepath"
+import "std/test"
 
 const testdataDir = _ENV['TESTDATA_DIR']
 if isNil(testdataDir) {

@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 test.run("delete variable", func(assert) {
     let hello = "world"

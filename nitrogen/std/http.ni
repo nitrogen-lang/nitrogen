@@ -1,4 +1,4 @@
-import "stdlib/encoding/json"
+import "std/encoding/json"
 
 func native do(method, url)
 func native canonicalHeaderKey(header)

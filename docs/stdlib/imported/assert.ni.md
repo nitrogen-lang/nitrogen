@@ -2,7 +2,7 @@
 
 Utilities for asserting things during testing.
 
-To use: `import 'stdlib/assert'`
+To use: `import 'std/assert'`
 
 ## isTrue(x: bool|func): nil
 

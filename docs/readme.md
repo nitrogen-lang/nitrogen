@@ -4,8 +4,8 @@ Here you will find documentation for the language syntax, as well as the standar
 
 - [Language](language.md)
 - [Elemental VM](vm.md)
-- [Standard Library](stdlib)
-- [Including Script Files](stdlib/global/imports.md)
+- [Standard Library](std)
+- [Including Script Files](std/global/imports.md)
 - [Binary Modules](modules)
 - [SCGI Server](scgi-server.md)
 - [Globals](globals.md)

@@ -9,7 +9,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-const moduleName = "stdlib/filepath"
+const moduleName = "std/filepath"
 
 func init() {
 	vm.RegisterModule(moduleName, &object.Module{

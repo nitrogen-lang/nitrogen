@@ -96,11 +96,11 @@ func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Enviro
 	}
 }
 
-func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) object.Object {
+func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.Object) {
 	defer func() {
 		if r := recover(); r != nil {
-			if _, ok := r.(object.Object); ok {
-				fmt.Fprintln(vm.GetStderr(), r)
+			if retObj, ok := r.(object.Object); ok {
+				fmt.Fprintln(vm.GetStderr(), retObj)
 				fmt.Fprintln(vm.GetStderr(), "Stack Trace:")
 				frame := vm.currentFrame
 				for frame != nil {
@@ -108,6 +108,7 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) object.Object
 					frame = frame.lastFrame
 				}
 				vm.unwind = true
+				ret = retObj
 			} else {
 				fmt.Fprintln(vm.GetStderr(), r)
 				fmt.Fprintln(vm.GetStderr(), string(debug.Stack()))

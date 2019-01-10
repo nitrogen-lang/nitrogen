@@ -2,7 +2,7 @@
 
 Functions for making HTTP requests.
 
-To use: `import 'stdlib/http'`
+To use: `import 'std/http'`
 
 ## get(url: string[, options: HTTPOptions]): Response
 

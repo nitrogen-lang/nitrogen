@@ -1,4 +1,4 @@
-import "stdlib/test"
+import "std/test"
 
 test.run("Import directory", func(assert) {
     import '../../testdata/math2' as math

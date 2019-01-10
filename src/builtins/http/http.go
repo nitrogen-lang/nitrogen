@@ -12,8 +12,8 @@ import (
 )
 
 func init() {
-	vm.RegisterNative("stdlib.http.do", do)
-	vm.RegisterNative("stdlib.http.canonicalHeaderKey", canonicalHeaderKey)
+	vm.RegisterNative("std.http.do", do)
+	vm.RegisterNative("std.http.canonicalHeaderKey", canonicalHeaderKey)
 }
 
 func do(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

@@ -2,7 +2,7 @@
 
 Read and write CSV (or similarly) encoded data.
 
-To use: `import 'stdlib/encoding/csv'`
+To use: `import 'std/encoding/csv'`
 
 ## class fileReader(f: resource)
 
@@ -26,8 +26,8 @@ Sets the field quote character. Defaults to double quote `"`.
 ## Example
 
 ```
-import "stdlib/encoding/csv"
-import "stdlib/file"
+import "std/encoding/csv"
+import "std/file"
 
 const csvFile = file.open(data.csv, 'r')
 const reader = new csv.fileReader(csvFile)

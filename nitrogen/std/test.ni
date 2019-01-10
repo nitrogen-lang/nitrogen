@@ -1,5 +1,5 @@
-import "stdlib/string"
-import "stdlib/assert"
+import "std/string"
+import "std/assert"
 
 const verbose = isString(_ENV['VERBOSE_TEST'])
 

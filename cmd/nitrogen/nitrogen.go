@@ -191,7 +191,6 @@ func main() {
 
 	if result != nil && result != object.NullConst {
 		if e, ok := result.(*object.Exception); ok {
-			os.Stdout.WriteString("Uncaught Exception: ")
 			os.Stdout.WriteString(e.Message)
 			os.Stdout.Write([]byte{'\n'})
 			os.Exit(1)

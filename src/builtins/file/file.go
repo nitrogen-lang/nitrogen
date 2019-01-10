@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	moduleName     = "stdlib/file"
-	fileResourceID = "stdlib.file"
+	moduleName     = "std/file"
+	fileResourceID = "std.file"
 )
 
 func init() {

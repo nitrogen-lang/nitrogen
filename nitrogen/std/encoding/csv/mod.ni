@@ -1,5 +1,5 @@
-// import 'stdlib/encoding/csv/encode'
-import 'stdlib/encoding/csv/decode'
+// import 'std/encoding/csv/encode'
+import 'std/encoding/csv/decode'
 
 return {
     // "encode": encode.encode,

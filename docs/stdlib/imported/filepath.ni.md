@@ -2,7 +2,7 @@
 
 The filepath module returns a Module object. All documented functions are part of this returned object.
 
-To use: `import 'stdlib/filepath'`
+To use: `import 'std/filepath'`
 
 ## cwd(): string
 

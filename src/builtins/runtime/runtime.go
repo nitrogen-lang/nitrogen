@@ -9,7 +9,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var moduleName = "stdlib/runtime"
+var moduleName = "std/runtime"
 
 func init() {
 	vm.RegisterModule(moduleName, &object.Module{
