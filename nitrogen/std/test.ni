@@ -3,19 +3,18 @@ import "std/assert"
 
 const verbose = isString(_ENV['VERBOSE_TEST'])
 
-func String(s) { new string.String(s) }
-
 const exports = {
-    "fatal": true
+    "fatal": true,
+    "assertLib": assert,
 }
 
 func run(desc, fn) {
     if verbose: println("Test: ", desc)
 
     try {
-        fn(assert)
+        fn(exports.assertLib)
     } catch e {
-        printerrln(String("Test '{}' failed: {}").format(desc, e))
+        printerrln(string.format("Test '{}' failed: {}", desc, e))
         if exports.fatal: exit(1)
     }
 }
