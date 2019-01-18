@@ -105,7 +105,7 @@ func (i *Integer) Type() ObjectType { return IntergerObj }
 func (i *Integer) Dup() Object      { return &Integer{Value: i.Value} }
 
 func MakeIntObj(v int64) *Integer {
-	if v <= maxStaticInt {
+	if v >= 0 && v <= maxStaticInt {
 		return staticInts[v]
 	}
 	return &Integer{Value: v}
