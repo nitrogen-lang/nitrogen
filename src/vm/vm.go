@@ -260,7 +260,7 @@ mainLoop:
 
 		case opcode.UnaryNeg:
 			l := vm.currentFrame.popStack().(*object.Integer)
-			vm.currentFrame.pushStack(&object.Integer{Value: -l.Value})
+			vm.currentFrame.pushStack(object.MakeIntObj(-l.Value))
 
 		case opcode.UnaryNot:
 			l := vm.currentFrame.popStack().(*object.Boolean)

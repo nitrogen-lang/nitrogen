@@ -46,7 +46,7 @@ func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 	case *object.Integer:
 		return arg
 	case *object.Float:
-		return &object.Integer{Value: int64(arg.Value)}
+		return object.MakeIntObj(int64(arg.Value))
 	}
 
 	return object.NewException("Argument to `toInt` must be FLOAT or INT, got %s", args[0].Type())
@@ -157,7 +157,7 @@ func parseIntBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		return object.NullConst
 	}
 
-	return &object.Integer{Value: i}
+	return object.MakeIntObj(i)
 }
 
 func parseFloatBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

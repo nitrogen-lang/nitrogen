@@ -59,7 +59,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 
 	// Literals
 	case *ast.IntegerLiteral:
-		i := &object.Integer{Value: node.Value}
+		i := object.MakeIntObj(node.Value)
 		ccb.code.addInst(opcode.LoadConst, ccb.constants.indexOf(i))
 
 	case *ast.NullLiteral:

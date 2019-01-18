@@ -32,13 +32,13 @@ func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ..
 
 	switch arg := args[0].(type) {
 	case *object.String:
-		return &object.Integer{Value: int64(len(arg.Value))}
+		return object.MakeIntObj(int64(len(arg.Value)))
 	case *object.Array:
-		return &object.Integer{Value: int64(len(arg.Elements))}
+		return object.MakeIntObj(int64(len(arg.Elements)))
 	case *object.Hash:
-		return &object.Integer{Value: int64(len(arg.Pairs))}
+		return object.MakeIntObj(int64(len(arg.Pairs)))
 	case *object.Null:
-		return &object.Integer{Value: 0}
+		return object.MakeIntObj(0)
 	}
 
 	return object.NewException("len(): Unsupported type %s", args[0].Type())

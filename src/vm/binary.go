@@ -29,33 +29,33 @@ func (vm *VirtualMachine) evalIntegerBinaryExpression(op string, left, right obj
 
 	switch op {
 	case "+":
-		return &object.Integer{Value: leftVal + rightVal}
+		return object.MakeIntObj(leftVal + rightVal)
 	case "-":
-		return &object.Integer{Value: leftVal - rightVal}
+		return object.MakeIntObj(leftVal - rightVal)
 	case "*":
-		return &object.Integer{Value: leftVal * rightVal}
+		return object.MakeIntObj(leftVal * rightVal)
 	case "/":
-		return &object.Integer{Value: leftVal / rightVal}
+		return object.MakeIntObj(leftVal / rightVal)
 	case "%":
-		return &object.Integer{Value: leftVal % rightVal}
+		return object.MakeIntObj(leftVal % rightVal)
 	case "<<":
 		if rightVal < 0 {
 			return object.NewException("Shift value must be non-negative")
 		}
-		return &object.Integer{Value: leftVal << uint64(rightVal)}
+		return object.MakeIntObj(leftVal << uint64(rightVal))
 	case ">>":
 		if rightVal < 0 {
 			return object.NewException("Shift value must be non-negative")
 		}
-		return &object.Integer{Value: leftVal >> uint64(rightVal)}
+		return object.MakeIntObj(leftVal >> uint64(rightVal))
 	case "&":
-		return &object.Integer{Value: leftVal & rightVal}
+		return object.MakeIntObj(leftVal & rightVal)
 	case "&^":
-		return &object.Integer{Value: leftVal &^ rightVal}
+		return object.MakeIntObj(leftVal &^ rightVal)
 	case "|":
-		return &object.Integer{Value: leftVal | rightVal}
+		return object.MakeIntObj(leftVal | rightVal)
 	case "^":
-		return &object.Integer{Value: leftVal ^ rightVal}
+		return object.MakeIntObj(leftVal ^ rightVal)
 	}
 
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())

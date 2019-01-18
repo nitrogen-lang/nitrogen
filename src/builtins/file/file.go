@@ -125,7 +125,7 @@ func writeFile(interpreter object.Interpreter, env *object.Environment, args ...
 		fmt.Fprintln(interpreter.GetStderr(), err)
 	}
 
-	return &object.Integer{Value: int64(written)}
+	return object.MakeIntObj(int64(written))
 }
 
 func readFullFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

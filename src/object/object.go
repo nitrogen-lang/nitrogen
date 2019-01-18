@@ -62,12 +62,21 @@ var objectTypeNames = map[ObjectType]string{
 	BoundMethodObj:   "BOUND METHOD",
 }
 
+const maxStaticInt = 255
+
 // These are all constants in the language that can be represented with a single instance
 var (
 	NullConst  = &Null{}
 	TrueConst  = &Boolean{Value: true}
 	FalseConst = &Boolean{Value: false}
+	staticInts [maxStaticInt + 1]*Integer
 )
+
+func init() {
+	for i := 0; i <= maxStaticInt; i++ {
+		staticInts[i] = &Integer{Value: int64(i)}
+	}
+}
 
 type Interpreter interface {
 	Eval(node ast.Node, env *Environment) Object
@@ -96,6 +105,9 @@ func (i *Integer) Type() ObjectType { return IntergerObj }
 func (i *Integer) Dup() Object      { return &Integer{Value: i.Value} }
 
 func MakeIntObj(v int64) *Integer {
+	if v <= maxStaticInt {
+		return staticInts[v]
+	}
 	return &Integer{Value: v}
 }
 
