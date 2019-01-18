@@ -14,5 +14,6 @@ import (
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/os"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/runtime"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/string"
+	_ "github.com/nitrogen-lang/nitrogen/src/builtins/time"
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins/typing"
 )
