@@ -3,13 +3,13 @@ import "std/assert"
 // This script doesn't use the "test" module since assert is used by test and that's what
 // we're testing here. We're testing the test harness.
 
-func shouldThrow(name, fn) {
+const shouldThrow = func(name, fn) {
     try { fn() } catch { return }
 
     throw "Assertion Failed: Expected " + name + " to throw."
 }
 
-func shouldNotThrow(name, fn) {
+const shouldNotThrow = func(name, fn) {
     try {
         fn()
     } catch {

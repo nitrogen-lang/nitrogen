@@ -1,4 +1,4 @@
-func encode(buf, obj) {
+const encode = func(buf, obj) {
     if isString(obj): return buf + '"' + obj + '"'
 
     if isInt(obj) or isFloat(obj) or isBool(obj): return buf + toString(obj)
@@ -12,7 +12,7 @@ func encode(buf, obj) {
     throw "Unsupported JSON object type: " + varType(obj)
 }
 
-func encodeArray(buf, arr) {
+const encodeArray = func(buf, arr) {
     const ln = len(arr)
 
     buf += '['
@@ -25,7 +25,7 @@ func encodeArray(buf, arr) {
     buf + ']'
 }
 
-func encodeMap(buf, obj) {
+const encodeMap = func(buf, obj) {
     const keys = hashKeys(obj)
     const ln = len(keys)
 

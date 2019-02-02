@@ -247,21 +247,11 @@ Functions allow a programmer to break apart a program into separate chunks that 
 in Nitrogen. They can be passed around just like any other variable.
 
 ```
-// Functions can be defined using two syntaxes
+// Functions are defined using the func keyword
 
 let myFunc = func(thing) {
     println(thing)
 }
-
-// or
-
-func myFunc(thing) {
-    println(thing)
-}
-
-// Attempting to combine the two will result in an error
-
-let myFunc = func myFunc(thing) { println(thing) } // This is bad
 
 // Functions are called like so
 
@@ -543,16 +533,16 @@ class name ^ parent {
     let field1
     const field2 = "constant"
 
-    func init(x) { // Initializer function
+    const init = func(x) { // Initializer function
         this.x = x // The instance can be referenced with "this"
     }
 
     // Class methods
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 
-    func setX(x) {
+    const setX = func(x) {
         this.x = x
     }
 }
@@ -570,15 +560,15 @@ class, the method can be called directly without consulting the `parent` variabl
 class parentPrinter {
     let z
 
-    func init() {
+    const init = func() {
         z = "parent thing"
     }
 
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'Parent: ' + z + ' Msg: ' + msg
     }
 
-    func parentOnly() {
+    const parentOnly = func() {
         return "I'm the parent"
     }
 }
@@ -587,17 +577,17 @@ class printer ^ parentPrinter {
     let x
     const t = "Thing"
 
-    func init(x) {
+    const init = func(x) {
         parent()
         this.x = x
     }
 
     // Overridden function
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'ID: ' + toString(x) + ' Msg: ' + msg
     }
 
-    func doStuff2(msg) {
+    const doStuff2 = func(msg) {
         return parent.doStuff(msg)
     }
 }
@@ -620,16 +610,16 @@ class name ^ parent {
     let field1
     const field2 = "constant"
 
-    func init(x) { // Initializer function
+    const init = func(x) { // Initializer function
         this.x = x // The instance can be referenced with "this"s
     }
 
     // Class methods
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'ID: ' + toString(x) + ' Msg: ' + msg
     }
 
-    func setX(x) {
+    const setX = func(x) {
         this.x = x
     }
 }

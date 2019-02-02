@@ -1,7 +1,7 @@
 import 'std/string'
 import "std/test"
 
-func String(s) {
+const String = func(s) {
     return new string.String(s)
 }
 

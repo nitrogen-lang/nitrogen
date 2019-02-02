@@ -1,39 +1,39 @@
 import "std/encoding/json"
 
-func native do(method, url)
-func native canonicalHeaderKey(header)
+const do = func native (method, url)
+const canonicalHeaderKey = func native (header)
 
 const exports = {
     "req": do,
     "canonicalHeaderKey": canonicalHeaderKey,
 }
 
-func getJSON(url) {
+const getJSON = func(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
     const resp = get(url, options)
     return json.decode(resp.body)
 }
 exports.getJSON = getJSON
 
-func get(url) {
+const get = func(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
     return do("GET", url, "", options)
 }
 exports.get = get
 
-func head(url) {
+const head = func(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
     return do("HEAD", url, "", options)
 }
 exports.head = head
 
-func del(url) {
+const del = func(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
     return do("DELETE", url, "", options)
 }
 exports.del = del
 
-func post(url) {
+const post = func(url) {
     let data = if len(arguments) >= 1 { arguments[0] } else { nil }
     let options = if len(arguments) >= 2 { arguments[1] } else { nil }
 
@@ -48,7 +48,7 @@ func post(url) {
 }
 exports.post = post
 
-func put(url) {
+const put = func(url) {
     let data = if len(arguments) >= 1 { arguments[0] } else { nil }
     let options = if len(arguments) >= 2 { arguments[1] } else { nil }
 
@@ -63,7 +63,7 @@ func put(url) {
 }
 exports.put = put
 
-func patch(url) {
+const patch = func(url) {
     let data = if len(arguments) >= 1 { arguments[0] } else { nil }
     let options = if len(arguments) >= 2 { arguments[1] } else { nil }
 
