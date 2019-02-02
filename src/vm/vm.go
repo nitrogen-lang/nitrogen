@@ -45,6 +45,7 @@ type VirtualMachine struct {
 	returnErr    error
 	Settings     *Settings
 	globalEnv    *object.Environment
+	instanceVars map[string]interface{}
 
 	unwind bool
 }
@@ -58,8 +59,9 @@ func NewVM(settings *Settings) *VirtualMachine {
 		}
 	}
 	return &VirtualMachine{
-		callStack: newFrameStack(),
-		Settings:  settings,
+		callStack:    newFrameStack(),
+		Settings:     settings,
+		instanceVars: make(map[string]interface{}),
 	}
 }
 
@@ -74,6 +76,28 @@ func (vm *VirtualMachine) GetCurrentScriptPath() string { return vm.currentFrame
 func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.Settings.Stdout }
 func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.Settings.Stderr }
 func (vm *VirtualMachine) GetStdin() io.Reader          { return vm.Settings.Stdin }
+
+func (vm *VirtualMachine) GetInstanceVar(key string) interface{} {
+	return vm.instanceVars[key]
+}
+
+func (vm *VirtualMachine) GetOkInstanceVar(key string) (interface{}, bool) {
+	val, ok := vm.instanceVars[key]
+	return val, ok
+}
+
+func (vm *VirtualMachine) SetInstanceVar(key string, val interface{}) {
+	vm.instanceVars[key] = val
+}
+
+func (vm *VirtualMachine) HasInstanceVar(key string) bool {
+	_, ok := vm.instanceVars[key]
+	return ok
+}
+
+func (vm *VirtualMachine) RemoveInstanceVar(key string) {
+	delete(vm.instanceVars, key)
+}
 
 func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment) (object.Object, error) {
 	if env == nil {

@@ -8,9 +8,9 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var (
-	moduleName = "std/opbuf"
-	oldOut     io.Writer
+const (
+	moduleName      = "std/opbuf"
+	instanceVarName = "opbuf-oldout"
 )
 
 func init() {
@@ -30,48 +30,52 @@ func init() {
 }
 
 func start(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if oldOut != nil {
+	theVM := interpreter.(*vm.VirtualMachine)
+
+	if theVM.HasInstanceVar(instanceVarName) {
 		return object.NewException("Output buffering is already started")
 	}
 
-	theVM, _ := interpreter.(*vm.VirtualMachine)
-	oldOut = theVM.Settings.Stdout
+	theVM.SetInstanceVar(instanceVarName, theVM.Settings.Stdout)
 	theVM.Settings.Stdout = &bytes.Buffer{}
 
 	return nil
 }
 
 func stopAndGet(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if oldOut == nil {
+	theVM := interpreter.(*vm.VirtualMachine)
+
+	if !theVM.HasInstanceVar(instanceVarName) {
 		return object.NewException("Output buffering is not started")
 	}
 
-	theVM := interpreter.(*vm.VirtualMachine)
 	buf := theVM.Settings.Stdout.(*bytes.Buffer)
-	theVM.Settings.Stdout = oldOut
-	oldOut = nil
+	theVM.Settings.Stdout = theVM.GetInstanceVar(instanceVarName).(io.Writer)
+	theVM.RemoveInstanceVar(instanceVarName)
 
 	return object.MakeStringObj(buf.String())
 }
 
 func stop(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if oldOut == nil {
+	theVM := interpreter.(*vm.VirtualMachine)
+
+	if !theVM.HasInstanceVar(instanceVarName) {
 		return object.NewException("Output buffering is not started")
 	}
 
-	theVM := interpreter.(*vm.VirtualMachine)
-	theVM.Settings.Stdout = oldOut
-	oldOut = nil
+	theVM.Settings.Stdout = theVM.GetInstanceVar(instanceVarName).(io.Writer)
+	theVM.RemoveInstanceVar(instanceVarName)
 
 	return nil
 }
 
 func clear(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if oldOut == nil {
+	theVM := interpreter.(*vm.VirtualMachine)
+
+	if !theVM.HasInstanceVar(instanceVarName) {
 		return object.NewException("Output buffering is not started")
 	}
 
-	theVM := interpreter.(*vm.VirtualMachine)
 	buf := theVM.Settings.Stdout.(*bytes.Buffer)
 	buf.Reset()
 
@@ -79,12 +83,14 @@ func clear(interpreter object.Interpreter, env *object.Environment, args ...obje
 }
 
 func flush(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if oldOut == nil {
+	theVM := interpreter.(*vm.VirtualMachine)
+
+	if !theVM.HasInstanceVar(instanceVarName) {
 		return object.NewException("Output buffering is not started")
 	}
 
-	theVM := interpreter.(*vm.VirtualMachine)
 	buf := theVM.Settings.Stdout.(*bytes.Buffer)
+	oldOut := theVM.GetInstanceVar(instanceVarName).(io.Writer)
 	_, err := io.Copy(oldOut, buf)
 	if err != nil {
 		return object.NewException(err.Error())
@@ -94,16 +100,18 @@ func flush(interpreter object.Interpreter, env *object.Environment, args ...obje
 }
 
 func get(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if oldOut == nil {
+	theVM := interpreter.(*vm.VirtualMachine)
+
+	if !theVM.HasInstanceVar(instanceVarName) {
 		return object.NewException("Output buffering is not started")
 	}
 
-	theVM := interpreter.(*vm.VirtualMachine)
 	buf := theVM.Settings.Stdout.(*bytes.Buffer)
 
 	return object.MakeStringObj(buf.String())
 }
 
 func isStarted(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	return object.NativeBoolToBooleanObj(oldOut != nil)
+	theVM := interpreter.(*vm.VirtualMachine)
+	return object.NativeBoolToBooleanObj(theVM.HasInstanceVar(instanceVarName))
 }
