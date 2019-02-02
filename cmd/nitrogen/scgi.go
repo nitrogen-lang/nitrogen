@@ -186,7 +186,10 @@ func (w *worker) run(conn net.Conn) {
 	vmsettings := vm.NewSettings()
 	vmsettings.Stdout = buf
 
-	result, _ := vm.NewVM(vmsettings).Execute(code, env)
+	machine := vm.NewVM(vmsettings)
+	machine.SetGlobalEnv(env)
+
+	result, _ := machine.Execute(code, nil)
 
 	buf.Flush()
 

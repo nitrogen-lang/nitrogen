@@ -149,12 +149,14 @@ func main() {
 	if filepath.Ext(sourceFile) == ".nib" {
 		code, _, err = marshal.ReadFile(sourceFile)
 		if err != nil {
+			fmt.Print("There were errors reading compiled program:\n\n")
 			fmt.Println(err.Error())
 			return
 		}
 	} else {
 		program, err = moduleutils.ASTCache.GetTree(sourceFile)
 		if err != nil {
+			fmt.Print("There were errors compiling the program:\n\n")
 			fmt.Println(err.Error())
 			os.Exit(1)
 			return
@@ -221,8 +223,9 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	vmsettings := vm.NewSettings()
 	vmsettings.Debug = fullDebug
 	machine := vm.NewVM(vmsettings)
+	machine.SetGlobalEnv(env)
 
-	ret, err := machine.Execute(code, env)
+	ret, err := machine.Execute(code, nil)
 	if err != nil {
 		if ex, ok := err.(vm.ErrExitCode); ok {
 			os.Exit(ex.Code)

@@ -11,17 +11,18 @@ separate parts of a larger application into manageable pieces.
 `import` will do a couple different things depending on whether the imported file is a Nitrogen script,
 compiled Nitrogen script, or a [shared dynamically linked plugin](../../modules).
 
-In the case of a script, compiled or not, an import statement will execute the imported script as
-if it was part of the current environment. The included script is executed within its own block scope.
-This means, any functions or variables created in the script are not available to the script that
-included the file. However, the included script has full access to any variable in the current scope.
-An included script can return a variable from the global scope which will be returned by
-the include call itself. This allows scripts to export functions or values to the calling script.
+An import statement does the following: locate the requested module and execute it,
+save any return value from the imported module as a constant variable in the current
+scope named `var` if given or `path` without any file extension.
+
+Imported modules have no access to the scope of the module importing it. Likewise, the importing
+module only has access to the variable returned by the imported module. This creates a clean
+interface between modules.
 
 ## use module.attribute[ as var]
 
-The use statement is a convience statement to assign an attribute to a variable. The same can be achieved
-use `let` or `const`, but `use` conveys better meaning as to the intent. `use` makes it so the full module
+The use statement is a convenience statement to assign an attribute to a variable. The same can be achieved
+with `let` or `const`, but `use` conveys better meaning as to the intent. `use` makes it so the full module
 name doesn't need to be used when accessing a module's properties.
 
 ### Example
@@ -60,12 +61,11 @@ path needs to be added at execution time.
 Each path is tried with the following extensions in order: ["", ".nib", ".ni", ".so"]. The first simply meaning
 the path is checked by itself in case the path includes the extension. Leaving off the extension allows the interpreter
 to include a file with the same basename. For example, a compiled `.nib` file can be loaded instead of a `.ni` thereby
-removing the need to compile the code before execution. Note, the interpreter does not yet check source mod time or hashes.
-This means, if a source file is changed, the corresponding `.nib` file must be compiled manually. The interpreter
-won't attempt to create an up-to-date version. If the file is not compiled, the older `.nib` file will continue to be
-loaded instead of the `.ni` source file. This is being worked on.
+removing the need to compile the code before execution. If a `.nib` file is loaded, the corresponding source `.ni`
+file is checked for modification time. If the source file is newer than the time recorded in the nib, the file
+will be recompiled and the new version will be saved for later loads.
 
-Directories can also be imported similar to Javascript. The interpreter looks for a file named `mod.ni` in the directory
+Directories can also be imported. The interpreter will look for a file named `mod.ni` in the directory
 and if found loads that. The `mod.ni` file is responsible for exporting everything the modules needs for its public API.
 
 ## Examples
@@ -101,7 +101,7 @@ That variable is then called like any other function.
 
 ### Module Emulation
 
-Modules can be emulated by returning a map:
+Modules can export multiple values by returning a map:
 
 math.ni:
 
