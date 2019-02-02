@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -130,15 +131,24 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 	defer func() {
 		if r := recover(); r != nil {
 			if retObj, ok := r.(object.Object); ok {
-				fmt.Fprintln(vm.GetStderr(), retObj)
-				fmt.Fprintln(vm.GetStderr(), "Stack Trace:")
+
+				if exc, ok := retObj.(*object.Exception); ok && exc.HasStackTrace {
+					ret = retObj
+					return
+				}
+
+				stackBuf := bytes.Buffer{}
+				fmt.Fprintln(&stackBuf, retObj)
+				fmt.Fprintln(&stackBuf, "Stack Trace:")
 				frame := vm.currentFrame
 				for frame != nil {
-					fmt.Fprintf(vm.GetStderr(), "\t%s: %s\n", frame.code.Filename, frame.code.Name)
+					fmt.Fprintf(&stackBuf, "\t%s: %s\n", frame.code.Filename, frame.code.Name)
 					frame = frame.lastFrame
 				}
 				vm.unwind = true
-				ret = retObj
+				exc := object.NewException(stackBuf.String())
+				exc.HasStackTrace = true
+				ret = exc
 			} else {
 				fmt.Fprintln(vm.GetStderr(), r)
 				fmt.Fprintln(vm.GetStderr(), string(debug.Stack()))
@@ -810,7 +820,9 @@ func (vm *VirtualMachine) throw() object.Object {
 		}
 		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
 		if vm.currentFrame == nil {                 // Call stack exhausted
-			exc := object.NewException("Uncaught Exception: %s", exception.Inspect())
+			// exc := object.NewException("Uncaught Exception: %s", exception.Inspect())
+			exc := object.NewException(exception.Inspect())
+			exc.HasStackTrace = exception.(*object.Exception).HasStackTrace
 
 			if vm.Settings.ReturnExceptions {
 				return exc

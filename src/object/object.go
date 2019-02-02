@@ -185,9 +185,10 @@ func (r *ReturnValue) Dup() Object      { return &ReturnValue{Value: r.Value.Dup
 
 // TODO: Expand with line/column numbers and stack trace
 type Exception struct {
-	Catchable bool
-	Message   string
-	Caught    bool
+	Catchable     bool
+	Message       string
+	Caught        bool
+	HasStackTrace bool
 }
 
 func (e *Exception) Inspect() string  { return e.Message }
