@@ -234,7 +234,22 @@ a %= 4 // a == 1
 
 ### Constants
 
-Constants can be a string, int, float, or bool. They CANNOT be an array or map.
+Constants refer to constant references. Meaning, a variable cannot be assigned a different
+value, but the value of the variable is not immutable.
+
+For example, the following code is valid. The variable `obj` is assigned only once,
+but the object assigned to obj is still mutable.
+
+```
+const obj = {
+    a: 1,
+    b: 2,
+}
+
+obj.a = 3
+
+// obj = newObject() <- This is invalid because obj cannot be reassigned.
+```
 
 ## Identifiers
 

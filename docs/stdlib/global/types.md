@@ -1,5 +1,7 @@
 # Types
 
+Type conversion and checking functions.
+
 ## toInt(in: int|float): int
 
 Convert a number to an int. Some information will be lost when converting from a float to an integer.

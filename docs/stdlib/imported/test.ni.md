@@ -14,7 +14,7 @@ If true, calls `exit(1)` if a test fails.
 ## assertLib: T
 
 The assertion object to pass to each test. Defaults to the standard library
-assertion package. The object needs to throw and exception to indicate a
+assert package. The object needs to throw an exception to indicate a
 particular assertion failed. The exception should be a clear explanation
 of how the assert failed.
 
