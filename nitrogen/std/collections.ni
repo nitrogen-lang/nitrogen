@@ -29,6 +29,13 @@ const reduce = func(collection, fn)/*: Object*/ {
 
     if len(arguments) > 0: accumulator = arguments[0]
 
+    if isArray(collection): return reduceArray(collection, fn, accumulator)
+    if isMap(collection): return reduceMap(collection, fn, accumulator)
+    throw "reduce(): collection must be a map or array"
+}
+exports.reduce = reduce
+
+const reduceArray = func(arr, fn, accumulator)/*: Object*/ {
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         accumulator = fn(accumulator, arr[i], i)
@@ -36,7 +43,17 @@ const reduce = func(collection, fn)/*: Object*/ {
 
     accumulator
 }
-exports.reduce = reduce
+
+const reduceMap = func(map, fn, accumulator)/*: Object*/ {
+    const keys = hashKeys(map);
+    const keyLn = len(keys)
+    for i = 0; i < keyLn; i+=1 {
+        const key = keys[i]
+        accumulator = fn(accumulator, map[key], key)
+    }
+
+    accumulator
+}
 
 const arrayMatch = func(arr1, arr2)/*: bool*/ {
     if !isArray(arr1) or !isArray(arr2): throw "arrayMatch expected arrays as arguments"
