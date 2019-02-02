@@ -1,6 +1,6 @@
 import './another.ni' as otherFile
 
-func main() {
+const main = func() {
     otherFile()
 }
 

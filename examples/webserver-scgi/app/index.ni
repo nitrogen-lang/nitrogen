@@ -1,34 +1,28 @@
 #!/usr/local/bin/nitrogen
 
-func printMap(map) {
-    println('<ul>')
+import 'std/string'
+import 'std/collections'
 
-    const keys = sort(hashKeys(map))
-    const keyLen = len(keys)
+const printMap = func(map) {
+    const list = collections.reduce(map, func(acc, val, key) {
+        acc + string.format('<li>{}: {}</li>', key, val)
+    }, '<ul>')
 
-    for i = 0; i < keyLen; i += 1 {
-        let key = keys[i]
-        println('<li>', key, ': ', map[key], '</li>')
-    }
-
-    println(res, '</ul>')
+    return list + '</ul>'
 }
 
-print("Content-Type: text/html\n")
-print("\n") // HTTP header section ends with an empty line
+println(string.format('Content-Type: text/html
 
-println('<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Nitrogen Webpage SCGI Example</title>
 </head>
-<body>')
-println('<h2>Hello from Nitrogen! SCGI</h2>')
-
-println('<h3>Script Environment:</h3>')
-
-printMap(_ENV)
-printMap(_SERVER)
-
-println('</body>
-</html>')
+<body>
+    <h2>Hello from Nitrogen! SCGI</h2>
+    <h3>Script Environment:</h3>
+    {}
+    {}
+</body>
+</html>
+', printMap(_ENV), printMap(_SERVER)))

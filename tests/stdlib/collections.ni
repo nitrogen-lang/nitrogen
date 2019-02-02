@@ -22,9 +22,20 @@ test.run("collections map", func(assert) {
     assert.isTrue(col.arrayMatch(mapTest, expected))
 })
 
-test.run("collections reduce", func(assert) {
+test.run("collections reduce array", func(assert) {
     const expected = 61
     const reduceTest = col.reduce(testArr, func(r, e){ r + len(e) }, 0)
+    assert.isEq(reduceTest, expected)
+})
+
+test.run("collections reduce map", func(assert) {
+    const theMap = {
+        "key1": 1,
+        "key2": 50,
+        "key3": 10,
+    }
+    const expected = 61
+    const reduceTest = col.reduce(theMap, func(acc, val){ acc + val }, 0)
     assert.isEq(reduceTest, expected)
 })
 

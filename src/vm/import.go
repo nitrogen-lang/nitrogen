@@ -79,7 +79,7 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 		scriptPath = scriptPath[:len(scriptPath)-1]
 	}
 
-	env := object.NewEnclosedEnv(vm.currentFrame.env)
+	env := object.NewEnclosedEnv(vm.globalEnv)
 	env.CreateConst("_FILE", object.MakeStringObj(scriptPath))
 
 	res = vm.RunFrame(vm.MakeFrame(code, env), true)

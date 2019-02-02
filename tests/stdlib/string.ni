@@ -1,7 +1,3 @@
-if !modulesSupported() {
-    return
-}
-
 import 'std/string' as str
 import "std/test"
 

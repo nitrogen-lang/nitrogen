@@ -2,13 +2,11 @@
  * Copyright (c) 2017, Lee Keitel
  * This file is released under the BSD 3-Clause license.
  *
- * This file demonstrates "object-oriented" programming.
- * Nitrogen doesn't have objects as such, not yet anyway,
- * but it can still be achieved using hash maps and factory
- * methods like below.
+ * This file demonstrates "object-oriented" programming
+ * using hashmaps.
  */
 
-func account(name) {
+const account = func(name) {
     // The "object" is declared inside the function making it unique
     // Since oBalance is not in the dispatch map, it can't be modified
     // except through the exposed functions.
@@ -38,7 +36,7 @@ func account(name) {
     return dispatch
 }
 
-func main() {
+const main = func() {
     let me = account("John Smith")
     println(me.name)
     println(me.balance())

@@ -10,26 +10,26 @@ class lexer {
     let delimiter = DEFAULT_DELIM
     let quote = DEFAULT_QUOTE
 
-    func init(file) {
+    const init = func(file) {
         this.source = file
         this.readChar()
         this.readChar()
     }
 
-    func setDelimiter(c) {
+    const setDelimiter = func(c) {
         this.delimiter = c
     }
 
-    func setQuote(c) {
+    const setQuote = func(c) {
         this.quote = c
     }
 
-    func readChar() {
+    const readChar = func() {
         this.curChar = this.peekChar
         this.peekChar = file.readChar(this.source)
     }
 
-    func readQuotedString() {
+    const readQuotedString = func() {
         let str = ""
 
         this.readChar() // Move pass open quote
@@ -50,7 +50,7 @@ class lexer {
         return str
     }
 
-    func readToDelim() {
+    const readToDelim = func() {
         let str = ""
 
         while this.curChar != this.delimiter and this.curChar != "\n" {
@@ -61,12 +61,12 @@ class lexer {
         return str
     }
 
-    func readField() {
+    const readField = func() {
         if this.curChar == this.quote: return this.readQuotedString()
         return this.readToDelim()
     }
 
-    func readRecord() {
+    const readRecord = func() {
         if isNull(this.curChar): return nil
 
         let fields = []
@@ -89,7 +89,7 @@ class lexer {
 class fileReader {
     let l
 
-    func init(f) {
+    const init = func(f) {
         if !isResource(f) or resourceID(f) != file.fileResourceID {
             throw "fileReader expected a file resource"
         }
@@ -97,11 +97,11 @@ class fileReader {
         this.l = new lexer(f)
     }
 
-    func readRecord() {
+    const readRecord = func() {
         return this.l.readRecord()
     }
 
-    func readAllRecords() {
+    const readAllRecords = func() {
         let records = [];
 
         let record = this.l.readRecord()
@@ -113,11 +113,11 @@ class fileReader {
         return records
     }
 
-    func delimiter(c) {
+    const delimiter = func(c) {
         this.l.setDelimiter(c)
     }
 
-    func quote(c) {
+    const quote = func(c) {
         this.l.setQuote(c)
     }
 }

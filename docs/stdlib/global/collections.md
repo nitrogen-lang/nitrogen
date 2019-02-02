@@ -28,13 +28,13 @@ Returns a new array with all elements of arr plus the element val added to the e
 
 Returns a new array with all elements of arr plus the element val added to the front.
 
-## splice(arr: array, offset: int[, length: int])
+## splice(arr: array, offset: int[, length: int]): array
 
 Returns an array with length elements of arr beginning at offset removed. Length defaults
 to the size of the array. splice will throw if either offset or length are negative.
 Using 0 as an offset with no length (thus the default) will return an empty array.
 
-## slice(arr: array, offset: int[, length: int])
+## slice(arr: array, offset: int[, length: int]): array
 
 Returns an array with length elements of arr beginning at offset. Length defaults
 to the size of the array. slice will throw if either offset or length are negative.

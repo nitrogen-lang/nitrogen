@@ -1,6 +1,6 @@
 import "std/test"
 
-func fac(in) {
+const fac = func(in) {
     if in == 0: return 1
     return in * fac(in - 1)
 }

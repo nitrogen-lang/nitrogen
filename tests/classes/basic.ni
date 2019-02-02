@@ -4,11 +4,11 @@ class printer {
     let x
     const t = "Thing"
 
-    func init(x) {
+    const init = func(x) {
         this.x = x
     }
 
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 }

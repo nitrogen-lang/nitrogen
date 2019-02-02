@@ -3,11 +3,11 @@ import "std/test"
 let grandparentInitRan = false
 
 class grandParent {
-    func init() {
+    const init = func() {
         grandparentInitRan = true
     }
 
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'Grandparent: '+msg
     }
 }
@@ -15,20 +15,20 @@ class grandParent {
 class parentPrinter ^ grandParent {
     let z
 
-    func init() {
+    const init = func() {
         parent()
         this.z = "parent thing"
     }
 
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'Parent: ' + this.z + ' Msg: ' + msg
     }
 
-    func parentOnly() {
+    const parentOnly = func() {
         return "I'm the parent"
     }
 
-    func doStuff2(msg) {
+    const doStuff2 = func(msg) {
         return parent.doStuff(msg)
     }
 }
@@ -37,25 +37,25 @@ class printer ^ parentPrinter {
     let x
     const t = "Thing"
 
-    func init(x) {
+    const init = func(x) {
         parent()
         this.x = x
     }
 
     // Overloaded function
-    func doStuff(msg) {
+    const doStuff = func(msg) {
         return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 
-    func doStuff2(msg) {
+    const doStuff2 = func(msg) {
         return parent.doStuff(msg)
     }
 
-    func doStuff3(msg) {
+    const doStuff3 = func(msg) {
         return parent.doStuff2(msg)
     }
 
-    func setX(x) {
+    const setX = func(x) {
         this.x = x
     }
 }

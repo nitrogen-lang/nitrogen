@@ -1,6 +1,6 @@
 const exports = {}
 
-func filter(arr, fn)/*: arr*/ {
+const filter = func(arr, fn)/*: arr*/ {
     let newArr = [];
 
     const ln = len(arr)
@@ -12,7 +12,7 @@ func filter(arr, fn)/*: arr*/ {
 }
 exports.filter = filter
 
-func map(arr, fn)/*: arr*/ {
+const map = func(arr, fn)/*: arr*/ {
     let newArr = [];
 
     const ln = len(arr)
@@ -24,11 +24,18 @@ func map(arr, fn)/*: arr*/ {
 }
 exports.map = map
 
-func reduce(arr, fn)/*: Object*/ {
+const reduce = func(collection, fn)/*: Object*/ {
     let accumulator = nil
 
     if len(arguments) > 0: accumulator = arguments[0]
 
+    if isArray(collection): return reduceArray(collection, fn, accumulator)
+    if isMap(collection): return reduceMap(collection, fn, accumulator)
+    throw "reduce(): collection must be a map or array"
+}
+exports.reduce = reduce
+
+const reduceArray = func(arr, fn, accumulator)/*: Object*/ {
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         accumulator = fn(accumulator, arr[i], i)
@@ -36,9 +43,19 @@ func reduce(arr, fn)/*: Object*/ {
 
     accumulator
 }
-exports.reduce = reduce
 
-func arrayMatch(arr1, arr2)/*: bool*/ {
+const reduceMap = func(map, fn, accumulator)/*: Object*/ {
+    const keys = hashKeys(map);
+    const keyLn = len(keys)
+    for i = 0; i < keyLn; i+=1 {
+        const key = keys[i]
+        accumulator = fn(accumulator, map[key], key)
+    }
+
+    accumulator
+}
+
+const arrayMatch = func(arr1, arr2)/*: bool*/ {
     if !isArray(arr1) or !isArray(arr2): throw "arrayMatch expected arrays as arguments"
     if len(arr1) != len(arr2): return false
 
@@ -51,7 +68,7 @@ func arrayMatch(arr1, arr2)/*: bool*/ {
 }
 exports.arrayMatch = arrayMatch
 
-func mapMatch(map1, map2) {
+const mapMatch = func(map1, map2) {
     if !isMap(map1) or !isMap(map2): return false
     if len(map1) != len(map2): return false
 
@@ -67,7 +84,7 @@ func mapMatch(map1, map2) {
 }
 exports.mapMatch = mapMatch
 
-func valuesEqual(v1, v2) {
+const valuesEqual = func(v1, v2) {
     if varType(v1) != varType(v2): return false
 
     if isArray(v1) {
@@ -79,14 +96,14 @@ func valuesEqual(v1, v2) {
     return (v1 == v2)
 }
 
-func foreach(collection, fn) {
+const foreach = func(collection, fn) {
     if isMap(collection): return foreachMap(collection, fn)
     if isArray(collection) or isString(collection): return foreachArray(collection, fn)
     throw "foreach(): collection must be a map, array, or string"
 }
 exports.foreach = foreach
 
-func foreachMap(map, fn) {
+const foreachMap = func(map, fn) {
     const keys = hashKeys(map);
     const keyLn = len(keys)
     for i = 0; i < keyLn; i+=1 {
@@ -95,21 +112,21 @@ func foreachMap(map, fn) {
     }
 }
 
-func foreachArray(arr, fn) {
+const foreachArray = func(arr, fn) {
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
         fn(i, arr[i])
     }
 }
 
-func contains(arr, needle) {
+const contains = func(arr, needle) {
     if isArray(arr): return arrayContains(arr, needle)
     if isMap(arr): return arrayContains(hashKeys(arr), needle)
     throw "contains expected an array or map but received " + varType(arr)
 }
 exports.contains = contains
 
-func arrayContains(arr, needle) {
+const arrayContains = func(arr, needle) {
     const arrLen = len(arr)
     const needleType = varType(needle)
 

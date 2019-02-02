@@ -5,7 +5,7 @@
  * This file demonstrates using a loop to generate the Fibonacci sequence.
  */
 
-func main() {
+const main = func() {
     let count = 1
     let num1 = 0
     let num2 = 1

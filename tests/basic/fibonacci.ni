@@ -1,6 +1,6 @@
 import "std/test"
 
-func fib(x) {
+const fib = func(x) {
     if x == 0 or x == 1: return x
     return fib(x-1) + fib(x-2)
 }

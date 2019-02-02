@@ -44,6 +44,7 @@ type VirtualMachine struct {
 	returnValue  object.Object
 	returnErr    error
 	Settings     *Settings
+	globalEnv    *object.Environment
 
 	unwind bool
 }
@@ -62,6 +63,10 @@ func NewVM(settings *Settings) *VirtualMachine {
 	}
 }
 
+func (vm *VirtualMachine) SetGlobalEnv(env *object.Environment) {
+	vm.globalEnv = env
+}
+
 func (vm *VirtualMachine) Eval(node ast.Node, env *object.Environment) object.Object {
 	return object.NullConst
 }
@@ -74,6 +79,7 @@ func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environm
 	if env == nil {
 		env = object.NewEnvironment()
 	}
+	env.SetParent(vm.globalEnv)
 	return vm.RunFrame(vm.MakeFrame(code, env), false), vm.returnErr
 }
 

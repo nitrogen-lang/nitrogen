@@ -4,12 +4,12 @@ test.run("Basic environment", func(assert) {
     let string = "Hello, world!"
 
     // Ensure this function changes the outer scope variable
-    func change_string(next) {
+    const change_string = func(next) {
         string = next
     }
 
     // Ensure this one doesn't
-    func not_change_string(next) {
+    const not_change_string = func(next) {
         // Overshadow the global string variable
         let string = ""
         string = next

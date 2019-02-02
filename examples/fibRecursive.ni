@@ -5,7 +5,7 @@
  * This file demonstrates recursion using the Fibonacci sequence.
  */
 
-func fib(x) {
+const fib = func(x) {
     if x == 0 or x == 1 {
         return x
     }
@@ -13,7 +13,7 @@ func fib(x) {
     return fib(x-1) + fib(x-2)
 }
 
-func main() {
+const main = func() {
     for i = 0; i < 31; i += 1 {
         println("Fib of ", i, " is ", fib(i))
     }

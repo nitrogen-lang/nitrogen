@@ -15,10 +15,10 @@ with the returned elements.
 `filter` applies the function `fn` on each element of `arr` and returns a new array
 containing the elements of `arr` where `fn` returned true.
 
-## reduce(arr: array, fn: func(accumulator, element, index): T[, initialValue: T]): T
+## reduce(col: array|map, fn: func(accumulator, element, index): T[, initialValue: T]): T
 
-`reduce` applies a function against an accumulator and each element in the array
-`arr` (from left to right) to reduce it to a single value.
+`reduce` applies a function against an accumulator and each element in the array/map
+`col` (from left to right) to reduce it to a single value.
 
 ## foreach(col: array|map, fn: func(key, val))
 

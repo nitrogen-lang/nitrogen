@@ -8,7 +8,7 @@ const exports = {
     "assertLib": assert,
 }
 
-func run(desc, fn) {
+const run = func(desc, fn) {
     if verbose: println("Test: ", desc)
 
     try {

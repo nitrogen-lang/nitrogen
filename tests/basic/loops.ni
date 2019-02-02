@@ -33,7 +33,7 @@ test.run("Loop with break", func(assert) {
 })
 
 test.run("While loop", func(assert) {
-    func testWhile() {
+    const testWhile = func() {
         let finished = false
         let i = 0
 

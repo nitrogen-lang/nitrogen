@@ -82,6 +82,7 @@ func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
 		return nil, nil, errors.New("Invalid timestamp")
 	}
 	// Eventually check fileTime against the main source file
+	// Mod time checked in codeBlockCache, maybe move here?
 	fi.ModTime = time.Unix(int64(binary.BigEndian.Uint64(fileTime)), 0)
 
 	rest, err := ioutil.ReadAll(file)

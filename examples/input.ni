@@ -5,11 +5,11 @@
  * This file demonstrates getting input from stdin.
  */
 
-func getName() {
+const getName = func() {
     readline("What's your name? ")
 }
 
-func getAge() {
+const getAge = func() {
     readline("How old are you? ")
 }
 
