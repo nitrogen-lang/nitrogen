@@ -16,3 +16,11 @@ index 1 of the executed command. An error object is returned if the command fail
 up the standard input, output, and error of the interpreter to the command. This
 allows a script to give control to a user for interactive commands. An error object is
 returned if the command failed to execute, nil otherwise.
+
+## argv(): array
+
+`argv` returns an array of command line arguments used when executing the application.
+
+## env(): map
+
+`env` returns a hashmap of the environment variables.
