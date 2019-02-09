@@ -2,13 +2,11 @@
 
 Here you will find documentation for the language syntax, as well as the standard library:
 
-- [Language](language.md)
-- [Elemental VM](vm.md)
+- [Language Syntax](language)
 - [Standard Library](std)
-- [Including Script Files](std/global/imports.md)
-- [Binary Modules](modules)
-- [SCGI Server](scgi-server.md)
 - [Globals](globals.md)
+- [SCGI Server](scgi-server.md)
+- [Elemental VM](vm.md)
 
 ## Function Notation
 
