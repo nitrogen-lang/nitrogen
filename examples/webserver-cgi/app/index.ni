@@ -2,6 +2,7 @@
 
 import 'std/string'
 import 'std/collections'
+import 'std/os'
 
 const printMap = func(map) {
     const list = collections.reduce(map, func(acc, val, key) {
@@ -25,4 +26,4 @@ println(string.format('Content-Type: text/html
     {}
 </body>
 </html>
-', printMap(_ENV), printMap(_SERVER)))
+', printMap(os.env()), printMap(_SERVER)))

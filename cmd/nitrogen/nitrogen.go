@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
+	builtinOs "github.com/nitrogen-lang/nitrogen/src/builtins/os"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
@@ -142,6 +143,7 @@ func main() {
 	sourceFile := flag.Arg(0)
 
 	env := makeEnv(sourceFile)
+	builtinOs.SetCmdArgs(getScriptArgs(sourceFile))
 
 	var code *compiler.CodeBlock
 	var program *ast.Program
@@ -224,6 +226,7 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	vmsettings.Debug = fullDebug
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
+	machine.SetInstanceVar("std.os.env", getExternalEnv())
 
 	ret, err := machine.Execute(code, nil)
 	if err != nil {
@@ -236,8 +239,6 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 
 func makeEnv(filepath string) *object.Environment {
 	env := object.NewEnvironment()
-	env.CreateConst("_ENV", getExternalEnv())
-	env.CreateConst("_ARGV", getScriptArgs(filepath))
 	env.CreateConst("_SERVER", getServerEnv())
 	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
 	return env

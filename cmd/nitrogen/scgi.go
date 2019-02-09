@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	builtinOs "github.com/nitrogen-lang/nitrogen/src/builtins/os"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 
@@ -57,6 +58,8 @@ func startSCGIServer() {
 	for i := 0; i < scgiWorkers; i++ {
 		workerPool <- &worker{id: i, workerPool: workerPool}
 	}
+
+	builtinOs.SetCmdArgs(getScriptArgs("nitrogen"))
 
 	fmt.Printf("SCGI listening on %s\n", scgiSock)
 
@@ -188,6 +191,7 @@ func (w *worker) run(conn net.Conn) {
 
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
+	machine.SetInstanceVar("std.os.env", getExternalEnv())
 
 	result, _ := machine.Execute(code, nil)
 
