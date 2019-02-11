@@ -12,7 +12,7 @@ Functions will return either a explicit value when using the `return` statement 
 it will return the last expression in the function body.
 
 ```
-const someFunc = func() {
+const someFunc = fn() {
     doSomething()
     doSomethingElse()
     "hello"

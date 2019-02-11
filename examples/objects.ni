@@ -6,10 +6,10 @@
  * using hashmaps.
  */
 
-const account = func(name) {
-    // The "object" is declared inside the function making it unique
+const account = fn(name) {
+    // The "object" is declared inside the fntion making it unique
     // Since oBalance is not in the dispatch map, it can't be modified
-    // except through the exposed functions.
+    // except through the exposed fntions.
     let oBalance = 0
     let dispatch = {
         "withdraw": nil,
@@ -18,7 +18,7 @@ const account = func(name) {
     }
 
     // "methods" are added as key pairs to the map
-    dispatch.withdraw = func(amount) {
+    dispatch.withdraw = fn(amount) {
         if amount > oBalance {
             return 'Insufficent balance'
         }
@@ -26,17 +26,17 @@ const account = func(name) {
         return oBalance
     }
 
-    dispatch.deposit = func(amount) {
+    dispatch.deposit = fn(amount) {
         oBalance = oBalance + amount
         return oBalance
     }
 
-    dispatch.balance = func() { oBalance }
+    dispatch.balance = fn() { oBalance }
     dispatch.name = name
     return dispatch
 }
 
-const main = func() {
+const main = fn() {
     let me = account("John Smith")
     println(me.name)
     println(me.balance())

@@ -43,7 +43,7 @@ the value to export. To export multiple values, the package can return a hash ma
 second.ni:
 
 ```
-func() {
+fn() {
     println("Hello from ", _FILE)
 }
 ```
@@ -53,7 +53,7 @@ main.ni:
 ```
 import './second.ni' as otherFile
 
-const main = func() {
+const main = fn() {
     otherFile()
 }
 

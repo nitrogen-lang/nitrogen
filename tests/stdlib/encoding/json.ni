@@ -45,20 +45,20 @@ let tests = [
     },
 ]
 
-test.run("JSON encode", func(assert) {
-    col.foreach(tests, func(i, el) {
+test.run("JSON encode", fn(assert) {
+    col.foreach(tests, fn(i, el) {
         assert.isEq(json.encode(el.in), el.out)
     })
 })
 
-test.run("JSON encode bad value", func(assert) {
-    assert.shouldThrow(func() {
-        json.encode(func() {pass})
+test.run("JSON encode bad value", fn(assert) {
+    assert.shouldThrow(fn() {
+        json.encode(fn() {pass})
     })
 })
 
-test.run("JSON decode", func(assert) {
-    col.foreach(tests, func(i, el) {
+test.run("JSON decode", fn(assert) {
+    col.foreach(tests, fn(i, el) {
         const decoded = json.decode(el.out)
 
         if isArray(el.in){

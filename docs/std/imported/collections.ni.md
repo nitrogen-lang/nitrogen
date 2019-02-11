@@ -5,22 +5,22 @@ working with collections such as arrays and maps.
 
 To use: `import 'std/collections'`
 
-## map(arr: array, fn: func(element, index): T): array
+## map(arr: array, func: fn(element, index): T): array
 
 `map` applies the function `fn` on each element of `arr` and returns a new array
 with the returned elements.
 
-## filter(arr: array, fn: func(element, index): bool): array
+## filter(arr: array, func: fn(element, index): bool): array
 
 `filter` applies the function `fn` on each element of `arr` and returns a new array
 containing the elements of `arr` where `fn` returned true.
 
-## reduce(col: array|map, fn: func(accumulator, element, index): T[, initialValue: T]): T
+## reduce(col: array|map, func: fn(accumulator, element, index): T[, initialValue: T]): T
 
 `reduce` applies a function against an accumulator and each element in the array/map
 `col` (from left to right) to reduce it to a single value.
 
-## foreach(col: array|map, fn: func(key, val))
+## foreach(col: array|map, func: fn(key, val))
 
 `foreach` will iterate over the supplied collection calling `fn` on each element.
 The function `fn` is given the index or map key and the element value. Returned

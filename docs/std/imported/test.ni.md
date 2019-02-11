@@ -18,7 +18,7 @@ assert package. The object needs to throw an exception to indicate a
 particular assertion failed. The exception should be a clear explanation
 of how the assert failed.
 
-## run(desc: string, fn: func): nil
+## run(desc: string, func: fn): nil
 
 `run` represents a single test. `fn` is executed in a try block and the test will
 fail if an uncaught exception is bubbled up. `fn` is given a single argument which
@@ -30,10 +30,10 @@ Example:
 ```
 import "std/test"
 
-test.run("Attempt to redefine constant", func(assert) {
+test.run("Attempt to redefine constant", fn(assert) {
     const thing = 42
 
-    assert.shouldThrow(func() {
+    assert.shouldThrow(fn() {
         thing = 43
     })
 })

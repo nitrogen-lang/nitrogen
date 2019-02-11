@@ -63,7 +63,7 @@ try {
 Using the `throw` keyword, a script can also generate an exception:
 
 ```
-const myException = func() {
+const myException = fn() {
     throw "Nope"
 }
 
@@ -77,7 +77,7 @@ try {
 Exceptions can also be rethrown:
 
 ```
-const myException = func() {
+const myException = fn() {
     try {
         myException2()
     } catch e {
@@ -85,7 +85,7 @@ const myException = func() {
     }
 }
 
-const myException2 = func() {
+const myException2 = fn() {
     throw "Nope"
 }
 

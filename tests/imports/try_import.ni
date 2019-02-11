@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Import directory", func(assert) {
+test.run("Import directory", fn(assert) {
     try {
         import '../../testdata/math.ni'
     } catch e {

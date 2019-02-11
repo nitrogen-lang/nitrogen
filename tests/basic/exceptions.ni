@@ -1,13 +1,13 @@
 import "std/test"
 
-test.run("Exceptions", func(assert) {
+test.run("Exceptions", fn(assert) {
     let fastVar = 42
 
-    const myException = func() {
+    const myException = fn() {
         myException2()
     }
 
-    const myException2 = func() {
+    const myException2 = fn() {
         throw "Nope"
     }
 

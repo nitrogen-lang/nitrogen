@@ -164,7 +164,7 @@ var tokens = [...]string{
 	RSquare: "]",
 
 	// Keywords
-	Function: "func",
+	Function: "fn",
 	Let:      "let",
 	Const:    "const",
 	True:     "true",

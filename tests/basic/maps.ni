@@ -1,7 +1,7 @@
 import "std/test"
 import "std/collections" as col
 
-test.run("Maps", func(assert) {
+test.run("Maps", fn(assert) {
     const hash = {
         "key1": "value1",
         "key2": "value2",
@@ -14,7 +14,7 @@ test.run("Maps", func(assert) {
 
     assert.isEq(len(keys), len(expectedKeys))
 
-    col.foreach(expectedKeys, func(i, v) {
+    col.foreach(expectedKeys, fn(i, v) {
         assert.isTrue(col.contains(keys, v))
     })
 })

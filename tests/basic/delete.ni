@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("delete variable", func(assert) {
+test.run("delete variable", fn(assert) {
     let hello = "world"
     assert.isTrue(isDefined("hello"))
 
@@ -8,8 +8,8 @@ test.run("delete variable", func(assert) {
     assert.isFalse(isDefined("hello"))
 })
 
-test.run("delete constant", func(assert) {
-    assert.shouldThrow(func() {
+test.run("delete constant", fn(assert) {
+    assert.shouldThrow(fn() {
         const place = "Earth"
         delete place
     })

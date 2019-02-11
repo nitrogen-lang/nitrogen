@@ -4,8 +4,8 @@ import 'std/string'
 import 'std/collections'
 import 'std/os'
 
-const printMap = func(map) {
-    const list = collections.reduce(map, func(acc, val, key) {
+const printMap = fn(map) {
+    const list = collections.reduce(map, fn(acc, val, key) {
         acc + string.format('<li>{}: {}</li>', key, val)
     }, '<ul>')
 

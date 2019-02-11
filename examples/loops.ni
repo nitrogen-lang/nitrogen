@@ -5,7 +5,7 @@
  * This file demonstrates for loops including the use of continue and break
  */
 
-const main = func() {
+const main = fn() {
     // This loop will go 10 times (0-9) but break on 5 and skip 2
     for i = 0; i < 10; i += 1 {
         // Loops run in an enclosed scope. Variable defined here won't escape to

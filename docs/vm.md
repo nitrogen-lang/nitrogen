@@ -1,10 +1,11 @@
 # Runtime VM
 
-This implementation of Nitrogen runs on a bytecode virtual machine core called Elemental.
-In general it's faster and more efficient than the old interpreter. With the VM, source
-code goes through a full compile stage before being executed including when using the REPL.
-This implementation does not have a JIT compiler and does not compile to machine assembly
-but instead to a higher level assembly-like bytecode.
+This implementation of Nitrogen runs on a bytecode virtual machine core called
+Elemental. In general it's faster and more efficient than the old interpreter.
+With the VM, source code goes through a full compile stage before being executed
+including when using the REPL. This implementation does not have a JIT compiler
+and does not compile to machine assembly but instead to a higher level
+assembly-like bytecode.
 
 ## Opcodes
 

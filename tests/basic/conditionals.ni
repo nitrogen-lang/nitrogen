@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Single statement if expressions", func(assert) {
+test.run("Single statement if expressions", fn(assert) {
     let counter = 0
 
     if true {
@@ -17,25 +17,25 @@ test.run("Single statement if expressions", func(assert) {
     assert.isEq(counter, 4)
 })
 
-test.run("Various if expressions", func(assert) {
-    assert.shouldThrow(func() {
+test.run("Various if expressions", fn(assert) {
+    assert.shouldThrow(fn() {
         if ["a"] == ["b"]: return
         println("Hello")
     })
 
-    assert.isTrue(func() {
+    assert.isTrue(fn() {
         if 42 == 42: return true
         return false
     }())
 
-    assert.isFalse(func() {
+    assert.isFalse(fn() {
         if "42" == 42: return true
         return false
     })
 })
 
-test.run("If statement with else", func(assert) {
-    const theTest = func(a) {
+test.run("If statement with else", fn(assert) {
+    const theTest = fn(a) {
         if a {
             return "Hello"
         } else {
@@ -47,8 +47,8 @@ test.run("If statement with else", func(assert) {
     assert.isEq(theTest(false), "Good bye")
 })
 
-test.run("If statement with else and compound conditional", func(assert) {
-    const theTest = func(a, b) {
+test.run("If statement with else and compound conditional", fn(assert) {
+    const theTest = fn(a, b) {
         if a or b {
             return "Hello"
         } else {
@@ -62,8 +62,8 @@ test.run("If statement with else and compound conditional", func(assert) {
     assert.isEq(theTest(false, false), "Good bye")
 })
 
-test.run("If statement with else assigned to variable", func(assert) {
-    const theTest = func(a) {
+test.run("If statement with else assigned to variable", fn(assert) {
+    const theTest = fn(a) {
         const msg = if a {
             "Hello"
         } else {
@@ -77,8 +77,8 @@ test.run("If statement with else assigned to variable", func(assert) {
     assert.isEq(theTest(false), "Good bye")
 })
 
-test.run("If statement within an if true branch", func(assert) {
-    const theTest = func(a, b) {
+test.run("If statement within an if true branch", fn(assert) {
+    const theTest = fn(a, b) {
         if a {
             if b {
                 return "Hello1"
@@ -96,8 +96,8 @@ test.run("If statement within an if true branch", func(assert) {
     assert.isEq(theTest(false, false), "Good bye")
 })
 
-test.run("If statement within an if false branch", func(assert) {
-    const theTest = func(a, b) {
+test.run("If statement within an if false branch", fn(assert) {
+    const theTest = fn(a, b) {
         if a {
             return "Hello"
         } else {
@@ -115,8 +115,8 @@ test.run("If statement within an if false branch", func(assert) {
     assert.isEq(theTest(false, false), "Good bye2")
 })
 
-test.run("If statement with elif block", func(assert) {
-    const theTest = func(a) {
+test.run("If statement with elif block", fn(assert) {
+    const theTest = fn(a) {
         if a == 42 {
             return 82
         } elif a == 43 {

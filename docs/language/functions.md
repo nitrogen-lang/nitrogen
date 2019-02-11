@@ -4,10 +4,10 @@ Functions allow a programmer to break apart a program into separate chunks that 
 on specific tasks. Functions are first class citizens in Nitrogen. They can be passed
 around just like any other literal.
 
-Functions are defined using the `func` keyword:
+Functions are defined using the `fn` keyword:
 
 ```
-let myFunc = func(thing) {
+let myFunc = fn(thing) {
     println(thing)
 }
 
@@ -25,11 +25,11 @@ the same number of parameters as its declaration. Functions can be called with
 more parameters, but they won't assigned to individual identifiers.
 
 ```
-const noParam = func() {
+const noParam = fn() {
     println('This function has no required arguments')
 }
 
-const withParam = func(arg1, arg2) {
+const withParam = fn(arg1, arg2) {
     println('This function takes two required arguments')
 }
 ```
@@ -38,7 +38,7 @@ Arguments beyond the required ones, are inserted into an array and assigned to
 the variable `arguments`.
 
 ```
-const someFunc = funct() {
+const someFunc = fn() {
     println(arguments) // Prints any arguments passed in
 }
 
@@ -48,7 +48,7 @@ someFunc('Hello', 'there') // Will print ['Hello', 'there']
 Calling a function without the required number of arguments will throw an exception.
 
 ```
-const someFunc = func(arg1) {
+const someFunc = fn(arg1) {
     println(arg1)
 }
 

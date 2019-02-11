@@ -4,16 +4,16 @@ class printer {
     let x
     const t = "Thing"
 
-    const init = func(x) {
+    const init = fn(x) {
         this.x = x
     }
 
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 }
 
-test.run("Basic classes", func(assert) {
+test.run("Basic classes", fn(assert) {
     const myPrinter = new printer(1)
     const myPrinter2 = new printer(2)
 

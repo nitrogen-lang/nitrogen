@@ -10,9 +10,10 @@ Here you will find documentation for the language syntax, as well as the standar
 
 ## Function Notation
 
-Throughout the documentation, you will find several function definitions. The following syntax is used to denote the number and type
-of any function arguments as well as return types. All functions have an implicit return. If a function doesn't list a return type,
-it's assumed to be nil.
+Throughout the documentation, you will find several function definitions. The following
+syntax is used to denote the number and type of any function arguments as well as
+return types. All functions have an implicit return. If a function doesn't list a
+return type, it's assumed to be nil.
 
 - Arguments are denoted by their name following by a colon and their type:
   - `someFunc(arg1: string)` - This functions takes a single arg which must be a string

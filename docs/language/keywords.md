@@ -13,7 +13,7 @@ These keywords are currently a part of the language.
 | catch    | class  | const  |
 | continue | delete | elif   |
 | else     | false  | for    |
-| func     | if     | import |
+| fn       | if     | import |
 | let      | native | new    |
 | nil      | or     | pass   |
 | return   | throw  | true   |
@@ -26,7 +26,9 @@ Although they will work as identifiers, it's highly encouraged not to use them.
 
 - async
 - await
-- yield
-- range
+- block
+- do
 - interface
+- range
 - trait
+- yield

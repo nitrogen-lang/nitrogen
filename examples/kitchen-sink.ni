@@ -10,10 +10,10 @@ println("Integer: ", 4)
 println("Float: ", 3.14)
 println("Boolean: ", true)
 println("String: ", "This is a string", 'This is so a string with single quotes')
-println("Function: ", func(x, y) { x + y; x * y; })
+println("Function: ", fn(x, y) { x + y; x * y; })
 
-// Here we define the variable "hello" and assign it a function
-let hello = func(place) {
+// Here we define the variable "hello" and assign it a fntion
+let hello = fn(place) {
     return "Hello, " + place
 }
 
@@ -30,13 +30,13 @@ const helloWorld2 = hello("Mars!")
 // other types aren't allowed as constants.
 
 /*
- * Nitrogen features many builtin functions that are implemented directly in the
- * interpreter. These functions generally deal with any type of I/O or
+ * Nitrogen features many builtin fntions that are implemented directly in the
+ * interpreter. These fntions generally deal with any type of I/O or
  * manipulation operations.
  */
 
 // "println" will print all arguments with a newline after each
-// The similarly named function "print" will print all arguments without a newline.
+// The similarly named fntion "print" will print all arguments without a newline.
 println(helloWorld)
 println(hello2("Earth!"))
 println(helloWorld2)
@@ -78,7 +78,7 @@ let placeMap = {
 
 println(placeMap["Europe"])
 
-// Standard library manipulation functions do not alter the actual array
+// Standard library manipulation fntions do not alter the actual array
 // The push below does not alter the array, but rather returns a new array
 // with the elements pf placeMap["Europe"] plus the new element "Denmark".
 println(push(placeMap["Europe"], "Denmark"))
@@ -102,7 +102,7 @@ let thisIsNull = nil
 println(thisIsNull)
 
 // Functions can take more arguments than declared, this can be used for optional args
-const extra = func(a) {
+const extra = fn(a) {
     // The local variable "arguments" is an array that contains all parameters after those
     // that were declared. So here, "arguments[0]" will be the SECOND parameter given since
     // the first paramter is bound to "a".

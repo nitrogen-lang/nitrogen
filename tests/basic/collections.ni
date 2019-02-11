@@ -2,18 +2,18 @@ import "std/test"
 
 const arr = ["one", "two"]
 
-test.run("array prepend", func(assert) {
+test.run("array prepend", fn(assert) {
     const prependArr = prepend(arr, "zero")
     assert.isEq(prependArr[0], "zero")
 })
 
-test.run("array push", func(assert) {
+test.run("array push", fn(assert) {
     const pushArr = push(arr, "three")
     assert.isEq(len(pushArr), 3)
     assert.isEq(pushArr[2], "three")
 })
 
-test.run("array pop", func(assert) {
+test.run("array pop", fn(assert) {
     const popArr = pop(arr)
     assert.isEq(len(popArr), 1)
     assert.isEq(popArr[0], "one")
@@ -21,7 +21,7 @@ test.run("array pop", func(assert) {
 
 const arr2 = arr + ["three", "four"]
 
-test.run("array splice with offset and length", func(assert) {
+test.run("array splice with offset and length", fn(assert) {
     const spliceArr = splice(arr2, 1, 2)
 
     assert.isEq(len(spliceArr), 2)
@@ -29,7 +29,7 @@ test.run("array splice with offset and length", func(assert) {
     assert.isEq(spliceArr[1], "four")
 })
 
-test.run("array splice with offset", func(assert) {
+test.run("array splice with offset", fn(assert) {
     const spliceArr = splice(arr2, 2)
 
     assert.isEq(len(spliceArr), 2)
@@ -37,37 +37,37 @@ test.run("array splice with offset", func(assert) {
     assert.isEq(spliceArr[1], "two")
 })
 
-test.run("array splice 0 offset, no length", func(assert) {
+test.run("array splice 0 offset, no length", fn(assert) {
     const spliceArr = splice(arr2, 0)
 
     assert.isEq(len(spliceArr), 0)
 })
 
-test.run("array splice with negative offset and length", func(assert) {
-    assert.shouldThrow(func() {
+test.run("array splice with negative offset and length", fn(assert) {
+    assert.shouldThrow(fn() {
         splice(arr2, -1)
     })
 
-    assert.shouldThrow(func() {
+    assert.shouldThrow(fn() {
         splice(arr2, 1, -1)
     })
 
-    assert.shouldThrow(func() {
+    assert.shouldThrow(fn() {
         splice(arr2, -1, -1)
     })
 })
 
-test.run("array splice with 0 length", func(assert) {
+test.run("array splice with 0 length", fn(assert) {
     const spliceArr = splice(arr2, 1, 0)
     assert.isEq(len(spliceArr), 4)
 })
 
-test.run("array slice with 0 offset", func(assert) {
+test.run("array slice with 0 offset", fn(assert) {
     const sliceArr = slice(arr2, 0)
     assert.isEq(len(sliceArr), 4)
 })
 
-test.run("array slice with offset and length", func(assert) {
+test.run("array slice with offset and length", fn(assert) {
     const sliceArr = slice(arr2, 1, 2)
     assert.isEq(len(sliceArr), 2)
     assert.isEq(sliceArr[0], "two")

@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Compound equality", func(assert) {
+test.run("Compound equality", fn(assert) {
     const a = 5
     const b = 6
     const c = 5
@@ -11,7 +11,7 @@ test.run("Compound equality", func(assert) {
     assert.isTrue(a >= c)
 })
 
-test.run("Compound assignment", func(assert) {
+test.run("Compound assignment", fn(assert) {
     let a = 5
 
     a += 2

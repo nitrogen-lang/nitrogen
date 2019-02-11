@@ -1,15 +1,15 @@
 import "std/test"
 
-test.run("Basic environment", func(assert) {
+test.run("Basic environment", fn(assert) {
     let string = "Hello, world!"
 
-    // Ensure this function changes the outer scope variable
-    const change_string = func(next) {
+    // Ensure this fntion changes the outer scope variable
+    const change_string = fn(next) {
         string = next
     }
 
     // Ensure this one doesn't
-    const not_change_string = func(next) {
+    const not_change_string = fn(next) {
         // Overshadow the global string variable
         let string = ""
         string = next

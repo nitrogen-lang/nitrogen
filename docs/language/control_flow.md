@@ -161,7 +161,7 @@ let continents = ["Asia", "Africa", "North America", "South America", "Antarctic
 
 import 'std/collections'
 
-collections.foreach(continents, func(i, v) {
+collections.foreach(continents, fn(i, v) {
     println(v) // Prints each continent
 })
 ```

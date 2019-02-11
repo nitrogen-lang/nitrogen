@@ -1,37 +1,37 @@
 import 'std/string'
 import "std/test"
 
-const String = func(s) {
+const String = fn(s) {
     return new string.String(s)
 }
 
-test.run("String module contains", func(assert) {
+test.run("String module contains", fn(assert) {
     const str = String("one,two,three")
     assert.isTrue(str.contains("two"))
     assert.isFalse(str.contains("Two"))
 })
 
-test.run("String module count", func(assert) {
+test.run("String module count", fn(assert) {
     const str = String("one,two,three")
     assert.isEq(str.count(","), 2)
-    assert.shouldThrow(func() {
+    assert.shouldThrow(fn() {
         str.count("")
     })
 })
 
-test.run("String module dedup", func(assert) {
+test.run("String module dedup", fn(assert) {
     const str = String("name:    John")
     const expected = "name: John"
     assert.isEq(str.dedup(" "), expected)
 })
 
-test.run("String module format", func(assert) {
+test.run("String module format", fn(assert) {
     const str = new string.String("My name is {} and I'm {} years old")
     const expected = "My name is John and I'm 25 years old"
     assert.isEq(str.format("John", 25), expected)
 })
 
-test.run("String module prefix/suffix", func(assert) {
+test.run("String module prefix/suffix", fn(assert) {
     const str = String("abcefguvwxyz")
 
     assert.isTrue(str.hasPrefix("abc"))
@@ -40,7 +40,7 @@ test.run("String module prefix/suffix", func(assert) {
     assert.isFalse(str.hasSuffix("vxyz"))
 })
 
-test.run("String module replace", func(assert) {
+test.run("String module replace", fn(assert) {
     const str = String("oink oink oink")
 
     let expected = "oinky oinky oink"
@@ -49,12 +49,12 @@ test.run("String module replace", func(assert) {
     expected = "moo moo moo"
     assert.isEq(str.replace("oink", "moo", -1), expected)
 
-    assert.shouldThrow(func() {
+    assert.shouldThrow(fn() {
         str.replace("", "moo", -1)
     })
 })
 
-test.run("String module split", func(assert) {
+test.run("String module split", fn(assert) {
     const str = String("one,two,three")
 
     let splits = str.split(",")
@@ -64,7 +64,7 @@ test.run("String module split", func(assert) {
     assert.isEq(len(splits), 2)
 })
 
-test.run("String module trim space", func(assert) {
+test.run("String module trim space", fn(assert) {
     const str = String("       test        ")
     const expected = "test"
     assert.isEq(str.trimSpace(), expected)

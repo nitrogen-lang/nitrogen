@@ -16,7 +16,7 @@ class token {
     let type
     let value
 
-    const init = func(t, v) {
+    const init = fn(t, v) {
         this.type = t
         this.value = v
     }
@@ -27,13 +27,13 @@ class lexer {
     let curIndex
     let curChar
 
-    const init = func(str) {
+    const init = fn(str) {
         this.source = str
         this.curIndex = 0
         this.readChar()
     }
 
-    const readChar = func() {
+    const readChar = fn() {
         if this.curIndex == len(this.source) + 1 {
             this.curChar = nil
             return
@@ -43,7 +43,7 @@ class lexer {
         this.curIndex += 1
     }
 
-    const readKeyword = func() {
+    const readKeyword = fn() {
         let str = ""
 
         while this.isLetter(this.curChar) {
@@ -62,7 +62,7 @@ class lexer {
         new token(INVALID, "")
     }
 
-    const readString = func() {
+    const readString = fn() {
         let str = ""
 
         this.readChar() // Move pass open quote
@@ -75,7 +75,7 @@ class lexer {
         new token(STRING, str)
     }
 
-    const readNumber = func() {
+    const readNumber = fn() {
         // TODO: Implement signs and e notation
         let str = ""
         let isFloat = false
@@ -96,7 +96,7 @@ class lexer {
         new token(NUMBER, num)
     }
 
-    const nextToken = func() {
+    const nextToken = fn() {
         this.skipWhitespace()
         const char = this.curChar
 
@@ -134,32 +134,32 @@ class lexer {
         new token(INVALID, "")
     }
 
-    const skipWhitespace = func() {
+    const skipWhitespace = fn() {
         while this.isWhitespace(this.curChar) {
             this.readChar()
         }
     }
 
-    const isDigit = func(c) { (c >= "0" and c <= "9") or c == "." or c == "-" }
-    const isLetter = func(c) { (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") }
-    const beginsKeyword = func(c) { c == "f" or c == "t" or c == "n" }
-    const isWhitespace = func(c) { c == " " or c == "\t" or c == "\r" or c == "\n" }
+    const isDigit = fn(c) { (c >= "0" and c <= "9") or c == "." or c == "-" }
+    const isLetter = fn(c) { (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") }
+    const beginsKeyword = fn(c) { c == "f" or c == "t" or c == "n" }
+    const isWhitespace = fn(c) { c == " " or c == "\t" or c == "\r" or c == "\n" }
 }
 
 class parser {
     let lexer
     let curToken
 
-    const init = func(l) {
+    const init = fn(l) {
         this.lexer = l
         this.nextToken()
     }
 
-    const nextToken = func() {
+    const nextToken = fn() {
         this.curToken = this.lexer.nextToken()
     }
 
-    const parse = func() {
+    const parse = fn() {
         const ct = this.curToken.type
 
         if ct == LCURLY: return this.parseObject()
@@ -173,7 +173,7 @@ class parser {
         throw "Invalid JSON, expected { [ true false null \" or a number"
     }
 
-    const parseArray = func() {
+    const parseArray = fn() {
         this.nextToken()
         let arr = []
 
@@ -190,7 +190,7 @@ class parser {
         arr
     }
 
-    const parseObject = func() {
+    const parseObject = fn() {
         this.nextToken()
         let obj = {}
 
@@ -215,7 +215,7 @@ class parser {
     }
 }
 
-const decode = func(str) {
+const decode = fn(str) {
     const l = new lexer(str)
     const p = new parser(l)
     p.parse()

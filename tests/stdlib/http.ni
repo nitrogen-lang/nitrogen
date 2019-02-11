@@ -5,7 +5,7 @@ import "std/collections"
 
 use collections.contains
 
-test.run("HTTP GET request", func(assert) {
+test.run("HTTP GET request", fn(assert) {
     const resp = http.get("https://jsonplaceholder.typicode.com/posts/1")
 
     assert.isTrue(contains(resp, "body"))
@@ -15,7 +15,7 @@ test.run("HTTP GET request", func(assert) {
     assert.isEq(resp.headers["Content-Type"], "application/json; charset=utf-8")
 })
 
-test.run("HTTP GET JSON request", func(assert) {
+test.run("HTTP GET JSON request", fn(assert) {
     const resp = http.getJSON("https://jsonplaceholder.typicode.com/posts/1")
 
     assert.isTrue(isMap(resp))
@@ -25,7 +25,7 @@ test.run("HTTP GET JSON request", func(assert) {
     assert.isTrue(contains(resp, "userId"))
 })
 
-test.run("HTTP HEAD request", func(assert) {
+test.run("HTTP HEAD request", fn(assert) {
     const resp = http.head("https://jsonplaceholder.typicode.com/posts/1")
 
     assert.isTrue(contains(resp, "body"))
@@ -34,7 +34,7 @@ test.run("HTTP HEAD request", func(assert) {
     assert.isEq(resp.headers["Content-Type"], "application/json; charset=utf-8")
 })
 
-test.run("HTTP DELETE request", func(assert) {
+test.run("HTTP DELETE request", fn(assert) {
     const resp = http.del("https://jsonplaceholder.typicode.com/posts/1")
 
     assert.isTrue(contains(resp, "body"))
@@ -43,7 +43,7 @@ test.run("HTTP DELETE request", func(assert) {
     assert.isEq(resp.headers["Content-Type"], "application/json; charset=utf-8")
 })
 
-test.run("HTTP POST request", func(assert) {
+test.run("HTTP POST request", fn(assert) {
     const data = json.encode({
         "title": 'foo',
         "body": 'bar',
@@ -68,7 +68,7 @@ test.run("HTTP POST request", func(assert) {
     assert.isTrue(contains(respData, "userId"))
 })
 
-test.run("HTTP POST request automatic encoding", func(assert) {
+test.run("HTTP POST request automatic encoding", fn(assert) {
     const data = {
         "title": 'foo',
         "body": 'bar',
@@ -89,7 +89,7 @@ test.run("HTTP POST request automatic encoding", func(assert) {
     assert.isTrue(contains(respData, "userId"))
 })
 
-test.run("HTTP PUT request automatic encoding", func(assert) {
+test.run("HTTP PUT request automatic encoding", fn(assert) {
     const data = {
         "title": 'foo2',
         "body": 'bar2',
@@ -110,7 +110,7 @@ test.run("HTTP PUT request automatic encoding", func(assert) {
     assert.isTrue(contains(respData, "userId"))
 })
 
-test.run("HTTP PATCH request automatic encoding", func(assert) {
+test.run("HTTP PATCH request automatic encoding", fn(assert) {
     const data = {
         "title": 'foo3',
     }

@@ -1,4 +1,4 @@
-const otherFile = func() {
+const otherFile = fn() {
     println("Hello from ", _FILE)
 }
 

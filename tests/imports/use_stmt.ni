@@ -4,7 +4,7 @@ import "std/string"
 use string.String
 use string.String as str
 
-test.run("Use statement", func(assert) {
+test.run("Use statement", fn(assert) {
     assert.isTrue(isDefined("String"))
     assert.isTrue(isDefined("str"))
 

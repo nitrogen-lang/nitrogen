@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Simple loop", func(assert) {
+test.run("Simple loop", fn(assert) {
     let outer = 0
 
     for (i = 0; i < 10; i += 1) {
@@ -10,7 +10,7 @@ test.run("Simple loop", func(assert) {
     assert.isEq(outer, 10)
 })
 
-test.run("Loop with continue", func(assert) {
+test.run("Loop with continue", fn(assert) {
     let outer = 0
 
     for (i = 0; i < 10; i += 1) {
@@ -21,7 +21,7 @@ test.run("Loop with continue", func(assert) {
     assert.isEq(outer, 5)
 })
 
-test.run("Loop with break", func(assert) {
+test.run("Loop with break", fn(assert) {
     let outer = 0
 
     for (i = 0; i < 12; i += 1) {
@@ -32,8 +32,8 @@ test.run("Loop with break", func(assert) {
     assert.isEq(outer, 10)
 })
 
-test.run("While loop", func(assert) {
-    const testWhile = func() {
+test.run("While loop", fn(assert) {
+    const testWhile = fn() {
         let finished = false
         let i = 0
 

@@ -1,4 +1,4 @@
-const encode = func(data) {
+const encode = fn(data) {
     throw "Not implemented - encode"
 }
 

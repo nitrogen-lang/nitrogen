@@ -9,11 +9,11 @@ const exports = {
     "assertLib": assert,
 }
 
-const run = func(desc, fn) {
+const run = fn(desc, func) {
     if verbose: println("Test: ", desc)
 
     try {
-        fn(exports.assertLib)
+        func(exports.assertLib)
     } catch e {
         printerrln(string.format("Test '{}' failed: {}", desc, e))
         if exports.fatal: exit(1)

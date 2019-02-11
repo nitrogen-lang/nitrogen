@@ -1,61 +1,61 @@
 const exports = {}
 
-const filter = func(arr, fn)/*: arr*/ {
+const filter = fn(arr, func)/*: arr*/ {
     let newArr = [];
 
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
-        if fn(arr[i], i): newArr = push(newArr, arr[i])
+        if func(arr[i], i): newArr = push(newArr, arr[i])
     }
 
     newArr
 }
 exports.filter = filter
 
-const map = func(arr, fn)/*: arr*/ {
+const map = fn(arr, func)/*: arr*/ {
     let newArr = [];
 
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
-        newArr = push(newArr, fn(arr[i], i))
+        newArr = push(newArr, func(arr[i], i))
     }
 
     newArr
 }
 exports.map = map
 
-const reduce = func(collection, fn)/*: Object*/ {
+const reduce = fn(collection, func)/*: Object*/ {
     let accumulator = nil
 
     if len(arguments) > 0: accumulator = arguments[0]
 
-    if isArray(collection): return reduceArray(collection, fn, accumulator)
-    if isMap(collection): return reduceMap(collection, fn, accumulator)
+    if isArray(collection): return reduceArray(collection, func, accumulator)
+    if isMap(collection): return reduceMap(collection, func, accumulator)
     throw "reduce(): collection must be a map or array"
 }
 exports.reduce = reduce
 
-const reduceArray = func(arr, fn, accumulator)/*: Object*/ {
+const reduceArray = fn(arr, func, accumulator)/*: Object*/ {
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
-        accumulator = fn(accumulator, arr[i], i)
+        accumulator = func(accumulator, arr[i], i)
     }
 
     accumulator
 }
 
-const reduceMap = func(map, fn, accumulator)/*: Object*/ {
+const reduceMap = fn(map, func, accumulator)/*: Object*/ {
     const keys = hashKeys(map);
     const keyLn = len(keys)
     for i = 0; i < keyLn; i+=1 {
         const key = keys[i]
-        accumulator = fn(accumulator, map[key], key)
+        accumulator = func(accumulator, map[key], key)
     }
 
     accumulator
 }
 
-const arrayMatch = func(arr1, arr2)/*: bool*/ {
+const arrayMatch = fn(arr1, arr2)/*: bool*/ {
     if !isArray(arr1) or !isArray(arr2): throw "arrayMatch expected arrays as arguments"
     if len(arr1) != len(arr2): return false
 
@@ -68,7 +68,7 @@ const arrayMatch = func(arr1, arr2)/*: bool*/ {
 }
 exports.arrayMatch = arrayMatch
 
-const mapMatch = func(map1, map2) {
+const mapMatch = fn(map1, map2) {
     if !isMap(map1) or !isMap(map2): return false
     if len(map1) != len(map2): return false
 
@@ -84,7 +84,7 @@ const mapMatch = func(map1, map2) {
 }
 exports.mapMatch = mapMatch
 
-const valuesEqual = func(v1, v2) {
+const valuesEqual = fn(v1, v2) {
     if varType(v1) != varType(v2): return false
 
     if isArray(v1) {
@@ -96,37 +96,37 @@ const valuesEqual = func(v1, v2) {
     return (v1 == v2)
 }
 
-const foreach = func(collection, fn) {
-    if isMap(collection): return foreachMap(collection, fn)
-    if isArray(collection) or isString(collection): return foreachArray(collection, fn)
+const foreach = fn(collection, func) {
+    if isMap(collection): return foreachMap(collection, func)
+    if isArray(collection) or isString(collection): return foreachArray(collection, func)
     throw "foreach(): collection must be a map, array, or string"
 }
 exports.foreach = foreach
 
-const foreachMap = func(map, fn) {
+const foreachMap = fn(map, func) {
     const keys = hashKeys(map);
     const keyLn = len(keys)
     for i = 0; i < keyLn; i+=1 {
         const key = keys[i]
-        fn(key, map[key])
+        func(key, map[key])
     }
 }
 
-const foreachArray = func(arr, fn) {
+const foreachArray = fn(arr, func) {
     const ln = len(arr)
     for i = 0; i < ln; i+=1 {
-        fn(i, arr[i])
+        func(i, arr[i])
     }
 }
 
-const contains = func(arr, needle) {
+const contains = fn(arr, needle) {
     if isArray(arr): return arrayContains(arr, needle)
     if isMap(arr): return arrayContains(hashKeys(arr), needle)
     throw "contains expected an array or map but received " + varType(arr)
 }
 exports.contains = contains
 
-const arrayContains = func(arr, needle) {
+const arrayContains = fn(arr, needle) {
     const arrLen = len(arr)
     const needleType = varType(needle)
 

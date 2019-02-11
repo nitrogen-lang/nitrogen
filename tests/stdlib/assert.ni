@@ -3,78 +3,78 @@ import "std/assert"
 // This script doesn't use the "test" module since assert is used by test and that's what
 // we're testing here. We're testing the test harness.
 
-const shouldThrow = func(name, fn) {
-    try { fn() } catch { return }
+const shouldThrow = fn(name, func) {
+    try { func() } catch { return }
 
     throw "Assertion Failed: Expected " + name + " to throw."
 }
 
-const shouldNotThrow = func(name, fn) {
+const shouldNotThrow = fn(name, func) {
     try {
-        fn()
+        func()
     } catch {
         throw "Assertion Failed: Expected " + name + " not to throw."
     }
 }
 
 // isTrue
-shouldNotThrow("001", func() {
+shouldNotThrow("001", fn() {
     assert.isTrue(true)
 })
 
-shouldThrow("002", func() {
+shouldThrow("002", fn() {
     assert.isTrue(false)
 })
 
 // isFalse
-shouldNotThrow("003", func() {
+shouldNotThrow("003", fn() {
     assert.isFalse(false)
 })
 
-shouldThrow("004", func() {
+shouldThrow("004", fn() {
     assert.isFalse(true)
 })
 
 // isEq
-shouldNotThrow("005", func() {
+shouldNotThrow("005", fn() {
     assert.isEq("hello", "hello")
 })
 
-shouldThrow("006", func() {
+shouldThrow("006", fn() {
     assert.isEq("hello", "Hello")
 })
 
-shouldThrow("007", func() {
+shouldThrow("007", fn() {
     assert.isEq("hello", 42)
 })
 
 // isNeq
-shouldNotThrow("008", func() {
+shouldNotThrow("008", fn() {
     assert.isNeq("hello", "Hello")
 })
 
-shouldThrow("009", func() {
+shouldThrow("009", fn() {
     assert.isNeq("hello", "hello")
 })
 
-shouldThrow("010", func() {
+shouldThrow("010", fn() {
     assert.isNeq("hello", 42)
 })
 
 // shouldThrow
-shouldNotThrow("011", func() {
-    assert.shouldThrow(func() { throw "Hello" })
+shouldNotThrow("011", fn() {
+    assert.shouldThrow(fn() { throw "Hello" })
 })
 
-shouldThrow("012", func() {
-    assert.shouldThrow(func() { 42 })
+shouldThrow("012", fn() {
+    assert.shouldThrow(fn() { 42 })
 })
 
 // shouldNotThrow
-shouldNotThrow("013", func() {
-    assert.shouldNotThrow(func() { 42 })
+shouldNotThrow("013", fn() {
+    assert.shouldNotThrow(fn() { 42 })
 })
 
-shouldThrow("014", func() {
-    assert.shouldNotThrow(func() { throw "Hello" })
+shouldThrow("014", fn() {
+    assert.shouldNotThrow(fn() { throw "Hello" })
 })

@@ -12,16 +12,16 @@ class name ^ parent {
     let field1
     const field2 = "constant"
 
-    const init = func(x) { // Initializer function
+    const init = fn(x) { // Initializer function
         this.x = x // The instance can be referenced with "this"
     }
 
     // Class methods
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 
-    const setX = func(x) {
+    const setX = fn(x) {
         this.x = x
     }
 }
@@ -41,15 +41,15 @@ called directly without consulting the `parent` variable.
 class parentPrinter {
     let z
 
-    const init = func() {
+    const init = fn() {
         z = "parent thing"
     }
 
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'Parent: ' + z + ' Msg: ' + msg
     }
 
-    const parentOnly = func() {
+    const parentOnly = fn() {
         return "I'm the parent"
     }
 }
@@ -58,17 +58,17 @@ class printer ^ parentPrinter {
     let x
     const t = "Thing"
 
-    const init = func(x) {
+    const init = fn(x) {
         parent()
         this.x = x
     }
 
     // Overridden function
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'ID: ' + toString(x) + ' Msg: ' + msg
     }
 
-    const doStuff2 = func(msg) {
+    const doStuff2 = fn(msg) {
         return parent.doStuff(msg)
     }
 }
@@ -91,16 +91,16 @@ class name ^ parent {
     let field1
     const field2 = "constant"
 
-    const init = func(x) { // Initializer function
+    const init = fn(x) { // Initializer function
         this.x = x // The instance can be referenced with "this"s
     }
 
     // Class methods
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'ID: ' + toString(x) + ' Msg: ' + msg
     }
 
-    const setX = func(x) {
+    const setX = fn(x) {
         this.x = x
     }
 }

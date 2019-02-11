@@ -3,11 +3,11 @@ import "std/test"
 let grandparentInitRan = false
 
 class grandParent {
-    const init = func() {
+    const init = fn() {
         grandparentInitRan = true
     }
 
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'Grandparent: '+msg
     }
 }
@@ -15,20 +15,20 @@ class grandParent {
 class parentPrinter ^ grandParent {
     let z
 
-    const init = func() {
+    const init = fn() {
         parent()
         this.z = "parent thing"
     }
 
-    const doStuff = func(msg) {
+    const doStuff = fn(msg) {
         return 'Parent: ' + this.z + ' Msg: ' + msg
     }
 
-    const parentOnly = func() {
+    const parentOnly = fn() {
         return "I'm the parent"
     }
 
-    const doStuff2 = func(msg) {
+    const doStuff2 = fn(msg) {
         return parent.doStuff(msg)
     }
 }
@@ -37,30 +37,30 @@ class printer ^ parentPrinter {
     let x
     const t = "Thing"
 
-    const init = func(x) {
+    const init = fn(x) {
         parent()
         this.x = x
     }
 
-    // Overloaded function
-    const doStuff = func(msg) {
+    // Overloaded fntion
+    const doStuff = fn(msg) {
         return 'ID: ' + toString(this.x) + ' Msg: ' + msg
     }
 
-    const doStuff2 = func(msg) {
+    const doStuff2 = fn(msg) {
         return parent.doStuff(msg)
     }
 
-    const doStuff3 = func(msg) {
+    const doStuff3 = fn(msg) {
         return parent.doStuff2(msg)
     }
 
-    const setX = func(x) {
+    const setX = fn(x) {
         this.x = x
     }
 }
 
-test.run("Class inheritance", func(assert) {
+test.run("Class inheritance", fn(assert) {
     let myPrinter = new printer(1)
     assert.isTrue(grandparentInitRan)
 

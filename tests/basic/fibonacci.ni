@@ -1,10 +1,10 @@
 import "std/test"
 
-const fib = func(x) {
+const fib = fn(x) {
     if x == 0 or x == 1: return x
     return fib(x-1) + fib(x-2)
 }
 
-test.run("Fibonacci 10", func(assert) {
+test.run("Fibonacci 10", fn(assert) {
     assert.isEq(fib(10), 55)
 })

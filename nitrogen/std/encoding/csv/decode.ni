@@ -10,26 +10,26 @@ class lexer {
     let delimiter = DEFAULT_DELIM
     let quote = DEFAULT_QUOTE
 
-    const init = func(file) {
+    const init = fn(file) {
         this.source = file
         this.readChar()
         this.readChar()
     }
 
-    const setDelimiter = func(c) {
+    const setDelimiter = fn(c) {
         this.delimiter = c
     }
 
-    const setQuote = func(c) {
+    const setQuote = fn(c) {
         this.quote = c
     }
 
-    const readChar = func() {
+    const readChar = fn() {
         this.curChar = this.peekChar
         this.peekChar = file.readChar(this.source)
     }
 
-    const readQuotedString = func() {
+    const readQuotedString = fn() {
         let str = ""
 
         this.readChar() // Move pass open quote
@@ -50,7 +50,7 @@ class lexer {
         return str
     }
 
-    const readToDelim = func() {
+    const readToDelim = fn() {
         let str = ""
 
         while this.curChar != this.delimiter and this.curChar != "\n" {
@@ -61,12 +61,12 @@ class lexer {
         return str
     }
 
-    const readField = func() {
+    const readField = fn() {
         if this.curChar == this.quote: return this.readQuotedString()
         return this.readToDelim()
     }
 
-    const readRecord = func() {
+    const readRecord = fn() {
         if isNull(this.curChar): return nil
 
         let fields = []
@@ -89,7 +89,7 @@ class lexer {
 class fileReader {
     let l
 
-    const init = func(f) {
+    const init = fn(f) {
         if !isResource(f) or resourceID(f) != file.fileResourceID {
             throw "fileReader expected a file resource"
         }
@@ -97,11 +97,11 @@ class fileReader {
         this.l = new lexer(f)
     }
 
-    const readRecord = func() {
+    const readRecord = fn() {
         return this.l.readRecord()
     }
 
-    const readAllRecords = func() {
+    const readAllRecords = fn() {
         let records = [];
 
         let record = this.l.readRecord()
@@ -113,11 +113,11 @@ class fileReader {
         return records
     }
 
-    const delimiter = func(c) {
+    const delimiter = fn(c) {
         this.l.setDelimiter(c)
     }
 
-    const quote = func(c) {
+    const quote = fn(c) {
         this.l.setQuote(c)
     }
 }

@@ -12,6 +12,6 @@ Name of the operating system (darwin, linux, freebsd, windows).
 
 The system architecture type (amd64, 386).
 
-## dis(fn: function): null
+## dis(func: function): null
 
 `dis` will print the bytecode and other compilation data for a function. `fn` must be a function.

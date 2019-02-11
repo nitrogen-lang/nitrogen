@@ -1,33 +1,33 @@
 import "std/test"
 
-test.run("Simple function call", func(assert) {
-    const someFunc = func(arg1) {
+test.run("Simple fntion call", fn(assert) {
+    const somefn = fn(arg1) {
         arg1
     }
 
-    assert.isEq(someFunc('Hello'), 'Hello')
+    assert.isEq(somefn('Hello'), 'Hello')
 })
 
-test.run("Simple function call no args", func(assert) {
-    const someFunc = func() { 'called' }
+test.run("Simple fntion call no args", fn(assert) {
+    const somefn = fn() { 'called' }
 
-    assert.isEq(someFunc(), 'called')
+    assert.isEq(somefn(), 'called')
 })
 
-test.run("Function call optional args", func(assert) {
-    const someFunc = func(arg1) {
+test.run("fntion call optional args", fn(assert) {
+    const somefn = fn(arg1) {
         toString(arguments)
     }
 
-    assert.isEq(someFunc('Hello', 'World'), '["World"]')
+    assert.isEq(somefn('Hello', 'World'), '["World"]')
 })
 
-test.run("Function call no required args", func(assert) {
-    const someFunc = func(arg1) {
+test.run("fntion call no required args", fn(assert) {
+    const somefn = fn(arg1) {
         pass
     }
 
-    assert.shouldThrow(func() {
-        someFunc()
+    assert.shouldThrow(fn() {
+        somefn()
     })
 })
