@@ -16,7 +16,7 @@ const isFalse = fn(x) {
     if isFunc(x): x = x()
     if !isBool(x): throw "assertion must be a boolean to isFalse"
     if !x: return
-    throw format("Assertion Failed: Expected `{}` to be true.", x)
+    throw format("Assertion Failed: Expected `{}` to be false.", x)
 }
 exports.isFalse = isFalse
 
