@@ -12,19 +12,19 @@ import (
 )
 
 func init() {
-	vm.RegisterNative("std.http.do", do)
+	vm.RegisterNative("std.http.doReq", doReq)
 	vm.RegisterNative("std.http.canonicalHeaderKey", canonicalHeaderKey)
 }
 
-func do(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckMinArgs("http.do", 2, args...); ac != nil {
+func doReq(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("http.doReq", 2, args...); ac != nil {
 		return ac
 	}
 
 	// Argument 1 - HTTP method
 	methodObj, ok := args[0].(*object.String)
 	if !ok {
-		return object.NewException("http.do expected first argument to be a string, got %s", args[0].Type().String())
+		return object.NewException("http.doReq expected first argument to be a string, got %s", args[0].Type().String())
 	}
 	method := strings.ToUpper(methodObj.String())
 	if method == "" {
@@ -34,12 +34,12 @@ func do(interpreter object.Interpreter, env *object.Environment, args ...object.
 	// Argument 2 - URL
 	urlObj, ok := args[1].(*object.String)
 	if !ok {
-		return object.NewException("http.do expected second argument to be a string, got %s", args[1].Type().String())
+		return object.NewException("http.doReq expected second argument to be a string, got %s", args[1].Type().String())
 	}
 
 	url := strings.TrimSpace(urlObj.String())
 	if url == "" {
-		return object.NewException("http.do expected a non-empty string")
+		return object.NewException("http.doReq expected a non-empty string")
 	}
 
 	// Argument 3 - Data payload
@@ -47,7 +47,7 @@ func do(interpreter object.Interpreter, env *object.Environment, args ...object.
 	if len(args) >= 3 && args[2] != object.NullConst {
 		dataObj, ok := args[2].(*object.String)
 		if !ok {
-			return object.NewException("http.do expected third argument to be a string, got %s", args[2].Type().String())
+			return object.NewException("http.doReq expected third argument to be a string, got %s", args[2].Type().String())
 		}
 		data = dataObj.String()
 	}

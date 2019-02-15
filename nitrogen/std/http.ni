@@ -1,10 +1,10 @@
 import "std/encoding/json"
 
-const do = fn native (method, url)
+const doReq = fn native (method, url)
 const canonicalHeaderKey = fn native (header)
 
 const exports = {
-    "req": do,
+    "req": doReq,
     "canonicalHeaderKey": canonicalHeaderKey,
 }
 
@@ -17,19 +17,19 @@ exports.getJSON = getJSON
 
 const get = fn(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
-    return do("GET", url, "", options)
+    return doReq("GET", url, "", options)
 }
 exports.get = get
 
 const head = fn(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
-    return do("HEAD", url, "", options)
+    return doReq("HEAD", url, "", options)
 }
 exports.head = head
 
 const del = fn(url) {
     let options = if len(arguments) >= 1 { arguments[0] } else { nil }
-    return do("DELETE", url, "", options)
+    return doReq("DELETE", url, "", options)
 }
 exports.del = del
 
@@ -44,7 +44,7 @@ const post = fn(url) {
         options["headers"] = { "Content-Type": "application/json" }
     }
 
-    return do("POST", url, data, options)
+    return doReq("POST", url, data, options)
 }
 exports.post = post
 
@@ -59,7 +59,7 @@ const put = fn(url) {
         options["headers"] = { "Content-Type": "application/json" }
     }
 
-    return do("PUT", url, data, options)
+    return doReq("PUT", url, data, options)
 }
 exports.put = put
 
@@ -74,7 +74,7 @@ const patch = fn(url) {
         options["headers"] = { "Content-Type": "application/json" }
     }
 
-    return do("PATCH", url, data, options)
+    return doReq("PATCH", url, data, options)
 }
 exports.patch = patch
 
