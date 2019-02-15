@@ -57,15 +57,17 @@ func (e *Environment) Parent() *Environment {
 }
 
 func (e *Environment) Print(indent string) {
-	if e == nil || e.root == nil {
+	if e == nil {
 		fmt.Println("{}")
 		return
 	}
 
-	v := e.root
-	for v != nil {
-		fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, v.name, v.v.Inspect(), indent, v.readonly)
-		v = v.n
+	if e.root != nil {
+		v := e.root
+		for v != nil {
+			fmt.Printf("%s%s = %s\n  %sConst: %t\n", indent, v.name, v.v.Inspect(), indent, v.readonly)
+			v = v.n
+		}
 	}
 
 	if e.parent != nil {

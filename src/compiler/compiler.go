@@ -57,6 +57,9 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.BlockStatement:
 		compileBlock(ccb, node)
 
+	case *ast.DoExpression:
+		compileDoBlock(ccb, node)
+
 	// Literals
 	case *ast.IntegerLiteral:
 		i := object.MakeIntObj(node.Value)

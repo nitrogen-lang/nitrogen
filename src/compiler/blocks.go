@@ -420,3 +420,26 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	ccb.code.addInst(opcode.EndBlock)
 	ccb.code.addInst(opcode.CloseScope)
 }
+
+func compileDoBlock(ccb *codeBlockCompiler, node *ast.DoExpression) {
+	ccb.code.addInst(opcode.OpenScope)
+
+	bodyCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table)),
+		names:     ccb.names,
+		code:      NewInstSet(),
+		filename:  ccb.filename,
+		name:      ccb.name,
+		inLoop:    ccb.inLoop,
+	}
+	compile(bodyCCB, node.Statements)
+
+	// This copies the local variables into the outer compile block for table indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
+		ccb.locals.indexOf(n)
+	}
+	ccb.code.merge(bodyCCB.code)
+
+	ccb.code.addInst(opcode.CloseScope)
+}

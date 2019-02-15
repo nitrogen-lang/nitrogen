@@ -11,13 +11,14 @@ These keywords are currently a part of the language.
 |----------|--------|--------|
 | and      | as     | break  |
 | catch    | class  | const  |
-| continue | delete | elif   |
-| else     | false  | for    |
-| fn       | if     | import |
-| let      | native | new    |
-| nil      | or     | pass   |
-| return   | throw  | true   |
-| try      | use    | while  |
+| continue | delete | do     |
+| elif     | else   | false  |
+| for      | fn     | if     |
+| import   | let    | native |
+| new      | nil    | or     |
+| pass     | return | throw  |
+| true     | try    | use    |
+| while    |
 
 ## Reserved For Future Use
 
@@ -26,8 +27,6 @@ Although they will work as identifiers, it's highly encouraged not to use them.
 
 - async
 - await
-- block
-- do
 - interface
 - range
 - trait

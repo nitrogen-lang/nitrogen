@@ -83,3 +83,25 @@ func (p *Parser) parseCallExpression(left ast.Expression) ast.Node {
 		Arguments: p.parseExpressionList(token.RParen),
 	}
 }
+
+func (p *Parser) parseDoExpression() ast.Expression {
+	tok := p.curToken
+
+	if !p.expectPeek(token.LBrace) {
+		return nil
+	}
+
+	block := p.parseBlockStatements()
+	if block == nil {
+		return nil
+	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return &ast.DoExpression{
+		Token:      tok,
+		Statements: block,
+	}
+}

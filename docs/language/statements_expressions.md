@@ -45,3 +45,29 @@ const someValue = if thing_is_true {
 Try/catch blocks work the same way. They can "return" their last expression. If an exception is
 caught, then the last expression of the catch block is returned otherwise the last expression
 of the try block is returned.
+
+[Learn more about try/catch and exceptions](exceptions.md).
+
+## Do Blocks
+
+Do blocks allow a program to calculate a value inside a private scope which can then
+be assigned to a value. This can be useful to create a constant variable which requires
+some calculation or setup before being assigned. Any variables created inside the do
+block are local to that block and go out of scope once the block returns. The block
+has access to its parent scope. Do blocks are similar to functions except they're
+lighter since they don't require an extra stack frame and they don't take arguments.
+Do blocks are best for one-off calculations or initialization. If a block is being
+repeated, it would be better to make it into a function.
+
+Like functions, the last value in the block is "returned" as the value of the block.
+Unlike functions, do blocks do not have a return statement. A return inside a do
+block will return from the outer function call, not the do block.
+
+```
+const some_value = do {
+    // Some complex, one-off calculation
+    9 + 5
+}
+
+some_value == 14
+```

@@ -8,7 +8,7 @@ to present and explain syntax and language features.
 - [Keywords](keywords.md)
 - [Semicolons](semicolons.md)
 - [Comments](comments.md)
-- [Statements/Expressions](statements_expressions.md)
+- [Statements/Expressions/Do Blocks](statements_expressions.md)
 - [Literals](literals.md)
 - [Variables](variables.md)
 - [Control Flow](control_flow.md)

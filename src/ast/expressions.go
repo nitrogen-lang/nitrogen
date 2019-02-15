@@ -208,3 +208,12 @@ func (m *NewInstance) String() string {
 	}
 	return fmt.Sprintf("new %s(%s)", m.Class, strings.Join(args, ", "))
 }
+
+type DoExpression struct {
+	Token      token.Token
+	Statements *BlockStatement
+}
+
+func (d *DoExpression) expressionNode()      {}
+func (d *DoExpression) TokenLiteral() string { return d.Token.Literal }
+func (d *DoExpression) String() string       { return d.Statements.String() }

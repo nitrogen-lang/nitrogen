@@ -105,6 +105,7 @@ const (
 	Delete
 	Use
 	Native
+	Do
 	keywordEnd
 )
 
@@ -191,6 +192,7 @@ var tokens = [...]string{
 	Delete:   "delete",
 	Use:      "use",
 	Native:   "native",
+	Do:       "do",
 }
 
 var keywords map[string]TokenType
