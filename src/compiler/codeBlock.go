@@ -4,9 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
-
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
 )
 
 type CodeBlock struct {
@@ -128,33 +127,11 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 			if node.Value == o.(*object.Boolean).Value {
 				return uint16(i)
 			}
-		case *object.Class:
-			if node.Name == o.(*object.Class).Name {
-				return uint16(i)
-			}
-			// case *CodeBlock:
-			// 	if node.Filename == o.(*CodeBlock).Filename && node.Name == o.(*CodeBlock).Name {
-			// 		return uint16(i)
-			// 	}
 		}
 	}
 
 	t.table = append(t.table, v)
 	return uint16(len(t.table) - 1)
-}
-
-func (t *constantTable) containsClass(name string) *object.Class {
-	for _, o := range t.table {
-		if o.Type() != object.ClassObj {
-			continue
-		}
-
-		c := o.(*object.Class)
-		if c.Name == name {
-			return c
-		}
-	}
-	return nil
 }
 
 type stringTable struct {

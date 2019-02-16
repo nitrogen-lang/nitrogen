@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
@@ -47,7 +48,7 @@ func Marshal(o object.Object) ([]byte, error) {
 		res, _ := Marshal(tmpStr)
 		buf.Write(res)
 
-		tmpStr.Value = []rune(o.Filename)
+		tmpStr.Value = []rune(o.Filename) // Reuse String object
 		res, _ = Marshal(tmpStr)
 		buf.Write(res)
 
@@ -67,19 +68,22 @@ func Marshal(o object.Object) ([]byte, error) {
 		buf.Write(encodeUint16(uint16(o.MaxBlockSize)))
 		buf.Write(encodeUint16(uint16(len(o.Constants))))
 		for _, c := range o.Constants {
-			res, _ := Marshal(c)
+			res, err := Marshal(c)
+			if err != nil {
+				return nil, err
+			}
 			buf.Write(res)
 		}
 		buf.Write(encodeUint16(uint16(len(o.Locals))))
 		for _, l := range o.Locals {
 			tmpStr.Value = []rune(l)
-			res, _ := Marshal(tmpStr)
+			res, _ := Marshal(tmpStr) // No error check, strings are almost guaranteed to work
 			buf.Write(res)
 		}
 		buf.Write(encodeUint16(uint16(len(o.Names))))
 		for _, l := range o.Names {
 			tmpStr.Value = []rune(l)
-			res, _ := Marshal(tmpStr)
+			res, _ := Marshal(tmpStr) // No error check, strings are almost guaranteed to work
 			buf.Write(res)
 		}
 		buf.Write(encodeUint16(uint16(len(o.Code))))
@@ -92,7 +96,7 @@ func Marshal(o object.Object) ([]byte, error) {
 		copy(out[9:], buf.Bytes())
 		return out, nil
 	}
-	return nil, nil
+	return nil, fmt.Errorf("Object type %T doesn't have a marshal implementation", o)
 }
 
 func Unmarshal(in []byte) (object.Object, []byte, error) {
@@ -139,10 +143,11 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		constantsLen := int(decodeUint16(inslice[:2]))
 		inslice = inslice[2:]
 		cb.Constants = make([]object.Object, constantsLen)
+		var err error
 		for i := range cb.Constants {
-			cb.Constants[i], inslice, _ = Unmarshal(inslice)
-			if cb.Constants[i] == nil {
-				panic("Malformed code block constant")
+			cb.Constants[i], inslice, err = Unmarshal(inslice)
+			if err != nil {
+				return nil, inslice, err
 			}
 		}
 
@@ -151,7 +156,10 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		cb.Locals = make([]string, localsLen)
 		for i := range cb.Locals {
 			var tmpStr object.Object
-			tmpStr, inslice, _ = Unmarshal(inslice)
+			tmpStr, inslice, err = Unmarshal(inslice)
+			if err != nil {
+				return nil, inslice, err
+			}
 			cb.Locals[i] = string(tmpStr.(*object.String).Value)
 		}
 
@@ -160,7 +168,10 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		cb.Names = make([]string, namesLen)
 		for i := range cb.Names {
 			var tmpStr object.Object
-			tmpStr, inslice, _ = Unmarshal(inslice)
+			tmpStr, inslice, err = Unmarshal(inslice)
+			if err != nil {
+				return nil, inslice, err
+			}
 			cb.Names[i] = string(tmpStr.(*object.String).Value)
 		}
 
@@ -171,7 +182,7 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 
 		return cb, inslice[codeLen:], nil
 	}
-	return nil, in, nil
+	return nil, in, fmt.Errorf("Unknown unmarshal for type char %c", in[0])
 }
 
 func decodeUint64(in []byte) uint64 {
