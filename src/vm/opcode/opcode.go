@@ -72,6 +72,7 @@ const (
 	OpenScope
 	CloseScope
 	Import
+	Dup
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 	Label
@@ -151,6 +152,7 @@ var HasNoArg = map[Opcode]bool{
 	Throw:        true,
 	OpenScope:    true,
 	CloseScope:   true,
+	Dup:          true,
 }
 
 var Names = map[Opcode]string{
@@ -205,6 +207,7 @@ var Names = map[Opcode]string{
 	OpenScope:        "OPEN_SCOPE",
 	CloseScope:       "CLOSE_SCOPE",
 	Import:           "IMPORT",
+	Dup:              "DUP",
 }
 
 var CmpOps = map[byte]string{

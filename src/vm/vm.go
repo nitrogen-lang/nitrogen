@@ -760,6 +760,9 @@ mainLoop:
 				vm.throw()
 			}
 
+		case opcode.Dup:
+			vm.currentFrame.pushStack(vm.currentFrame.getFrontStack())
+
 		default:
 			codename := opcode.Names[code]
 			if codename == "" {

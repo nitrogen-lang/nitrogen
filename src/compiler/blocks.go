@@ -421,6 +421,75 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	ccb.code.addInst(opcode.CloseScope)
 }
 
+func compileIterLoop(ccb *codeBlockCompiler, loop *ast.IterLoopStatement) {
+	return
+
+	// TODO: Implement for..in loops
+	endBlockLbl := randomLabel("end_")
+	iterBlockLbl := randomLabel("iter_")
+
+	compile(ccb, loop.Iter)
+
+	// A loop begins with a PREPARE_BLOCK opcode this creates the first layer environment
+	ccb.code.addInst(opcode.OpenScope)
+
+	// Prepare for main body
+	bodyCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table)),
+		names:     ccb.names,
+		code:      NewInstSet(),
+		filename:  ccb.filename,
+		name:      ccb.name,
+		inLoop:    true,
+	}
+
+	// Compile main body of loop
+	compile(bodyCCB, loop.Body)
+
+	// If the body ends in an expression, we need to pop it so the stack is correct
+	if _, ok := loop.Body.Statements[len(loop.Body.Statements)-1].(*ast.ExpressionStatement); ok {
+		bodyCCB.code.addInst(opcode.Pop)
+	}
+
+	// This copies the local variables into the outer compile block for table indexing
+	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
+		ccb.locals.indexOf(n)
+	}
+
+	// Prepare for iteration code
+	iterCCB := &codeBlockCompiler{
+		constants: ccb.constants,
+		locals:    newStringTableOffset(len(ccb.locals.table)),
+		names:     ccb.names,
+		code:      NewInstSet(),
+		filename:  ccb.filename,
+		name:      ccb.name,
+	}
+
+	// Compile iteration
+	compile(iterCCB, loop.Iter)
+
+	// Again, copy over the locals for indexing
+	for _, n := range iterCCB.locals.table[len(ccb.locals.table):] {
+		ccb.locals.indexOf(n)
+	}
+
+	ccb.code.addLabeledArgs(opcode.StartLoop, endBlockLbl, iterBlockLbl)
+
+	ccb.code.merge(condCCB.code)
+	ccb.code.addLabeledArgs(opcode.PopJumpIfFalse, endBlockLbl)
+	ccb.code.merge(bodyCCB.code)
+
+	ccb.code.addLabel(iterBlockLbl)
+	ccb.code.merge(iterCCB.code)
+	ccb.code.addInst(opcode.NextIter)
+	ccb.code.addLabel(endBlockLbl)
+	ccb.code.addInst(opcode.EndBlock)
+	ccb.code.addInst(opcode.CloseScope)
+	ccb.code.addInst(opcode.CloseScope)
+}
+
 func compileDoBlock(ccb *codeBlockCompiler, node *ast.DoExpression) {
 	ccb.code.addInst(opcode.OpenScope)
 

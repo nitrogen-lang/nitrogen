@@ -224,6 +224,9 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.LoopStatement:
 		compileLoop(ccb, node)
 
+	case *ast.IterLoopStatement:
+		compileIterLoop(ccb, node)
+
 	case *ast.ContinueStatement:
 		if !ccb.inLoop {
 			panic("continue used in non-loop block")
