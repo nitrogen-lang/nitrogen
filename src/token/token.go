@@ -106,6 +106,7 @@ const (
 	Use
 	Native
 	Do
+	In
 	keywordEnd
 )
 
@@ -193,6 +194,7 @@ var tokens = [...]string{
 	Use:      "use",
 	Native:   "native",
 	Do:       "do",
+	In:       "in",
 }
 
 var keywords map[string]TokenType

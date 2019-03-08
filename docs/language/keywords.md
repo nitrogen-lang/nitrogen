@@ -14,11 +14,11 @@ These keywords are currently a part of the language.
 | continue | delete | do     |
 | elif     | else   | false  |
 | for      | fn     | if     |
-| import   | let    | native |
-| new      | nil    | or     |
-| pass     | return | throw  |
-| true     | try    | use    |
-| while    |
+| import   | in     | let    |
+| native   | new    | nil    |
+| or       | pass   | return |
+| throw    | true   | try    |
+| use      | while  |
 
 ## Reserved For Future Use
 

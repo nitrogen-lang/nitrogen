@@ -404,6 +404,18 @@ func (h *Hash) SetKey(key string, val Object) {
 	}
 }
 
+func (h *Hash) Keys() *Array {
+	arr := &Array{
+		Elements: make([]Object, 0, len(h.Pairs)),
+	}
+
+	for _, pair := range h.Pairs {
+		arr.Elements = append(arr.Elements, pair.Key)
+	}
+
+	return arr
+}
+
 func MakeEmptyHash() *Hash {
 	return &Hash{Pairs: make(map[HashKey]HashPair)}
 }

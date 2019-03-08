@@ -431,8 +431,8 @@ mainLoop:
 			vm.currentFrame.env.Set(name, vm.currentFrame.popStack())
 
 		case opcode.LoadIndex:
-			left := vm.currentFrame.popStack()
 			index := vm.currentFrame.popStack()
+			left := vm.currentFrame.popStack()
 			res := vm.evalIndexExpression(left, index)
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
@@ -724,7 +724,7 @@ mainLoop:
 			case *object.Hash:
 				vm.currentFrame.pushStack(vm.lookupHashIndex(obj, object.MakeStringObj(name)))
 			default:
-				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
+				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object type %s", obj.Type()))
 				vm.throw()
 			}
 
@@ -756,7 +756,33 @@ mainLoop:
 			case *object.Hash:
 				vm.assignHashMapIndex(instance, object.MakeStringObj(name), val)
 			default:
-				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object"))
+				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object type %s", instance.Type()))
+				vm.throw()
+			}
+
+		case opcode.Dup:
+			vm.currentFrame.pushStack(vm.currentFrame.getFrontStack())
+
+		case opcode.GetIter:
+			obj := vm.currentFrame.popStack()
+
+			switch obj := obj.(type) {
+			case *VMInstance:
+				method := obj.GetBoundMethod("_iter")
+				if method == nil {
+					vm.currentFrame.pushStack(object.NewPanic("Instance does not implement _iter() %s", obj.Class.Name))
+					vm.throw()
+					break
+				}
+				vm.CallFunction(0, method, true, obj)
+			case *object.Hash:
+				vm.currentFrame.pushStack(makeMapIter(obj))
+			case *object.Array:
+				vm.currentFrame.pushStack(makeArrayIter(obj))
+			case *object.String:
+				vm.currentFrame.pushStack(makeStringIter(obj))
+			default:
+				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object type %s", obj.Type()))
 				vm.throw()
 			}
 

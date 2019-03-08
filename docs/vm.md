@@ -102,3 +102,7 @@ These are all the opcodes used in this implementation.
 ### START\_TRY
 
 ### THROW
+
+### DUP
+
+### GET\_ITER

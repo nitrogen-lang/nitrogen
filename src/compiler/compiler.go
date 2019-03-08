@@ -217,12 +217,15 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileFunction(ccb, node, false, false)
 
 	case *ast.IndexExpression:
-		compile(ccb, node.Index)
 		compile(ccb, node.Left)
+		compile(ccb, node.Index)
 		ccb.code.addInst(opcode.LoadIndex)
 
 	case *ast.LoopStatement:
 		compileLoop(ccb, node)
+
+	case *ast.IterLoopStatement:
+		compileIterLoop(ccb, node)
 
 	case *ast.ContinueStatement:
 		if !ccb.inLoop {

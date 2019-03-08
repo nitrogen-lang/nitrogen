@@ -200,6 +200,35 @@ func (fl *LoopStatement) String() string {
 	return out.String()
 }
 
+type IterLoopStatement struct {
+	Key   *Identifier
+	Value *Identifier
+	Iter  *Identifier
+	Body  *BlockStatement
+}
+
+func (fl *IterLoopStatement) statementNode()       {}
+func (fl *IterLoopStatement) TokenLiteral() string { return "for" }
+func (fl *IterLoopStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("for ")
+
+	if fl.Key != nil {
+		out.WriteString(fl.Key.String())
+		out.WriteString(", ")
+	}
+
+	out.WriteString(fl.Value.String())
+	out.WriteString(" in ")
+	out.WriteString(fl.Iter.String())
+
+	out.WriteString(" { ")
+	out.WriteString(fl.Body.String())
+	out.WriteString(" }")
+	return out.String()
+}
+
 type ContinueStatement struct{}
 
 func (c *ContinueStatement) statementNode()       {}

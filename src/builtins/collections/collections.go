@@ -305,15 +305,7 @@ func hashKeysBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		return object.NewException("hashKeys expects a hash map")
 	}
 
-	arr := &object.Array{
-		Elements: make([]object.Object, 0, len(hash.Pairs)),
-	}
-
-	for _, pair := range hash.Pairs {
-		arr.Elements = append(arr.Elements, pair.Key)
-	}
-
-	return arr
+	return hash.Keys()
 }
 
 func hasKeyBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
