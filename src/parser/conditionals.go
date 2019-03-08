@@ -65,133 +65,127 @@ func (p *Parser) parseForLoop() ast.Statement {
 		p.nextToken()
 	}
 
-	if p.peekTokenIs(token.LBrace) || (expectClosingParen && p.peekTokenIs(token.RParen)) {
-		loop.Init = nil
-		loop.Condition = nil
-		loop.Iter = nil
-	} else {
-		if !p.peekTokenIs(token.Identifier) {
-			p.peekError(token.Identifier)
+	if !p.peekTokenIs(token.Identifier) {
+		p.peekError(token.Identifier)
+		return nil
+	}
+
+	peekTok := p.peekToken
+	p.nextToken()
+
+	p.insertToken(token.Token{Type: token.Let, Literal: "let"})
+	p.nextToken()
+
+	if p.peekTokenIs(token.Comma) {
+		p.curToken = peekTok
+		loop := &ast.IterLoopStatement{}
+
+		if !p.curTokenIs(token.Identifier) {
+			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
 			return nil
 		}
 
-		peekTok := p.peekToken
+		loop.Key = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		p.nextToken() // Skip comma
 		p.nextToken()
 
-		p.insertToken(token.Token{Type: token.Let, Literal: "let"})
-		p.nextToken()
-
-		if p.peekTokenIs(token.Comma) {
-			p.curToken = peekTok
-			loop := &ast.IterLoopStatement{}
-
-			if !p.curTokenIs(token.Identifier) {
-				p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
-				return nil
-			}
-
-			loop.Key = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-			p.nextToken() // Skip comma
-			p.nextToken()
-
-			if !p.curTokenIs(token.Identifier) {
-				p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
-				return nil
-			}
-
-			loop.Value = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-			if !p.expectPeek(token.In) {
-				return nil
-			}
-			p.nextToken()
-
-			if !p.curTokenIs(token.Identifier) {
-				p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
-				return nil
-			}
-
-			loop.Iter = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-			if expectClosingParen && !p.expectPeek(token.RParen) {
-				return nil
-			}
-
-			if !p.peekTokenIs(token.LBrace) {
-				p.peekError(token.LBrace)
-				return nil
-			}
-
-			p.nextToken()
-			loop.Body = p.parseBlockStatements()
-			p.nextToken()
-
-			if p.peekTokenIs(token.Semicolon) {
-				p.nextToken()
-			}
-
-			return loop
-		} else if p.peekTokenIs(token.In) {
-			p.curToken = peekTok
-			loop := &ast.IterLoopStatement{}
-
-			if !p.curTokenIs(token.Identifier) {
-				p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
-				return nil
-			}
-
-			loop.Value = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-			if !p.expectPeek(token.In) {
-				return nil
-			}
-			p.nextToken()
-
-			if !p.curTokenIs(token.Identifier) {
-				p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
-				return nil
-			}
-
-			loop.Iter = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-
-			if expectClosingParen && !p.expectPeek(token.RParen) {
-				return nil
-			}
-
-			if !p.peekTokenIs(token.LBrace) {
-				p.peekError(token.LBrace)
-				return nil
-			}
-
-			p.nextToken()
-			loop.Body = p.parseBlockStatements()
-			p.nextToken()
-
-			if p.peekTokenIs(token.Semicolon) {
-				p.nextToken()
-			}
-
-			return loop
-		} else {
-			p.insertToken(peekTok)
-
-			loop.Init = p.parseDefStatement().(*ast.DefStatement)
-			if !p.curTokenIs(token.Semicolon) {
-				p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
-				return nil
-			}
-			p.nextToken()
-
-			loop.Condition = p.parseExpression(priLowest).(ast.Expression)
-			p.nextToken()
-			if !p.curTokenIs(token.Semicolon) {
-				p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
-				return nil
-			}
-			p.nextToken()
-
-			loop.Iter = p.parseExpression(priLowest)
+		if !p.curTokenIs(token.Identifier) {
+			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			return nil
 		}
+
+		loop.Value = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		if !p.expectPeek(token.In) {
+			return nil
+		}
+		p.nextToken()
+
+		if !p.curTokenIs(token.Identifier) {
+			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			return nil
+		}
+
+		loop.Iter = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		if expectClosingParen && !p.expectPeek(token.RParen) {
+			return nil
+		}
+
+		if !p.peekTokenIs(token.LBrace) {
+			p.peekError(token.LBrace)
+			return nil
+		}
+
+		p.nextToken()
+		loop.Body = p.parseBlockStatements()
+		p.nextToken()
+
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+
+		return loop
+	} else if p.peekTokenIs(token.In) {
+		p.curToken = peekTok
+		loop := &ast.IterLoopStatement{}
+
+		if !p.curTokenIs(token.Identifier) {
+			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			return nil
+		}
+
+		loop.Value = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		if !p.expectPeek(token.In) {
+			return nil
+		}
+		p.nextToken()
+
+		if !p.curTokenIs(token.Identifier) {
+			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			return nil
+		}
+
+		loop.Iter = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		if expectClosingParen && !p.expectPeek(token.RParen) {
+			return nil
+		}
+
+		if !p.peekTokenIs(token.LBrace) {
+			p.peekError(token.LBrace)
+			return nil
+		}
+
+		p.nextToken()
+		loop.Body = p.parseBlockStatements()
+		p.nextToken()
+
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+
+		return loop
+	} else {
+		p.insertToken(peekTok)
+
+		loop.Init = p.parseDefStatement().(*ast.DefStatement)
+		if !p.curTokenIs(token.Semicolon) {
+			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
+			return nil
+		}
+		p.nextToken()
+
+		loop.Condition = p.parseExpression(priLowest).(ast.Expression)
+		p.nextToken()
+		if !p.curTokenIs(token.Semicolon) {
+			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
+			return nil
+		}
+		p.nextToken()
+
+		loop.Iter = p.parseExpression(priLowest)
 	}
 
 	if expectClosingParen && !p.expectPeek(token.RParen) {
@@ -226,21 +220,42 @@ func (p *Parser) parseWhileLoop() ast.Statement {
 		p.nextToken()
 	}
 
-	if p.peekTokenIs(token.LBrace) || (expectClosingParen && p.peekTokenIs(token.RParen)) {
-		loop.Init = nil
-		loop.Condition = nil
-		loop.Iter = nil
-	} else {
-		p.nextToken()
-		condExp, ok := p.parseExpression(priLowest).(ast.Expression)
-		if !ok {
-			return nil
-		}
-		loop.Condition = condExp
+	p.nextToken()
+	condExp, ok := p.parseExpression(priLowest).(ast.Expression)
+	if !ok {
+		return nil
 	}
+	loop.Condition = condExp
 
 	if expectClosingParen && !p.expectPeek(token.RParen) {
 		return nil
+	}
+
+	if !p.peekTokenIs(token.LBrace) {
+		p.peekError(token.LBrace)
+		return nil
+	}
+
+	p.nextToken()
+	loop.Body = p.parseBlockStatements()
+	p.nextToken()
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return loop
+}
+
+func (p *Parser) parseInfiniteLoop() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseInfiniteLoop")
+	}
+
+	loop := &ast.LoopStatement{
+		Init:      nil,
+		Condition: nil,
+		Iter:      nil,
 	}
 
 	if !p.peekTokenIs(token.LBrace) {

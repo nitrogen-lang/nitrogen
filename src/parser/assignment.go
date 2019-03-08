@@ -24,6 +24,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseForLoop()
 	case token.While:
 		return p.parseWhileLoop()
+	case token.Loop:
+		return p.parseInfiniteLoop()
 	case token.Import:
 		return p.parseImport()
 	case token.Delete:

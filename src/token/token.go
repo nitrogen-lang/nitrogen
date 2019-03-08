@@ -92,6 +92,7 @@ const (
 	Nil
 	For
 	While
+	Loop
 	Continue
 	Break
 	Try
@@ -180,6 +181,7 @@ var tokens = [...]string{
 	LOr:      "or",
 	For:      "for",
 	While:    "while",
+	Loop:     "loop",
 	Continue: "continue",
 	Break:    "break",
 	Try:      "try",

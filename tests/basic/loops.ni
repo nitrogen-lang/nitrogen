@@ -49,6 +49,19 @@ test.run("While loop", fn(assert) {
     assert.isEq(testWhile(), 5)
 })
 
+test.run("Infinite loop", fn(assert) {
+    let finished = false
+    let i = 0
+
+    loop {
+        if finished: break
+        i += 1
+        if i == 5: finished = true
+    }
+
+    assert.isEq(i, 5)
+})
+
 test.run("Array iterator", fn(assert) {
     let sum = 0
 

@@ -73,15 +73,17 @@ for i = 0; i < 10; i += 1 {
 }
 
 // Infinite loop
-for {
+loop {
     println("Infinity")
 }
 
+// Collection iterator
 const items = ["item1", "item2"]
 for val in items {
     println(val)
 }
 
+// While loop
 let finished = false
 while !finished {
     // Do work eventually setting finished to true
@@ -100,8 +102,6 @@ boolean value. The iterator may be any expression but should increment the loop
 counter somehow otherwise it will go in an infinite loop.
 
 Only one variable can be assigned in the initializer.
-
-An infinite loop can be achieved my simply omitting the entire loop header.
 
 A while loop is used when only a condition needs to be checked on each iteration
 and an iterator isn't required. Think of it as "if some condition, continue to

@@ -177,7 +177,7 @@ class parser {
         this.nextToken()
         let arr = []
 
-        for {
+        loop {
             if this.curToken.type == RSQUARE: break
             arr = push(arr, this.parse())
             this.nextToken()
@@ -194,7 +194,7 @@ class parser {
         this.nextToken()
         let obj = {}
 
-        for {
+        loop {
             if this.curToken.type == RCURLY: break
             if this.curToken.type != STRING: throw "Invalid JSON object key, expected a string"
             const key = this.curToken.value

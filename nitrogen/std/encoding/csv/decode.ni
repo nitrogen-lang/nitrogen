@@ -33,7 +33,7 @@ class lexer {
         let str = ""
 
         this.readChar() // Move pass open quote
-        for {
+        loop {
             if this.curChar == this.quote {
                 if this.peekChar == this.quote {
                     this.readChar()
@@ -71,7 +71,7 @@ class lexer {
 
         let fields = []
 
-        for {
+        loop {
             const field = this.readField()
             fields = push(fields, field)
             if isNull(this.curChar): break
