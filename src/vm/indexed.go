@@ -11,7 +11,7 @@ func (vm *VirtualMachine) evalIndexExpression(left, index object.Object) object.
 	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
 		return vm.evalStringIndexExpression(left.(*object.String), index)
 	}
-	return object.NewException("Index operator not allowed: %s", left.Type())
+	return object.NewException("Index operator not allowed on type %s", left.Type())
 }
 
 func (vm *VirtualMachine) evalArrayIndexExpression(array *object.Array, index object.Object) object.Object {

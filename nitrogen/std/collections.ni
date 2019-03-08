@@ -97,27 +97,15 @@ const valuesEqual = fn(v1, v2) {
 }
 
 const foreach = fn(collection, func) {
-    if isMap(collection): return foreachMap(collection, func)
-    if isArray(collection) or isString(collection): return foreachArray(collection, func)
-    throw "foreach(): collection must be a map, array, or string"
+    if !isMap(collection) and !isArray(collection) and !isString(collection) {
+        throw "foreach(): collection must be a map, array, or string"
+    }
+
+    for key, val in collection {
+        func(key, val)
+    }
 }
 exports.foreach = foreach
-
-const foreachMap = fn(map, func) {
-    const keys = hashKeys(map);
-    const keyLn = len(keys)
-    for i = 0; i < keyLn; i+=1 {
-        const key = keys[i]
-        func(key, map[key])
-    }
-}
-
-const foreachArray = fn(arr, func) {
-    const ln = len(arr)
-    for i = 0; i < ln; i+=1 {
-        func(i, arr[i])
-    }
-}
 
 const contains = fn(arr, needle) {
     if isArray(arr): return arrayContains(arr, needle)

@@ -1,8 +1,8 @@
 import "std/test"
 
-const fac = fn(in) {
-    if in == 0: return 1
-    return in * fac(in - 1)
+const fac = fn(num) {
+    if num == 0: return 1
+    return num * fac(num - 1)
 }
 
 test.run("Factorial 20", fn(assert) {

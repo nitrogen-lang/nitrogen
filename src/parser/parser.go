@@ -438,8 +438,13 @@ func (p *Parser) parseGroupedExpressionC(end token.TokenType) ast.Expression {
 
 func (p *Parser) parseGroupedExpressionE() ast.Expression {
 	if p.settings.Debug {
-		fmt.Println("parseGroupedExpressionC")
+		fmt.Println("parseGroupedExpressionE")
 	}
 	p.nextToken()
-	return p.parseExpression(priLowest).(ast.Expression)
+	exp := p.parseExpression(priLowest)
+	if exp == nil {
+		return nil
+	}
+
+	return exp.(ast.Expression)
 }

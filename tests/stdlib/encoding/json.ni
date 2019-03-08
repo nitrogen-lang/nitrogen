@@ -47,7 +47,7 @@ let tests = [
 
 test.run("JSON encode", fn(assert) {
     col.foreach(tests, fn(i, el) {
-        assert.isEq(json.encode(el.in), el.out)
+        assert.isEq(json.encode(el["in"]), el["out"])
     })
 })
 
@@ -59,14 +59,14 @@ test.run("JSON encode bad value", fn(assert) {
 
 test.run("JSON decode", fn(assert) {
     col.foreach(tests, fn(i, el) {
-        const decoded = json.decode(el.out)
+        const decoded = json.decode(el["out"])
 
-        if isArray(el.in){
-            assert.isTrue(col.arrayMatch(decoded, el.in))
-        } elif isMap(el.in) {
-            assert.isTrue(col.mapMatch(decoded, el.in))
+        if isArray(el["in"]){
+            assert.isTrue(col.arrayMatch(decoded, el["in"]))
+        } elif isMap(el["in"]) {
+            assert.isTrue(col.mapMatch(decoded, el["in"]))
         } else {
-            assert.isEq(decoded, el.in)
+            assert.isEq(decoded, el["in"])
         }
     })
 

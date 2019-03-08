@@ -217,8 +217,8 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileFunction(ccb, node, false, false)
 
 	case *ast.IndexExpression:
-		compile(ccb, node.Index)
 		compile(ccb, node.Left)
+		compile(ccb, node.Index)
 		ccb.code.addInst(opcode.LoadIndex)
 
 	case *ast.LoopStatement:

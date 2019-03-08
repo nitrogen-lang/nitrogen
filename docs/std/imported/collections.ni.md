@@ -20,7 +20,9 @@ containing the elements of `arr` where `fn` returned true.
 `reduce` applies a function against an accumulator and each element in the array/map
 `col` (from left to right) to reduce it to a single value.
 
-## foreach(col: array|map, func: fn(key, val))
+## foreach(col: array|map|string, func: fn(key, val)) -- DEPRECATED
+
+**DEPRECATED**: Use for..in loop instead.
 
 `foreach` will iterate over the supplied collection calling `fn` on each element.
 The function `fn` is given the index or map key and the element value. Returned

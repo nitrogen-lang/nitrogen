@@ -422,29 +422,52 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 }
 
 func compileIterLoop(ccb *codeBlockCompiler, loop *ast.IterLoopStatement) {
-	return
-
-	// TODO: Implement for..in loops
 	endBlockLbl := randomLabel("end_")
 	iterBlockLbl := randomLabel("iter_")
+	endIterLbl := randomLabel("end_iter_")
 
 	compile(ccb, loop.Iter)
+	ccb.code.addInst(opcode.GetIter)
 
-	// A loop begins with a PREPARE_BLOCK opcode this creates the first layer environment
-	ccb.code.addInst(opcode.OpenScope)
+	ccb.code.addLabeledArgs(opcode.StartLoop, endBlockLbl, iterBlockLbl)
+	ccb.code.addInst(opcode.Dup)
+	ccb.code.addInst(opcode.LoadAttribute, ccb.names.indexOf("_next"))
+	ccb.code.addInst(opcode.Call, 0)
 
-	// Prepare for main body
+	ccb.code.addInst(opcode.Dup)
+	ccb.code.addInst(opcode.LoadConst, ccb.constants.indexOf(object.NullConst))
+	ccb.code.addInst(opcode.Compare, uint16(opcode.CmpEq))
+	ccb.code.addLabeledArgs(opcode.PopJumpIfTrue, endIterLbl)
+	ccb.code.addInst(opcode.JumpForward, 4)
+
+	ccb.code.addLabel(endIterLbl)
+	ccb.code.addInst(opcode.Pop) // Duplicated return from _next()
+	ccb.code.addLabeledArgs(opcode.JumpAbsolute, endBlockLbl)
+
+	bodyStrTable := newStringTableOffset(len(ccb.locals.table))
+
+	if loop.Key != nil {
+		ccb.code.addInst(opcode.Dup)
+		ccb.code.addInst(opcode.LoadConst, ccb.constants.indexOf(object.MakeIntObj(0)))
+		ccb.code.addInst(opcode.LoadIndex)
+		ccb.code.addInst(opcode.Define, ccb.locals.indexOf(loop.Key.Value))
+		bodyStrTable.indexOf(loop.Key.Value)
+	}
+
+	ccb.code.addInst(opcode.LoadConst, ccb.constants.indexOf(object.MakeIntObj(1)))
+	ccb.code.addInst(opcode.LoadIndex)
+	ccb.code.addInst(opcode.Define, ccb.locals.indexOf(loop.Value.Value))
+	bodyStrTable.indexOf(loop.Value.Value)
+
 	bodyCCB := &codeBlockCompiler{
 		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table)),
+		locals:    bodyStrTable,
 		names:     ccb.names,
 		code:      NewInstSet(),
 		filename:  ccb.filename,
 		name:      ccb.name,
 		inLoop:    true,
 	}
-
-	// Compile main body of loop
 	compile(bodyCCB, loop.Body)
 
 	// If the body ends in an expression, we need to pop it so the stack is correct
@@ -456,38 +479,14 @@ func compileIterLoop(ccb *codeBlockCompiler, loop *ast.IterLoopStatement) {
 	for _, n := range bodyCCB.locals.table[len(ccb.locals.table):] {
 		ccb.locals.indexOf(n)
 	}
-
-	// Prepare for iteration code
-	iterCCB := &codeBlockCompiler{
-		constants: ccb.constants,
-		locals:    newStringTableOffset(len(ccb.locals.table)),
-		names:     ccb.names,
-		code:      NewInstSet(),
-		filename:  ccb.filename,
-		name:      ccb.name,
-	}
-
-	// Compile iteration
-	compile(iterCCB, loop.Iter)
-
-	// Again, copy over the locals for indexing
-	for _, n := range iterCCB.locals.table[len(ccb.locals.table):] {
-		ccb.locals.indexOf(n)
-	}
-
-	ccb.code.addLabeledArgs(opcode.StartLoop, endBlockLbl, iterBlockLbl)
-
-	ccb.code.merge(condCCB.code)
-	ccb.code.addLabeledArgs(opcode.PopJumpIfFalse, endBlockLbl)
 	ccb.code.merge(bodyCCB.code)
 
 	ccb.code.addLabel(iterBlockLbl)
-	ccb.code.merge(iterCCB.code)
 	ccb.code.addInst(opcode.NextIter)
 	ccb.code.addLabel(endBlockLbl)
 	ccb.code.addInst(opcode.EndBlock)
 	ccb.code.addInst(opcode.CloseScope)
-	ccb.code.addInst(opcode.CloseScope)
+	ccb.code.addInst(opcode.Pop) // Iterator object
 }
 
 func compileDoBlock(ccb *codeBlockCompiler, node *ast.DoExpression) {

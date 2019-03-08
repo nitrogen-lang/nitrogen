@@ -104,3 +104,5 @@ These are all the opcodes used in this implementation.
 ### THROW
 
 ### DUP
+
+### GET\_ITER
