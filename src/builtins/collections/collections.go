@@ -23,6 +23,7 @@ func init() {
 	vm.RegisterBuiltin("hashMerge", hashMergeBuiltin)
 	vm.RegisterBuiltin("hashKeys", hashKeysBuiltin)
 	vm.RegisterBuiltin("hasKey", hasKeyBuiltin)
+	vm.RegisterBuiltin("range", rangeIterBuiltin)
 }
 
 func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -325,4 +326,115 @@ func hasKeyBuiltin(interpreter object.Interpreter, env *object.Environment, args
 
 	_, has := hash.Pairs[key.HashKey()]
 	return object.NativeBoolToBooleanObj(has)
+}
+
+var rangeIterator = &vm.BuiltinClass{
+	Fields: map[string]object.Object{
+		"start": object.NullConst,
+		"end":   object.NullConst,
+		"step":  object.NullConst,
+		"i":     object.NullConst,
+	},
+	VMClass: &vm.VMClass{
+		Name:   "rangeIterator",
+		Parent: nil,
+		Methods: map[string]object.ClassMethod{
+			"_next": vm.MakeBuiltinMethod(rangeIteratorNext),
+			"_iter": vm.MakeBuiltinMethod(rangeIteratorIter),
+		},
+	},
+}
+
+func rangeIteratorNext(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	selfEndObj, _ := self.Fields.Get("end")
+	selfStepObj, _ := self.Fields.Get("step")
+	selfNextObj, _ := self.Fields.Get("next")
+	selfIndexObj, _ := self.Fields.Get("i")
+
+	selfEnd := selfEndObj.(*object.Integer)
+	selfStep := selfStepObj.(*object.Integer)
+	selfNext := selfNextObj.(*object.Integer)
+	selfIndex := selfIndexObj.(*object.Integer)
+
+	if selfNext.Value >= selfEnd.Value {
+		return object.NullConst
+	}
+
+	idx := selfIndex.Value
+	next := selfNext.Value
+
+	self.Fields.Set("i", object.MakeIntObj(selfIndex.Value+1))
+	self.Fields.Set("next", object.MakeIntObj(selfNext.Value+selfStep.Value))
+
+	return &object.Array{
+		Elements: []object.Object{
+			object.MakeIntObj(idx),
+			object.MakeIntObj(next),
+		},
+	}
+}
+
+func rangeIteratorIter(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	return self
+}
+
+func makeRangeIter(start, end, step int64) *vm.VMInstance {
+	env := object.NewEnvironment()
+	env.SetForce("next", object.MakeIntObj(start), false)
+	env.SetForce("end", object.MakeIntObj(end), false)
+	env.SetForce("step", object.MakeIntObj(step), false)
+	env.SetForce("i", object.MakeIntObj(0), false)
+
+	return &vm.VMInstance{
+		Class:  rangeIterator.VMClass,
+		Fields: env,
+	}
+}
+
+func rangeIterBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	var start int64
+	var end int64
+	var step int64 = 1
+
+	if len(args) == 1 {
+		endInt, ok := args[0].(*object.Integer)
+		if !ok {
+			return object.NewException("range arg 1 expects an integer")
+		}
+		end = endInt.Value
+	} else if len(args) == 2 {
+		startInt, ok := args[0].(*object.Integer)
+		if !ok {
+			return object.NewException("range arg 1 expects an integer")
+		}
+		start = startInt.Value
+
+		endInt, ok := args[1].(*object.Integer)
+		if !ok {
+			return object.NewException("range arg 2 expects an integer")
+		}
+		end = endInt.Value
+	} else if len(args) == 3 {
+		startInt, ok := args[0].(*object.Integer)
+		if !ok {
+			return object.NewException("range arg 1 expects an integer")
+		}
+		start = startInt.Value
+
+		endInt, ok := args[1].(*object.Integer)
+		if !ok {
+			return object.NewException("range arg 2 expects an integer")
+		}
+		end = endInt.Value
+
+		stepInt, ok := args[2].(*object.Integer)
+		if !ok {
+			return object.NewException("range arg 2 expects an integer")
+		}
+		step = stepInt.Value
+	} else {
+		return object.NewException("ranged expects between 1 - 3 arguments, got %d", len(args))
+	}
+
+	return makeRangeIter(start, end, step)
 }

@@ -55,3 +55,11 @@ simply ignored. Note, neither input map is modified during the operation.
 
 Creates and returns an array with the keys of the given map. ***NOTE***: Programmers should NOT rely
 on the order of hash map keys. They are not guaranteed to be in a specific order.
+
+## range([start: int, ]end: int[, step: int]): instance
+
+`range` returns an instance implementing an iterator over the integer range. `range` takes between 1
+- 3 arguments. 1 arg is the end with start = 0 and step = 1. 2 args sets start and end with step = 1.
+3 args sets start, end, and step. Range iterates over the range [start, end) meaning `end` is not in
+the set. `range(10)` returns integers 0 - 9. `range(3, 10)` returns integers 3 - 9. `range(0, 10, 2)`
+returns integers 0, 2, 4, 6, 8.

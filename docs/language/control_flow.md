@@ -83,6 +83,12 @@ for val in items {
     println(val)
 }
 
+// Range iterator
+// Same as C style for loop above
+for i in range(10) {
+    println(i)
+}
+
 // While loop
 let finished = false
 while !finished {

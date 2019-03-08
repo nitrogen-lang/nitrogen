@@ -203,7 +203,7 @@ func (fl *LoopStatement) String() string {
 type IterLoopStatement struct {
 	Key   *Identifier
 	Value *Identifier
-	Iter  *Identifier
+	Iter  Expression
 	Body  *BlockStatement
 }
 

@@ -101,12 +101,11 @@ func (p *Parser) parseForLoop() ast.Statement {
 		}
 		p.nextToken()
 
-		if !p.curTokenIs(token.Identifier) {
-			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+		val, ok := p.parseExpression(priLowest).(ast.Expression)
+		if !ok {
 			return nil
 		}
-
-		loop.Iter = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		loop.Iter = val
 
 		if expectClosingParen && !p.expectPeek(token.RParen) {
 			return nil
@@ -142,12 +141,11 @@ func (p *Parser) parseForLoop() ast.Statement {
 		}
 		p.nextToken()
 
-		if !p.curTokenIs(token.Identifier) {
-			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+		val, ok := p.parseExpression(priLowest).(ast.Expression)
+		if !ok {
 			return nil
 		}
-
-		loop.Iter = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		loop.Iter = val
 
 		if expectClosingParen && !p.expectPeek(token.RParen) {
 			return nil

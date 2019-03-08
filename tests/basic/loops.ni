@@ -121,3 +121,43 @@ test.run("Hashmap iterator with keys", fn(assert) {
 
     assert.isTrue(col.arrayMatch(keys, ["key1", "key2", "key3"]))
 })
+
+test.run("Iterator expression", fn(assert) {
+    let sum = 0
+
+    for num in [2, 5, 10, 12, 5, 7] {
+        sum += num
+    }
+
+    assert.isEq(sum, 41)
+})
+
+test.run("Range iterator", fn(assert) {
+    let sum = 0
+
+    for num in range(5) {
+        sum += num
+    }
+
+    assert.isEq(sum, 10)
+})
+
+test.run("Range iterator with start", fn(assert) {
+    let sum = 0
+
+    for num in range(2, 5) {
+        sum += num
+    }
+
+    assert.isEq(sum, 9)
+})
+
+test.run("Range iterator with start, step", fn(assert) {
+    let sum = 0
+
+    for num in range(2, 5, 2) {
+        sum += num
+    }
+
+    assert.isEq(sum, 6)
+})
