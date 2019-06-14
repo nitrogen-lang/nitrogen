@@ -18,6 +18,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDefStatement()
 	case token.Return:
 		return p.parseReturnStatement()
+	case token.Function:
+		return p.parseFuncDefStatement()
 	case token.Class:
 		return p.parseClassDefStatement()
 	case token.For:
@@ -237,6 +239,35 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	} else {
 		stmt.Value = exp.(ast.Expression)
 	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseFuncDefStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseFuncDefStatement")
+	}
+
+	startToken := p.curToken
+	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
+
+	var ok bool
+	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
+	if !ok {
+		return nil
+	}
+
+	fun, ok := stmt.Value.(*ast.FunctionLiteral)
+	if !ok {
+		p.addErrorWithCPos(startToken.Pos, "Expected something else")
+		return nil
+	}
+
+	stmt.Name = &ast.Identifier{Token: startToken, Value: fun.Name}
 
 	if p.peekTokenIs(token.Semicolon) {
 		p.nextToken()

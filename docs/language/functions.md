@@ -7,6 +7,11 @@ around just like any other literal.
 Functions are defined using the `fn` keyword:
 
 ```
+fn someFunc(arg1, arg2) {
+    doSomething(arg1)
+    doSomething(arg2)
+}
+
 let myFunc = fn(thing) {
     println(thing)
 }
@@ -20,7 +25,7 @@ A function definition includes a parameter name list and a statement block.
 
 ## Parameters
 
-Functions can be called with parameters. A funciton must be called with at least
+Functions can be called with parameters. A function must be called with at least
 the same number of parameters as its declaration. Functions can be called with
 more parameters, but they won't assigned to individual identifiers.
 

@@ -23,8 +23,13 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 		p.nextToken()
 	}
 
+	if p.curTokenIs(token.Identifier) {
+		lit.Name = p.curToken.Literal
+		lit.FQName = p.curToken.Literal
+		p.nextToken()
+	}
+
 	if !p.curTokenIs(token.LParen) {
-		p.addErrorWithPos("Function literals cannot have names, use a let statement instead")
 		return nil
 	}
 
