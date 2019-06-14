@@ -306,14 +306,6 @@ func (l *Lexer) NextToken() token.Token {
 	case '#':
 		tok = l.readSingleLineComment()
 		l.resetPos()
-	case '\\':
-		if l.peekCh == 'x' {
-			l.readRune()
-			tok = l.readNumber()
-			l.lastToken = tok
-			return tok
-		}
-		tok = l.newToken(token.Illegal, l.curCh)
 	case 0:
 		if l.needSemicolon() {
 			tok = l.newToken(token.Semicolon, ';')
@@ -466,17 +458,21 @@ func (l *Lexer) readNumber() token.Token {
 	base := ""
 	tokenType := token.Integer
 
-	if l.curCh == '0' && l.peekCh == 'x' {
-		base = "0x"
-		pos.Col-- // Correct for initial 0x
-		l.readRune()
-		l.readRune()
-	}
-
-	if l.curCh == 'x' {
-		base = "0x"
-		pos.Col-- // Correct for initial \
-		l.readRune()
+	if l.curCh == '0' {
+		switch l.peekChar() {
+		case 'x':
+			base = "0x"
+			l.readRune()
+			l.readRune()
+		case 'b':
+			base = "0b"
+			l.readRune()
+			l.readRune()
+		case 'o':
+			base = "0o"
+			l.readRune()
+			l.readRune()
+		}
 	}
 
 	if l.curCh == '.' {
@@ -489,8 +485,11 @@ func (l *Lexer) readNumber() token.Token {
 		}
 	}
 
-	for isDigit(l.curCh) || isHexDigit(l.curCh) {
-		if l.curCh == '.' {
+	for isDigit(l.curCh) || isHexDigit(l.curCh) || l.curCh == '_' {
+		if l.curCh == '_' {
+			l.readRune()
+			continue
+		} else if l.curCh == '.' {
 			if tokenType != token.Integer {
 				return token.Token{
 					Type:     token.Illegal,

@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
 	"github.com/nitrogen-lang/nitrogen/src/token"
@@ -21,7 +22,17 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 
-	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+	var value int64
+	var err error
+
+	if strings.HasPrefix(p.curToken.Literal, "0b") {
+		value, err = strconv.ParseInt(p.curToken.Literal[2:], 2, 64)
+	} else if strings.HasPrefix(p.curToken.Literal, "0o") {
+		value, err = strconv.ParseInt(p.curToken.Literal[2:], 8, 64)
+	} else {
+		value, err = strconv.ParseInt(p.curToken.Literal, 0, 64)
+	}
+
 	if err != nil {
 		p.addErrorWithPos("Invalid integer: %q", p.curToken.Literal)
 		return nil
