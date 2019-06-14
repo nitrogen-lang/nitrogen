@@ -362,6 +362,8 @@ func (l *Lexer) needSemicolon() bool {
 		token.Integer,
 		token.Float,
 		token.String,
+		token.True,
+		token.False,
 		token.Nil,
 		token.Return,
 		token.Break,
