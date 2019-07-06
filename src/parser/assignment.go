@@ -37,6 +37,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.Throw:
 		p.nextToken()
 		t := &ast.ThrowStatement{
+			Token:      p.curToken,
 			Expression: p.parseExpression(priLowest).(ast.Expression),
 		}
 		if p.peekTokenIs(token.Semicolon) {
@@ -44,19 +45,25 @@ func (p *Parser) parseStatement() ast.Statement {
 		}
 		return t
 	case token.Continue:
-		stat := &ast.ContinueStatement{}
+		stat := &ast.ContinueStatement{
+			Token: p.curToken,
+		}
 		if p.peekTokenIs(token.Semicolon) {
 			p.nextToken()
 		}
 		return stat
 	case token.Break:
-		stat := &ast.BreakStatement{}
+		stat := &ast.BreakStatement{
+			Token: p.curToken,
+		}
 		if p.peekTokenIs(token.Semicolon) {
 			p.nextToken()
 		}
 		return stat
 	case token.Pass:
-		stat := &ast.PassStatement{}
+		stat := &ast.PassStatement{
+			Token: p.curToken,
+		}
 		if p.peekTokenIs(token.Semicolon) {
 			p.nextToken()
 		}

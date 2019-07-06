@@ -195,6 +195,7 @@ func (t *TryCatchExpression) String() string {
 }
 
 type NewInstance struct {
+	Token     token.Token
 	Class     Expression
 	Arguments []Expression
 }

@@ -57,7 +57,9 @@ func (p *Parser) parseForLoop() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseForLoop")
 	}
-	loop := &ast.LoopStatement{}
+	loop := &ast.LoopStatement{
+		Token: p.curToken,
+	}
 	expectClosingParen := false
 
 	if p.peekTokenIs(token.LParen) {
@@ -78,7 +80,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 
 	if p.peekTokenIs(token.Comma) {
 		p.curToken = peekTok
-		loop := &ast.IterLoopStatement{}
+		loop := &ast.IterLoopStatement{Token: p.curToken}
 
 		if !p.curTokenIs(token.Identifier) {
 			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
@@ -127,7 +129,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 		return loop
 	} else if p.peekTokenIs(token.In) {
 		p.curToken = peekTok
-		loop := &ast.IterLoopStatement{}
+		loop := &ast.IterLoopStatement{Token: p.curToken}
 
 		if !p.curTokenIs(token.Identifier) {
 			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
@@ -210,7 +212,9 @@ func (p *Parser) parseWhileLoop() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseWhileLoop")
 	}
-	loop := &ast.LoopStatement{}
+	loop := &ast.LoopStatement{
+		Token: p.curToken,
+	}
 	expectClosingParen := false
 
 	if p.peekTokenIs(token.LParen) {
@@ -251,6 +255,7 @@ func (p *Parser) parseInfiniteLoop() ast.Statement {
 	}
 
 	loop := &ast.LoopStatement{
+		Token:     p.curToken,
 		Init:      nil,
 		Condition: nil,
 		Iter:      nil,

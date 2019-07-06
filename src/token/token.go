@@ -7,7 +7,7 @@ type TokenType int
 // Position represents the line and column number where a token starts
 // in a source file.
 type Position struct {
-	Line, Col int
+	Line, Col uint
 }
 
 // TODO: Add filename to token

@@ -66,6 +66,7 @@ func Marshal(o object.Object) ([]byte, error) {
 		buf.Write(encodeUint16(uint16(o.LocalCount)))
 		buf.Write(encodeUint16(uint16(o.MaxStackSize)))
 		buf.Write(encodeUint16(uint16(o.MaxBlockSize)))
+
 		buf.Write(encodeUint16(uint16(len(o.Constants))))
 		for _, c := range o.Constants {
 			res, err := Marshal(c)
@@ -74,18 +75,30 @@ func Marshal(o object.Object) ([]byte, error) {
 			}
 			buf.Write(res)
 		}
+
 		buf.Write(encodeUint16(uint16(len(o.Locals))))
 		for _, l := range o.Locals {
 			tmpStr.Value = []rune(l)
 			res, _ := Marshal(tmpStr) // No error check, strings are almost guaranteed to work
 			buf.Write(res)
 		}
+
 		buf.Write(encodeUint16(uint16(len(o.Names))))
 		for _, l := range o.Names {
 			tmpStr.Value = []rune(l)
 			res, _ := Marshal(tmpStr) // No error check, strings are almost guaranteed to work
 			buf.Write(res)
 		}
+
+		buf.Write(encodeUint16(uint16(len(o.LineOffsets) / 2)))
+		for i := 0; i < len(o.LineOffsets); i += 2 {
+			addr := o.LineOffsets[i]
+			line := o.LineOffsets[i+1]
+
+			buf.Write(encodeUint16(uint16(addr)))
+			buf.Write(encodeUint16(uint16(line)))
+		}
+
 		buf.Write(encodeUint16(uint16(len(o.Code))))
 		buf.Write(o.Code)
 
@@ -173,6 +186,16 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 				return nil, inslice, err
 			}
 			cb.Names[i] = string(tmpStr.(*object.String).Value)
+		}
+
+		lineOffsetPairs := int(decodeUint16(inslice[:2]))
+		inslice = inslice[2:]
+		cb.LineOffsets = make([]uint16, lineOffsetPairs*2)
+		for i := 0; i < len(cb.LineOffsets); i += 2 {
+			cb.LineOffsets[i] = decodeUint16(inslice[:2])
+			inslice = inslice[2:]
+			cb.LineOffsets[i+1] = decodeUint16(inslice[:2])
+			inslice = inslice[2:]
 		}
 
 		codeLen := int(decodeUint16(inslice[:2]))

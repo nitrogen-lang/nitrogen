@@ -177,12 +177,12 @@ func main() {
 		code = compiler.Compile(program, "__main")
 	}
 
-	if compileOnly {
+	if outputFile != "" {
+		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile))
 		return
 	}
 
-	if outputFile != "" {
-		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile))
+	if compileOnly {
 		return
 	}
 

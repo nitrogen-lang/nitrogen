@@ -20,7 +20,7 @@ type Lexer struct {
 	lastToken token.Token
 
 	fileList    []string
-	line, col   int
+	line, col   uint
 	currentFile string
 }
 
@@ -94,7 +94,7 @@ func (l *Lexer) readRune() {
 	l.col++
 }
 
-func makePos(line, col int) token.Position {
+func makePos(line, col uint) token.Position {
 	return token.Position{
 		Line: line,
 		Col:  col,

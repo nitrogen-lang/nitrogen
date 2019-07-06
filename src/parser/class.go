@@ -14,6 +14,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 
 	classToken := p.curToken
 	c := &ast.ClassLiteral{
+		Token:   classToken,
 		Fields:  make([]*ast.DefStatement, 0),
 		Methods: make(map[string]*ast.FunctionLiteral),
 	}
@@ -70,7 +71,9 @@ func (p *Parser) parseMakeExpression() ast.Expression {
 	if p.settings.Debug {
 		fmt.Println("parseMakeExpression")
 	}
-	m := &ast.NewInstance{}
+	m := &ast.NewInstance{
+		Token: p.curToken,
+	}
 
 	p.nextToken()
 	cExpression := p.parseExpression(priLowest)

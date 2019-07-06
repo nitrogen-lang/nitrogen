@@ -125,6 +125,7 @@ func (h *HashLiteral) String() string {
 }
 
 type ClassLiteral struct {
+	Token   token.Token
 	Name    string
 	Parent  string
 	Fields  []*DefStatement

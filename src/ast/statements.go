@@ -168,6 +168,7 @@ func (bs *BlockStatement) String() string {
 }
 
 type LoopStatement struct {
+	Token     token.Token
 	Init      *DefStatement
 	Condition Expression
 	Iter      Node
@@ -201,6 +202,7 @@ func (fl *LoopStatement) String() string {
 }
 
 type IterLoopStatement struct {
+	Token token.Token
 	Key   *Identifier
 	Value *Identifier
 	Iter  Expression
@@ -229,19 +231,24 @@ func (fl *IterLoopStatement) String() string {
 	return out.String()
 }
 
-type ContinueStatement struct{}
+type ContinueStatement struct {
+	Token token.Token
+}
 
 func (c *ContinueStatement) statementNode()       {}
 func (c *ContinueStatement) TokenLiteral() string { return "continue" }
 func (c *ContinueStatement) String() string       { return "continue" }
 
-type BreakStatement struct{}
+type BreakStatement struct {
+	Token token.Token
+}
 
 func (b *BreakStatement) statementNode()       {}
 func (b *BreakStatement) TokenLiteral() string { return "break" }
 func (b *BreakStatement) String() string       { return "break" }
 
 type ThrowStatement struct {
+	Token      token.Token
 	Expression Expression
 }
 
@@ -249,7 +256,9 @@ func (t *ThrowStatement) statementNode()       {}
 func (t *ThrowStatement) TokenLiteral() string { return "throw" }
 func (t *ThrowStatement) String() string       { return "throw" }
 
-type PassStatement struct{}
+type PassStatement struct {
+	Token token.Token
+}
 
 func (b *PassStatement) statementNode()       {}
 func (b *PassStatement) TokenLiteral() string { return "pass" }

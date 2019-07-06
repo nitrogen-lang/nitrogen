@@ -20,6 +20,7 @@ type CodeBlock struct {
 	Code         []byte
 	Native       bool
 	ClassMethod  bool
+	LineOffsets  []uint16
 }
 
 // Implement object.Object interface
@@ -29,9 +30,16 @@ func (cb *CodeBlock) Inspect() string         { return "<codeblock>" }
 func (cb *CodeBlock) Dup() object.Object      { return object.NullConst }
 func (cb *CodeBlock) Print(indent string) {
 	offset := 0
+	lineOffsetIdx := 0
+
 	for offset < len(cb.Code) {
 		code := opcode.Opcode(cb.Code[offset])
-		fmt.Printf("%s%d:\t%s", indent, offset, opcode.Names[code])
+		if lineOffsetIdx < len(cb.LineOffsets) && int(cb.LineOffsets[lineOffsetIdx]) == offset {
+			fmt.Printf("%s%d\t%s%d:\t%s", indent, cb.LineOffsets[lineOffsetIdx+1], indent, offset, opcode.Names[code])
+			lineOffsetIdx += 2
+		} else {
+			fmt.Printf("%s\t%s%d:\t%s", indent, indent, offset, opcode.Names[code])
+		}
 		offset++
 
 		switch code {
@@ -90,6 +98,7 @@ type codeBlockCompiler struct {
 	code           *InstSet
 	filename, name string
 	inLoop         bool
+	linenum        uint
 }
 
 type constantTable struct {

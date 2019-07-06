@@ -142,7 +142,7 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 				fmt.Fprintln(&stackBuf, "Stack Trace:")
 				frame := vm.currentFrame
 				for frame != nil {
-					fmt.Fprintf(&stackBuf, "\t%s: %s\n", frame.code.Filename, frame.code.Name)
+					fmt.Fprintf(&stackBuf, "\t%s: %s:%d\n", frame.code.Filename, frame.code.Name, frame.lineno())
 					frame = frame.lastFrame
 				}
 				vm.unwind = vm.currentFrame.unwind

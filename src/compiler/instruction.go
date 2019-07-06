@@ -12,6 +12,7 @@ type Instruction struct {
 	ArgLabels []string // len = 1 or 2, name of label for corresponding argument, prefix "~" means relative
 	Label     string   // Label names this instruction for linking later
 	Next      *Instruction
+	Line      uint
 }
 
 func (i *Instruction) String() string {
@@ -64,11 +65,12 @@ func (i *InstSet) last() *Instruction {
 	return i.Tail
 }
 
-func (i *InstSet) addInst(code opcode.Opcode, args ...uint16) {
+func (i *InstSet) addInst(code opcode.Opcode, line uint, args ...uint16) {
 	checkArgLength(code, len(args))
 	inst := &Instruction{
 		Instr: code,
 		Args:  args,
+		Line:  line,
 	}
 
 	if i.Head == nil {
@@ -80,10 +82,11 @@ func (i *InstSet) addInst(code opcode.Opcode, args ...uint16) {
 	}
 }
 
-func (i *InstSet) addLabel(label string) {
+func (i *InstSet) addLabel(label string, line uint) {
 	inst := &Instruction{
 		Instr: opcode.Label,
 		Label: label,
+		Line:  line,
 	}
 
 	if i.Head == nil {
@@ -95,12 +98,13 @@ func (i *InstSet) addLabel(label string) {
 	}
 }
 
-func (i *InstSet) addLabeledArgs(code opcode.Opcode, argLabels ...string) {
+func (i *InstSet) addLabeledArgs(code opcode.Opcode, line uint, argLabels ...string) {
 	checkArgLength(code, len(argLabels))
 	inst := &Instruction{
 		Instr:     code,
 		Args:      make([]uint16, len(argLabels)),
 		ArgLabels: argLabels,
+		Line:      line,
 	}
 
 	if i.Head == nil {
@@ -174,7 +178,7 @@ func (i *InstSet) Link() {
 	}
 }
 
-func (i *InstSet) Assemble(ccb *codeBlockCompiler) []byte {
+func (i *InstSet) Assemble(ccb *codeBlockCompiler) ([]byte, []uint16) {
 	for _, o := range optimizations {
 		o(i, ccb)
 	}
@@ -183,7 +187,9 @@ func (i *InstSet) Assemble(ccb *codeBlockCompiler) []byte {
 
 	size := i.Len()
 	bytes := make([]byte, size)
-	offset := 0
+	offsetMap := make([]uint16, 0, 100)
+	var lastLine uint
+	var offset uint16
 
 	in := i.Head
 	for in != nil {
@@ -192,6 +198,10 @@ func (i *InstSet) Assemble(ccb *codeBlockCompiler) []byte {
 			continue
 		}
 
+		if in.Line != lastLine {
+			offsetMap = append(offsetMap, offset, uint16(in.Line))
+			lastLine = in.Line
+		}
 		bytes[offset] = in.Instr.ToByte()
 		offset++
 
@@ -217,7 +227,7 @@ func (i *InstSet) Assemble(ccb *codeBlockCompiler) []byte {
 		in = in.Next
 	}
 
-	return bytes
+	return bytes, offsetMap
 }
 
 type Code struct {

@@ -43,6 +43,23 @@ type Frame struct {
 	unwind     bool
 }
 
+func (f *Frame) lineno() uint {
+	pc := uint16(f.pc)
+	var linenum uint16
+
+	for i := 0; i < len(f.code.LineOffsets); i += 2 {
+		addr := f.code.LineOffsets[i]
+		line := f.code.LineOffsets[i+1]
+
+		if addr >= pc {
+			return uint(linenum)
+		}
+
+		linenum = line
+	}
+	return uint(linenum)
+}
+
 func (f *Frame) pushStack(obj object.Object) {
 	if f == nil {
 		return
