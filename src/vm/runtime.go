@@ -40,6 +40,7 @@ type Frame struct {
 	bp         int
 	env        *object.Environment
 	pc         int
+	unwind     bool
 }
 
 func (f *Frame) pushStack(obj object.Object) {

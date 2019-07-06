@@ -167,7 +167,7 @@ func objectToString(obj object.Object, machine *vm.VirtualMachine) string {
 	if instance, ok := obj.(*vm.VMInstance); ok {
 		toString := instance.GetBoundMethod("toString")
 		if toString != nil {
-			machine.CallFunction(0, toString, true, nil)
+			machine.CallFunction(0, toString, true, nil, false)
 			return objectToString(machine.PopStack(), machine)
 		}
 	}

@@ -54,7 +54,7 @@ func printBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 			machine := interpreter.(*vm.VirtualMachine)
 			toString := instance.GetBoundMethod("toString")
 			if toString != nil {
-				machine.CallFunction(0, toString, true, nil)
+				machine.CallFunction(0, toString, true, nil, false)
 				printBuiltin(interpreter, env, machine.PopStack())
 				continue
 			}
@@ -77,7 +77,7 @@ func printerrBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 			machine := interpreter.(*vm.VirtualMachine)
 			toString := instance.GetBoundMethod("toString")
 			if toString != nil {
-				machine.CallFunction(0, toString, true, nil)
+				machine.CallFunction(0, toString, true, nil, false)
 				printBuiltin(interpreter, env, machine.PopStack())
 				continue
 			}

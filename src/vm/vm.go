@@ -124,6 +124,7 @@ func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Enviro
 		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
 		blockStack: make([]block, code.MaxBlockSize),
 		env:        env,
+		unwind:     true,
 	}
 }
 
@@ -131,7 +132,6 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 	defer func() {
 		if r := recover(); r != nil {
 			if retObj, ok := r.(object.Object); ok {
-
 				if exc, ok := retObj.(*object.Exception); ok && exc.HasStackTrace {
 					ret = retObj
 					return
@@ -145,10 +145,11 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 					fmt.Fprintf(&stackBuf, "\t%s: %s\n", frame.code.Filename, frame.code.Name)
 					frame = frame.lastFrame
 				}
-				vm.unwind = true
+				vm.unwind = vm.currentFrame.unwind
 				exc := object.NewException(stackBuf.String())
 				exc.HasStackTrace = true
 				ret = exc
+				vm.currentFrame = vm.currentFrame.lastFrame
 			} else {
 				fmt.Fprintln(vm.GetStderr(), r)
 				fmt.Fprintln(vm.GetStderr(), string(debug.Stack()))
@@ -456,15 +457,15 @@ mainLoop:
 			fn := vm.currentFrame.popStack()
 			this, exists := vm.currentFrame.env.GetLocal("this")
 			if !exists {
-				vm.CallFunction(numargs, fn, false, nil)
+				vm.CallFunction(numargs, fn, false, nil, !immediateReturn)
 				break
 			}
 			instance, ok := this.(*VMInstance)
 			if !ok {
-				vm.CallFunction(numargs, fn, false, nil)
+				vm.CallFunction(numargs, fn, false, nil, !immediateReturn)
 				break
 			}
-			vm.CallFunction(numargs, fn, false, instance)
+			vm.CallFunction(numargs, fn, false, instance, !immediateReturn)
 
 		case opcode.Compare:
 			r := vm.currentFrame.popStack()
@@ -774,7 +775,7 @@ mainLoop:
 					vm.throw()
 					break
 				}
-				vm.CallFunction(0, method, true, obj)
+				vm.CallFunction(0, method, true, obj, !immediateReturn)
 			case *object.Hash:
 				vm.currentFrame.pushStack(makeMapIter(obj))
 			case *object.Array:
@@ -844,6 +845,11 @@ func (vm *VirtualMachine) throw() object.Object {
 				break
 			}
 		}
+		if !vm.currentFrame.unwind {
+			exc := object.NewException(exception.Inspect())
+			exc.HasStackTrace = exception.(*object.Exception).HasStackTrace
+			panic(exc)
+		}
 		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
 		if vm.currentFrame == nil {                 // Call stack exhausted
 			// exc := object.NewException("Uncaught Exception: %s", exception.Inspect())
@@ -912,13 +918,18 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 		return
 	}
 
-	vm.CallFunction(argLen, init, true, nil)
-	vm.currentFrame.popStack() // Pop return value of init function
+	vm.CallFunction(argLen, init, true, nil, false)
+	ret := vm.currentFrame.popStack() // Pop return value of init function
+	if ret.Type() == object.ExceptionObj {
+		vm.currentFrame.pushStack(ret)
+		vm.throw()
+		return
+	}
 	vm.currentFrame.pushStack(instance)
 	return
 }
 
-func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, this *VMInstance) {
+func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, this *VMInstance, unwind bool) {
 	switch fn := fn.(type) {
 	case *object.Builtin:
 		if vm.Settings.Debug {
@@ -991,6 +1002,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 		}
 
 		newFrame := vm.MakeFrame(fn.Body, env)
+		newFrame.unwind = unwind
 		newFrame.lastFrame = vm.currentFrame
 
 		for i := 0; i < paramLen; i++ {
@@ -1016,7 +1028,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 			vm.callStack.Push(newFrame)
 		}
 	case *BoundMethod:
-		vm.CallFunction(argc, fn.Method, true, fn.Instance)
+		vm.CallFunction(argc, fn.Method, true, fn.Instance, unwind)
 	case *VMClass:
 		if this == nil {
 			vm.currentFrame.pushStack(object.NewPanic("Can't call class method outside of object"))
@@ -1037,7 +1049,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 			}
 			return
 		}
-		vm.CallFunction(argc, init, true, this)
+		vm.CallFunction(argc, init, true, this, unwind)
 	default:
 		for i := 0; i < int(argc); i++ {
 			vm.currentFrame.popStack()

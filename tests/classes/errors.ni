@@ -1,15 +1,22 @@
 import "std/test"
 
+// Issue #37
 test.run("Failed lookup in class init", fn(assert) {
     class MyClass {
-        const init = fn() {
-            println(things)
+        fn init() {
+            println(thing)
         }
     }
 
-    assert.shouldThrow(fn() {
-        const instance = new MyClass()
-    })
+    fn main() {
+        try {
+            const things = new MyClass()
+        } catch e {
+            pass
+        }
 
-    return nil // See bug regarding class init exceptions not propogating
+        42 // Ensure the instance object doesn't linger on the stack
+    }
+
+    assert.isEq(main(), 42)
 })
