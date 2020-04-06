@@ -34,3 +34,8 @@ or with an argument that's not a string, will cause the interpreter to error.
 `exit()` terminates script execution and returns with the error code given.
 If the script is running in response to an SCGI request, the request is immediately
 returned.
+
+## debugVal(arg: T): T
+
+`debugVal()` will print its argument to standard out and return the argument unchanged.
+This is useful for debugging to check values without having to create a new variable.

@@ -22,6 +22,17 @@ func init() {
 			"osArch": object.MakeStringObj(runtime.GOARCH),
 		},
 	})
+	vm.RegisterBuiltin("debugVal", debugBuiltin)
+}
+
+func debugBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
+	}
+
+	fmt.Println(args[0].Inspect())
+
+	return args[0]
 }
 
 func disassemble(machine object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
