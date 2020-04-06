@@ -18,12 +18,13 @@ assert package. The object needs to throw an exception to indicate a
 particular assertion failed. The exception should be a clear explanation
 of how the assert failed.
 
-## run(desc: string, func: fn): nil
+## run(desc: string, func: fn[, cleanup: fn]): nil
 
 `run` represents a single test. `fn` is executed in a try block and the test will
 fail if an uncaught exception is bubbled up. `fn` is given a single argument which
 is an assertion module. The assertion module is the standard library assert package
-by default but can be changed by setting the `assertLib` variable above.
+by default but can be changed by setting the `assertLib` variable above. After the
+test is completed, regardless of pass or fail, the cleanup function will be ran.
 
 Example:
 
