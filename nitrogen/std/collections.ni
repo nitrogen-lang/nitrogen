@@ -127,4 +127,19 @@ const arrayContains = fn(arr, needle) {
     false
 }
 
+const join = fn(separator, arr) {
+    const arrLen = len(arr)
+    let str = ""
+
+    for i = 0; i < arrLen; i += 1 {
+        str += toString(arr[i])
+        if i < arrLen - 1 {
+            str += separator
+        }
+    }
+
+    str
+}
+exports.join = join
+
 return exports

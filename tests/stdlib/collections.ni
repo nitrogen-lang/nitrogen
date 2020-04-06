@@ -115,3 +115,8 @@ test.run("collections map match", fn(assert) {
     }
     assert.isFalse(col.mapMatch(map1, map2))
 })
+
+test.run("collections array join", fn(assert) {
+    const testArr2 = ["asia", "north america", "south america"]
+    assert.isEq(col.join(",", testArr2), "asia,north america,south america")
+})

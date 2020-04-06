@@ -45,3 +45,11 @@ will return false.
 `contains` searches `haystack` for `needle` and returns true if the needle is in the
 array, false otherwise. If `haystack` is a map, then `contains` returns if the map
 has a key `needle`.
+
+## join(separator: string, arr: array): string
+
+Joins the elements in `arr` separated by `separator`.
+
+'''
+join(', ', ["hello", "world"]) == "hello, world"
+'''
