@@ -11,14 +11,14 @@ if isNil(testdataDir) {
     exit(1)
 }
 
-const filename = filepath.join(testdataDir, 'test.csv')
+const decodeFilename = filepath.join(testdataDir, 'test.csv')
 
-const csvFile = file.open(filename, 'r')
-const reader = new csv.fileReader(csvFile)
+const decodeCsvFile = file.open(decodeFilename, 'r')
+const reader = new csv.fileReader(decodeCsvFile)
 
 const records = reader.readAllRecords()
 
-file.close(csvFile)
+file.close(decodeCsvFile)
 
 test.run("Check row count", fn(assert) {
     assert.isTrue(isArray(records))
@@ -39,4 +39,38 @@ test.run("Check field with quotes", fn(assert) {
 test.run("Check field with newline", fn(assert) {
     const row = records[5]
     assert.isEq("Lettie,\nLopez", row[1])
+})
+
+
+const encodeFilename = filepath.join(testdataDir, "tmp-test.csv")
+const encodeCsvFile = file.open(encodeFilename, "w")
+const writer = new csv.fileWriter(encodeCsvFile)
+
+const newRecords = [
+    ["seq","name","age","state","zip","dollar","pick"],
+    [1,"Keith,Jackson",27,"MN",81521,"$354.79",'"GREEN"'],
+    [2,"Frances,Wheeler",58,"NY",21838,"$1322.39",'"YELLOW"'],
+    [3,"Miguel,Hopkins",35,"GA",91111,"$522.29",'"WHITE"'],
+    [4,"Noah,Spencer",22,"DE",94024,"$8178.92",'"GREEN"'],
+    [5,"Lettie,\nLopez",64,"RI",39463,"$6219.12",'"GREEN"'],
+]
+
+for record in newRecords {
+    writer.writeRecord(record)
+}
+
+file.close(encodeCsvFile)
+
+test.run("Check encoded file was written", fn(assert) {
+    const fileData = file.readAll(encodeFilename)
+    assert.isEq(fileData, 'seq,name,age,state,zip,dollar,pick
+1,"Keith,Jackson",27,MN,81521,$354.79,"""GREEN"""
+2,"Frances,Wheeler",58,NY,21838,$1322.39,"""YELLOW"""
+3,"Miguel,Hopkins",35,GA,91111,$522.29,"""WHITE"""
+4,"Noah,Spencer",22,DE,94024,$8178.92,"""GREEN"""
+5,"Lettie,
+Lopez",64,RI,39463,$6219.12,"""GREEN"""
+')
+}, fn() {
+    file.remove(encodeFilename)
 })

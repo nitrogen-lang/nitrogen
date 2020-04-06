@@ -1,7 +1,7 @@
-// import 'std/encoding/csv/encode'
+import 'std/encoding/csv/encode'
 import 'std/encoding/csv/decode'
 
 return {
-    // "encode": encode.encode,
+    "fileWriter": encode.fileWriter,
     "fileReader": decode.fileReader,
 }
