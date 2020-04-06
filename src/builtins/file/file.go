@@ -2,8 +2,6 @@ package file
 
 import (
 	"bufio"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -21,12 +19,7 @@ func init() {
 	vm.RegisterModule(moduleName, &object.Module{
 		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
-			"open":     openFile,
-			"close":    closeFile,
-			"write":    writeFile,
-			"readAll":  readFullFile,
-			"readLine": readLine,
-			"readChar": readChar,
+			"readFile": readFullFile,
 			"remove":   deleteFile,
 			"exists":   fileExists,
 			"rename":   renameFile,
@@ -34,14 +27,31 @@ func init() {
 			"isdir":    isDirectory,
 		},
 		Vars: map[string]object.Object{
-			"name":           object.MakeStringObj(moduleName),
-			"fileResourceID": object.MakeStringObj(fileResourceID),
+			"name": object.MakeStringObj(moduleName),
+			"File": &vm.BuiltinClass{
+				Fields: map[string]object.Object{},
+				VMClass: &vm.VMClass{
+					Name:   "File",
+					Parent: nil,
+					Methods: map[string]object.ClassMethod{
+						"init":     vm.MakeBuiltinMethod(vmFileOpenFile),
+						"close":    vm.MakeBuiltinMethod(vmFileCloseFile),
+						"write":    vm.MakeBuiltinMethod(vmFileWriteFile),
+						"readAll":  vm.MakeBuiltinMethod(vmFileReadFullFile),
+						"readLine": vm.MakeBuiltinMethod(vmFileReadLine),
+						"readChar": vm.MakeBuiltinMethod(vmFileReadChar),
+						"remove":   vm.MakeBuiltinMethod(vmFileDeleteFile),
+						"rename":   vm.MakeBuiltinMethod(vmFileRenameFile),
+					},
+				},
+			},
 		},
 	})
 }
 
 type fileResource struct {
 	file   *os.File
+	mode   int
 	reader *bufio.Reader
 }
 
@@ -57,75 +67,6 @@ var modes = map[string]int{
 	"w+": os.O_RDWR | os.O_TRUNC | os.O_CREATE,
 	"a":  os.O_APPEND | os.O_WRONLY | os.O_CREATE,
 	"a+": os.O_APPEND | os.O_RDWR | os.O_CREATE,
-}
-
-func openFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("openFile", 2, args...); ac != nil {
-		return ac
-	}
-
-	filepath, ok := args[0].(*object.String)
-	if !ok {
-		return object.NewException("openFile expected a string, got %s", args[0].Type().String())
-	}
-
-	mode, ok := args[1].(*object.String)
-	if !ok {
-		return object.NewException("openFile expected a string, got %s", args[0].Type().String())
-	}
-
-	fileMode, ok := modes[mode.String()]
-	if !ok {
-		return object.NewException("Invalid file mode %s", mode.String())
-	}
-
-	file, err := os.OpenFile(filepath.String(), fileMode, 0644)
-	if err != nil {
-		return object.NewException("Error opening file %s", err.Error())
-	}
-
-	return &fileResource{
-		file:   file,
-		reader: bufio.NewReader(file),
-	}
-}
-
-func closeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("closeFile", 1, args...); ac != nil {
-		return ac
-	}
-
-	file, ok := args[0].(*fileResource)
-	if !ok {
-		return object.NewException("closeFile expected a file resource, got %s", args[0].Type().String())
-	}
-
-	file.file.Close()
-
-	return object.NullConst
-}
-
-func writeFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("writeFile", 2, args...); ac != nil {
-		return ac
-	}
-
-	file, ok := args[0].(*fileResource)
-	if !ok {
-		return object.NewException("writeFile expected a file resource, got %s", args[0].Type().String())
-	}
-
-	str, ok := args[1].(*object.String)
-	if !ok {
-		return object.NewException("writeFile expected a string, got %s", args[1].Type().String())
-	}
-
-	written, err := file.file.WriteString(str.String())
-	if err != nil {
-		fmt.Fprintln(interpreter.GetStderr(), err)
-	}
-
-	return object.MakeIntObj(int64(written))
 }
 
 func readFullFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -144,54 +85,6 @@ func readFullFile(interpreter object.Interpreter, env *object.Environment, args 
 	}
 
 	return object.MakeStringObj(string(file))
-}
-
-func readLine(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("readLine", 1, args...); ac != nil {
-		return ac
-	}
-
-	file, ok := args[0].(*fileResource)
-	if !ok {
-		return object.NewException("readLine expected a file resource, got %s", args[0].Type().String())
-	}
-
-	line, err := file.reader.ReadString('\n')
-	if err != nil {
-		if err == io.EOF {
-			if line != "" {
-				object.MakeStringObj(line)
-			}
-			return object.NullConst
-		}
-		return object.NewException(err.Error())
-	}
-
-	return object.MakeStringObj(line[:len(line)-1])
-}
-
-func readChar(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	if ac := moduleutils.CheckArgs("readChar", 1, args...); ac != nil {
-		return ac
-	}
-
-	file, ok := args[0].(*fileResource)
-	if !ok {
-		return object.NewException("readChar expected a file resource, got %s", args[0].Type().String())
-	}
-
-	r, _, err := file.reader.ReadRune()
-	if err != nil {
-		if err == io.EOF {
-			if r != 0 {
-				return object.MakeStringObjRunes([]rune{r})
-			}
-			return object.NullConst
-		}
-		return object.NewException(err.Error())
-	}
-
-	return object.MakeStringObjRunes([]rune{r})
 }
 
 func deleteFile(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

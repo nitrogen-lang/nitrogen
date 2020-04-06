@@ -45,6 +45,13 @@ func NewSizedEnclosedEnv(outer *Environment, size int) *Environment {
 	return env
 }
 
+func (e *Environment) Clone() *Environment {
+	return &Environment{
+		root:   e.root,
+		parent: e.parent,
+	}
+}
+
 func (e *Environment) SetParent(env *Environment) {
 	e.parent = env
 }

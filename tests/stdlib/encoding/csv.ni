@@ -13,12 +13,12 @@ if isNil(testdataDir) {
 
 const decodeFilename = filepath.join(testdataDir, 'test.csv')
 
-const decodeCsvFile = file.open(decodeFilename, 'r')
+const decodeCsvFile = new file.File(decodeFilename, 'r')
 const reader = new csv.fileReader(decodeCsvFile)
 
 const records = reader.readAllRecords()
 
-file.close(decodeCsvFile)
+decodeCsvFile.close()
 
 test.run("Check row count", fn(assert) {
     assert.isTrue(isArray(records))
@@ -43,7 +43,7 @@ test.run("Check field with newline", fn(assert) {
 
 
 const encodeFilename = filepath.join(testdataDir, "tmp-test.csv")
-const encodeCsvFile = file.open(encodeFilename, "w")
+const encodeCsvFile = new file.File(encodeFilename, "w")
 const writer = new csv.fileWriter(encodeCsvFile)
 
 const newRecords = [
@@ -59,10 +59,10 @@ for record in newRecords {
     writer.writeRecord(record)
 }
 
-file.close(encodeCsvFile)
+encodeCsvFile.close()
 
 test.run("Check encoded file was written", fn(assert) {
-    const fileData = file.readAll(encodeFilename)
+    const fileData = file.readFile(encodeFilename)
     assert.isEq(fileData, 'seq,name,age,state,zip,dollar,pick
 1,"Keith,Jackson",27,MN,81521,$354.79,"""GREEN"""
 2,"Frances,Wheeler",58,NY,21838,$1322.39,"""YELLOW"""

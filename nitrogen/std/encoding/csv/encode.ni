@@ -1,5 +1,4 @@
 import "std/collections"
-import "std/file"
 import "std/string"
 
 use collections.join
@@ -13,15 +12,12 @@ class fileWriter {
     let quote = '"'
 
     fn init(f) {
-        if !isResource(f) or resourceID(f) != file.fileResourceID {
-            throw "fileWriter expected a file resource"
-        }
         this.cfile = f
     }
 
     fn writeRecord(record) {
-        file.write(this.cfile, join(",", map(record, this.csvQuote)))
-        file.write(this.cfile, "\n")
+        this.cfile.write(join(",", map(record, this.csvQuote)))
+        this.cfile.write("\n")
     }
 
     fn csvQuote(item) {

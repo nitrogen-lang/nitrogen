@@ -1,5 +1,3 @@
-import "std/file"
-
 const DEFAULT_DELIM = ','
 const DEFAULT_QUOTE = '"'
 
@@ -26,7 +24,7 @@ class lexer {
 
     const readChar = fn() {
         this.curChar = this.peekChar
-        this.peekChar = file.readChar(this.source)
+        this.peekChar = this.source.readChar()
     }
 
     const readQuotedString = fn() {
@@ -90,10 +88,6 @@ class fileReader {
     let l
 
     const init = fn(f) {
-        if !isResource(f) or resourceID(f) != file.fileResourceID {
-            throw "fileReader expected a file resource"
-        }
-
         this.l = new lexer(f)
     }
 

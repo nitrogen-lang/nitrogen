@@ -11,8 +11,8 @@ if isNil(testdataDir) {
 
 const filename = filepath.join(testdataDir, 'test.txt')
 
-test.run("file.readAll", fn(assert) {
-    const data = file.readAll(filename)
+test.run("file.readFile", fn(assert) {
+    const data = file.readFile(filename)
     const expected = "Hello, world!\n"
     assert.isEq(data, expected)
 })

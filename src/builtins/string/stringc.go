@@ -73,7 +73,7 @@ func vmStringInit(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *obje
 		return object.NewException("string expected a string, got %s", args[1].Type().String())
 	}
 
-	env.Set("str", args[0])
+	self.Fields.SetForce("str", args[0], true)
 	return nil
 }
 
