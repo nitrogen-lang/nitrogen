@@ -27,7 +27,7 @@ func init() {
 			"readAll":  readFullFile,
 			"readLine": readLine,
 			"readChar": readChar,
-			"delete":   deleteFile,
+			"remove":   deleteFile,
 			"exists":   fileExists,
 			"rename":   renameFile,
 			"dirlist":  directoryList,

@@ -15,7 +15,7 @@ if a resource is a file.
 value is a file resource that is used by other file methods in this module.
 
 | mode | description                                                                                                                        |
-|------|------------------------------------------------------------------------------------------------------------------------------------|
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | r    | Open for reading only                                                                                                              |
 | r+   | Open for reading and writing                                                                                                       |
 | w    | Open for writing only; truncates the file to zero length; if the file doesn't exist, attempts to create it                         |
@@ -37,7 +37,7 @@ number of bytes written.
 
 Reads the entire file at `filepath` and returns its contents as a string.
 
-## delete(filepath: string)
+## remove(filepath: string)
 
 Deletes the file at `filepath`. If the file doesn't exist, nothing happens.
 
