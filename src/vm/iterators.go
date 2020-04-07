@@ -13,7 +13,7 @@ var arrayIterator = &BuiltinClass{
 		Name:   "ArrayIterator",
 		Parent: nil,
 		Methods: map[string]object.ClassMethod{
-			"_next": MakeBuiltinMethod(arrayIteratorNext),
+			"_next": MakeBuiltinMethod(arrayIteratorNext, 0),
 		},
 	},
 }
@@ -62,7 +62,7 @@ var mapIterator = &BuiltinClass{
 		Name:   "MapIterator",
 		Parent: nil,
 		Methods: map[string]object.ClassMethod{
-			"_next": MakeBuiltinMethod(mapIteratorNext),
+			"_next": MakeBuiltinMethod(mapIteratorNext, 0),
 		},
 	},
 }
@@ -115,7 +115,7 @@ var stringIterator = &BuiltinClass{
 		Name:   "StringIterator",
 		Parent: nil,
 		Methods: map[string]object.ClassMethod{
-			"_next": MakeBuiltinMethod(stringIteratorNext),
+			"_next": MakeBuiltinMethod(stringIteratorNext, 0),
 		},
 	},
 }

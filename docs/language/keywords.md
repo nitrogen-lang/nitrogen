@@ -7,18 +7,19 @@ They cannot be used as user-defined identifies such as variable names.
 
 These keywords are currently a part of the language.
 
-|          |        |        |
-|----------|--------|--------|
-| and      | as     | break  |
-| catch    | class  | const  |
-| continue | delete | do     |
-| elif     | else   | false  |
-| for      | fn     | if     |
-| import   | in     | let    |
-| native   | new    | nil    |
-| or       | pass   | return |
-| throw    | true   | try    |
-| use      | while  |
+|            |        |           |
+| ---------- | ------ | --------- |
+| and        | as     | break     |
+| catch      | class  | const     |
+| continue   | delete | do        |
+| elif       | else   | false     |
+| for        | fn     | if        |
+| import     | in     | let       |
+| native     | new    | nil       |
+| or         | pass   | return    |
+| throw      | true   | try       |
+| use        | while  | interface |
+| implements |        |
 
 ## Reserved For Future Use
 
@@ -27,7 +28,6 @@ Although they will work as identifiers, it's highly encouraged not to use them.
 
 - async
 - await
-- interface
 - range
 - trait
 - yield

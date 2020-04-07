@@ -311,6 +311,16 @@ mainLoop:
 				vm.currentFrame.pushStack(object.TrueConst)
 			}
 
+		case opcode.Implements:
+			r := vm.currentFrame.popStack()
+			l := vm.currentFrame.popStack()
+			res := vm.evalImplementsExpression(l, r)
+			vm.currentFrame.pushStack(res)
+			if object.ObjectIs(res, object.ExceptionObj) {
+				vm.throw()
+				break
+			}
+
 		case opcode.LoadConst:
 			vm.currentFrame.pushStack(vm.currentFrame.code.Constants[vm.getUint16()])
 

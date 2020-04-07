@@ -136,6 +136,10 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 			if node.Value == o.(*object.Boolean).Value {
 				return uint16(i)
 			}
+		case *object.Interface:
+			if node.Name == o.(*object.Interface).Name {
+				return uint16(i)
+			}
 		}
 	}
 

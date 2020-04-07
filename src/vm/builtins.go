@@ -179,8 +179,9 @@ func (b *BoundMethod) Dup() object.Object      { return object.NullConst }
 type BuiltinMethodFunction func(i *VirtualMachine, self *VMInstance, env *object.Environment, args ...object.Object) object.Object
 
 type BuiltinMethod struct {
-	Fn   BuiltinMethodFunction
-	Name string
+	Fn          BuiltinMethodFunction
+	Name        string
+	NumOfParams int
 }
 
 func (b *BuiltinMethod) Inspect() string         { return "builtin method" }
@@ -188,8 +189,8 @@ func (b *BuiltinMethod) Type() object.ObjectType { return object.BuiltinMethodOb
 func (b *BuiltinMethod) Dup() object.Object      { return b }
 func (b *BuiltinMethod) ClassMethod()            {}
 
-func MakeBuiltinMethod(fn BuiltinMethodFunction) *BuiltinMethod {
-	return &BuiltinMethod{Fn: fn}
+func MakeBuiltinMethod(fn BuiltinMethodFunction, NumOfParams int) *BuiltinMethod {
+	return &BuiltinMethod{Fn: fn, NumOfParams: NumOfParams}
 }
 
 func InstanceOf(class string, i *VMInstance) bool {

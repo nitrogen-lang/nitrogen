@@ -36,6 +36,7 @@ const (
 	ResourceObj
 	ModuleObj
 	ClassObj
+	InterfaceObj
 	InstanceObj
 	BuiltinMethodObj
 	BoundMethodObj
@@ -57,6 +58,7 @@ var objectTypeNames = map[ObjectType]string{
 	ResourceObj:      "RESOURCE",
 	ModuleObj:        "MODULE",
 	ClassObj:         "CLASS",
+	InterfaceObj:     "INTERFACE",
 	InstanceObj:      "INSTANCE",
 	BuiltinMethodObj: "BUILTIN METHOD",
 	BoundMethodObj:   "BOUND METHOD",

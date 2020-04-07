@@ -6,12 +6,20 @@ use collections.map
 use string.contains
 use string.replace
 
+interface Writer {
+    write(data)
+}
+
 class fileWriter {
     let cfile
     let delimiter = ','
     let quote = '"'
 
     fn init(f) {
+        if ! f implements Writer {
+            throw "f must be a Writer"
+        }
+
         this.cfile = f
     }
 
@@ -35,4 +43,5 @@ class fileWriter {
 
 return {
     "fileWriter": fileWriter,
+    "Writer": Writer,
 }

@@ -108,6 +108,8 @@ const (
 	Native
 	Do
 	In
+	Interface
+	Implements
 	keywordEnd
 )
 
@@ -167,36 +169,38 @@ var tokens = [...]string{
 	RSquare: "]",
 
 	// Keywords
-	Function: "fn",
-	Let:      "let",
-	Const:    "const",
-	True:     "true",
-	False:    "false",
-	If:       "if",
-	Elif:     "elif",
-	Else:     "else",
-	Return:   "return",
-	Nil:      "nil",
-	LAnd:     "and",
-	LOr:      "or",
-	For:      "for",
-	While:    "while",
-	Loop:     "loop",
-	Continue: "continue",
-	Break:    "break",
-	Try:      "try",
-	Catch:    "catch",
-	Throw:    "throw",
-	Class:    "class",
-	New:      "new",
-	Pass:     "pass",
-	Import:   "import",
-	As:       "as",
-	Delete:   "delete",
-	Use:      "use",
-	Native:   "native",
-	Do:       "do",
-	In:       "in",
+	Function:   "fn",
+	Let:        "let",
+	Const:      "const",
+	True:       "true",
+	False:      "false",
+	If:         "if",
+	Elif:       "elif",
+	Else:       "else",
+	Return:     "return",
+	Nil:        "nil",
+	LAnd:       "and",
+	LOr:        "or",
+	For:        "for",
+	While:      "while",
+	Loop:       "loop",
+	Continue:   "continue",
+	Break:      "break",
+	Try:        "try",
+	Catch:      "catch",
+	Throw:      "throw",
+	Class:      "class",
+	New:        "new",
+	Pass:       "pass",
+	Import:     "import",
+	As:         "as",
+	Delete:     "delete",
+	Use:        "use",
+	Native:     "native",
+	Do:         "do",
+	In:         "in",
+	Interface:  "interface",
+	Implements: "implements",
 }
 
 var keywords map[string]TokenType

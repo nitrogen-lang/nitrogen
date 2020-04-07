@@ -1,6 +1,7 @@
 package object
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
@@ -81,4 +82,38 @@ func GetSelf(env *Environment) *Instance {
 		return nil
 	}
 	return i
+}
+
+type IfaceMethodDef struct {
+	Name       string
+	Parameters []string
+}
+
+func (i *IfaceMethodDef) Inspect() string {
+	var out bytes.Buffer
+
+	out.WriteString("fn ")
+	out.WriteString(i.Name)
+	out.WriteByte('(')
+	for j := 0; j < len(i.Parameters); j++ {
+		out.WriteString(i.Parameters[j])
+		if j < len(i.Parameters)-1 {
+			out.WriteString(", ")
+		}
+	}
+	out.WriteByte(')')
+
+	return out.String()
+}
+
+type Interface struct {
+	Name    string
+	Methods map[string]*IfaceMethodDef
+}
+
+func (i *Interface) Inspect() string  { return "interface " + i.Name }
+func (i *Interface) Type() ObjectType { return InterfaceObj }
+func (i *Interface) Dup() Object      { return NullConst }
+func (i *Interface) GetMethod(name string) *IfaceMethodDef {
+	return i.Methods[name]
 }

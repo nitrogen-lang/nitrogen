@@ -1,6 +1,10 @@
 const DEFAULT_DELIM = ','
 const DEFAULT_QUOTE = '"'
 
+interface CharReader {
+    readChar()
+}
+
 class lexer {
     let source
     let curChar
@@ -9,6 +13,10 @@ class lexer {
     let quote = DEFAULT_QUOTE
 
     const init = fn(file) {
+        if ! file implements CharReader {
+            throw "f must be a CharReader"
+        }
+
         this.source = file
         this.readChar()
         this.readChar()
@@ -118,4 +126,5 @@ class fileReader {
 
 return {
     "fileReader": fileReader,
+    "CharReader": CharReader,
 }

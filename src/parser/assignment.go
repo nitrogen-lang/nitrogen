@@ -22,6 +22,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseFuncDefStatement()
 	case token.Class:
 		return p.parseClassDefStatement()
+	case token.Interface:
+		return p.parseInterfaceDefStatement()
 	case token.For:
 		return p.parseForLoop()
 	case token.While:
@@ -310,6 +312,42 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 
 	if class, ok := stmt.Value.(*ast.ClassLiteral); ok {
 		class.Name = stmt.Name.String()
+	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseInterfaceDefStatement() ast.Statement {
+	if p.settings.Debug {
+		fmt.Println("parseInterfaceDefStatement")
+	}
+	if !p.peekTokenIs(token.Identifier) {
+		return p.parseExpressionStatement()
+	}
+
+	InterfaceToken := p.curToken
+	if !p.expectPeek(token.Identifier) {
+		return nil
+	}
+
+	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	p.insertToken(InterfaceToken)
+	p.nextToken()
+
+	exp, ok := p.parseExpression(priLowest).(ast.Expression)
+	if !ok {
+		return nil
+	}
+	stmt.Value = exp
+
+	if iface, ok := stmt.Value.(*ast.InterfaceLiteral); ok {
+		iface.Name = stmt.Name.String()
 	}
 
 	if p.peekTokenIs(token.Semicolon) {

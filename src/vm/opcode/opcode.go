@@ -47,6 +47,7 @@ const (
 	BinaryAndNot
 	UnaryNeg
 	UnaryNot
+	Implements
 	Compare
 	Call
 	Return
@@ -141,6 +142,7 @@ var HasNoArg = map[Opcode]bool{
 	BinaryOr:     true,
 	BinaryNot:    true,
 	BinaryAndNot: true,
+	Implements:   true,
 	UnaryNeg:     true,
 	UnaryNot:     true,
 	Return:       true,
@@ -182,6 +184,7 @@ var Names = map[Opcode]string{
 	BinaryOr:         "BINARY_OR",
 	BinaryNot:        "BINARY_NOT",
 	BinaryAndNot:     "BINARY_ANDNOT",
+	Implements:       "IMPLEMENTS",
 	UnaryNeg:         "UNARY_NEG",
 	UnaryNot:         "UNARY_NOT",
 	Compare:          "COMPARE",

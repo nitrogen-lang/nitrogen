@@ -39,6 +39,11 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 		return lit
 	}
 
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+		return lit
+	}
+
 	if !p.expectPeek(token.LBrace) {
 		return nil
 	}

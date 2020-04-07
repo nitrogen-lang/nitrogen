@@ -137,3 +137,20 @@ func (c *ClassLiteral) TokenLiteral() string { return "class" }
 func (c *ClassLiteral) String() string {
 	return fmt.Sprintf("class %s ^ %s {...}", c.Name, c.Parent)
 }
+
+type IfaceMethodDef struct {
+	Name   string
+	Params []string
+}
+
+type InterfaceLiteral struct {
+	Token   token.Token
+	Name    string
+	Methods map[string]*IfaceMethodDef
+}
+
+func (c *InterfaceLiteral) expressionNode()      {}
+func (c *InterfaceLiteral) TokenLiteral() string { return "interface" }
+func (c *InterfaceLiteral) String() string {
+	return fmt.Sprintf("interface %s {...}", c.Name)
+}

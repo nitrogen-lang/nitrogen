@@ -59,6 +59,15 @@ func disassemble(machine object.Interpreter, env *object.Environment, args ...ob
 		return object.NullConst
 	}
 
+	if iface, ok := fnObj.(*object.Interface); ok {
+		fmt.Println(iface.Inspect(), "{")
+		for _, def := range iface.Methods {
+			fmt.Println("", def.Inspect())
+		}
+		fmt.Println("}")
+		return object.NullConst
+	}
+
 	fn, ok := fnObj.(*vm.VMFunction)
 	if !ok {
 		return object.NewException("dis expected a func, got %s", fnObj.Type().String())

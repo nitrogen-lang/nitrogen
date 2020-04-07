@@ -103,6 +103,22 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		}
 		ccb.code.addInst(opcode.MakeMap, ccb.linenum, uint16(len(node.Pairs)))
 
+	case *ast.InterfaceLiteral:
+		ccb.linenum = node.Token.Pos.Line
+		iface := &object.Interface{
+			Name:    node.Name,
+			Methods: make(map[string]*object.IfaceMethodDef, len(node.Methods)),
+		}
+
+		for name, def := range node.Methods {
+			iface.Methods[name] = &object.IfaceMethodDef{
+				Name:       def.Name,
+				Parameters: def.Params,
+			}
+		}
+
+		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(iface))
+
 	// Expressions
 	case *ast.Identifier:
 		ccb.linenum = node.Token.Pos.Line
@@ -163,6 +179,8 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpLTEq))
 		case ">=":
 			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpGTEq))
+		case "implements":
+			ccb.code.addInst(opcode.Implements, ccb.linenum)
 		}
 
 	case *ast.CallExpression:

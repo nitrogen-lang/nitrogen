@@ -109,3 +109,37 @@ let myObject = new name(10)
 
 println(classOf(myObject)) // Prints "name"
 ```
+
+# Interface
+
+An interface can be used to ensure a class, object, or other interface implements
+certain functionality. Object implement interface implicitly. There is not need,
+or syntax, to mark a class as explicitly implementing an interface.
+
+## Interface Example
+
+```
+interface Printer {
+    print(data)
+}
+
+interface AdvancedPrinter {
+    print(data)
+    yell(data, other)
+}
+
+class StdOutPrinter {
+    fn print(data) {
+        println(data)
+    }
+}
+
+const classImplements = StdOutPrinter implements Printer // True
+
+const p = new StdOutPrinter()
+const instanceImplements = p implements Printer // True
+
+const interfaceImplements = AdvancedPrinter implements Printer // True
+```
+
+See example usage in the standard library. For example, the CSV module.

@@ -93,3 +93,53 @@ func (p *Parser) parseMakeExpression() ast.Expression {
 
 	return m
 }
+
+func (p *Parser) parseInterfaceLiteral() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseInterfaceLiteral")
+	}
+
+	interfaceToken := p.curToken
+	iface := &ast.InterfaceLiteral{
+		Token:   interfaceToken,
+		Methods: make(map[string]*ast.IfaceMethodDef),
+	}
+
+	if !p.expectPeek(token.LBrace) {
+		return nil
+	}
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBrace) {
+		if !p.curTokenIs(token.Identifier) {
+			return nil
+		}
+
+		ifaceMeth := &ast.IfaceMethodDef{
+			Name: p.curToken.Literal,
+		}
+
+		if !p.expectPeek(token.LParen) {
+			return nil
+		}
+
+		params := p.parseFunctionParameters()
+		ifaceMeth.Params = make([]string, len(params))
+		for i, p := range params {
+			ifaceMeth.Params[i] = p.String()
+		}
+
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+
+		iface.Methods[ifaceMeth.Name] = ifaceMeth
+		p.nextToken()
+	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return iface
+}

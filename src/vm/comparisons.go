@@ -5,6 +5,126 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
 )
 
+func (vm *VirtualMachine) evalImplementsExpression(left, right object.Object) object.Object {
+	var iface *object.Interface
+
+	if inter, ok := right.(*object.Interface); ok {
+		iface = inter
+	} else {
+		return object.NewException("implements must have an interface on the right side")
+	}
+
+	switch node := left.(type) {
+	case *object.Interface:
+		for _, method := range iface.Methods {
+			m, exists := node.Methods[method.Name]
+			if !exists || len(m.Parameters) != len(method.Parameters) {
+				return object.FalseConst
+			}
+		}
+	case *object.Class:
+		for _, method := range iface.Methods {
+			m, exists := node.Methods[method.Name]
+			if !exists {
+				return object.FalseConst
+			}
+
+			fn, ok := m.(*object.Function)
+			if !ok || len(fn.Parameters) != len(method.Parameters) {
+				return object.FalseConst
+			}
+		}
+	case *object.Instance:
+		class := node.Class
+		for _, method := range iface.Methods {
+			m, exists := class.Methods[method.Name]
+			if !exists {
+				return object.FalseConst
+			}
+
+			fn, ok := m.(*object.Function)
+			if !ok || len(fn.Parameters) != len(method.Parameters) {
+				return object.FalseConst
+			}
+		}
+	case *VMClass:
+		for _, method := range iface.Methods {
+			m, exists := node.Methods[method.Name]
+			if !exists {
+				return object.FalseConst
+			}
+
+			switch m := m.(type) {
+			case *object.Function:
+				if len(m.Parameters) != len(method.Parameters) {
+					return object.FalseConst
+				}
+			case *BuiltinMethod:
+				if m.NumOfParams != len(method.Parameters) {
+					return object.FalseConst
+				}
+			case *VMFunction:
+				if len(m.Parameters) != len(method.Parameters) {
+					return object.FalseConst
+				}
+			default:
+				return object.FalseConst
+			}
+		}
+	case *VMInstance:
+		class := node.Class
+		for _, method := range iface.Methods {
+			m, exists := class.Methods[method.Name]
+			if !exists {
+				return object.FalseConst
+			}
+
+			switch m := m.(type) {
+			case *object.Function:
+				if len(m.Parameters) != len(method.Parameters) {
+					return object.FalseConst
+				}
+			case *BuiltinMethod:
+				if m.NumOfParams != len(method.Parameters) {
+					return object.FalseConst
+				}
+			case *VMFunction:
+				if len(m.Parameters) != len(method.Parameters) {
+					return object.FalseConst
+				}
+			default:
+				return object.FalseConst
+			}
+		}
+	case *BuiltinClass:
+		for _, method := range iface.Methods {
+			m, exists := node.Methods[method.Name]
+			if !exists {
+				return object.FalseConst
+			}
+
+			switch m := m.(type) {
+			case *object.Function:
+				if len(m.Parameters) != len(method.Parameters) {
+					return object.FalseConst
+				}
+			case *BuiltinMethod:
+				if m.NumOfParams != len(method.Parameters) {
+					return object.FalseConst
+				}
+			case *VMFunction:
+				if len(m.Parameters) != len(method.Parameters) {
+					return object.FalseConst
+				}
+			default:
+				return object.FalseConst
+			}
+		}
+	}
+
+	return object.TrueConst
+}
+
 func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) object.Object {
 	switch {
 	case left.Type() != right.Type():

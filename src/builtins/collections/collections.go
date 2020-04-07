@@ -339,8 +339,8 @@ var rangeIterator = &vm.BuiltinClass{
 		Name:   "rangeIterator",
 		Parent: nil,
 		Methods: map[string]object.ClassMethod{
-			"_next": vm.MakeBuiltinMethod(rangeIteratorNext),
-			"_iter": vm.MakeBuiltinMethod(rangeIteratorIter),
+			"_next": vm.MakeBuiltinMethod(rangeIteratorNext, 0),
+			"_iter": vm.MakeBuiltinMethod(rangeIteratorIter, 0),
 		},
 	},
 }

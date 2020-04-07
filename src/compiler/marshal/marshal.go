@@ -42,6 +42,35 @@ func Marshal(o object.Object) ([]byte, error) {
 		return out, nil
 	case *object.Null:
 		return []byte{'n'}, nil
+	case *object.Interface:
+		buf := new(bytes.Buffer)
+		tmpStr := object.MakeStringObj(o.Name)
+		res, _ := Marshal(tmpStr)
+		buf.Write(res)
+
+		buf.Write(encodeUint16(uint16(len(o.Methods))))
+
+		for _, method := range o.Methods {
+			tmpStr.Value = []rune(method.Name) // Reuse String object
+			res, _ = Marshal(tmpStr)
+			buf.Write(res)
+
+			buf.Write(encodeUint16(uint16(len(method.Parameters))))
+
+			for _, paramter := range method.Parameters {
+				tmpStr.Value = []rune(paramter) // Reuse String object
+				res, _ = Marshal(tmpStr)
+				buf.Write(res)
+			}
+		}
+
+		clen := buf.Len()
+		out := make([]byte, clen+9)
+		out[0] = 'e'
+		binary.BigEndian.PutUint64(out[1:9], uint64(clen))
+		copy(out[9:], buf.Bytes())
+		return out, nil
+
 	case *compiler.CodeBlock:
 		buf := new(bytes.Buffer)
 		tmpStr := object.MakeStringObj(o.Name)
@@ -132,6 +161,35 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 		return object.NativeBoolToBooleanObj(in[1] == 1), in[2:], nil
 	case 'n':
 		return object.NullConst, in[1:], nil
+	case 'e':
+		inslice := in[9:]
+
+		iface := &object.Interface{}
+		name, inslice, _ := Unmarshal(inslice)
+		iface.Name = string(name.(*object.String).Value)
+
+		numOfMethods := int(decodeUint16(inslice[:2]))
+		inslice = inslice[2:]
+		iface.Methods = make(map[string]*object.IfaceMethodDef, numOfMethods)
+
+		for i := 0; i < numOfMethods; i++ {
+			methDef := &object.IfaceMethodDef{}
+			name, inslice, _ = Unmarshal(inslice)
+			methDef.Name = string(name.(*object.String).Value)
+
+			numOfParams := int(decodeUint16(inslice[:2]))
+			inslice = inslice[2:]
+			methDef.Parameters = make([]string, numOfParams)
+
+			for p := 0; p < numOfParams; p++ {
+				name, inslice, _ = Unmarshal(inslice)
+				methDef.Parameters[p] = string(name.(*object.String).Value)
+			}
+
+			iface.Methods[methDef.Name] = methDef
+		}
+
+		return iface, inslice, nil
 	case 'c':
 		inslice := in[9:] // Length is bytes [1-8]
 
