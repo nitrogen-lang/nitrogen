@@ -2,7 +2,7 @@ import "std/string"
 import "std/assert"
 import "std/os"
 
-const verbose = isString(os.env()['VERBOSE_TEST'])
+const verbose = isString(os.env['VERBOSE_TEST'])
 
 const exports = {
     "fatal": true,

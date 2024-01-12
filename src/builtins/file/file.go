@@ -15,8 +15,8 @@ const (
 	fileResourceID = "std.file"
 )
 
-func init() {
-	vm.RegisterModule(moduleName, &object.Module{
+func Init() object.Object {
+	return &object.Module{
 		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
 			"readFile": readFullFile,
@@ -46,7 +46,7 @@ func init() {
 				},
 			},
 		},
-	})
+	}
 }
 
 type fileResource struct {

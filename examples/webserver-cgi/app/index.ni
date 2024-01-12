@@ -26,4 +26,4 @@ println(string.format('Content-Type: text/html
     {}
 </body>
 </html>
-', printMap(os.env()), printMap(_SERVER)))
+', printMap(os.env), printMap(_SERVER)))

@@ -87,8 +87,12 @@ func (vm *VirtualMachine) GetOkInstanceVar(key string) (interface{}, bool) {
 	return val, ok
 }
 
-func (vm *VirtualMachine) SetInstanceVar(key string, val interface{}) {
-	vm.instanceVars[key] = val
+func (vm *VirtualMachine) SetModuleProp(modulePath string, prop string, val object.Object) {
+	module := GetModule(modulePath)
+	if module == nil {
+		panic(fmt.Sprintf("Module %s doesn't exist", modulePath))
+	}
+	module.Vars[prop] = val
 }
 
 func (vm *VirtualMachine) HasInstanceVar(key string) bool {

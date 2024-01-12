@@ -6,7 +6,6 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 var (
@@ -14,19 +13,19 @@ var (
 	commandArgs *object.Array
 )
 
-func init() {
-	vm.RegisterModule(moduleName, &object.Module{
+func Init() object.Object {
+	return &object.Module{
 		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
 			"system": runSystem,
 			"exec":   runSystemPT,
 			"argv":   argv,
-			"env":    osEnv,
 		},
 		Vars: map[string]object.Object{
 			"name": object.MakeStringObj(moduleName),
+			"env":  object.MakeEmptyHash(),
 		},
-	})
+	}
 }
 
 // SetCmdArgs sets the command line arguments array.
@@ -36,15 +35,6 @@ func SetCmdArgs(args *object.Array) {
 
 func argv(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	return commandArgs
-}
-
-func osEnv(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
-	machine := interpreter.(*vm.VirtualMachine)
-	extEnv, exists := machine.GetOkInstanceVar("std.os.env")
-	if !exists {
-		return object.NullConst
-	}
-	return extEnv.(object.Object)
 }
 
 func runSystem(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

@@ -168,14 +168,12 @@ func main() {
 			fmt.Println(program.String())
 			return
 		}
+
+		code = compiler.Compile(program, "__main")
 	}
 
 	var result object.Object
 	var start time.Time
-
-	if code == nil {
-		code = compiler.Compile(program, "__main")
-	}
 
 	if outputFile != "" {
 		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile))
@@ -226,7 +224,7 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	vmsettings.Debug = fullDebug
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
-	machine.SetInstanceVar("std.os.env", getExternalEnv())
+	machine.SetModuleProp("std/os", "env", getExternalEnv())
 
 	ret, err := machine.Execute(code, nil)
 	if err != nil {

@@ -5,7 +5,7 @@ import "std/filepath"
 import "std/test"
 import "std/os"
 
-const testdataDir = os.env()['TESTDATA_DIR']
+const testdataDir = os.env['TESTDATA_DIR']
 if isNil(testdataDir) {
     println("TESTDATA_DIR not set")
     exit(1)

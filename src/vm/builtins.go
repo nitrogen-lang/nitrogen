@@ -81,10 +81,21 @@ func getBuiltin(name string) object.Object {
 
 // GetModule returns a Module object is a module with the given name is registered, otherwise nil.
 func GetModule(name string) *object.Module {
-	if module, defined := modules[name]; defined {
-		return module
+	modulePath := strings.Split(name, "/")
+	module, defined := modules[modulePath[0]]
+	if !defined {
+		return nil
 	}
-	return nil
+
+	for _, p := range modulePath[1:] {
+		obj, exists := module.Vars[p]
+		if !exists || obj.Type() != object.ModuleObj {
+			return nil
+		}
+		module = obj.(*object.Module)
+	}
+
+	return module
 }
 
 type VMFunction struct {

@@ -6,13 +6,12 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 const moduleName = "std/filepath"
 
-func init() {
-	vm.RegisterModule(moduleName, &object.Module{
+func Init() object.Object {
+	return &object.Module{
 		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
 			"dir":      filepathDirectory,
@@ -25,7 +24,7 @@ func init() {
 		Vars: map[string]object.Object{
 			"name": object.MakeStringObj(moduleName),
 		},
-	})
+	}
 }
 
 func filepathDirectory(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

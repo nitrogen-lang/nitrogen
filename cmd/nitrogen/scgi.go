@@ -191,7 +191,7 @@ func (w *worker) run(conn net.Conn) {
 
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
-	machine.SetInstanceVar("std.os.env", getExternalEnv())
+	machine.SetModuleProp("std/os", "env", getExternalEnv())
 
 	result, _ := machine.Execute(code, nil)
 

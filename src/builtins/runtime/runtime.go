@@ -1,4 +1,4 @@
-package dis
+package runtime
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 
 var moduleName = "std/runtime"
 
-func init() {
-	vm.RegisterModule(moduleName, &object.Module{
+func Init() object.Object {
+	return &object.Module{
 		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
 			"dis": disassemble,
@@ -21,7 +21,10 @@ func init() {
 			"osName": object.MakeStringObj(runtime.GOOS),
 			"osArch": object.MakeStringObj(runtime.GOARCH),
 		},
-	})
+	}
+}
+
+func init() {
 	vm.RegisterBuiltin("debugVal", debugBuiltin)
 }
 

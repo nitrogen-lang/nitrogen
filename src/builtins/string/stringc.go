@@ -10,8 +10,8 @@ import (
 
 var moduleName = "std/string"
 
-func init() {
-	vm.RegisterModule(moduleName, &object.Module{
+func Init() object.Object {
+	return &object.Module{
 		Name: moduleName,
 		Methods: map[string]object.BuiltinFunction{
 			"contains":  strContains,
@@ -49,7 +49,7 @@ func init() {
 				},
 			},
 		},
-	})
+	}
 }
 
 func dedupString(str []rune, c rune) string {
