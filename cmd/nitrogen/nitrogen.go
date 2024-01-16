@@ -49,6 +49,7 @@ var (
 	printVersion bool
 	fullDebug    bool
 	compileOnly  bool
+	disableNibs  bool
 	cpuprofile   string
 	memprofile   string
 	outputFile   string
@@ -75,6 +76,7 @@ func init() {
 
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
 	flag.BoolVar(&compileOnly, "c", false, "Compile code, print any errors, and exit")
+	flag.BoolVar(&disableNibs, "nonibs", false, "Disable creation of .nib files")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
@@ -104,6 +106,10 @@ func main() {
 	if infoCmd {
 		runInfoCmd()
 		return
+	}
+
+	if disableNibs {
+		moduleutils.WriteCompiledScripts = false
 	}
 
 	if len(autoloadModules) > 0 {

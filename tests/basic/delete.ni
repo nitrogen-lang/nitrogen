@@ -9,7 +9,7 @@ test.run("delete variable", fn(assert) {
 })
 
 test.run("delete constant", fn(assert) {
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         const place = "Earth"
         delete place
     })

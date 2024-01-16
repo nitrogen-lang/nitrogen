@@ -18,7 +18,7 @@ test.run("Single statement if expressions", fn(assert) {
 })
 
 test.run("Various if expressions", fn(assert) {
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         if ["a"] == ["b"]: return
         println("Hello")
     })

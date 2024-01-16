@@ -8,6 +8,7 @@ import (
 func init() {
 	AddOptimizer(optimizeLoadPop)
 	AddOptimizer(optimizeNegativeNums)
+	AddOptimizer(optimizeDefineLoadFast)
 }
 
 // optimizeLoadPop removes the pattern LOAD_ followed by POP.
@@ -40,6 +41,29 @@ func optimizeNegativeNums(i *InstSet, ccb *codeBlockCompiler) {
 			if ok {
 				curr.Args[0] = ccb.constants.indexOf(object.MakeIntObj(-numObj.Value))
 				curr.Next = curr.Next.Next
+			}
+		}
+
+		curr = curr.Next
+	}
+}
+
+func optimizeDefineLoadFast(i *InstSet, ccb *codeBlockCompiler) {
+	curr := i.Head
+
+	for curr != nil && curr.Next != nil {
+		if curr.Is(opcode.Define) && curr.Next.Is(opcode.LoadFast) {
+			if curr.Args[0] == curr.Next.Args[0] {
+				def := curr
+
+				dup := &Instruction{
+					Instr: opcode.Dup,
+					Line:  curr.Line,
+					Next:  def,
+				}
+
+				curr.Prev.Next = dup
+				def.Next = curr.Next.Next
 			}
 		}
 

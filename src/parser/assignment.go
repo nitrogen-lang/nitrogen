@@ -36,16 +36,6 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDelete()
 	case token.Use:
 		return p.parseUseStatement()
-	case token.Throw:
-		p.nextToken()
-		t := &ast.ThrowStatement{
-			Token:      p.curToken,
-			Expression: p.parseExpression(priLowest).(ast.Expression),
-		}
-		if p.peekTokenIs(token.Semicolon) {
-			p.nextToken()
-		}
-		return t
 	case token.Continue:
 		stat := &ast.ContinueStatement{
 			Token: p.curToken,

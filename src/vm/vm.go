@@ -564,7 +564,7 @@ mainLoop:
 				val := vm.currentFrame.popStack()
 				hashKey, ok := key.(object.Hashable)
 				if !ok {
-					ex := object.NewPanic("Map key %s not valid", key.Inspect())
+					ex := object.NewException("Map key %s not valid", key.Inspect())
 					vm.currentFrame.pushStack(ex)
 					vm.throw()
 					break
@@ -615,17 +615,18 @@ mainLoop:
 				vm.currentFrame.popStack()
 			}
 
-		case opcode.OpenScope:
+		case opcode.StartBlock:
+			vm.currentFrame.pushBlock(&doBlock{})
 			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
 
-		case opcode.CloseScope:
-			vm.currentFrame.env = vm.currentFrame.env.Parent()
-
-		case opcode.EndBlock:
-			vm.currentFrame.popBlock()
-			if vm.currentFrame.sp == 0 {
-				vm.currentFrame.pushStack(object.NullConst)
+		case opcode.Recover:
+			catch := vm.getUint16()
+			tcb := &recoverBlock{
+				pc: int(catch),
+				sp: vm.currentFrame.sp,
 			}
+			vm.currentFrame.pushBlock(tcb)
+			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
 
 		case opcode.StartLoop:
 			loopEnd := vm.getUint16()
@@ -637,6 +638,13 @@ mainLoop:
 			}
 			vm.currentFrame.pushBlock(lb)
 			vm.currentFrame.env = object.NewEnclosedEnv(vm.currentFrame.env)
+
+		case opcode.EndBlock:
+			vm.currentFrame.popBlock()
+			vm.currentFrame.env = vm.currentFrame.env.Parent()
+			if vm.currentFrame.sp == 0 {
+				vm.currentFrame.pushStack(object.NullConst)
+			}
 
 		case opcode.Continue:
 			vm.currentFrame.pc = vm.currentFrame.popBlockUntil(loopBlockT).(*forLoopBlock).iter
@@ -651,20 +659,6 @@ mainLoop:
 		case opcode.Import:
 			path := vm.currentFrame.code.Constants[vm.getUint16()].(*object.String)
 			vm.importPackage(path.String())
-
-		case opcode.StartTry:
-			catch := vm.getUint16()
-			tcb := &tryBlock{
-				catch: int(catch),
-				sp:    vm.currentFrame.sp,
-			}
-			vm.currentFrame.pushBlock(tcb)
-
-		case opcode.Throw:
-			exc := vm.throw()
-			if exc != nil {
-				return exc
-			}
 
 		case opcode.BuildClass:
 			methodNum := vm.getUint16()
@@ -739,7 +733,7 @@ mainLoop:
 			case *object.Hash:
 				vm.currentFrame.pushStack(vm.lookupHashIndex(obj, object.MakeStringObj(name)))
 			default:
-				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object type %s", obj.Type()))
+				vm.currentFrame.pushStack(object.NewException("Attribute lookup on non-object type %s", obj.Type()))
 				vm.throw()
 			}
 
@@ -771,7 +765,7 @@ mainLoop:
 			case *object.Hash:
 				vm.assignHashMapIndex(instance, object.MakeStringObj(name), val)
 			default:
-				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object type %s", instance.Type()))
+				vm.currentFrame.pushStack(object.NewException("Attribute lookup on non-object type %s", instance.Type()))
 				vm.throw()
 			}
 
@@ -785,7 +779,7 @@ mainLoop:
 			case *VMInstance:
 				method := obj.GetBoundMethod("_iter")
 				if method == nil {
-					vm.currentFrame.pushStack(object.NewPanic("Instance does not implement _iter() %s", obj.Class.Name))
+					vm.currentFrame.pushStack(object.NewException("Instance does not implement _iter() %s", obj.Class.Name))
 					vm.throw()
 					break
 				}
@@ -797,7 +791,7 @@ mainLoop:
 			case *object.String:
 				vm.currentFrame.pushStack(makeStringIter(obj))
 			default:
-				vm.currentFrame.pushStack(object.NewPanic("Attribute lookup on non-object type %s", obj.Type()))
+				vm.currentFrame.pushStack(object.NewException("Attribute lookup on non-object type %s", obj.Type()))
 				vm.throw()
 			}
 
@@ -851,11 +845,11 @@ func (vm *VirtualMachine) throw() object.Object {
 		// Unwind block stack until there's a try block
 		catchBlock := vm.currentFrame.popBlockUntil(tryBlockT)
 		if catchBlock != nil { // Try block found
-			tryBlockS := catchBlock.(*tryBlock)
+			tryBlockS := catchBlock.(*recoverBlock)
 			if !tryBlockS.caught {
 				tryBlockS.caught = true
-				vm.currentFrame.sp = tryBlockS.sp    // Unwind data stack
-				vm.currentFrame.pc = tryBlockS.catch // Set program counter to catch block
+				vm.currentFrame.sp = tryBlockS.sp // Unwind data stack
+				vm.currentFrame.pc = tryBlockS.pc // Set program counter to catch block
 				break
 			}
 		}
@@ -939,8 +933,13 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 		vm.throw()
 		return
 	}
+
+	if ret.Type() == object.ErrorObj {
+		vm.currentFrame.pushStack(ret)
+		return
+	}
+
 	vm.currentFrame.pushStack(instance)
-	return
 }
 
 func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, this *VMInstance, unwind bool) {

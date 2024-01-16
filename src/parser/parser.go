@@ -104,11 +104,11 @@ func New(l *lexer.Lexer, settings *Settings) *Parser {
 	p.registerPrefix(token.Dash, p.parsePrefixExpression)
 	p.registerPrefix(token.LParen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
-	p.registerPrefix(token.Try, p.parseTryCatch)
 	p.registerPrefix(token.Class, p.parseClassLiteral)
 	p.registerPrefix(token.Interface, p.parseInterfaceLiteral)
 	p.registerPrefix(token.New, p.parseMakeExpression)
 	p.registerPrefix(token.Do, p.parseDoExpression)
+	p.registerPrefix(token.Recover, p.parseRecoverExpression)
 
 	// Infix parsing functions
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)

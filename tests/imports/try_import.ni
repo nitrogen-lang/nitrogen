@@ -1,10 +1,13 @@
 import "std/test"
 
 test.run("Import directory", fn(assert) {
-    try {
+    const math = recover {
         import '../../testdata/math.ni'
-    } catch e {
-        println("Test Failed: ", e)
+        math
+    }
+
+    if !isMap(math) {
+        println("Import test failed: ", varType(math))
         exit(1)
     }
 

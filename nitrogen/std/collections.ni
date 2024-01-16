@@ -31,7 +31,7 @@ const reduce = fn(collection, func)/*: Object*/ {
 
     if isArray(collection): return reduceArray(collection, func, accumulator)
     if isMap(collection): return reduceMap(collection, func, accumulator)
-    throw "reduce(): collection must be a map or array"
+    return error("reduce(): collection must be a map or array")
 }
 exports.reduce = reduce
 
@@ -56,7 +56,7 @@ const reduceMap = fn(map, func, accumulator)/*: Object*/ {
 }
 
 const arrayMatch = fn(arr1, arr2)/*: bool*/ {
-    if !isArray(arr1) or !isArray(arr2): throw "arrayMatch expected arrays as arguments"
+    if !isArray(arr1) or !isArray(arr2): return error("arrayMatch expected arrays as arguments")
     if len(arr1) != len(arr2): return false
 
     const ln = len(arr1)
@@ -98,7 +98,7 @@ const valuesEqual = fn(v1, v2) {
 
 const foreach = fn(collection, func) {
     if !isMap(collection) and !isArray(collection) and !isString(collection) {
-        throw "foreach(): collection must be a map, array, or string"
+        return error("foreach(): collection must be a map, array, or string")
     }
 
     for key, val in collection {
@@ -110,7 +110,7 @@ exports.foreach = foreach
 const contains = fn(arr, needle) {
     if isArray(arr): return arrayContains(arr, needle)
     if isMap(arr): return arrayContains(hashKeys(arr), needle)
-    throw "contains expected an array or map but received " + varType(arr)
+    return error("contains expected an array or map but received " + varType(arr))
 }
 exports.contains = contains
 

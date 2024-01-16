@@ -9,10 +9,8 @@ test.run("Failed lookup in class init", fn(assert) {
     }
 
     fn main() {
-        try {
+        recover {
             const things = new MyClass()
-        } catch e {
-            pass
         }
 
         42 // Ensure the instance object doesn't linger on the stack

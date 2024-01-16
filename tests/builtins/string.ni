@@ -14,7 +14,7 @@ test.run("String module contains", fn(assert) {
 test.run("String module count", fn(assert) {
     const str = String("one,two,three")
     assert.isEq(str.count(","), 2)
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         str.count("")
     })
 })
@@ -49,7 +49,7 @@ test.run("String module replace", fn(assert) {
     expected = "moo moo moo"
     assert.isEq(str.replace("oink", "moo", -1), expected)
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         str.replace("", "moo", -1)
     })
 })

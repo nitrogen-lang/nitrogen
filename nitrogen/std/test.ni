@@ -9,20 +9,24 @@ const exports = {
     "assertLib": assert,
 }
 
-const run = fn(desc, func) {
+fn run(desc, func) {
+    let assertLib = exports.assertLib
     let cleanup = nil
 
     if len(arguments) > 0: cleanup = arguments[0]
 
     if verbose: println("Test: ", desc)
 
-    try {
-        func(exports.assertLib)
-        if !isNil(cleanup): cleanup()
-    } catch e {
-        if !isNil(cleanup): cleanup()
+    let assertionError = recover {
+        func(assertLib)
+    }
 
-        printerrln(string.format("Test '{}' failed: {}", desc, e))
+    recover {
+        if !isNil(cleanup): cleanup()
+    }
+
+    if isError(assertionError) {
+        printerrln(string.format("Test '{}' failed: {}", desc, assertionError))
         if exports.fatal: exit(1)
     }
 }

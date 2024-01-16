@@ -1,7 +1,7 @@
 import "std/test"
 
 test.run("Non-existant import", fn(assert) {
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         import './includes/_not_exist.ni'
     })
 })

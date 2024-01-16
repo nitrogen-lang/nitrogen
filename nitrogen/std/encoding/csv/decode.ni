@@ -14,7 +14,7 @@ class lexer {
 
     const init = fn(file) {
         if ! file implements CharReader {
-            throw "f must be a CharReader"
+            return error("f must be a CharReader")
         }
 
         this.source = file

@@ -44,15 +44,15 @@ test.run("array splice 0 offset, no length", fn(assert) {
 })
 
 test.run("array splice with negative offset and length", fn(assert) {
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         splice(arr2, -1)
     })
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         splice(arr2, 1, -1)
     })
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         splice(arr2, -1, -1)
     })
 })

@@ -73,7 +73,7 @@ test.run("collections foreach with string", fn(assert) {
 })
 
 test.run("collections foreach not collection", fn(assert) {
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         col.foreach(42, fn(){})
     })
 })

@@ -52,7 +52,7 @@ test.run("JSON encode", fn(assert) {
 })
 
 test.run("JSON encode bad value", fn(assert) {
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         json.encode(fn() {pass})
     })
 })

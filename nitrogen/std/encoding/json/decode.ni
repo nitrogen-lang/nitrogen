@@ -170,7 +170,7 @@ class parser {
         if ct == STRING: return this.curToken.value
         if ct == NUMBER: return this.curToken.value
 
-        throw "Invalid JSON, expected { [ true false null \" or a number"
+        return error("Invalid JSON, expected { [ true false null \" or a number")
     }
 
     const parseArray = fn() {
@@ -183,7 +183,7 @@ class parser {
             this.nextToken()
 
             if this.curToken.type == RSQUARE: break
-            if this.curToken.type != COMMA: throw "Invalid JSON array, expected a comma"
+            if this.curToken.type != COMMA: return error("Invalid JSON array, expected a comma")
             this.nextToken()
         }
 
@@ -196,18 +196,18 @@ class parser {
 
         loop {
             if this.curToken.type == RCURLY: break
-            if this.curToken.type != STRING: throw "Invalid JSON object key, expected a string"
+            if this.curToken.type != STRING: return error("Invalid JSON object key, expected a string")
             const key = this.curToken.value
 
             this.nextToken()
-            if this.curToken.type != COLON: throw "Invalid JSON object value pair, expected a colon"
+            if this.curToken.type != COLON: return error("Invalid JSON object value pair, expected a colon")
 
             this.nextToken()
             obj[key] = this.parse()
 
             this.nextToken()
             if this.curToken.type == RCURLY: break
-            if this.curToken.type != COMMA: throw "Invalid JSON object, expected a comma"
+            if this.curToken.type != COMMA: return error("Invalid JSON object, expected a comma")
             this.nextToken()
         }
 

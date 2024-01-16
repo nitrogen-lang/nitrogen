@@ -95,9 +95,7 @@ const (
 	Loop
 	Continue
 	Break
-	Try
-	Catch
-	Throw
+	Recover
 	Class
 	New
 	Pass
@@ -186,9 +184,7 @@ var tokens = [...]string{
 	Loop:       "loop",
 	Continue:   "continue",
 	Break:      "break",
-	Try:        "try",
-	Catch:      "catch",
-	Throw:      "throw",
+	Recover:    "recover",
 	Class:      "class",
 	New:        "new",
 	Pass:       "pass",

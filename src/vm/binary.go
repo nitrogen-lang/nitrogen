@@ -9,7 +9,7 @@ import (
 func (vm *VirtualMachine) evalBinaryExpression(op string, left, right object.Object) object.Object {
 	switch {
 	case left.Type() != right.Type():
-		panic(object.NewException("type mismatch: %s %s %s", left.Type(), op, right.Type()))
+		return object.NewException("type mismatch: %s %s %s", left.Type(), op, right.Type())
 	case object.ObjectsAre(object.IntergerObj, left, right):
 		return vm.evalIntegerBinaryExpression(op, left, right)
 	case object.ObjectsAre(object.FloatObj, left, right):

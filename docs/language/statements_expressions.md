@@ -1,15 +1,15 @@
 # Statements/Expressions
 
-Nitrogen is an expression oriented language. Meaning, almost everything is an expression
-and will return its last value. To clarify, an expression is anything that returns a value.
-This includes literals which return themselves, as well as functions calls, index lookups, etc.
-Statements don't return anything instead they just do something. These include assignments,
-loops, and imports.
+Nitrogen is an expression oriented language. Meaning, almost everything is an
+expression and will return its last value. To clarify, an expression is anything
+that returns a value. This includes literals which return themselves, as well as
+functions calls, index lookups, etc. Statements don't return anything instead
+they just do something. These include assignments, loops, and imports.
 
 ## Functions
 
-Functions will return either a explicit value when using the `return` statement or
-it will return the last expression in the function body.
+Functions will return either a explicit value when using the `return` statement
+or it will return the last expression in the function body.
 
 ```
 const someFunc = fn() {
@@ -19,12 +19,21 @@ const someFunc = fn() {
 }
 
 const result = someFunc() // result == "hello"
+
+// The following is the same as above. Functions are objects themselves.
+// The below syntax is sugar for the above definition.
+fn someFunc() {
+    doSomething()
+    doSomethingElse()
+    "hello"
+}
 ```
 
-The function above calls two other functions then returns the string "hello". Notice
-the `return` keyword wasn't used. Since the string was the last expression in the body
-it was returned implicitly. If the string was removed, then the return value of
-`doSomethingElse()` would've been returned instead since it would be the last expression.
+The function above calls two other functions then returns the string "hello".
+Notice the `return` keyword wasn't used. Since the string was the last
+expression in the body it was returned implicitly. If the string was removed,
+then the return value of `doSomethingElse()` would've been returned instead
+since it would be the last expression.
 
 ## If "Statements"
 
@@ -38,30 +47,24 @@ const someValue = if thing_is_true {
 }
 ```
 
-`someValue` will either be "Hello" or "World" depending on if `thing_is_true` is actually true.
-
-## Try/Catch
-
-Try/catch blocks work the same way. They can "return" their last expression. If an exception is
-caught, then the last expression of the catch block is returned otherwise the last expression
-of the try block is returned.
-
-[Learn more about try/catch and exceptions](exceptions.md).
+`someValue` will either be "Hello" or "World" depending on if `thing_is_true` is
+actually true.
 
 ## Do Blocks
 
-Do blocks allow a program to calculate a value inside a private scope which can then
-be assigned to a value. This can be useful to create a constant variable which requires
-some calculation or setup before being assigned. Any variables created inside the do
-block are local to that block and go out of scope once the block returns. The block
-has access to its parent scope. Do blocks are similar to functions except they're
-lighter since they don't require an extra stack frame and they don't take arguments.
-Do blocks are best for one-off calculations or initialization. If a block is being
-repeated, it would be better to make it into a function.
+Do blocks allow a program to calculate a value inside a private scope which can
+then be assigned to a value. This can be useful to create a constant variable
+which requires some calculation or setup before being assigned. Any variables
+created inside the do block are local to that block and go out of scope once the
+block returns. The block has access to its parent scope. Do blocks are similar
+to functions except they're lighter since they don't require an extra stack
+frame and they don't take arguments. Do blocks are best for one-off calculations
+or initialization. If a block is being repeated, it would be better to make it
+into a function.
 
-Like functions, the last value in the block is "returned" as the value of the block.
-Unlike functions, do blocks do not have a return statement. A return inside a do
-block will return from the outer function call, not the do block.
+Like functions, the last value in the block is "returned" as the value of the
+block. Unlike functions, do blocks do not have a return statement. A return
+inside a do block will return from the outer function call, not the do block.
 
 ```
 const some_value = do {
@@ -71,3 +74,22 @@ const some_value = do {
 
 some_value == 14
 ```
+
+## Recover Blocks
+
+Recover blocks are Do Blocks that can "catch" non-panic runtime exceptions. If
+no runtime exception occurs, the block acts like a normal Do Block. If an
+exception does occur, the exception object will be returned from the block. The
+returned value can be checked using the type `isX` functions. Exception objects
+can only be generated by the runtime, not user code.
+
+```
+const some_value = recover {
+    // Some potentially bad code
+    1 + "hello"
+}
+
+some_value == Exception("Invalid types")
+```
+
+[Learn more about runtime recovery](exceptions.md).

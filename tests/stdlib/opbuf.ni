@@ -6,7 +6,7 @@ test.run("Stop output buffer", fn(assert) {
     print("Hello")
     assert.isEq(opbuf.stop(), nil)
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         opbuf.stop()
     })
 })
@@ -16,14 +16,14 @@ test.run("Basic output buffering", fn(assert) {
     print("Hello")
     assert.isEq(opbuf.stopAndGet(), "Hello")
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         opbuf.stopAndGet()
     })
 })
 
 test.run("No double output buffering", fn(assert) {
     opbuf.start()
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         opbuf.start()
     })
     opbuf.stop()
@@ -48,7 +48,7 @@ test.run("Get output buffer", fn(assert) {
     print("Hello")
     assert.isEq(opbuf.get(), "Hello")
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         opbuf.start()
     })
 })

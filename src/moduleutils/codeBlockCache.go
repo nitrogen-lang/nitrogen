@@ -14,7 +14,8 @@ import (
 
 // CodeBlockCache is a global cache of Code Blocks keyed to a script filename
 var (
-	CodeBlockCache = newCodeBlockCache()
+	CodeBlockCache       = newCodeBlockCache()
+	WriteCompiledScripts = true
 )
 
 type codeBlockCache struct {
@@ -86,9 +87,11 @@ func (c *codeBlockCache) GetBlock(file, name string) (*compiler.CodeBlock, error
 		}
 		cachedItem.block = compiler.Compile(program, name)
 
-		ext := path.Ext(file)
-		outfile := file[:len(file)-len(ext)] + ".nib"
-		marshal.WriteFile(outfile, cachedItem.block, fileinfo.ModTime())
+		if WriteCompiledScripts {
+			ext := path.Ext(file)
+			outfile := file[:len(file)-len(ext)] + ".nib"
+			marshal.WriteFile(outfile, cachedItem.block, fileinfo.ModTime())
+		}
 	}
 	cachedItem.modTime = fileinfo.ModTime()
 	c.cache[file] = cachedItem

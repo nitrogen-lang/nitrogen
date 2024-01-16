@@ -27,7 +27,7 @@ test.run("function call no required args", fn(assert) {
         pass
     }
 
-    assert.shouldThrow(fn() {
+    assert.shouldRecover(fn() {
         somefn()
     })
 })
