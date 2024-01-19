@@ -2,7 +2,7 @@ VERSION ?= $(shell git describe --tags --always --dirty)
 BUILDTIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILDER := $(shell echo "`git config user.name` <`git config user.email`>")
 CGO_ENABLED ?= 1
-MODULE_PATHS ?=
+MODULE_PATHS ?= "nitrogen"
 
 LDFLAGS := -X 'main.version=$(VERSION)' \
 			-X 'main.buildTime=$(BUILDTIME)' \
@@ -10,9 +10,14 @@ LDFLAGS := -X 'main.version=$(VERSION)' \
 			-X 'main.builtinModPaths=$(MODULE_PATHS)' \
 			-s -w
 
-.PHONY: go-test nitrogen-test build modules
+.PHONY: go-test nitrogen-test build modules build-tools buildc
 
-all: build
+all: build-tools
+
+build-tools: buildc build
+
+buildc:
+	go build -o bin/nitrogenc -ldflags="$(LDFLAGS)" ./cmd/nitrogenc/...
 
 build:
 	go build -o bin/nitrogen -ldflags="$(LDFLAGS)" ./cmd/nitrogen/...
