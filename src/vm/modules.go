@@ -1,8 +1,10 @@
-// +build linux,cgo darwin,cgo
+//go:build (linux && cgo) || (darwin && cgo)
 
 package vm
 
 import (
+	"os"
+	"path/filepath"
 	"plugin"
 
 	"github.com/nitrogen-lang/nitrogen/src/object"
@@ -25,4 +27,27 @@ func importSharedModule(vm *VirtualMachine, scriptPath, name string) object.Obje
 		return module
 	}
 	return object.NullConst
+}
+
+const ModulesSupported = true
+
+func PreloadModules(searchPaths, modules []string) error {
+	for _, module := range modules {
+		for _, path := range searchPaths {
+			fullpath := filepath.Join(path, module)
+
+			if fileExists(fullpath) {
+				_, err := plugin.Open(fullpath)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func fileExists(file string) bool {
+	_, err := os.Stat(file)
+	return !os.IsNotExist(err)
 }

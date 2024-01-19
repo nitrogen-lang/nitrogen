@@ -113,7 +113,7 @@ func main() {
 	}
 
 	if len(autoloadModules) > 0 {
-		if err := loadModules(modulePaths, autoloadModules); err != nil {
+		if err := vm.PreloadModules(modulePaths, autoloadModules); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -376,7 +376,7 @@ Compiled by:       %s
 Go version:        %s %s/%s
 Modules Supported: %t
 Builtin Mod Path:  %s
-`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, modulesSupported, builtinModPaths)
+`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, vm.ModulesSupported, builtinModPaths)
 }
 
 func runInfoCmd() {
