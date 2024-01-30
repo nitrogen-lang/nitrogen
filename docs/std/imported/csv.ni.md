@@ -1,12 +1,13 @@
 # csv.ni
 
-Read and write CSV (or similarly) encoded data.
+Read and write CSV encoded data.
 
 To use: `import 'std/encoding/csv'`
 
-## class fileReader(f: resource)
+## class reader(f: resource)
 
-A fileReader takes a [file](file.ni.md) resource.
+A reader takes a [file](file.ni.md) resource. This class implementes the
+iterator interface so it can be used in for..in loops.
 
 ### Methods
 
@@ -29,21 +30,19 @@ Sets the field quote character. Defaults to double quote `"`.
 import "std/encoding/csv"
 import "std/file"
 
-const csvFile = file.open('data.csv', 'r')
-const reader = new csv.fileReader(csvFile)
+const csvFile = new file.File('data.csv', 'r')
+const reader = new csv.reader(csvFile)
 
-let record = reader.readRecord()
-while !isNull(record) {
+for record in reader {
     println(record)
-    record = reader.readRecord()
 }
 
 file.close(csvFile)
 ```
 
-## class fileWriter(f: resource)
+## class writer(f: resource)
 
-A fileWriter takes a [file](file.ni.md) resource.
+A writer takes a [file](file.ni.md) resource.
 
 ### Fields
 
@@ -67,8 +66,8 @@ Write a record to the file. Fields will be quoted if needed.
 import "std/encoding/csv"
 import "std/file"
 
-const csvFile = file.open('data.csv', 'w')
-const writer = new csv.fileWriter(csvFile)
+const csvFile = new file.File('data.csv', 'w')
+const writer = new csv.writer(csvFile)
 
 const records = [
     ["seq","name","age","state","zip","dollar","pick"],
