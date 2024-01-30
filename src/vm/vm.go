@@ -161,7 +161,7 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 				fmt.Fprintln(vm.GetStderr(), "VM Stack Trace:")
 				frame := vm.currentFrame
 				for frame != nil {
-					fmt.Fprintf(vm.GetStderr(), "\t%s: %s\n", frame.code.Filename, frame.code.Name)
+					fmt.Fprintf(vm.GetStderr(), "\t%s: %s:%d\n", frame.code.Filename, frame.code.Name, frame.lineno())
 					frame = frame.lastFrame
 				}
 				vm.unwind = true
@@ -174,6 +174,10 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 
 mainLoop:
 	for {
+		if vm.currentFrame.sp > 0 && object.ObjectIs(vm.currentFrame.getFrontStack(), object.ExceptionObj) {
+			vm.throw()
+		}
+
 		if vm.unwind || vm.currentFrame == nil {
 			if vm.returnValue == nil {
 				vm.returnValue = object.NullConst
@@ -353,6 +357,9 @@ mainLoop:
 				return vm.returnValue
 			}
 			vm.currentFrame.pushStack(vm.returnValue)
+			if object.ObjectIs(vm.returnValue, object.ExceptionObj) {
+				vm.throw()
+			}
 
 		case opcode.Pop:
 			vm.currentFrame.popStack()
@@ -685,6 +692,10 @@ mainLoop:
 		case opcode.MakeInstance:
 			argLen := vm.getUint16()
 			class := vm.currentFrame.popStack()
+			if !object.ObjectIs(class, object.ClassObj) {
+				vm.currentFrame.pushStack(object.NewException("Cannot make instance from non-class object " + class.Type().String()))
+				vm.throw()
+			}
 			vm.makeInstance(argLen, class)
 
 		case opcode.LoadAttribute:
@@ -700,7 +711,9 @@ mainLoop:
 					if ok {
 						vm.currentFrame.pushStack(val)
 					} else {
-						vm.currentFrame.pushStack(object.NullConst)
+						vm.currentFrame.pushStack(object.NewException("Attribute " + name + " not found on object " + obj.Class.Name))
+						vm.throw()
+						break
 					}
 				}
 			case *VMClass:
@@ -726,7 +739,9 @@ mainLoop:
 						Parent:   instance.Class.Parent,
 					})
 				} else {
-					vm.currentFrame.pushStack(object.NullConst)
+					vm.currentFrame.pushStack(object.NewException("Attribute " + name + " not found on object " + obj.Name))
+					vm.throw()
+					break
 				}
 			case *object.Module:
 				vm.currentFrame.pushStack(vm.lookupModuleAttr(obj, name))
@@ -803,7 +818,6 @@ mainLoop:
 			ex := object.NewPanic("Opcode %s is not supported", codename)
 			vm.currentFrame.pushStack(ex)
 			vm.throw()
-			break
 		}
 	}
 }
@@ -915,6 +929,10 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 			Class:  class.VMClass,
 			Fields: iFields,
 		}
+	}
+
+	if instance == nil {
+		panic("Cannot make an instance from " + class.Type().String())
 	}
 
 	init := instance.GetBoundMethod("init")
