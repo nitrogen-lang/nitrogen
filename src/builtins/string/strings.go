@@ -8,6 +8,30 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
+func init() {
+	vm.RegisterNative("std.string.contains", strContains)
+	vm.RegisterNative("std.string.count", strCount)
+	vm.RegisterNative("std.string.dedup", strDedup)
+	vm.RegisterNative("std.string.format", strFormat)
+	vm.RegisterNative("std.string.hasPrefix", strHasPrefix)
+	vm.RegisterNative("std.string.hasSuffix", strHasSuffix)
+	vm.RegisterNative("std.string.replace", strReplace)
+	vm.RegisterNative("std.string.split", strSplit)
+	vm.RegisterNative("std.string.splitN", strSplitN)
+	vm.RegisterNative("std.string.trimSpace", strTrim)
+
+	vm.RegisterNativeMethod("std.string.String.contains", vmStrContains, 1)
+	vm.RegisterNativeMethod("std.string.String.count", vmStrCount, 1)
+	vm.RegisterNativeMethod("std.string.String.dedup", vmStrDedup, 1)
+	vm.RegisterNativeMethod("std.string.String.format", vmStrFormat, 1)
+	vm.RegisterNativeMethod("std.string.String.hasPrefix", vmStrHasPrefix, 1)
+	vm.RegisterNativeMethod("std.string.String.hasSuffix", vmStrHasSuffix, 1)
+	vm.RegisterNativeMethod("std.string.String.replace", vmStrReplace, 3)
+	vm.RegisterNativeMethod("std.string.String.split", vmStrSplit, 1)
+	vm.RegisterNativeMethod("std.string.String.splitN", vmStrSplitN, 2)
+	vm.RegisterNativeMethod("std.string.String.trimSpace", vmStrTrim, 0)
+}
+
 func strSplitN(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
 	if ac := moduleutils.CheckArgs("strSplitN", 3, args...); ac != nil {
 		return ac

@@ -8,50 +8,6 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var moduleName = "std/string"
-
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"contains":  strContains,
-			"count":     strCount,
-			"dedup":     strDedup,
-			"format":    strFormat,
-			"hasPrefix": strHasPrefix,
-			"hasSuffix": strHasSuffix,
-			"replace":   strReplace,
-			"split":     strSplit,
-			"splitN":    strSplitN,
-			"trimSpace": strTrim,
-		},
-		Vars: map[string]object.Object{
-			"String": &vm.BuiltinClass{
-				Fields: map[string]object.Object{
-					"str": object.NullConst,
-				},
-				VMClass: &vm.VMClass{
-					Name:   "String",
-					Parent: nil,
-					Methods: map[string]object.ClassMethod{
-						"contains":  vm.MakeBuiltinMethod(vmStrContains, 1),
-						"count":     vm.MakeBuiltinMethod(vmStrCount, 0),
-						"dedup":     vm.MakeBuiltinMethod(vmStrDedup, 1),
-						"format":    vm.MakeBuiltinMethod(vmStrFormat, 0),
-						"hasPrefix": vm.MakeBuiltinMethod(vmStrHasPrefix, 1),
-						"hasSuffix": vm.MakeBuiltinMethod(vmStrHasSuffix, 1),
-						"init":      vm.MakeBuiltinMethod(vmStringInit, 1),
-						"replace":   vm.MakeBuiltinMethod(vmStrReplace, 2),
-						"split":     vm.MakeBuiltinMethod(vmStrSplit, 1),
-						"splitN":    vm.MakeBuiltinMethod(vmStrSplitN, 2),
-						"trimSpace": vm.MakeBuiltinMethod(vmStrTrim, 0),
-					},
-				},
-			},
-		},
-	}
-}
-
 func dedupString(str []rune, c rune) string {
 	newstr := make([]rune, 0, int(float32(len(str))*0.75))
 
@@ -65,16 +21,6 @@ func dedupString(str []rune, c rune) string {
 	}
 
 	return string(newstr)
-}
-
-func vmStringInit(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {
-	_, ok := args[0].(*object.String)
-	if !ok {
-		return object.NewException("string expected a string, got %s", args[1].Type().String())
-	}
-
-	self.Fields.SetForce("str", args[0], true)
-	return nil
 }
 
 func vmStrSplitN(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *object.Environment, args ...object.Object) object.Object {

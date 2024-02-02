@@ -5,19 +5,13 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var moduleName = "std/time"
-
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"now":    timeNowS,
-			"now_ms": timeNowMs,
-			"now_ns": timeNowNs,
-		},
-	}
+func init() {
+	vm.RegisterNative("std.time.now", timeNowS)
+	vm.RegisterNative("std.time.now_ms", timeNowMs)
+	vm.RegisterNative("std.time.now_ns", timeNowNs)
 }
 
 func timeNowS(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

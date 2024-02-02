@@ -2,7 +2,7 @@ package string
 
 import (
 	"crypto/tls"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -117,7 +117,7 @@ func doReq(interpreter object.Interpreter, env *object.Environment, args ...obje
 }
 
 func buildReturnValue(resp *http.Response) object.Object {
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	headers := make(map[string]string, len(resp.Header))
 

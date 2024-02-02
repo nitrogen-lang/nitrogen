@@ -9,23 +9,19 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var moduleName = "std/runtime"
-
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"dis": disassemble,
-		},
-		Vars: map[string]object.Object{
-			"osName": object.MakeStringObj(runtime.GOOS),
-			"osArch": object.MakeStringObj(runtime.GOARCH),
-		},
-	}
-}
-
 func init() {
 	vm.RegisterBuiltin("debugVal", debugBuiltin)
+	vm.RegisterNative("std.runtime.dis", disassemble)
+	vm.RegisterNative("std.runtime.osName", osName)
+	vm.RegisterNative("std.runtime.osArch", osArch)
+}
+
+func osName(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return object.MakeStringObj(runtime.GOOS)
+}
+
+func osArch(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return object.MakeStringObj(runtime.GOARCH)
 }
 
 func debugBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

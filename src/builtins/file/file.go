@@ -11,42 +11,25 @@ import (
 )
 
 const (
-	moduleName     = "std/file"
 	fileResourceID = "std.file"
 )
 
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"readFile": readFullFile,
-			"remove":   deleteFile,
-			"exists":   fileExists,
-			"rename":   renameFile,
-			"dirlist":  directoryList,
-			"isdir":    isDirectory,
-		},
-		Vars: map[string]object.Object{
-			"name": object.MakeStringObj(moduleName),
-			"File": &vm.BuiltinClass{
-				Fields: map[string]object.Object{},
-				VMClass: &vm.VMClass{
-					Name:   "File",
-					Parent: nil,
-					Methods: map[string]object.ClassMethod{
-						"init":     vm.MakeBuiltinMethod(vmFileOpenFile, 2),
-						"close":    vm.MakeBuiltinMethod(vmFileCloseFile, 0),
-						"write":    vm.MakeBuiltinMethod(vmFileWriteFile, 1),
-						"readAll":  vm.MakeBuiltinMethod(vmFileReadFullFile, 0),
-						"readLine": vm.MakeBuiltinMethod(vmFileReadLine, 0),
-						"readChar": vm.MakeBuiltinMethod(vmFileReadChar, 0),
-						"remove":   vm.MakeBuiltinMethod(vmFileDeleteFile, 0),
-						"rename":   vm.MakeBuiltinMethod(vmFileRenameFile, 1),
-					},
-				},
-			},
-		},
-	}
+func init() {
+	vm.RegisterNative("std.file.readFile", readFullFile)
+	vm.RegisterNative("std.file.remove", deleteFile)
+	vm.RegisterNative("std.file.exists", fileExists)
+	vm.RegisterNative("std.file.rename", renameFile)
+	vm.RegisterNative("std.file.dirlist", directoryList)
+	vm.RegisterNative("std.file.isdir", isDirectory)
+
+	vm.RegisterNativeMethod("std.file.File.init", vmFileOpenFile, 1)
+	vm.RegisterNativeMethod("std.file.File.close", vmFileCloseFile, 0)
+	vm.RegisterNativeMethod("std.file.File.write", vmFileWriteFile, 1)
+	vm.RegisterNativeMethod("std.file.File.readAll", vmFileReadFullFile, 0)
+	vm.RegisterNativeMethod("std.file.File.readLine", vmFileReadLine, 0)
+	vm.RegisterNativeMethod("std.file.File.readChar", vmFileReadChar, 0)
+	vm.RegisterNativeMethod("std.file.File.remove", vmFileDeleteFile, 0)
+	vm.RegisterNativeMethod("std.file.File.rename", vmFileRenameFile, 1)
 }
 
 type fileResource struct {
@@ -166,7 +149,7 @@ func directoryList(interpreter object.Interpreter, env *object.Environment, args
 
 	dirlist, err := file.Readdirnames(0)
 	if err != nil {
-		return object.NewException("Error reading directory list %s %s", filepath.Value, err.Error())
+		return object.NewException("Error reading directory list %s %s", string(filepath.Value), err.Error())
 	}
 	return object.MakeStringArray(dirlist)
 }
