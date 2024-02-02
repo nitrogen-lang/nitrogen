@@ -34,7 +34,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	}
 
 	if err != nil {
-		p.addErrorWithPos("Invalid integer: %q", p.curToken.Literal)
+		p.addErrorWithCurPos("Invalid integer: %q", p.curToken.Literal)
 		return nil
 	}
 
@@ -50,7 +50,7 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 
 	value, err := strconv.ParseFloat(p.curToken.Literal, 64)
 	if err != nil {
-		p.addErrorWithPos("Invalid float: %q", p.curToken.Literal)
+		p.addErrorWithCurPos("Invalid float: %q", p.curToken.Literal)
 		return nil
 	}
 

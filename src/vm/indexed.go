@@ -79,5 +79,6 @@ func (vm *VirtualMachine) lookupModuleAttr(module *object.Module, key string) ob
 	if ok {
 		return variable
 	}
+
 	return object.NullConst
 }

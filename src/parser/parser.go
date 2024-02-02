@@ -161,37 +161,33 @@ func (p *Parser) registerInfix(tt token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tt] = fn
 }
 
-func (p *Parser) addError(format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
-	p.errors = append(p.errors, msg)
+func (p *Parser) addErrorWithCurPos(format string, args ...interface{}) {
+	p.addErrorWithPos(p.curToken.Pos, format, args...)
 }
 
-func (p *Parser) addErrorWithPos(format string, args ...interface{}) {
-	p.addErrorWithCPos(p.curToken.Pos, format, args...)
-}
-
-func (p *Parser) addErrorWithCPos(pos token.Position, format string, args ...interface{}) {
+func (p *Parser) addErrorWithPos(pos token.Position, format string, args ...interface{}) {
 	if len(args) > 0 {
-		args = append([]interface{}{pos.Line, pos.Col}, args...)
+		args = append([]interface{}{pos.Filename, pos.Line, pos.Col}, args...)
 	} else {
-		args = []interface{}{pos.Line, pos.Col}
+		args = []interface{}{pos.Filename, pos.Line, pos.Col}
 	}
-	msg := fmt.Sprintf("line %d, col %d "+format, args...)
+	msg := fmt.Sprintf("%s:\n  line %d, col %d:\n    "+format, args...)
 	p.errors = append(p.errors, msg)
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-	p.addError(
-		"line %d, col %d Incorrect next token. Expected %q, got %q",
-		p.peekToken.Pos.Line,
-		p.peekToken.Pos.Col,
-		t.String(),
-		p.peekToken.Type.String(),
-	)
+	p.addErrorWithPos(p.peekToken.Pos, "Incorrect next token. Expected %q, got %q", t.String(),
+		p.peekToken.Type.String())
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	p.addErrorWithPos("Invalid prefix: %s", t)
+	if t == token.BitwiseOr {
+		p.addErrorWithCurPos("Invalid prefix: %q. Did you mean \"or\"?", t.String())
+	} else if t == token.BitwiseAnd {
+		p.addErrorWithCurPos("Invalid prefix: %q. Did you mean \"and\"?", t.String())
+	} else {
+		p.addErrorWithCurPos("Invalid prefix: %q", t.String())
+	}
 }
 
 func (p *Parser) nextToken() {
@@ -201,7 +197,7 @@ func (p *Parser) nextToken() {
 	}
 
 	if p.curTokenIs(token.Illegal) {
-		p.addErrorWithPos("Got illegal token: %s", p.curToken.Literal)
+		p.addErrorWithCurPos("Got illegal token: %s", p.curToken.Literal)
 		p.nextToken()
 	}
 
@@ -234,7 +230,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 	if p.settings.Debug {
 		fmt.Println("ParseProgram")
 	}
-	program := &ast.Program{Filename: p.curToken.Filename}
+	program := &ast.Program{Filename: p.curToken.Pos.Filename}
 	program.Statements = []ast.Statement{}
 
 	for p.curToken.Type != token.EOF {
@@ -255,11 +251,27 @@ func (p *Parser) parseExpression(precedence int) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseExpression")
 	}
-	prefix := p.prefixParseFns[p.curToken.Type]
-	if prefix == nil {
+
+	var prefix prefixParseFn
+	skips := 0
+
+	// Attempt to parse a valid expression by skipping up to 2 tokens
+	// if the current token isn't a valid prefix.
+	for skips = 0; skips < 2; skips += 1 {
+		prefix = p.prefixParseFns[p.curToken.Type]
+
+		if prefix != nil {
+			break
+		}
+
 		p.noPrefixParseFnError(p.curToken.Type)
+		p.nextToken()
+	}
+
+	if skips == 2 {
 		return nil
 	}
+
 	var leftExp ast.Node
 	leftExp = prefix()
 
@@ -274,7 +286,7 @@ func (p *Parser) parseExpression(precedence int) ast.Node {
 		p.nextToken()
 		lexp, ok := leftExp.(ast.Expression)
 		if !ok {
-			p.addErrorWithCPos(currPos, "Failed parsing expression")
+			p.addErrorWithPos(currPos, "Failed parsing expression")
 			return nil
 		}
 		leftExp = infix(lexp)
@@ -381,10 +393,12 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 		list = append(list, expr.(ast.Expression))
 	}
 
-	if !p.expectPeek(end) {
+	if !p.peekTokenIs(end) {
+		p.addErrorWithCurPos("I was expecting %q, but instead I got %q. Did you forget a comma?", end.String(), p.peekToken.Literal)
 		return nil
 	}
 
+	p.nextToken()
 	return list
 }
 

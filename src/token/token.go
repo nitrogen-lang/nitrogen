@@ -8,14 +8,13 @@ type TokenType int
 // in a source file.
 type Position struct {
 	Line, Col uint
+	Filename  string
 }
 
-// TODO: Add filename to token
 type Token struct {
-	Type     TokenType
-	Literal  string
-	Pos      Position
-	Filename string
+	Type    TokenType
+	Literal string
+	Pos     Position
 }
 
 // All tokens in Nitrogen

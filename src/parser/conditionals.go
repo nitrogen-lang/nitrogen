@@ -83,7 +83,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 		loop := &ast.IterLoopStatement{Token: p.curToken}
 
 		if !p.curTokenIs(token.Identifier) {
-			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			p.addErrorWithCurPos("expected an ident, got %s", p.curToken.Type.String())
 			return nil
 		}
 
@@ -92,7 +92,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 		p.nextToken()
 
 		if !p.curTokenIs(token.Identifier) {
-			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			p.addErrorWithCurPos("expected an ident, got %s", p.curToken.Type.String())
 			return nil
 		}
 
@@ -132,7 +132,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 		loop := &ast.IterLoopStatement{Token: p.curToken}
 
 		if !p.curTokenIs(token.Identifier) {
-			p.addErrorWithPos("expected an ident, got %s", p.curToken.Type.String())
+			p.addErrorWithCurPos("expected an ident, got %s", p.curToken.Type.String())
 			return nil
 		}
 
@@ -172,7 +172,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 
 		loop.Init = p.parseDefStatement().(*ast.DefStatement)
 		if !p.curTokenIs(token.Semicolon) {
-			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
+			p.addErrorWithCurPos("expected semicolon, got %s", p.curToken.Type.String())
 			return nil
 		}
 		p.nextToken()
@@ -180,7 +180,7 @@ func (p *Parser) parseForLoop() ast.Statement {
 		loop.Condition = p.parseExpression(priLowest).(ast.Expression)
 		p.nextToken()
 		if !p.curTokenIs(token.Semicolon) {
-			p.addErrorWithPos("expected semicolon, got %s", p.curToken.Type.String())
+			p.addErrorWithCurPos("expected semicolon, got %s", p.curToken.Type.String())
 			return nil
 		}
 		p.nextToken()

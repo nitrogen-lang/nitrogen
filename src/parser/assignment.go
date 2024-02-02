@@ -77,7 +77,7 @@ func (p *Parser) parseUseStatement() ast.Statement {
 	node := p.parseExpression(priLowest)
 	exp, ok := node.(*ast.AttributeExpression)
 	if !ok {
-		p.addErrorWithPos("use expected an attribute expression")
+		p.addErrorWithCurPos("use expected an attribute expression")
 		return nil
 	}
 	stmt.Value = exp
@@ -87,7 +87,7 @@ func (p *Parser) parseUseStatement() ast.Statement {
 
 		stmt.Name = &ast.Identifier{Value: ImportName(exp.Index.String())}
 		if stmt.Name.Value == "" {
-			p.addErrorWithPos("use statement does not create a valid identifier")
+			p.addErrorWithCurPos("use statement does not create a valid identifier")
 			return nil
 		}
 		return stmt
@@ -132,7 +132,7 @@ func (p *Parser) parseImport() ast.Statement {
 	}
 
 	if p.curToken.Literal == "" {
-		p.addErrorWithPos("import path cannot be empty")
+		p.addErrorWithCurPos("import path cannot be empty")
 		return nil
 	}
 
@@ -143,7 +143,7 @@ func (p *Parser) parseImport() ast.Statement {
 
 		stmt.Name = &ast.Identifier{Value: ImportName(stmt.Path.String())}
 		if stmt.Name.Value == "" {
-			p.addErrorWithPos("import path does not create a valid identifier")
+			p.addErrorWithCurPos("import path does not create a valid identifier")
 			return nil
 		}
 		return stmt
@@ -183,7 +183,7 @@ func (p *Parser) parseDefStatement() ast.Statement {
 		p.nextToken()
 
 		if stmt.Const {
-			p.addErrorWithPos("Constant defined with no value")
+			p.addErrorWithCurPos("Constant defined with no value")
 			return nil
 		}
 		return stmt
@@ -262,7 +262,7 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 
 	fun, ok := stmt.Value.(*ast.FunctionLiteral)
 	if !ok {
-		p.addErrorWithCPos(startToken.Pos, "Expected something else")
+		p.addErrorWithPos(startToken.Pos, "Expected something else")
 		return nil
 	}
 
@@ -361,7 +361,7 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Node {
 	var ok bool
 	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
 	if !ok {
-		p.addErrorWithCPos(p.curToken.Pos, "Invalid assignment")
+		p.addErrorWithPos(p.curToken.Pos, "Invalid assignment")
 		return nil
 	}
 
