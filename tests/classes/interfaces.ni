@@ -15,15 +15,15 @@ class StdOutPrinter {
     }
 }
 
-test.run("Class implements interface", fn(assert) {
-    assert.isTrue(StdOutPrinter implements Printer)
+test.run("Class implements interface", fn(assert, check) {
+    check(assert.isTrue(StdOutPrinter implements Printer))
 })
 
-test.run("Instance implements interface", fn(assert) {
+test.run("Instance implements interface", fn(assert, check) {
     const p = new StdOutPrinter()
-    assert.isTrue(p implements Printer)
+    check(assert.isTrue(p implements Printer))
 })
 
-test.run("Another interface implements interface", fn(assert) {
-    assert.isTrue(AdvancedPrinter implements Printer)
+test.run("Another interface implements interface", fn(assert, check) {
+    check(assert.isTrue(AdvancedPrinter implements Printer))
 })

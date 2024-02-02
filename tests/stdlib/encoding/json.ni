@@ -45,28 +45,28 @@ let tests = [
     },
 ]
 
-test.run("JSON encode", fn(assert) {
+test.run("JSON encode", fn(assert, check) {
     col.foreach(tests, fn(i, el) {
-        assert.isEq(json.encode(el["in"]), el["out"])
+        check(assert.isEq(json.encode(el["in"]), el["out"]))
     })
 })
 
-test.run("JSON encode bad value", fn(assert) {
-    assert.shouldRecover(fn() {
+test.run("JSON encode bad value", fn(assert, check) {
+    check(assert.shouldRecover(fn() {
         json.encode(fn() {pass})
-    })
+    }))
 })
 
-test.run("JSON decode", fn(assert) {
+test.run("JSON decode", fn(assert, check) {
     col.foreach(tests, fn(i, el) {
         const decoded = json.decode(el["out"])
 
         if isArray(el["in"]){
-            assert.isTrue(col.arrayMatch(decoded, el["in"]))
+            check(assert.isTrue(col.arrayMatch(decoded, el["in"])))
         } elif isMap(el["in"]) {
-            assert.isTrue(col.mapMatch(decoded, el["in"]))
+            check(assert.isTrue(col.mapMatch(decoded, el["in"])))
         } else {
-            assert.isEq(decoded, el["in"])
+            check(assert.isEq(decoded, el["in"]))
         }
     })
 
@@ -85,5 +85,5 @@ test.run("JSON decode", fn(assert) {
     }
 
     const decoded = json.decode(whitespaceTest)
-    assert.isTrue(col.mapMatch(decoded, wsExpected))
+    check(assert.isTrue(col.mapMatch(decoded, wsExpected)))
 })

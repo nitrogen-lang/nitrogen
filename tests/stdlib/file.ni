@@ -3,7 +3,7 @@ import "std/filepath"
 import "std/test"
 import "std/os"
 
-const testdataDir = os.env['TESTDATA_DIR']
+const testdataDir = os.env()['TESTDATA_DIR']
 if isNil(testdataDir) {
     println("TESTDATA_DIR not set")
     exit(1)
@@ -11,8 +11,8 @@ if isNil(testdataDir) {
 
 const filename = filepath.join(testdataDir, 'test.txt')
 
-test.run("file.readFile", fn(assert) {
+test.run("file.readFile", fn(assert, check) {
     const data = file.readFile(filename)
     const expected = "Hello, world!\n"
-    assert.isEq(data, expected)
+    check(assert.isEq(data, expected))
 })

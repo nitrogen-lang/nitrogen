@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 NITROGEN_BIN="${NITROGEN_BIN:-$DIR/../bin/nitrogen}"
 export TESTDATA_DIR="$DIR/../testdata"
 
-echo "Run Nitrogen source test suite"
+echo "Running Nitrogen source test suite"
 echo
 
 shopt -s globstar

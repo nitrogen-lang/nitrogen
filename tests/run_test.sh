@@ -10,7 +10,7 @@ fi
 NITROGEN_BIN="${NITROGEN_BIN:-$DIR/../bin/nitrogen}"
 export TESTDATA_DIR="$DIR/../testdata"
 
-echo "Run Nitrogen source test suite"
+echo "Running Nitrogen source test suite"
 echo
 
 rel_path="$(realpath --relative-to="${DIR}" "$TEST")"

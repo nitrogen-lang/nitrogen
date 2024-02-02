@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Import directory", fn(assert) {
+test.run("Import directory", fn(assert, check) {
     const math = recover {
         import '../../testdata/math.ni'
         math
@@ -11,5 +11,5 @@ test.run("Import directory", fn(assert) {
         exit(1)
     }
 
-    assert.isTrue(isFunc(math.add))
+    check(assert.isTrue(isFunc(math.add)))
 })

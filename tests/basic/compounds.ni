@@ -1,28 +1,28 @@
 import "std/test"
 
-test.run("Compound equality", fn(assert) {
+test.run("Compound equality", fn(assert, check) {
     const a = 5
     const b = 6
     const c = 5
 
-    assert.isFalse(a >= b)
-    assert.isFalse(b <= a)
-    assert.isTrue(a <= c)
-    assert.isTrue(a >= c)
+    check(assert.isFalse(a >= b))
+    check(assert.isFalse(b <= a))
+    check(assert.isTrue(a <= c))
+    check(assert.isTrue(a >= c))
 })
 
-test.run("Compound assignment", fn(assert) {
+test.run("Compound assignment", fn(assert, check) {
     let a = 5
 
     a += 2
-    assert.isEq(a, 7)
+    check(assert.isEq(a, 7))
 
     a -= 3
-    assert.isEq(a, 4)
+    check(assert.isEq(a, 4))
 
     a *= 2
-    assert.isEq(a, 8)
+    check(assert.isEq(a, 8))
 
     a /= 4
-    assert.isEq(a, 2)
+    check(assert.isEq(a, 2))
 })

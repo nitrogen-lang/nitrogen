@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Basic environment", fn(assert) {
+test.run("Basic environment", fn(assert, check) {
     let string = "Hello, world!"
 
     // Ensure this fntion changes the outer scope variable
@@ -15,13 +15,13 @@ test.run("Basic environment", fn(assert) {
         string = next
     }
 
-    assert.isEq(string, "Hello, world!")
+    check(assert.isEq(string, "Hello, world!"))
 
     change_string("Hello, mars!")
 
-    assert.isEq(string, "Hello, mars!")
+    check(assert.isEq(string, "Hello, mars!"))
 
     not_change_string("Hello, earth!")
 
-    assert.isEq(string, "Hello, mars!")
+    check(assert.isEq(string, "Hello, mars!"))
 })

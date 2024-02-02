@@ -2,7 +2,7 @@ import "std/string"
 import "std/assert"
 import "std/os"
 
-const verbose = isString(os.env['VERBOSE_TEST'])
+const verbose = isString(os.env()['VERBOSE_TEST'])
 
 const exports = {
     "fatal": true,
@@ -18,7 +18,7 @@ fn run(desc, func) {
     if verbose: println("Test: ", desc)
 
     let assertionError = recover {
-        func(assertLib)
+        func(assertLib, check(desc))
     }
 
     recover {
@@ -31,5 +31,14 @@ fn run(desc, func) {
     }
 }
 exports.run = run
+
+fn check(desc) {
+    return fn(val) {
+        if isError(val) {
+            printerrln(string.format("Test '{}' failed: {}", desc, val))
+            if exports.fatal: exit(1)
+        }
+    }
+}
 
 return exports

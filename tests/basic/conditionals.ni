@@ -1,6 +1,6 @@
 import "std/test"
 
-test.run("Single statement if expressions", fn(assert) {
+test.run("Single statement if expressions", fn(assert, check) {
     let counter = 0
 
     if true {
@@ -14,27 +14,27 @@ test.run("Single statement if expressions", fn(assert) {
     if true: counter += 1
     if (true): counter += 1
 
-    assert.isEq(counter, 4)
+    check(assert.isEq(counter, 4))
 })
 
-test.run("Various if expressions", fn(assert) {
-    assert.shouldRecover(fn() {
+test.run("Various if expressions", fn(assert, check) {
+    check(assert.shouldRecover(fn() {
         if ["a"] == ["b"]: return
         println("Hello")
-    })
+    }))
 
-    assert.isTrue(fn() {
+    check(assert.isTrue(fn() {
         if 42 == 42: return true
         return false
-    }())
+    }()))
 
-    assert.isFalse(fn() {
+    check(assert.isFalse(fn() {
         if "42" == 42: return true
         return false
-    })
+    }))
 })
 
-test.run("If statement with else", fn(assert) {
+test.run("If statement with else", fn(assert, check) {
     const theTest = fn(a) {
         if a {
             return "Hello"
@@ -43,11 +43,11 @@ test.run("If statement with else", fn(assert) {
         }
     }
 
-    assert.isEq(theTest(true), "Hello")
-    assert.isEq(theTest(false), "Good bye")
+    check(assert.isEq(theTest(true), "Hello"))
+    check(assert.isEq(theTest(false), "Good bye"))
 })
 
-test.run("If statement with else and compound conditional", fn(assert) {
+test.run("If statement with else and compound conditional", fn(assert, check) {
     const theTest = fn(a, b) {
         if a or b {
             return "Hello"
@@ -56,13 +56,13 @@ test.run("If statement with else and compound conditional", fn(assert) {
         }
     }
 
-    assert.isEq(theTest(true, false), "Hello")
-    assert.isEq(theTest(false, true), "Hello")
-    assert.isEq(theTest(true, true), "Hello")
-    assert.isEq(theTest(false, false), "Good bye")
+    check(assert.isEq(theTest(true, false), "Hello"))
+    check(assert.isEq(theTest(false, true), "Hello"))
+    check(assert.isEq(theTest(true, true), "Hello"))
+    check(assert.isEq(theTest(false, false), "Good bye"))
 })
 
-test.run("If statement with else assigned to variable", fn(assert) {
+test.run("If statement with else assigned to variable", fn(assert, check) {
     const theTest = fn(a) {
         const msg = if a {
             "Hello"
@@ -73,11 +73,11 @@ test.run("If statement with else assigned to variable", fn(assert) {
         return msg
     }
 
-    assert.isEq(theTest(true), "Hello")
-    assert.isEq(theTest(false), "Good bye")
+    check(assert.isEq(theTest(true), "Hello"))
+    check(assert.isEq(theTest(false), "Good bye"))
 })
 
-test.run("If statement within an if true branch", fn(assert) {
+test.run("If statement within an if true branch", fn(assert, check) {
     const theTest = fn(a, b) {
         if a {
             if b {
@@ -90,13 +90,13 @@ test.run("If statement within an if true branch", fn(assert) {
         }
     }
 
-    assert.isEq(theTest(true, true), "Hello1")
-    assert.isEq(theTest(true, false), "Hello2")
-    assert.isEq(theTest(false, true), "Good bye")
-    assert.isEq(theTest(false, false), "Good bye")
+    check(assert.isEq(theTest(true, true), "Hello1"))
+    check(assert.isEq(theTest(true, false), "Hello2"))
+    check(assert.isEq(theTest(false, true), "Good bye"))
+    check(assert.isEq(theTest(false, false), "Good bye"))
 })
 
-test.run("If statement within an if false branch", fn(assert) {
+test.run("If statement within an if false branch", fn(assert, check) {
     const theTest = fn(a, b) {
         if a {
             return "Hello"
@@ -109,13 +109,13 @@ test.run("If statement within an if false branch", fn(assert) {
         }
     }
 
-    assert.isEq(theTest(true, true), "Hello")
-    assert.isEq(theTest(true, false), "Hello")
-    assert.isEq(theTest(false, true), "Good bye1")
-    assert.isEq(theTest(false, false), "Good bye2")
+    check(assert.isEq(theTest(true, true), "Hello"))
+    check(assert.isEq(theTest(true, false), "Hello"))
+    check(assert.isEq(theTest(false, true), "Good bye1"))
+    check(assert.isEq(theTest(false, false), "Good bye2"))
 })
 
-test.run("If statement with elif block", fn(assert) {
+test.run("If statement with elif block", fn(assert, check) {
     const theTest = fn(a) {
         if a == 42 {
             return 82
@@ -128,8 +128,8 @@ test.run("If statement with elif block", fn(assert) {
         }
     }
 
-    assert.isEq(theTest(42), 82)
-    assert.isEq(theTest(43), 83)
-    assert.isEq(theTest(44), 84)
-    assert.isEq(theTest(45), 90)
+    check(assert.isEq(theTest(42), 82))
+    check(assert.isEq(theTest(43), 83))
+    check(assert.isEq(theTest(44), 84))
+    check(assert.isEq(theTest(45), 90))
 })

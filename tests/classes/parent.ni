@@ -60,22 +60,22 @@ class printer ^ parentPrinter {
     }
 }
 
-test.run("Class inheritance", fn(assert) {
+test.run("Class inheritance", fn(assert, check) {
     let myPrinter = new printer(1)
-    assert.isTrue(grandparentInitRan)
+    check(assert.isTrue(grandparentInitRan))
 
     let expected = 'ID: 1 Msg: Hello'
-    assert.isEq(myPrinter.doStuff('Hello'), expected) // Overloaded method
+    check(assert.isEq(myPrinter.doStuff('Hello'), expected)) // Overloaded method
 
     expected = 'parent thing'
-    assert.isEq(myPrinter.z, expected)
+    check(assert.isEq(myPrinter.z, expected))
 
     expected = "I'm the parent"
-    assert.isEq(myPrinter.parentOnly(), expected)
+    check(assert.isEq(myPrinter.parentOnly(), expected))
 
     expected = 'Parent: parent thing Msg: Hello'
-    assert.isEq(myPrinter.doStuff2('Hello'), expected)
+    check(assert.isEq(myPrinter.doStuff2('Hello'), expected))
 
     expected = 'Grandparent: Hello'
-    assert.isEq(myPrinter.doStuff3('Hello'), expected)
+    check(assert.isEq(myPrinter.doStuff3('Hello'), expected))
 })

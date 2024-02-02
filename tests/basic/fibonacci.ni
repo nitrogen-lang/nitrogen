@@ -5,6 +5,6 @@ const fib = fn(x) {
     return fib(x-1) + fib(x-2)
 }
 
-test.run("Fibonacci 10", fn(assert) {
-    assert.isEq(fib(10), 55)
+test.run("Fibonacci 10", fn(assert, check) {
+    check(assert.isEq(fib(10), 55))
 })
