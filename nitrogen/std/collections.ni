@@ -142,4 +142,13 @@ const join = fn(separator, arr) {
 }
 exports.join = join
 
+const getOrDefault = fn(col, key, def) {
+    if contains(col, key) {
+        col[key]
+    } else {
+        def
+    }
+}
+exports.getOrDefault = getOrDefault
+
 return exports
