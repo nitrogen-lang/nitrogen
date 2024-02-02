@@ -74,9 +74,14 @@ func (vm *VirtualMachine) evalImplementsExpression(left, right object.Object) ob
 	case *VMInstance:
 		class := node.Class
 		for _, method := range iface.Methods {
-			m, exists := class.Methods[method.Name]
+			var m object.ClassMethod
+
+			m, exists := nativeMethods[class.Name+"."+method.Name]
 			if !exists {
-				return object.FalseConst
+				m, exists = class.Methods[method.Name]
+				if !exists {
+					return object.FalseConst
+				}
 			}
 
 			switch m := m.(type) {
@@ -163,7 +168,7 @@ func (vm *VirtualMachine) evalIntegerInfixExpression(op byte, left, right object
 		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
 	}
 
-	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
 }
 
 func (vm *VirtualMachine) evalFloatInfixExpression(op byte, left, right object.Object) object.Object {
@@ -185,7 +190,7 @@ func (vm *VirtualMachine) evalFloatInfixExpression(op byte, left, right object.O
 		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
 	}
 
-	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
 }
 
 func (vm *VirtualMachine) evalStringInfixExpression(op byte, left, right object.Object) object.Object {
@@ -207,7 +212,7 @@ func (vm *VirtualMachine) evalStringInfixExpression(op byte, left, right object.
 		return object.NativeBoolToBooleanObj(leftVal <= rightVal)
 	}
 
-	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
 }
 
 func (vm *VirtualMachine) evalBoolInfixExpression(op byte, left, right object.Object) object.Object {
@@ -221,7 +226,7 @@ func (vm *VirtualMachine) evalBoolInfixExpression(op byte, left, right object.Ob
 		return object.NativeBoolToBooleanObj(leftVal != rightVal)
 	}
 
-	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+	return object.NewException("unknown operator: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
 }
 
 func (vm *VirtualMachine) evalNullInfixExpression(op byte) object.Object {
@@ -232,5 +237,5 @@ func (vm *VirtualMachine) evalNullInfixExpression(op byte) object.Object {
 		return object.FalseConst
 	}
 
-	return object.NewException("unknown operator: nil %s nil", op)
+	return object.NewException("unknown operator: nil %c nil", op)
 }

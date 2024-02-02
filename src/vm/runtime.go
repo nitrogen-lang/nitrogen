@@ -37,6 +37,7 @@ type doBlock struct{}
 func (b *doBlock) blockType() blockType { return doBlockT }
 
 type Frame struct {
+	module     string
 	lastFrame  *Frame
 	code       *compiler.CodeBlock
 	stack      []object.Object

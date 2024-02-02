@@ -240,9 +240,9 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	vmsettings.Debug = fullDebug
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
-	machine.SetModuleProp("std/os", "env", getExternalEnv())
+	machine.SetInstanceVar("os.env", getExternalEnv())
 
-	ret, err := machine.Execute(code, nil)
+	ret, err := machine.Execute(code, nil, "__main")
 	if err != nil {
 		if ex, ok := err.(vm.ErrExitCode); ok {
 			os.Exit(ex.Code)

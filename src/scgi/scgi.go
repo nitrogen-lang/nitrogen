@@ -237,9 +237,9 @@ func (w *worker) run(conn net.Conn) {
 
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
-	machine.SetModuleProp("std/os", "env", scgiEnv)
+	machine.SetInstanceVar("os.env", scgiEnv)
 
-	result, _ := machine.Execute(code, nil)
+	result, _ := machine.Execute(code, nil, "__main")
 
 	buf.Flush()
 

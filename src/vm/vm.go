@@ -46,7 +46,7 @@ type VirtualMachine struct {
 	returnErr    error
 	Settings     *Settings
 	globalEnv    *object.Environment
-	instanceVars map[string]interface{}
+	instanceVars map[string]object.Object
 
 	unwind bool
 }
@@ -62,7 +62,7 @@ func NewVM(settings *Settings) *VirtualMachine {
 	return &VirtualMachine{
 		callStack:    newFrameStack(),
 		Settings:     settings,
-		instanceVars: make(map[string]interface{}),
+		instanceVars: make(map[string]object.Object),
 	}
 }
 
@@ -78,21 +78,17 @@ func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.Settings.Std
 func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.Settings.Stderr }
 func (vm *VirtualMachine) GetStdin() io.Reader          { return vm.Settings.Stdin }
 
-func (vm *VirtualMachine) GetInstanceVar(key string) interface{} {
+func (vm *VirtualMachine) SetInstanceVar(key string, val object.Object) {
+	vm.instanceVars[key] = val
+}
+
+func (vm *VirtualMachine) GetInstanceVar(key string) object.Object {
 	return vm.instanceVars[key]
 }
 
-func (vm *VirtualMachine) GetOkInstanceVar(key string) (interface{}, bool) {
+func (vm *VirtualMachine) GetOkInstanceVar(key string) (object.Object, bool) {
 	val, ok := vm.instanceVars[key]
 	return val, ok
-}
-
-func (vm *VirtualMachine) SetModuleProp(modulePath string, prop string, val object.Object) {
-	module := GetModule(modulePath)
-	if module == nil {
-		panic(fmt.Sprintf("Module %s doesn't exist", modulePath))
-	}
-	module.Vars[prop] = val
 }
 
 func (vm *VirtualMachine) HasInstanceVar(key string) bool {
@@ -104,12 +100,12 @@ func (vm *VirtualMachine) RemoveInstanceVar(key string) {
 	delete(vm.instanceVars, key)
 }
 
-func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment) (object.Object, error) {
+func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment, modulename string) (object.Object, error) {
 	if env == nil {
 		env = object.NewEnvironment()
 	}
 	env.SetParent(vm.globalEnv)
-	return vm.RunFrame(vm.MakeFrame(code, env), false), vm.returnErr
+	return vm.RunFrame(vm.MakeFrame(code, env, modulename), false), vm.returnErr
 }
 
 func (vm *VirtualMachine) CurrentFrame() *Frame {
@@ -122,13 +118,14 @@ func (vm *VirtualMachine) Exit(code int) {
 	vm.unwind = true
 }
 
-func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Environment) *Frame {
+func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Environment, module string) *Frame {
 	return &Frame{
 		code:       code,
 		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
 		blockStack: make([]block, code.MaxBlockSize),
 		env:        env,
 		unwind:     true,
+		module:     module,
 	}
 }
 
@@ -174,15 +171,20 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 
 mainLoop:
 	for {
-		if vm.currentFrame.sp > 0 && object.ObjectIs(vm.currentFrame.getFrontStack(), object.ExceptionObj) {
-			vm.throw()
-		}
-
 		if vm.unwind || vm.currentFrame == nil {
 			if vm.returnValue == nil {
 				vm.returnValue = object.NullConst
 			}
 			return vm.returnValue
+		}
+
+		if vm.currentFrame.sp > 0 &&
+			object.ObjectIs(vm.currentFrame.getFrontStack(), object.ExceptionObj) &&
+			!(vm.currentFrame.getFrontStack().(*object.Exception)).Caught {
+			if vm.Settings.ReturnExceptions {
+				return vm.currentFrame.popStack()
+			}
+			vm.throw()
 		}
 
 		if vm.currentFrame.pc >= len(vm.currentFrame.code.Code) {
@@ -204,7 +206,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinarySub:
@@ -214,7 +215,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryMul:
@@ -224,7 +224,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryDivide:
@@ -234,7 +233,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryMod:
@@ -244,7 +242,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryShiftL:
@@ -254,7 +251,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryShiftR:
@@ -264,7 +260,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryAnd:
@@ -274,7 +269,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryOr:
@@ -284,7 +278,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryNot:
@@ -294,7 +287,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.BinaryAndNot:
@@ -304,7 +296,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.UnaryNeg:
@@ -670,7 +661,7 @@ mainLoop:
 		case opcode.BuildClass:
 			methodNum := vm.getUint16()
 			class := &VMClass{}
-			class.Name = vm.currentFrame.popStack().(*object.String).String()
+			class.Name = vm.currentFrame.module + "." + vm.currentFrame.popStack().(*object.String).String()
 			parent := vm.currentFrame.popStack()
 			if parent != object.NullConst {
 				class.Parent = parent.(*VMClass)
@@ -864,6 +855,7 @@ func (vm *VirtualMachine) throw() object.Object {
 				tryBlockS.caught = true
 				vm.currentFrame.sp = tryBlockS.sp // Unwind data stack
 				vm.currentFrame.pc = tryBlockS.pc // Set program counter to catch block
+				(exception.(*object.Exception)).Caught = true
 				break
 			}
 		}
@@ -907,7 +899,7 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 		iFields.SetParent(vm.currentFrame.env)
 
 		for _, c := range classChain {
-			frame := vm.MakeFrame(c.Fields, iFields)
+			frame := vm.MakeFrame(c.Fields, iFields, vm.currentFrame.module)
 			vm.RunFrame(frame, true)
 		}
 
@@ -1032,7 +1024,7 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 			return
 		}
 
-		newFrame := vm.MakeFrame(fn.Body, env)
+		newFrame := vm.MakeFrame(fn.Body, env, vm.currentFrame.module)
 		newFrame.unwind = unwind
 		newFrame.lastFrame = vm.currentFrame
 
