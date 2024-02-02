@@ -202,6 +202,9 @@ func (p *Parser) parseDefStatement() ast.Statement {
 	stmt.Value = thing.(ast.Expression)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		if fun.Name != "(anonymous)" || fun.FQName != "(anonymous)" {
+			p.addErrorWithCurPos("Function definition with let cannot have two names")
+		}
 		fun.Name = stmt.Name.String()
 		fun.FQName = stmt.Name.String()
 	}
@@ -263,6 +266,11 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	fun, ok := stmt.Value.(*ast.FunctionLiteral)
 	if !ok {
 		p.addErrorWithPos(startToken.Pos, "Expected something else")
+		return nil
+	}
+
+	if fun.Name == "(anonymous)" {
+		p.addErrorWithPos(startToken.Pos, "Anonymous function with no definition or name")
 		return nil
 	}
 

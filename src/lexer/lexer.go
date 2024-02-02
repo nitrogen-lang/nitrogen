@@ -31,7 +31,7 @@ func New(reader io.Reader) *Lexer {
 	l.readRune()
 	l.col = 1
 	l.line = 1
-	l.currentFile = "anonymous"
+	l.currentFile = ""
 	return l
 }
 
