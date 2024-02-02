@@ -11,7 +11,12 @@ import (
 )
 
 func TestEval(input string) object.Object {
-	program := parser.New(lexer.NewString(input), nil).ParseProgram()
+	p := parser.New(lexer.NewString(input), nil)
+	program := p.ParseProgram()
+	if len(p.Errors()) != 0 {
+		return object.MakeStringArray(p.Errors())
+	}
+
 	code := compiler.Compile(program, "__main")
 	env := object.NewEnvironment()
 	vmSettings := vm.NewSettings()
@@ -19,7 +24,7 @@ func TestEval(input string) object.Object {
 	vmSettings.ReturnExceptions = true
 	machine := vm.NewVM(vmSettings)
 
-	ret, _ := machine.Execute(code, env)
+	ret, _ := machine.Execute(code, env, "__main")
 	return ret
 }
 
@@ -86,10 +91,14 @@ func ShowError(obj object.Object) string {
 		return "nil"
 	}
 
-	if obj, ok := obj.(*object.Exception); ok {
-		return obj.Inspect()
+	switch o := obj.(type) {
+	case *object.Exception:
+		return o.Inspect()
+	case *object.Array:
+		return o.Inspect()
+	default:
+		return obj.Type().String()
 	}
-	return obj.Type().String()
 }
 
 func TestLiteralErrorObjects(t *testing.T, got object.Object, expected interface{}) {
