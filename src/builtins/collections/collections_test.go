@@ -142,8 +142,8 @@ func TestBuiltinHashMerge(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`hashMerge({"key2": "value"}, {"key2": "value2"})`, `{key2: value2}`},       // Test overwrite
-		{`hashMerge({"key2": "value"}, {"key2": "value2"}, false)`, `{key2: value}`}, // Test no overwrite
+		{`hashMerge({"key2": "value"}, {"key2": "value2"})`, `{key2: "value2"}`},       // Test overwrite
+		{`hashMerge({"key2": "value"}, {"key2": "value2"}, false)`, `{key2: "value"}`}, // Test no overwrite
 		{`hashMerge()`, "hashMerge requires at least 2 arguments. Got 0"},
 		{`hashMerge({"key": "value"}, 10)`, "First two arguments must be maps"},
 		{`hashMerge(10, {"key": "value"})`, "First two arguments must be maps"},

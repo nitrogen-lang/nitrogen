@@ -113,7 +113,7 @@ func TestReturnStatements(t *testing.T) {
 }
 
 func TestFunctionSugar(t *testing.T) {
-	input := `func hello(place) {
+	input := `fn hello(place) {
         return "Hello, " + place;
     }`
 
@@ -134,12 +134,12 @@ func TestFunctionSugar(t *testing.T) {
 
 	val := stmt.(*ast.DefStatement).Value
 	if _, ok := val.(*ast.FunctionLiteral); !ok {
-		t.Fatalf("func sugar invalid, no function literal. got=%T", val)
+		t.Fatalf("fn sugar invalid, no function literal. got=%T", val)
 	}
 }
 
 func TestLetFuncSugarStatement(t *testing.T) {
-	input := `let hello = func hello_(place) {
+	input := `let hello = fn hello_(place) {
         return "Hello, " + place;
     }`
 
@@ -147,15 +147,15 @@ func TestLetFuncSugarStatement(t *testing.T) {
 	p := New(l, nil)
 	p.ParseProgram()
 	if len(p.Errors()) == 0 {
-		t.Fatalf("let with func sugar expected to fail, but didn't")
+		t.Fatalf("let with fn sugar expected to fail, but didn't")
 	}
-	if p.Errors()[0] != "at line 1, col 18 Incorrect next token. Expected \"(\", got \"IDENT\"" {
+	if p.Errors()[0] != ":\n  line 3, col 4:\n    Function definition with let cannot have two names" {
 		t.Fatalf("Incorrect error. got \"%s\"", p.Errors()[0])
 	}
 }
 
 func TestNullReturn(t *testing.T) {
-	input := `func hello(place) {
+	input := `fn hello(place) {
         return
     }`
 
@@ -167,7 +167,7 @@ func TestNullReturn(t *testing.T) {
 	}
 
 	astString := program.String()
-	if astString != "func hello(place) {return null;}" {
+	if astString != "fn hello(place) {return null;}" {
 		t.Fatalf("Incorrect null return parsing. Got %q", astString)
 	}
 }

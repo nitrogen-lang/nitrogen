@@ -333,42 +333,7 @@ func TestForLoopNoParens(t *testing.T) {
 }
 
 func TestInfiniteForLoop(t *testing.T) {
-	input := `for { print(i) }`
-
-	l := lexer.NewString(input)
-	p := New(l, nil)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-
-	if len(program.Statements) != 1 {
-		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
-			1, len(program.Statements))
-	}
-
-	fl, ok := program.Statements[0].(*ast.LoopStatement)
-	if !ok {
-		t.Fatalf("Statement is not for loop. Got %T", program.Statements[0])
-	}
-
-	if fl.Init != nil {
-		t.Fatalf("Initializer should be nil. Got %s", fl.Init.String())
-	}
-
-	if fl.Condition != nil {
-		t.Fatalf("Condition should be nil. Got %s", fl.Condition.String())
-	}
-
-	if fl.Iter != nil {
-		t.Fatalf("Iterator should be nil. Got %s", fl.Iter.String())
-	}
-
-	if len(fl.Body.Statements) != 1 {
-		t.Fatalf("Incorrect number of body statements. Expected 1, got %d", len(fl.Body.Statements))
-	}
-}
-
-func TestInfiniteForLoopEmptyParens(t *testing.T) {
-	input := `for() { print(i) }`
+	input := `loop { print(i) }`
 
 	l := lexer.NewString(input)
 	p := New(l, nil)
