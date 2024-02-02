@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,22 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nitrogen-lang/nitrogen/src/ast"
 	builtinOs "github.com/nitrogen-lang/nitrogen/src/builtins/os"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
-	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/parser"
 	"github.com/nitrogen-lang/nitrogen/src/scgi"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
-)
-
-const (
-	interactivePrompt = ">> "
 )
 
 type strSliceFlag []string
@@ -44,15 +35,11 @@ func (s *strSliceFlag) Set(st string) error {
 }
 
 var (
-	interactive  bool
-	printAst     bool
 	startSCGI    bool
 	printVersion bool
 	fullDebug    bool
-	disableNibs  bool
 	cpuprofile   string
 	memprofile   string
-	outputFile   string
 
 	infoCmd bool
 
@@ -67,15 +54,11 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&interactive, "i", false, "Interactive mode")
-	flag.BoolVar(&disableNibs, "nonibs", false, "Disable creation of .nib files")
-	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
-	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
 
 	flag.Var(&extraModulePaths, "M", "Module search paths")
 	flag.Var(&autoloadModules, "al", "Autoload modules")
@@ -122,10 +105,6 @@ func main() {
 		return
 	}
 
-	if disableNibs {
-		moduleutils.WriteCompiledScripts = false
-	}
-
 	if len(autoloadModules) > 0 {
 		if err := vm.PreloadModules(modulePaths, autoloadModules); err != nil {
 			fmt.Println(err)
@@ -139,12 +118,6 @@ func main() {
 	}
 
 	moduleutils.ParserSettings.Debug = fullDebug
-	if interactive {
-		fmt.Println("Nitrogen Programming Language")
-		fmt.Println("Type in commands at the prompt")
-		startRepl(os.Stdin, os.Stdout)
-		return
-	}
 
 	if flag.NArg() == 0 {
 		fmt.Println("No script given")
@@ -165,40 +138,15 @@ func main() {
 	env := makeEnv(sourceFile)
 	builtinOs.SetCmdArgs(getScriptArgs(sourceFile))
 
-	var code *compiler.CodeBlock
-	var program *ast.Program
-	var err error
-	if filepath.Ext(sourceFile) == ".nib" {
-		code, _, err = marshal.ReadFile(sourceFile)
-		if err != nil {
-			fmt.Print("There were errors reading compiled program:\n\n")
-			fmt.Println(err.Error())
-			return
-		}
-	} else {
-		program, err = moduleutils.ASTCache.GetTree(sourceFile)
-		if err != nil {
-			fmt.Print("There were errors compiling the program:\n\n")
-			fmt.Println(err.Error())
-			os.Exit(1)
-			return
-		}
-
-		if printAst {
-			fmt.Println(program.String())
-			return
-		}
-
-		code = compiler.Compile(program, "__main")
+	code, _, err := marshal.ReadFile(sourceFile)
+	if err != nil {
+		fmt.Print("There were errors reading compiled program:\n\n")
+		fmt.Println(err.Error())
+		return
 	}
 
 	var result object.Object
 	var start time.Time
-
-	if outputFile != "" {
-		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile), true)
-		return
-	}
 
 	start = time.Now()
 	result = runCompiledCode(code, env)
@@ -299,53 +247,8 @@ func getScriptArgs(filepath string) *object.Array {
 	return &object.Array{Elements: newElements}
 }
 
-func startRepl(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
-	env := makeEnv("")
-
-	var code *compiler.CodeBlock
-	for {
-		fmt.Fprint(out, interactivePrompt)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
-		}
-
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" {
-			continue
-		}
-		if line == ".quit" || line == ".exit" {
-			return
-		}
-
-		l := lexer.NewString(line)
-		p := parser.New(l, moduleutils.ParserSettings)
-
-		program := p.ParseProgram()
-		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
-			continue
-		}
-
-		code = compiler.Compile(program, "__main")
-
-		result := runCompiledCode(code, env)
-		if result != nil && result != object.NullConst {
-			io.WriteString(out, result.Inspect())
-		}
-		io.WriteString(out, "\n")
-	}
-}
-
-func printParserErrors(out io.Writer, errors []string) {
-	for _, msg := range errors {
-		fmt.Fprintf(out, "ERROR: %s\n", msg)
-	}
-}
-
 func versionInfo() {
-	fmt.Printf(`Nitrogen
+	fmt.Printf(`Nitrogen Bytecode Runner
 Version:           %s
 Built:             %s
 Compiled by:       %s

@@ -1,4 +1,4 @@
-package main
+package scgi
 
 import (
 	"bufio"
@@ -25,6 +25,42 @@ var (
 	scgiSock          string
 	scgiWorkers       int
 	scgiWorkerTimeout int
+	scgiEnv           *object.Hash
+	scgiModPaths      *object.Array
+
+	CGIHeaderNames = []string{
+		"AUTH_TYPE",
+		"DOCUMENT_ROOT",
+		"DOCUMENT_URI",
+		"GATEWAY_INTERFACE",
+		"HTTP_ACCEPT_CHARSET",
+		"HTTP_ACCEPT_ENCODING",
+		"HTTP_ACCEPT_LANGUAGE",
+		"HTTP_ACCEPT",
+		"HTTP_CONNECTION",
+		"HTTP_HOST",
+		"HTTP_REFERER",
+		"HTTP_USER_AGENT",
+		"HTTPS",
+		"QUERY_STRING",
+		"REDIRECT_REMOTE_USER",
+		"REMOTE_ADDR",
+		"REMOTE_HOST",
+		"REMOTE_PORT",
+		"REMOTE_USER",
+		"REQUEST_METHOD",
+		"REQUEST_TIME",
+		"REQUEST_URI",
+		"SCRIPT_FILENAME",
+		"SCRIPT_NAME",
+		"SERVER_ADDR",
+		"SERVER_ADMIN",
+		"SERVER_NAME",
+		"SERVER_PORT",
+		"SERVER_PROTOCOL",
+		"SERVER_SIGNATURE",
+		"SERVER_SOFTWARE",
+	}
 )
 
 func init() {
@@ -33,7 +69,10 @@ func init() {
 	flag.IntVar(&scgiWorkerTimeout, "scgi-worker-timeout", 10, "Number of seconds to wait for an available worker before giving up")
 }
 
-func startSCGIServer() {
+func StartSCGIServer(scriptArgs *object.Array, modPaths *object.Array, env *object.Hash) {
+	scgiEnv = env
+	scgiModPaths = modPaths
+
 	addrSplit := strings.SplitN(scgiSock, ":", 2)
 	if len(addrSplit) != 2 {
 		os.Stderr.WriteString("Invalid listening socket address\n")
@@ -59,7 +98,7 @@ func startSCGIServer() {
 		workerPool <- &worker{id: i, workerPool: workerPool}
 	}
 
-	builtinOs.SetCmdArgs(getScriptArgs("nitrogen"))
+	builtinOs.SetCmdArgs(scriptArgs)
 
 	fmt.Printf("SCGI listening on %s\n", scgiSock)
 
@@ -110,6 +149,13 @@ func getNetString(r io.Reader) ([]byte, error) {
 	}
 
 	return netstring, nil
+}
+
+func makeEnv(filepath string) *object.Environment {
+	env := object.NewEnvironment()
+	env.CreateConst("_SERVER", scgiEnv)
+	env.Create("_SEARCH_PATHS", scgiModPaths)
+	return env
 }
 
 type worker struct {
@@ -167,7 +213,7 @@ func (w *worker) run(conn net.Conn) {
 	}
 
 	// Ensure all expected headers are set
-	for _, header := range cgiHeaderNames {
+	for _, header := range CGIHeaderNames {
 		if headers[header] == "" {
 			headers[header] = ""
 		}
@@ -191,7 +237,7 @@ func (w *worker) run(conn net.Conn) {
 
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
-	machine.SetModuleProp("std/os", "env", getExternalEnv())
+	machine.SetModuleProp("std/os", "env", scgiEnv)
 
 	result, _ := machine.Execute(code, nil)
 

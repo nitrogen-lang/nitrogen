@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"time"
@@ -18,21 +19,32 @@ var (
 	ErrVersion = errors.New("File does not match current version")
 )
 
+const execHeader = "#!/usr/bin/nitrogenrun\n"
+
 func IsErrVersion(err error) bool {
 	return err == ErrVersion
 }
 
-func WriteFile(name string, cb *compiler.CodeBlock, ts time.Time) error {
+func WriteFile(name string, cb *compiler.CodeBlock, ts time.Time, executable bool) error {
 	marshaled, err := Marshal(cb)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.OpenFile(name, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	fileMode := 0644
+	if executable {
+		fileMode = 0755
+	}
+
+	file, err := os.OpenFile(name, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, fs.FileMode(fileMode))
 	if err != nil {
 		return err
 	}
 	defer file.Close()
+
+	if executable {
+		file.WriteString(execHeader)
+	}
 
 	if ts.IsZero() {
 		ts = time.Now()
@@ -62,6 +74,14 @@ func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
 	defer file.Close()
 
 	fi := &FileInfo{Filename: name}
+
+	firstChar := make([]byte, 1)
+	file.Read(firstChar)
+	if firstChar[0] == '#' {
+		file.Seek(int64(len(execHeader)), 0)
+	} else {
+		file.Seek(0, 0)
+	}
 
 	fileHeader := make([]byte, 4)
 	file.Read(fileHeader)

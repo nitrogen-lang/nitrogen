@@ -74,7 +74,7 @@ func main() {
 		outputFile = filepath.Join(sourceFileDir, sourceFilename+".nib")
 	}
 	fmt.Printf("Bytecode writen to %s\n", outputFile)
-	marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile))
+	marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile), true)
 }
 
 func versionInfo() {

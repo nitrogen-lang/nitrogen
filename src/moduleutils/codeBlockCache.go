@@ -90,7 +90,7 @@ func (c *codeBlockCache) GetBlock(file, name string) (*compiler.CodeBlock, error
 		if WriteCompiledScripts {
 			ext := path.Ext(file)
 			outfile := file[:len(file)-len(ext)] + ".nib"
-			marshal.WriteFile(outfile, cachedItem.block, fileinfo.ModTime())
+			marshal.WriteFile(outfile, cachedItem.block, fileinfo.ModTime(), false)
 		}
 	}
 	cachedItem.modTime = fileinfo.ModTime()
