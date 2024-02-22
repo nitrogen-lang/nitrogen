@@ -895,12 +895,17 @@ func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
 			cClass = cClass.Parent
 		}
 
-		iFields := object.NewEnvironment()
+		iFields := object.NewLocalEnvironment()
 		iFields.SetParent(vm.currentFrame.env)
 
 		for _, c := range classChain {
 			frame := vm.MakeFrame(c.Fields, iFields, vm.currentFrame.module)
-			vm.RunFrame(frame, true)
+			ret := vm.RunFrame(frame, true)
+			if ret.Type() == object.ExceptionObj {
+				vm.currentFrame.pushStack(ret)
+				vm.throw()
+				return
+			}
 		}
 
 		iFields.SetParent(nil)
