@@ -172,3 +172,15 @@ func (s *frameStack) Pop() *Frame {
 func (s *frameStack) Len() int {
 	return s.length
 }
+
+func (s *frameStack) forEach(fn func(*Frame)) {
+	f := s.head
+
+	for {
+		if f == nil {
+			return
+		}
+		fn(f.val)
+		f = f.prev
+	}
+}

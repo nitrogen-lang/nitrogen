@@ -87,6 +87,32 @@ func (cb *CodeBlock) Print(indent string) {
 	}
 }
 
+func (cb *CodeBlock) LineNum(pc int) uint16 {
+	offset := 0
+	lineOffsetIdx := 0
+	var line uint16
+
+	for offset < pc {
+		code := opcode.Opcode(cb.Code[offset])
+		if lineOffsetIdx < len(cb.LineOffsets) && int(cb.LineOffsets[lineOffsetIdx]) == offset {
+			line = cb.LineOffsets[lineOffsetIdx+1]
+			lineOffsetIdx += 2
+		}
+		offset++
+
+		switch {
+		case opcode.HasOneByteArg[code]:
+			offset++
+		case opcode.HasTwoByteArg[code]:
+			offset += 2
+		case opcode.HasFourByteArg[code]:
+			offset += 4
+		}
+	}
+
+	return line
+}
+
 func bytesToUint16(a, b byte) uint16 {
 	return (uint16(a) << 8) + uint16(b)
 }

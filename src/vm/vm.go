@@ -192,7 +192,12 @@ mainLoop:
 		}
 		code := vm.fetchOpcode()
 		if vm.Settings.Debug {
-			fmt.Fprintf(vm.GetStdout(), "Executing %d -> %s\n", vm.currentFrame.pc-1, opcode.Names[code])
+			fmt.Fprintf(vm.GetStdout(), "================\n")
+			fmt.Fprintf(vm.GetStdout(), "** Executing:\n")
+			fmt.Fprintf(vm.GetStdout(), "** PC = %d; OPCODE = %s\n", vm.currentFrame.pc-1, opcode.Names[code])
+			fmt.Fprintf(vm.GetStdout(), "** FRAME_MODULE = %s\n", vm.currentFrame.module)
+			fmt.Fprintf(vm.GetStdout(), "** FRAME_FILENAME = %s:%d\n", vm.currentFrame.code.Filename, vm.currentFrame.lineno())
+			fmt.Fprintf(vm.GetStdout(), "================\n")
 		}
 
 		switch code {
@@ -317,7 +322,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.LoadConst:
@@ -364,7 +368,6 @@ mainLoop:
 
 			vm.currentFrame.pushStack(object.NewException("Unknown variable/constant %s", name))
 			vm.throw()
-			break
 
 		case opcode.StoreFast:
 			// Ensure constant isn't redefined
@@ -422,7 +425,6 @@ mainLoop:
 
 			vm.currentFrame.pushStack(object.NewException("Global %s doesn't exist", name))
 			vm.throw()
-			break
 
 		case opcode.StoreGlobal:
 			// Ensure constant isn't redefined
@@ -450,7 +452,6 @@ mainLoop:
 			vm.currentFrame.pushStack(res)
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.throw()
-				break
 			}
 
 		case opcode.StoreIndex:
@@ -461,7 +462,6 @@ mainLoop:
 			if object.ObjectIs(res, object.ExceptionObj) {
 				vm.currentFrame.pushStack(res)
 				vm.throw()
-				break
 			}
 
 		case opcode.Call:
