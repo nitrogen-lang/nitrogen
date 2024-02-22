@@ -300,6 +300,10 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		ccb.linenum = node.Token.Pos.Line
 		// Ignore
 
+	case *ast.BreakpointStatement:
+		ccb.linenum = node.Token.Pos.Line
+		ccb.code.addInst(opcode.Breakpoint, ccb.linenum)
+
 	// Not implemented yet
 	case *ast.Program:
 		panic("ast.Program Not implemented yet")

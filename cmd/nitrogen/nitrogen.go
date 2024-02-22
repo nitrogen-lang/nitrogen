@@ -231,7 +231,8 @@ func main() {
 
 func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.Object {
 	if fullDebug {
-		code.Print("")
+		fmt.Println("DEBUG: Script bytecode:")
+		code.Print("  ")
 	}
 
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))

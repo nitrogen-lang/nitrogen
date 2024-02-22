@@ -48,7 +48,8 @@ type VirtualMachine struct {
 	globalEnv    *object.Environment
 	instanceVars map[string]object.Object
 
-	unwind bool
+	breakpoint bool
+	unwind     bool
 }
 
 func NewVM(settings *Settings) *VirtualMachine {
@@ -191,18 +192,16 @@ mainLoop:
 			panic(fmt.Sprintf("Program counter %d outside bounds of bytecode %d", vm.currentFrame.pc, len(vm.currentFrame.code.Code)-1))
 		}
 		code := vm.fetchOpcode()
-		if vm.Settings.Debug {
-			fmt.Fprintf(vm.GetStdout(), "================\n")
-			fmt.Fprintf(vm.GetStdout(), "** Executing:\n")
-			fmt.Fprintf(vm.GetStdout(), "** PC = %d; OPCODE = %s\n", vm.currentFrame.pc-1, opcode.Names[code])
-			fmt.Fprintf(vm.GetStdout(), "** FRAME_MODULE = %s\n", vm.currentFrame.module)
-			fmt.Fprintf(vm.GetStdout(), "** FRAME_FILENAME = %s:%d\n", vm.currentFrame.code.Filename, vm.currentFrame.lineno())
-			fmt.Fprintf(vm.GetStdout(), "================\n")
+		if vm.Settings.Debug && vm.breakpoint {
+			debugPrompt(vm)
 		}
 
 		switch code {
 		case opcode.Noop:
 			continue mainLoop
+
+		case opcode.Breakpoint:
+			vm.breakpoint = true
 
 		case opcode.BinaryAdd:
 			r := vm.currentFrame.popStack()
@@ -811,6 +810,11 @@ mainLoop:
 			vm.throw()
 		}
 	}
+}
+
+func (vm *VirtualMachine) currentOpcode() opcode.Opcode {
+	b := vm.currentFrame.code.Code[vm.currentFrame.pc-1]
+	return opcode.Opcode(b)
 }
 
 func (vm *VirtualMachine) fetchOpcode() opcode.Opcode {

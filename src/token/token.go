@@ -107,6 +107,7 @@ const (
 	In
 	Interface
 	Implements
+	Breakpoint
 	keywordEnd
 )
 
@@ -196,6 +197,7 @@ var tokens = [...]string{
 	In:         "in",
 	Interface:  "interface",
 	Implements: "implements",
+	Breakpoint: "breakpoint",
 }
 
 var keywords map[string]TokenType

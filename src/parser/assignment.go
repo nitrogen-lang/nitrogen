@@ -60,6 +60,14 @@ func (p *Parser) parseStatement() ast.Statement {
 			p.nextToken()
 		}
 		return stat
+	case token.Breakpoint:
+		stat := &ast.BreakpointStatement{
+			Token: p.curToken,
+		}
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+		return stat
 	case token.EOF:
 		panic("Something messed up big time")
 	}

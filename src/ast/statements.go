@@ -254,3 +254,11 @@ type PassStatement struct {
 func (b *PassStatement) statementNode()       {}
 func (b *PassStatement) TokenLiteral() string { return "pass" }
 func (b *PassStatement) String() string       { return "pass" }
+
+type BreakpointStatement struct {
+	Token token.Token
+}
+
+func (b *BreakpointStatement) statementNode()       {}
+func (b *BreakpointStatement) TokenLiteral() string { return "breakpoint" }
+func (b *BreakpointStatement) String() string       { return "breakpoint" }

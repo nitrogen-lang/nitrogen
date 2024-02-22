@@ -73,6 +73,7 @@ const (
 	Import
 	Dup
 	GetIter
+	Breakpoint
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 	Label
@@ -153,6 +154,7 @@ var HasNoArg = map[Opcode]bool{
 	Break:        true,
 	Dup:          true,
 	GetIter:      true,
+	Breakpoint:   true,
 }
 
 var Names = map[Opcode]string{
@@ -208,6 +210,7 @@ var Names = map[Opcode]string{
 	Import:           "IMPORT",
 	Dup:              "DUP",
 	GetIter:          "GET_ITER",
+	Breakpoint:       "BREAKPOINT",
 }
 
 var CmpOps = map[byte]string{
