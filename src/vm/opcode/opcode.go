@@ -61,20 +61,19 @@ const (
 	JumpIfFalseOrPop
 	JumpAbsolute
 	JumpForward
+	StartBlock
 	EndBlock
 	StartLoop
 	Continue
 	NextIter
 	Break
-	StartTry
-	Throw
+	Recover
 	BuildClass
 	MakeInstance
-	OpenScope
-	CloseScope
 	Import
 	Dup
 	GetIter
+	Breakpoint
 
 	MaxOpcode // Not a real opcode, just used to denote the maximum value of a valid opcode
 	Label
@@ -116,7 +115,7 @@ var HasTwoByteArg = map[Opcode]bool{
 	JumpIfFalseOrPop: true,
 	JumpAbsolute:     true,
 	JumpForward:      true,
-	StartTry:         true,
+	Recover:          true,
 	BuildClass:       true,
 	MakeInstance:     true,
 	Import:           true,
@@ -148,15 +147,14 @@ var HasNoArg = map[Opcode]bool{
 	Return:       true,
 	Pop:          true,
 	MakeFunction: true,
+	StartBlock:   true,
 	EndBlock:     true,
 	Continue:     true,
 	NextIter:     true,
 	Break:        true,
-	Throw:        true,
-	OpenScope:    true,
-	CloseScope:   true,
 	Dup:          true,
 	GetIter:      true,
+	Breakpoint:   true,
 }
 
 var Names = map[Opcode]string{
@@ -200,20 +198,19 @@ var Names = map[Opcode]string{
 	JumpIfFalseOrPop: "JUMP_IF_FALSE_OR_POP",
 	JumpAbsolute:     "JUMP_ABSOLUTE",
 	JumpForward:      "JUMP_FORWARD",
+	StartBlock:       "START_BLOCK",
 	EndBlock:         "END_BLOCK",
 	StartLoop:        "START_LOOP",
 	Continue:         "CONTINUE",
 	NextIter:         "NEXT_ITER",
 	Break:            "BREAK",
-	StartTry:         "START_TRY",
-	Throw:            "THROW",
+	Recover:          "RECOVER",
 	BuildClass:       "BUILD_CLASS",
 	MakeInstance:     "MAKE_INSTANCE",
-	OpenScope:        "OPEN_SCOPE",
-	CloseScope:       "CLOSE_SCOPE",
 	Import:           "IMPORT",
 	Dup:              "DUP",
 	GetIter:          "GET_ITER",
+	Breakpoint:       "BREAKPOINT",
 }
 
 var CmpOps = map[byte]string{

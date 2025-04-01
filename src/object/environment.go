@@ -23,24 +23,33 @@ type eco struct {
 }
 
 type Environment struct {
-	root   *eco
-	parent *Environment
+	root      *eco
+	parent    *Environment
+	localOnly bool
 }
 
 func NewEnvironment() *Environment {
-	return NewSizedEnvironment(0)
+	return NewSizedEnvironment(0, false)
 }
 
-func NewSizedEnvironment(size int) *Environment {
-	return &Environment{}
+func NewLocalEnvironment() *Environment {
+	return NewSizedEnvironment(0, true)
+}
+
+func NewSizedEnvironment(size int, localOnly bool) *Environment {
+	return &Environment{localOnly: localOnly}
 }
 
 func NewEnclosedEnv(outer *Environment) *Environment {
-	return NewSizedEnclosedEnv(outer, 0)
+	return NewSizedEnclosedEnv(outer, 0, false)
 }
 
-func NewSizedEnclosedEnv(outer *Environment, size int) *Environment {
-	env := NewSizedEnvironment(size)
+func NewEnclosedLocalEnv(outer *Environment) *Environment {
+	return NewSizedEnclosedEnv(outer, 0, true)
+}
+
+func NewSizedEnclosedEnv(outer *Environment, size int, localOnly bool) *Environment {
+	env := NewSizedEnvironment(size, localOnly)
 	env.parent = outer
 	return env
 }
@@ -128,7 +137,7 @@ func (e *Environment) IsConst(name string) bool {
 		return obj.readonly
 	}
 
-	if e.parent != nil {
+	if !e.localOnly && e.parent != nil {
 		return e.parent.IsConst(name)
 	}
 	return false

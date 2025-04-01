@@ -12,8 +12,8 @@ func TestBlockStack(t *testing.T) {
 
 	loopBlock := &forLoopBlock{}
 	f.blockStack[0] = loopBlock
-	f.blockStack[1] = &tryBlock{}
-	f.blockStack[2] = &tryBlock{}
+	f.blockStack[1] = &recoverBlock{}
+	f.blockStack[2] = &recoverBlock{}
 
 	front := f.popBlockUntil(loopBlockT)
 	if front != loopBlock {
@@ -28,7 +28,7 @@ func TestBlockStack(t *testing.T) {
 	f.bp = 3
 	loopBlock = &forLoopBlock{}
 	f.blockStack[0] = &forLoopBlock{}
-	f.blockStack[1] = &tryBlock{}
+	f.blockStack[1] = &recoverBlock{}
 	f.blockStack[2] = loopBlock
 
 	front = f.popBlockUntil(loopBlockT)

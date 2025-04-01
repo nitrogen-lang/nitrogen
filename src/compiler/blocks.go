@@ -62,43 +62,6 @@ func compileClassLiteral(ccb *codeBlockCompiler, class *ast.ClassLiteral) {
 	ccb.code.addInst(opcode.BuildClass, ccb.linenum, uint16(len(class.Methods)))
 }
 
-func compileTryCatch(ccb *codeBlockCompiler, try *ast.TryCatchExpression) {
-	_, tryNoNil := try.Try.Statements[len(try.Try.Statements)-1].(*ast.ExpressionStatement)
-	_, catchNoNil := try.Catch.Statements[len(try.Catch.Statements)-1].(*ast.ExpressionStatement)
-
-	catchBlkLbl := randomLabel("catch_")
-	endTryLbl := randomLabel("endTry_")
-
-	ccb.linenum = try.Try.Token.Pos.Line
-	ccb.code.addLabeledArgs(opcode.StartTry, ccb.linenum, catchBlkLbl)
-	compile(ccb, try.Try)
-	ccb.code.addLabeledArgs(opcode.JumpAbsolute, ccb.linenum, endTryLbl)
-
-	ccb.code.addLabel(catchBlkLbl, ccb.linenum)
-	if try.Symbol == nil {
-		ccb.code.addInst(opcode.Pop, ccb.linenum)
-	} else {
-		ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(try.Symbol.Value))
-	}
-
-	ccb.linenum = try.Catch.Token.Pos.Line
-	compile(ccb, try.Catch)
-	if try.Symbol != nil {
-		ccb.code.addInst(opcode.DeleteFast, ccb.linenum, ccb.locals.indexOf(try.Symbol.Value))
-	}
-
-	if catchNoNil && !tryNoNil {
-		ccb.code.addInst(opcode.JumpForward, ccb.linenum, 3)
-	}
-
-	if !tryNoNil || !catchNoNil {
-		compileLoadNull(ccb)
-	}
-
-	ccb.code.addLabel(endTryLbl, ccb.linenum)
-	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
-}
-
 func compileBlock(ccb *codeBlockCompiler, block *ast.BlockStatement) {
 	ccb.linenum = block.Token.Pos.Line
 	l := len(block.Statements) - 1
@@ -281,7 +244,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	iterBlockLbl := randomLabel("iter_")
 
 	// A loop begins with a PREPARE_BLOCK opcode this creates the first layer environment
-	ccb.code.addInst(opcode.OpenScope, ccb.linenum)
+	ccb.code.addInst(opcode.StartBlock, ccb.linenum)
 	// Initialization is done in this first layer
 	compile(ccb, loop.Init)
 
@@ -356,8 +319,7 @@ func compileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	ccb.code.addInst(opcode.NextIter, ccb.linenum)
 	ccb.code.addLabel(endBlockLbl, ccb.linenum)
 	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
-	ccb.code.addInst(opcode.CloseScope, ccb.linenum)
-	ccb.code.addInst(opcode.CloseScope, ccb.linenum)
+	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
 }
 
 func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
@@ -394,7 +356,6 @@ func compileInfiniteLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	ccb.code.addInst(opcode.NextIter, ccb.linenum)
 	ccb.code.addLabel(endBlockLbl, ccb.linenum)
 	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
-	ccb.code.addInst(opcode.CloseScope, ccb.linenum)
 }
 
 func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
@@ -451,7 +412,6 @@ func compileWhileLoop(ccb *codeBlockCompiler, loop *ast.LoopStatement) {
 	ccb.code.addInst(opcode.NextIter, ccb.linenum)
 	ccb.code.addLabel(endBlockLbl, ccb.linenum)
 	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
-	ccb.code.addInst(opcode.CloseScope, ccb.linenum)
 }
 
 func compileIterLoop(ccb *codeBlockCompiler, loop *ast.IterLoopStatement) {
@@ -521,13 +481,18 @@ func compileIterLoop(ccb *codeBlockCompiler, loop *ast.IterLoopStatement) {
 	ccb.code.addInst(opcode.NextIter, ccb.linenum)
 	ccb.code.addLabel(endBlockLbl, ccb.linenum)
 	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
-	ccb.code.addInst(opcode.CloseScope, ccb.linenum)
 	ccb.code.addInst(opcode.Pop, ccb.linenum) // Iterator object
 }
 
 func compileDoBlock(ccb *codeBlockCompiler, node *ast.DoExpression) {
+	endBlockLabel := randomLabel("endBlk_")
+
 	ccb.linenum = node.Token.Pos.Line
-	ccb.code.addInst(opcode.OpenScope, ccb.linenum)
+	if node.Recoverable {
+		ccb.code.addLabeledArgs(opcode.Recover, ccb.linenum, endBlockLabel)
+	} else {
+		ccb.code.addInst(opcode.StartBlock, ccb.linenum)
+	}
 
 	bodyCCB := &codeBlockCompiler{
 		constants: ccb.constants,
@@ -548,5 +513,6 @@ func compileDoBlock(ccb *codeBlockCompiler, node *ast.DoExpression) {
 	}
 	ccb.code.merge(bodyCCB.code)
 
-	ccb.code.addInst(opcode.CloseScope, ccb.linenum)
+	ccb.code.addLabel(endBlockLabel, ccb.linenum)
+	ccb.code.addInst(opcode.EndBlock, ccb.linenum)
 }

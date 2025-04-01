@@ -42,12 +42,12 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 		hash.Pairs[keyExp] = valueExp
 
 		if p.peekToken.Type == token.Semicolon {
-			p.addErrorWithPos("Hash pairs must end with a comma")
+			p.addErrorWithCurPos("Hash pairs must end with a comma")
 			return nil
 		}
 
 		if !p.peekTokenIs(token.RBrace) && !p.expectPeek(token.Comma) {
-			p.addErrorWithPos("Invalid hash literal")
+			p.addErrorWithCurPos("Invalid hash literal")
 			return nil
 		}
 	}
@@ -85,7 +85,7 @@ func (p *Parser) parseAttributeExpression(left ast.Expression) ast.Node {
 
 	ident, ok := i.(*ast.Identifier)
 	if !ok {
-		p.addErrorWithPos("Attribute operator requires an identifier")
+		p.addErrorWithCurPos("Attribute operator requires an identifier")
 		return nil
 	}
 	// Convert identifier into a string for later lookup

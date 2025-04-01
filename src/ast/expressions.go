@@ -171,29 +171,6 @@ func (i *AttributeExpression) String() string {
 	return out.String()
 }
 
-type TryCatchExpression struct {
-	Try    *BlockStatement
-	Catch  *BlockStatement
-	Symbol *Identifier
-}
-
-func (t *TryCatchExpression) expressionNode()      {}
-func (t *TryCatchExpression) TokenLiteral() string { return "try" }
-func (t *TryCatchExpression) String() string {
-	var out bytes.Buffer
-	out.WriteString("try {")
-	out.WriteString(t.Try.String())
-	out.WriteString("} catch ")
-	if t.Symbol != nil {
-		out.WriteString(t.Symbol.String())
-		out.WriteByte(' ')
-	}
-	out.WriteByte('{')
-	out.WriteString(t.Catch.String())
-	out.WriteByte('}')
-	return out.String()
-}
-
 type NewInstance struct {
 	Token     token.Token
 	Class     Expression
@@ -211,8 +188,9 @@ func (m *NewInstance) String() string {
 }
 
 type DoExpression struct {
-	Token      token.Token
-	Statements *BlockStatement
+	Token       token.Token
+	Statements  *BlockStatement
+	Recoverable bool
 }
 
 func (d *DoExpression) expressionNode()      {}

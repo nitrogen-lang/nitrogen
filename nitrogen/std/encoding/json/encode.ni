@@ -9,7 +9,7 @@ const encode = fn(buf, obj) {
 
     if isMap(obj): return encodeMap(buf, obj)
 
-    throw "Unsupported JSON object type: " + varType(obj)
+    return error("Unsupported JSON object type: " + varType(obj))
 }
 
 const encodeArray = fn(buf, arr) {

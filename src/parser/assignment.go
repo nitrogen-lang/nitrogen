@@ -36,16 +36,6 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDelete()
 	case token.Use:
 		return p.parseUseStatement()
-	case token.Throw:
-		p.nextToken()
-		t := &ast.ThrowStatement{
-			Token:      p.curToken,
-			Expression: p.parseExpression(priLowest).(ast.Expression),
-		}
-		if p.peekTokenIs(token.Semicolon) {
-			p.nextToken()
-		}
-		return t
 	case token.Continue:
 		stat := &ast.ContinueStatement{
 			Token: p.curToken,
@@ -70,6 +60,14 @@ func (p *Parser) parseStatement() ast.Statement {
 			p.nextToken()
 		}
 		return stat
+	case token.Breakpoint:
+		stat := &ast.BreakpointStatement{
+			Token: p.curToken,
+		}
+		if p.peekTokenIs(token.Semicolon) {
+			p.nextToken()
+		}
+		return stat
 	case token.EOF:
 		panic("Something messed up big time")
 	}
@@ -87,7 +85,7 @@ func (p *Parser) parseUseStatement() ast.Statement {
 	node := p.parseExpression(priLowest)
 	exp, ok := node.(*ast.AttributeExpression)
 	if !ok {
-		p.addErrorWithPos("use expected an attribute expression")
+		p.addErrorWithCurPos("use expected an attribute expression")
 		return nil
 	}
 	stmt.Value = exp
@@ -97,7 +95,7 @@ func (p *Parser) parseUseStatement() ast.Statement {
 
 		stmt.Name = &ast.Identifier{Value: ImportName(exp.Index.String())}
 		if stmt.Name.Value == "" {
-			p.addErrorWithPos("use statement does not create a valid identifier")
+			p.addErrorWithCurPos("use statement does not create a valid identifier")
 			return nil
 		}
 		return stmt
@@ -142,7 +140,7 @@ func (p *Parser) parseImport() ast.Statement {
 	}
 
 	if p.curToken.Literal == "" {
-		p.addErrorWithPos("import path cannot be empty")
+		p.addErrorWithCurPos("import path cannot be empty")
 		return nil
 	}
 
@@ -153,7 +151,7 @@ func (p *Parser) parseImport() ast.Statement {
 
 		stmt.Name = &ast.Identifier{Value: ImportName(stmt.Path.String())}
 		if stmt.Name.Value == "" {
-			p.addErrorWithPos("import path does not create a valid identifier")
+			p.addErrorWithCurPos("import path does not create a valid identifier")
 			return nil
 		}
 		return stmt
@@ -193,7 +191,7 @@ func (p *Parser) parseDefStatement() ast.Statement {
 		p.nextToken()
 
 		if stmt.Const {
-			p.addErrorWithPos("Constant defined with no value")
+			p.addErrorWithCurPos("Constant defined with no value")
 			return nil
 		}
 		return stmt
@@ -212,6 +210,9 @@ func (p *Parser) parseDefStatement() ast.Statement {
 	stmt.Value = thing.(ast.Expression)
 
 	if fun, ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		if fun.Name != "(anonymous)" || fun.FQName != "(anonymous)" {
+			p.addErrorWithCurPos("Function definition with let cannot have two names")
+		}
 		fun.Name = stmt.Name.String()
 		fun.FQName = stmt.Name.String()
 	}
@@ -272,7 +273,12 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 
 	fun, ok := stmt.Value.(*ast.FunctionLiteral)
 	if !ok {
-		p.addErrorWithCPos(startToken.Pos, "Expected something else")
+		p.addErrorWithPos(startToken.Pos, "Expected something else")
+		return nil
+	}
+
+	if fun.Name == "(anonymous)" {
+		p.addErrorWithPos(startToken.Pos, "Anonymous function with no definition or name")
 		return nil
 	}
 
@@ -371,7 +377,7 @@ func (p *Parser) parseAssignmentStatement(left ast.Expression) ast.Node {
 	var ok bool
 	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
 	if !ok {
-		p.addErrorWithCPos(p.curToken.Pos, "Invalid assignment")
+		p.addErrorWithPos(p.curToken.Pos, "Invalid assignment")
 		return nil
 	}
 

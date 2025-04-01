@@ -115,3 +115,26 @@ func (p *Parser) parseDoExpression() ast.Expression {
 		Statements: block,
 	}
 }
+
+func (p *Parser) parseRecoverExpression() ast.Expression {
+	tok := p.curToken
+
+	if !p.expectPeek(token.LBrace) {
+		return nil
+	}
+
+	block := p.parseBlockStatements()
+	if block == nil {
+		return nil
+	}
+
+	if p.peekTokenIs(token.Semicolon) {
+		p.nextToken()
+	}
+
+	return &ast.DoExpression{
+		Token:       tok,
+		Statements:  block,
+		Recoverable: true,
+	}
+}

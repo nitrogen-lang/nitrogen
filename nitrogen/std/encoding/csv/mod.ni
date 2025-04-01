@@ -2,8 +2,8 @@ import 'std/encoding/csv/encode'
 import 'std/encoding/csv/decode'
 
 return {
-    "fileWriter": encode.fileWriter,
-    "Writer": encode.Writer,
-    "fileReader": decode.fileReader,
-    "CharReader": decode.CharReader,
+    "writer": encode.fileWriter,
+    "WriterIfc": encode.Writer,
+    "reader": decode.reader,
+    "ReaderIfc": decode.CharReader,
 }

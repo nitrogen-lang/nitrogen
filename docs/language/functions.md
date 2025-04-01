@@ -50,7 +50,7 @@ const someFunc = fn() {
 someFunc('Hello', 'there') // Will print ['Hello', 'there']
 ```
 
-Calling a function without the required number of arguments will throw an exception.
+Calling a function without the required number of arguments will throw a runtime exception.
 
 ```
 const someFunc = fn(arg1) {

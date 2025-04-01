@@ -156,7 +156,7 @@ func (bs *BlockStatement) String() string {
 	for i, s := range bs.Statements {
 		str := s.String()
 		out.WriteString(str)
-		if str[len(str)-1] != ';' {
+		if len(str) == 0 || str[len(str)-1] != ';' {
 			out.WriteByte(';')
 		}
 
@@ -247,15 +247,6 @@ func (b *BreakStatement) statementNode()       {}
 func (b *BreakStatement) TokenLiteral() string { return "break" }
 func (b *BreakStatement) String() string       { return "break" }
 
-type ThrowStatement struct {
-	Token      token.Token
-	Expression Expression
-}
-
-func (t *ThrowStatement) statementNode()       {}
-func (t *ThrowStatement) TokenLiteral() string { return "throw" }
-func (t *ThrowStatement) String() string       { return "throw" }
-
 type PassStatement struct {
 	Token token.Token
 }
@@ -263,3 +254,11 @@ type PassStatement struct {
 func (b *PassStatement) statementNode()       {}
 func (b *PassStatement) TokenLiteral() string { return "pass" }
 func (b *PassStatement) String() string       { return "pass" }
+
+type BreakpointStatement struct {
+	Token token.Token
+}
+
+func (b *BreakpointStatement) statementNode()       {}
+func (b *BreakpointStatement) TokenLiteral() string { return "breakpoint" }
+func (b *BreakpointStatement) String() string       { return "breakpoint" }

@@ -8,14 +8,13 @@ type TokenType int
 // in a source file.
 type Position struct {
 	Line, Col uint
+	Filename  string
 }
 
-// TODO: Add filename to token
 type Token struct {
-	Type     TokenType
-	Literal  string
-	Pos      Position
-	Filename string
+	Type    TokenType
+	Literal string
+	Pos     Position
 }
 
 // All tokens in Nitrogen
@@ -66,6 +65,8 @@ const (
 	Semicolon
 	Colon
 	Carrot
+	Fatarrow
+	Underscore
 
 	// Groups and blocks
 	LParen
@@ -95,9 +96,7 @@ const (
 	Loop
 	Continue
 	Break
-	Try
-	Catch
-	Throw
+	Recover
 	Class
 	New
 	Pass
@@ -110,6 +109,8 @@ const (
 	In
 	Interface
 	Implements
+	Breakpoint
+	Match
 	keywordEnd
 )
 
@@ -155,10 +156,12 @@ var tokens = [...]string{
 	ShiftRight: ">>",
 
 	// Delimiters
-	Comma:     ",",
-	Semicolon: ";",
-	Colon:     ":",
-	Carrot:    "^",
+	Comma:      ",",
+	Semicolon:  ";",
+	Colon:      ":",
+	Carrot:     "^",
+	Fatarrow:   "=>",
+	Underscore: "_",
 
 	// Groups and blocks
 	LParen:  "(",
@@ -186,9 +189,7 @@ var tokens = [...]string{
 	Loop:       "loop",
 	Continue:   "continue",
 	Break:      "break",
-	Try:        "try",
-	Catch:      "catch",
-	Throw:      "throw",
+	Recover:    "recover",
 	Class:      "class",
 	New:        "new",
 	Pass:       "pass",
@@ -201,6 +202,8 @@ var tokens = [...]string{
 	In:         "in",
 	Interface:  "interface",
 	Implements: "implements",
+	Breakpoint: "breakpoint",
+	Match:      "match",
 }
 
 var keywords map[string]TokenType

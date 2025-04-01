@@ -36,7 +36,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 	for _, statement := range body.Statements {
 		def, ok := statement.(*ast.DefStatement)
 		if !ok {
-			p.addErrorWithCPos(classToken.Pos, "Only function and variable statements are allowed in a class definition")
+			p.addErrorWithPos(classToken.Pos, "Only function and variable statements are allowed in a class definition")
 			return nil
 		}
 
@@ -51,7 +51,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 	errored := false
 	for _, f := range c.Fields {
 		if fn, exists := c.Methods[f.Name.Value]; exists {
-			p.addErrorWithCPos(fn.Token.Pos, "Duplicate named function %s", fn.Name)
+			p.addErrorWithPos(fn.Token.Pos, "Duplicate named function %s", fn.Name)
 			errored = true
 		}
 	}
@@ -80,7 +80,7 @@ func (p *Parser) parseMakeExpression() ast.Expression {
 
 	call, ok := cExpression.(*ast.CallExpression)
 	if !ok {
-		p.addErrorWithPos("Invalid object creation")
+		p.addErrorWithCurPos("Invalid object creation")
 		return nil
 	}
 

@@ -53,3 +53,13 @@ Joins the elements in `arr` separated by `separator`.
 '''
 join(', ', ["hello", "world"]) == "hello, world"
 '''
+
+## getOrDefault(coll: map, key: T, default: U): U
+
+If the collection has `key`, then return the mapped value. Otherwise, returns
+`default`.
+
+'''
+getOrDefault({"a": 1}, "a", 2) == 1
+getOrDefault({"a": 1}, "b", 2) == 2
+'''

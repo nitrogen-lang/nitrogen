@@ -15,17 +15,32 @@ Convert a number to a float.
 Convert any value into its stringified form.
 
 ## isFloat(in: T): bool
+
 ## isInt(in: T): bool
+
 ## isBool(in: T): bool
+
 ## isString(in: T): bool
+
 ## isNull(in: T): bool (alias for isNil)
+
 ## isNil(in: T): bool
+
 ## isFunc(in: T): bool
+
 ## isArray(in: T): bool
+
 ## isMap(in: T): bool
+
 ## isResource(in: T): bool
+
 ## isClass(in: T): bool
+
 ## isInstance(in: T): bool
+
+## isError(in: T): bool
+
+## isException(in: T): bool
 
 Return if a variable is a specific type.
 

@@ -1,4 +1,4 @@
-func hello() {
+fn hello() {
     println("Hello, world!")
 }
 

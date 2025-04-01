@@ -279,14 +279,6 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		}
 		ccb.code.addInst(opcode.Break, ccb.linenum)
 
-	case *ast.TryCatchExpression:
-		compileTryCatch(ccb, node)
-
-	case *ast.ThrowStatement:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Expression)
-		ccb.code.addInst(opcode.Throw, ccb.linenum)
-
 	case *ast.ClassLiteral:
 		compileClassLiteral(ccb, node)
 
@@ -307,6 +299,10 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	case *ast.PassStatement:
 		ccb.linenum = node.Token.Pos.Line
 		// Ignore
+
+	case *ast.BreakpointStatement:
+		ccb.linenum = node.Token.Pos.Line
+		ccb.code.addInst(opcode.Breakpoint, ccb.linenum)
 
 	// Not implemented yet
 	case *ast.Program:

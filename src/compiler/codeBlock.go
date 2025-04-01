@@ -43,35 +43,35 @@ func (cb *CodeBlock) Print(indent string) {
 		offset++
 
 		switch code {
-		case opcode.MakeArray, opcode.MakeMap, opcode.StartTry, opcode.BuildClass, opcode.MakeInstance:
+		case opcode.MakeArray, opcode.MakeMap, opcode.Recover, opcode.BuildClass, opcode.MakeInstance:
 			fmt.Printf("\t\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 		case opcode.JumpForward:
 			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
-			fmt.Printf("\t\t%d (%d)", target, offset+2+target)
+			fmt.Printf("\t%d (%d)", target, offset+2+target)
 		case opcode.JumpAbsolute:
 			target := int(bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
-			fmt.Printf("\t\t%d", target)
+			fmt.Printf("\t%d", target)
 		case opcode.StartLoop:
-			fmt.Printf("\t\t%d %d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]), bytesToUint16(cb.Code[offset+2], cb.Code[offset+3]))
+			fmt.Printf("\t%d %d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]), bytesToUint16(cb.Code[offset+2], cb.Code[offset+3]))
 		case opcode.PopJumpIfTrue, opcode.PopJumpIfFalse, opcode.JumpIfTrueOrPop, opcode.JumpIfFalseOrPop:
 			fmt.Printf("\t%d", bytesToUint16(cb.Code[offset], cb.Code[offset+1]))
 		case opcode.LoadConst, opcode.Import:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf("\t\t%d (%s)", index, cb.Constants[index].Inspect())
+			fmt.Printf("\t%d (%s)", index, cb.Constants[index].Inspect())
 		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst, opcode.DeleteFast:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf("\t\t%d (%s)", index, cb.Locals[index])
+			fmt.Printf("\t%d (%s)", index, cb.Locals[index])
 		case opcode.Define:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf("\t\t\t%d (%s)", index, cb.Locals[index])
+			fmt.Printf("\t\t%d (%s)", index, cb.Locals[index])
 		case opcode.Call:
 			params := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf("\t\t\t%d (%d positional parameters)", params, params)
+			fmt.Printf("\t\t%d (%d positional parameters)", params, params)
 		case opcode.LoadGlobal, opcode.StoreGlobal, opcode.LoadAttribute, opcode.StoreAttribute:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf("\t\t%d (%s)", index, cb.Names[index])
+			fmt.Printf("\t%d (%s)", index, cb.Names[index])
 		case opcode.Compare:
-			fmt.Printf("\t\t\t%d (%s)", cb.Code[offset], opcode.CmpOps[cb.Code[offset]])
+			fmt.Printf("\t%d (%s)", cb.Code[offset], opcode.CmpOps[cb.Code[offset]])
 		}
 
 		switch {
@@ -85,6 +85,32 @@ func (cb *CodeBlock) Print(indent string) {
 
 		fmt.Println()
 	}
+}
+
+func (cb *CodeBlock) LineNum(pc int) uint16 {
+	offset := 0
+	lineOffsetIdx := 0
+	var line uint16
+
+	for offset < pc {
+		code := opcode.Opcode(cb.Code[offset])
+		if lineOffsetIdx < len(cb.LineOffsets) && int(cb.LineOffsets[lineOffsetIdx]) == offset {
+			line = cb.LineOffsets[lineOffsetIdx+1]
+			lineOffsetIdx += 2
+		}
+		offset++
+
+		switch {
+		case opcode.HasOneByteArg[code]:
+			offset++
+		case opcode.HasTwoByteArg[code]:
+			offset += 2
+		case opcode.HasFourByteArg[code]:
+			offset += 4
+		}
+	}
+
+	return line
 }
 
 func bytesToUint16(a, b byte) uint16 {

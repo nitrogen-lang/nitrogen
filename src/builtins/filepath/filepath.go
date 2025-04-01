@@ -6,25 +6,16 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-const moduleName = "std/filepath"
-
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"dir":      filepathDirectory,
-			"basename": filepathBasename,
-			"ext":      filepathExt,
-			"join":     filepathJoin,
-			"abs":      filepathAbs,
-			"cwd":      filepathCwd,
-		},
-		Vars: map[string]object.Object{
-			"name": object.MakeStringObj(moduleName),
-		},
-	}
+func init() {
+	vm.RegisterNative("std.filepath.dir", filepathDirectory)
+	vm.RegisterNative("std.filepath.basename", filepathBasename)
+	vm.RegisterNative("std.filepath.ext", filepathExt)
+	vm.RegisterNative("std.filepath.join", filepathJoin)
+	vm.RegisterNative("std.filepath.abs", filepathAbs)
+	vm.RegisterNative("std.filepath.cwd", filepathCwd)
 }
 
 func filepathDirectory(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

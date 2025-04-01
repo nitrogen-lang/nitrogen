@@ -52,7 +52,7 @@ func TestIsBuiltins(t *testing.T) {
 		{`isBool(false)`, true},
 		{`isNull(nil)`, true},
 		{`isNull("nil")`, false},
-		{`isFunc(func() { 10; })`, true},
+		{`isFunc(fn() { 10; })`, true},
 		{`isFunc(10)`, false},
 		{`isString("Hello")`, true},
 		{`isString(10)`, false},
@@ -79,7 +79,7 @@ func TestToStringBuiltin(t *testing.T) {
 		{`toString(false)`, "false"},
 		{`toString(nil)`, "nil"},
 		{`toString([1, 2, 3])`, "[1, 2, 3]"},
-		{`toString({"key": "value"})`, "{key: value}"},
+		{`toString({"key": "value"})`, "{key: \"value\"}"},
 	}
 
 	for i, tt := range tests {

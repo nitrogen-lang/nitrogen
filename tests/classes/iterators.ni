@@ -34,7 +34,7 @@ class MyCollection {
     }
 }
 
-test.run("Class iterator", fn(assert) {
+test.run("Class iterator", fn(assert, check) {
     const input = ["computer", "mouse", "keyboard"]
     const things = new MyCollection(input)
 
@@ -43,5 +43,5 @@ test.run("Class iterator", fn(assert) {
         copy = push(copy, thing)
     }
 
-    assert.isTrue(col.arrayMatch(input, copy))
+    check(assert.isTrue(col.arrayMatch(input, copy)))
 })

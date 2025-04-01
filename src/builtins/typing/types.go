@@ -29,6 +29,7 @@ func init() {
 	vm.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
 	vm.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
 	vm.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
+	vm.RegisterBuiltin("isException", makeIsTypeBuiltin(object.ExceptionObj))
 	vm.RegisterBuiltin("isResource", makeIsTypeBuiltin(object.ResourceObj))
 	vm.RegisterBuiltin("isClass", makeIsTypeBuiltin(object.ClassObj))
 	vm.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))

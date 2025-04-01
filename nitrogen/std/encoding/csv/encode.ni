@@ -17,7 +17,7 @@ class fileWriter {
 
     fn init(f) {
         if ! f implements Writer {
-            throw "f must be a Writer"
+            return error("f must be a Writer")
         }
 
         this.cfile = f

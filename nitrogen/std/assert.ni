@@ -4,49 +4,46 @@ use string.format
 
 const exports = {}
 
-const isTrue = fn(x) {
+fn isTrue(x) {
     if isFunc(x): x = x()
-    if !isBool(x): throw "assertion must be a boolean to isTrue"
+    if !isBool(x): return error("assertion must be a boolean to isTrue")
     if x: return
-    throw format("Assertion Failed: Expected `{}` to be true.", x)
+    return error(format("Assertion Failed: Expected `{}` to be true.", x))
 }
 exports.isTrue = isTrue
 
-const isFalse = fn(x) {
+fn isFalse(x) {
     if isFunc(x): x = x()
-    if !isBool(x): throw "assertion must be a boolean to isFalse"
+    if !isBool(x): return error("assertion must be a boolean to isFalse")
     if !x: return
-    throw format("Assertion Failed: Expected `{}` to be false.", x)
+    return error(format("Assertion Failed: Expected `{}` to be false.", x))
 }
 exports.isFalse = isFalse
 
-const isEq = fn(a, b) {
+fn isEq(a, b) {
     if a == b: return
-    throw format("Assertion Failed: Expected `{}` and `{}` to be equal.", a, b)
+    return error(format("Assertion Failed: Expected `{}` and `{}` to be equal.", a, b))
 }
 exports.isEq = isEq
 
-const isNeq = fn(a, b) {
+fn isNeq(a, b) {
     if a != b: return
-    throw format("Assertion Failed: Expected `{}` and `{}` to not be equal.", a, b)
+    return error(format("Assertion Failed: Expected `{}` and `{}` to not be equal.", a, b))
 }
 exports.isNeq = isNeq
 
-const shouldThrow = fn(func) {
-    if !isFunc(func): throw "assertion must be a func to shouldThrow"
-    try { func() } catch { return }
-    throw "Assertion Failed: Expected test to throw."
+fn shouldRecover(func) {
+    if !isFunc(func): return error("assertion must be a func to shouldRecover")
+    const r = recover { func() }
+    if isNil(r): return error("Assertion Failed: Expected test to recove.")
 }
-exports.shouldThrow = shouldThrow
+exports.shouldRecover = shouldRecover
 
-const shouldNotThrow = fn(func) {
-    if !isFunc(func): throw "assertion must be a func to shouldNotThrow"
-    try {
-        func()
-    } catch e {
-        throw format("Assertion Failed: Expected test not to throw. {}", e)
-    }
+fn shouldNotRecover(func) {
+    if !isFunc(func): return error("assertion must be a func to shouldNotRecover")
+    const r = recover { func() }
+    if !isNil(r): return error(format("Assertion Failed: Expected test not to recove. {}", e))
 }
-exports.shouldNotThrow = shouldNotThrow
+exports.shouldNotRecover = shouldNotRecover
 
 return exports

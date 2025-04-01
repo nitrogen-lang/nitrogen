@@ -21,10 +21,10 @@ Returns if the file at `filepath` exists.
 Attempts to rename a file from `oldPath` to `newPath`. If no error occurs, nil
 is returned.
 
-## dirlist(path: string): array
+## dirlist(path: string): array|error
 
 Returns an array which is the directory listing of path. If path is not a
-directory, an exception is thrown.
+directory, an error will be returned.
 
 ## isdir(path: string): bool
 

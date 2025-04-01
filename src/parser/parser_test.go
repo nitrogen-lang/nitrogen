@@ -28,8 +28,8 @@ func testDefStatement(t *testing.T, s ast.Statement, name string) bool {
 		return false
 	}
 
-	if letStmt.Name.TokenLiteral() != name {
-		t.Errorf("s.Name not '%s'. got=%s", name, letStmt.Name)
+	if letStmt.Name.Value != name {
+		t.Errorf("s.Name not '%s'. got='%s'", name, letStmt.Name)
 		return false
 	}
 
@@ -188,7 +188,7 @@ func checkParserErrors(t *testing.T, p *Parser) {
 
 	t.Errorf("parser has %d errors", len(errors))
 	for _, msg := range errors {
-		t.Errorf("parser error: %q", msg)
+		t.Errorf("parser error: %s", msg)
 	}
 	t.FailNow()
 }

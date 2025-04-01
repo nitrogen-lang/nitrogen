@@ -22,6 +22,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
+	"github.com/nitrogen-lang/nitrogen/src/scgi"
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
@@ -48,15 +49,16 @@ var (
 	startSCGI    bool
 	printVersion bool
 	fullDebug    bool
-	compileOnly  bool
+	disableNibs  bool
 	cpuprofile   string
 	memprofile   string
 	outputFile   string
 
 	infoCmd bool
 
-	modulePaths     strSliceFlag
-	autoloadModules strSliceFlag
+	extraModulePaths strSliceFlag
+	autoloadModules  strSliceFlag
+	modulePaths      []string
 
 	version         = "Unknown"
 	buildTime       = ""
@@ -65,16 +67,8 @@ var (
 )
 
 func init() {
-	pwd, _ := os.Getwd()
-	modulePaths = append(modulePaths, pwd)
-
-	envModPath := os.Getenv("NITROGEN_MODULES")
-	if envModPath != "" {
-		modulePaths = append(modulePaths, strings.Split(envModPath, ":")...)
-	}
-
 	flag.BoolVar(&interactive, "i", false, "Interactive mode")
-	flag.BoolVar(&compileOnly, "c", false, "Compile code, print any errors, and exit")
+	flag.BoolVar(&disableNibs, "nonibs", false, "Disable creation of .nib files")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
@@ -83,7 +77,7 @@ func init() {
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
 	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
 
-	flag.Var(&modulePaths, "M", "Module search paths")
+	flag.Var(&extraModulePaths, "M", "Module search paths")
 	flag.Var(&autoloadModules, "al", "Autoload modules")
 
 	flag.BoolVar(&infoCmd, "info", false, "Print information about a .nib file")
@@ -92,8 +86,30 @@ func init() {
 func main() {
 	flag.Parse()
 
+	modulePaths = make([]string, 0, len(extraModulePaths)+6)
+
+	// Package paths from command line flag
+	modulePaths = append(modulePaths, extraModulePaths...)
+
+	// Package paths from environment variable
+	envModPath := os.Getenv("NITROGEN_MODULES")
+	if envModPath != "" {
+		modulePaths = append(modulePaths, strings.Split(envModPath, ":")...)
+	}
+
+	// Add working directory to path
+	pwd, _ := os.Getwd()
+	modulePaths = append(modulePaths, pwd)
+
+	// Add compile time paths
 	if builtinModPaths != "" {
 		modulePaths = append(modulePaths, strings.Split(builtinModPaths, ":")...)
+	}
+
+	// Add Noble package manager path
+	homeDir, _ := os.UserHomeDir()
+	if homeDir != "" {
+		modulePaths = append(modulePaths, filepath.Join(homeDir, ".noble", "pkg"))
 	}
 
 	if printVersion {
@@ -106,15 +122,19 @@ func main() {
 		return
 	}
 
+	if disableNibs {
+		moduleutils.WriteCompiledScripts = false
+	}
+
 	if len(autoloadModules) > 0 {
-		if err := loadModules(modulePaths, autoloadModules); err != nil {
+		if err := vm.PreloadModules(modulePaths, autoloadModules); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	}
 
 	if startSCGI {
-		startSCGIServer()
+		scgi.StartSCGIServer(getScriptArgs("nitrogen"), object.MakeStringArray(modulePaths), getServerEnv())
 		return
 	}
 
@@ -176,11 +196,7 @@ func main() {
 	var start time.Time
 
 	if outputFile != "" {
-		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile))
-		return
-	}
-
-	if compileOnly {
+		marshal.WriteFile(outputFile, code, moduleutils.FileModTime(sourceFile), true)
 		return
 	}
 
@@ -188,7 +204,7 @@ func main() {
 	result = runCompiledCode(code, env)
 
 	if fullDebug {
-		fmt.Printf("Execution took %s\n", time.Now().Sub(start))
+		fmt.Printf("Execution took %s\n", time.Since(start))
 	}
 
 	if result != nil && result != object.NullConst {
@@ -215,7 +231,8 @@ func main() {
 
 func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.Object {
 	if fullDebug {
-		code.Print("")
+		fmt.Println("DEBUG: Script bytecode:")
+		code.Print("  ")
 	}
 
 	env.CreateConst("_FILE", object.MakeStringObj(code.Filename))
@@ -224,9 +241,9 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	vmsettings.Debug = fullDebug
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
-	machine.SetModuleProp("std/os", "env", getExternalEnv())
+	machine.SetInstanceVar("os.env", getExternalEnv())
 
-	ret, err := machine.Execute(code, nil)
+	ret, err := machine.Execute(code, nil, "__main")
 	if err != nil {
 		if ex, ok := err.(vm.ErrExitCode); ok {
 			os.Exit(ex.Code)
@@ -242,47 +259,13 @@ func makeEnv(filepath string) *object.Environment {
 	return env
 }
 
-var cgiHeaderNames = []string{
-	"AUTH_TYPE",
-	"DOCUMENT_ROOT",
-	"DOCUMENT_URI",
-	"GATEWAY_INTERFACE",
-	"HTTP_ACCEPT_CHARSET",
-	"HTTP_ACCEPT_ENCODING",
-	"HTTP_ACCEPT_LANGUAGE",
-	"HTTP_ACCEPT",
-	"HTTP_CONNECTION",
-	"HTTP_HOST",
-	"HTTP_REFERER",
-	"HTTP_USER_AGENT",
-	"HTTPS",
-	"QUERY_STRING",
-	"REDIRECT_REMOTE_USER",
-	"REMOTE_ADDR",
-	"REMOTE_HOST",
-	"REMOTE_PORT",
-	"REMOTE_USER",
-	"REQUEST_METHOD",
-	"REQUEST_TIME",
-	"REQUEST_URI",
-	"SCRIPT_FILENAME",
-	"SCRIPT_NAME",
-	"SERVER_ADDR",
-	"SERVER_ADMIN",
-	"SERVER_NAME",
-	"SERVER_PORT",
-	"SERVER_PROTOCOL",
-	"SERVER_SIGNATURE",
-	"SERVER_SOFTWARE",
-}
-
-func getServerEnv() object.Object {
+func getServerEnv() *object.Hash {
 	if os.Getenv("GATEWAY_INTERFACE") != "CGI/1.1" {
 		return object.MakeEmptyHash()
 	}
 
-	headers := make(map[string]string, len(cgiHeaderNames))
-	for _, header := range cgiHeaderNames {
+	headers := make(map[string]string, len(scgi.CGIHeaderNames))
+	for _, header := range scgi.CGIHeaderNames {
 		headers[header] = os.Getenv(header)
 	}
 
@@ -309,7 +292,7 @@ func getScriptArgs(filepath string) *object.Array {
 		s = flag.Args()[1:]
 	}
 	length := len(s) + 1
-	newElements := make([]object.Object, length, length)
+	newElements := make([]object.Object, length)
 	newElements[0] = object.MakeStringObj(filepath)
 	for i, v := range s {
 		newElements[i+1] = object.MakeStringObj(v)
@@ -363,14 +346,15 @@ func printParserErrors(out io.Writer, errors []string) {
 }
 
 func versionInfo() {
-	fmt.Printf(`Nitrogen - (C) 2018 Lee Keitel
+	fmt.Printf(`Nitrogen
 Version:           %s
 Built:             %s
 Compiled by:       %s
 Go version:        %s %s/%s
-Modules Supported: %t
 Builtin Mod Path:  %s
-`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, modulesSupported, builtinModPaths)
+Pkg Path:          %s
+Native Modules Supported: %t
+`, version, buildTime, builder, runtime.Version(), runtime.GOOS, runtime.GOARCH, builtinModPaths, modulePaths, vm.ModulesSupported)
 }
 
 func runInfoCmd() {

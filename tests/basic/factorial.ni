@@ -5,6 +5,6 @@ const fac = fn(num) {
     return num * fac(num - 1)
 }
 
-test.run("Factorial 20", fn(assert) {
-    assert.isEq(fac(20), 2432902008176640000)
+test.run("Factorial 20", fn(assert, check) {
+    check(assert.isEq(fac(20), 2432902008176640000))
 })

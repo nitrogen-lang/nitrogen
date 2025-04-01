@@ -9,23 +9,20 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-var moduleName = "std/runtime"
-
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"dis": disassemble,
-		},
-		Vars: map[string]object.Object{
-			"osName": object.MakeStringObj(runtime.GOOS),
-			"osArch": object.MakeStringObj(runtime.GOARCH),
-		},
-	}
-}
-
 func init() {
 	vm.RegisterBuiltin("debugVal", debugBuiltin)
+	vm.RegisterNative("std.runtime.dis", disassemble)
+	vm.RegisterNative("std.runtime.dis_method", disassemble_method)
+	vm.RegisterNative("std.runtime.osName", osName)
+	vm.RegisterNative("std.runtime.osArch", osArch)
+}
+
+func osName(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return object.MakeStringObj(runtime.GOOS)
+}
+
+func osArch(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	return object.MakeStringObj(runtime.GOARCH)
 }
 
 func debugBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -74,6 +71,36 @@ func disassemble(machine object.Interpreter, env *object.Environment, args ...ob
 	fn, ok := fnObj.(*vm.VMFunction)
 	if !ok {
 		return object.NewException("dis expected a func, got %s", fnObj.Type().String())
+	}
+
+	cb := fn.Body
+
+	fmt.Printf("Name: %s\nFilename: %s\nLocalCount: %d\nMaxStackSize: %d\nMaxBlockSize: %d\n",
+		cb.Name, cb.Filename, cb.LocalCount, cb.MaxStackSize, cb.MaxBlockSize)
+	cb.Print(" ")
+	return object.NullConst
+}
+
+func disassemble_method(machine object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("dis_method", 2, args...); ac != nil {
+		return ac
+	}
+
+	classObj, ok := args[0].(*vm.VMClass)
+	if !ok {
+		return object.NewException("dis_method expected first arg to be a Class, got %s", args[0].Type().String())
+	}
+
+	methodName, ok := args[1].(*object.String)
+	if !ok {
+		return object.NewException("dis_method expected second arg to be a String, got %s", args[1].Type().String())
+	}
+
+	method := classObj.GetMethod(string(methodName.String()))
+
+	fn, ok := method.(*vm.VMFunction)
+	if !ok {
+		return object.NewException("dis_method expected a func, got %s", method.Type().String())
 	}
 
 	cb := fn.Body

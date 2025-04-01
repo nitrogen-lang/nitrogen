@@ -1,7 +1,7 @@
 import "std/test"
 
-test.run("Import with no extension", fn(assert) {
+test.run("Import with no extension", fn(assert, check) {
     import '../../testdata/math' as math
-    assert.isTrue(isFunc(math.add))
-    assert.isEq(math.add(2, 4), 6)
+    check(assert.isTrue(isFunc(math.add)))
+    check(assert.isEq(math.add(2, 4), 6))
 })

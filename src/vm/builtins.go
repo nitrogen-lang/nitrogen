@@ -56,15 +56,16 @@ func RegisterNative(name string, fn object.BuiltinFunction) {
 	nativeFn[name] = &object.Builtin{Fn: fn}
 }
 
-func RegisterNativeMethod(name string, fn BuiltinMethodFunction) {
+func RegisterNativeMethod(name string, fn BuiltinMethodFunction, params int) {
 	if _, defined := nativeMethods[name]; defined {
 		// Panic because this should NEVER happen when built
 		panic("VM native method " + name + " already defined")
 	}
 
 	nativeMethods[name] = &BuiltinMethod{
-		Name: name[strings.LastIndex(name, ".")+1:],
-		Fn:   fn,
+		Name:        name[strings.LastIndex(name, ".")+1:],
+		Fn:          fn,
+		NumOfParams: params,
 	}
 }
 

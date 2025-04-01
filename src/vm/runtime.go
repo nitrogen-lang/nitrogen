@@ -12,6 +12,7 @@ type blockType byte
 const (
 	loopBlockT blockType = iota
 	tryBlockT
+	doBlockT
 )
 
 type block interface {
@@ -24,14 +25,19 @@ type forLoopBlock struct {
 
 func (b *forLoopBlock) blockType() blockType { return loopBlockT }
 
-type tryBlock struct {
-	catch, sp int
-	caught    bool
+type recoverBlock struct {
+	pc, sp int
+	caught bool
 }
 
-func (b *tryBlock) blockType() blockType { return tryBlockT }
+func (b *recoverBlock) blockType() blockType { return tryBlockT }
+
+type doBlock struct{}
+
+func (b *doBlock) blockType() blockType { return doBlockT }
 
 type Frame struct {
+	module     string
 	lastFrame  *Frame
 	code       *compiler.CodeBlock
 	stack      []object.Object
@@ -165,4 +171,16 @@ func (s *frameStack) Pop() *Frame {
 
 func (s *frameStack) Len() int {
 	return s.length
+}
+
+func (s *frameStack) forEach(fn func(*Frame)) {
+	f := s.head
+
+	for {
+		if f == nil {
+			return
+		}
+		fn(f.val)
+		f = f.prev
+	}
 }

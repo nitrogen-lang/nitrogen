@@ -8,28 +8,18 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
-const (
-	moduleName = "std/opbuf"
-)
-
 var (
 	oldWriter io.Writer
 )
 
-func Init() object.Object {
-	return &object.Module{
-		Name: moduleName,
-		Methods: map[string]object.BuiltinFunction{
-			"start":      start,
-			"clear":      clear,
-			"flush":      flush,
-			"get":        get,
-			"stopAndGet": stopAndGet,
-			"stop":       stop,
-			"isStarted":  isStarted,
-		},
-		Vars: map[string]object.Object{},
-	}
+func init() {
+	vm.RegisterNative("std.opbuf.start", start)
+	vm.RegisterNative("std.opbuf.clear", clear)
+	vm.RegisterNative("std.opbuf.flush", flush)
+	vm.RegisterNative("std.opbuf.get", get)
+	vm.RegisterNative("std.opbuf.stopAndGet", stopAndGet)
+	vm.RegisterNative("std.opbuf.stop", stop)
+	vm.RegisterNative("std.opbuf.isStarted", isStarted)
 }
 
 func start(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

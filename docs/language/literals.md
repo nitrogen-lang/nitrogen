@@ -27,8 +27,8 @@ examples:
 0b1010 // Binary, prefixed with 0b
 ```
 
-Integers support all the standard arthimatic and bitwise operators and are
-comparable. Integers may contain underscores "_" to separate digits:
+Integers support all the standard arithmetic and bitwise operators and are
+comparable. Integers may contain underscores "\_" to separate digits:
 `10_000_000`. Rules around using the digit separator are very loose. They may
 appear anywhere in the number with not limitation on how many are used
 consecutively. Obviously, one should be mindful and consistent when using them.
@@ -37,7 +37,7 @@ consecutively. Obviously, one should be mindful and consistent when using them.
 
 Floating point numbers are implemented as 64-bit IEEE floating point numbers.
 Floats can only be represented in dotted decimal notation. Exponential notation
-is coming soon. Like ints, floats support the standard arithmatic operations and
+is coming soon. Like ints, floats support the standard arithmetic operations and
 are comparable. Floats may contain digit separators as well.
 
 ## Booleans

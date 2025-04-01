@@ -11,98 +11,106 @@ assembly-like bytecode.
 
 These are all the opcodes used in this implementation.
 
-### NOOP
+### BINARY_ADD
 
-### LOAD\_CONST
+### BINARY_AND
 
-### STORE\_CONST
+### BINARY_ANDNOT
 
-### LOAD\_FAST
+### BINARY_DIVIDE
 
-### STORE\_FAST
+### BINARY_MOD
 
-### DELETE\_FAST
+### BINARY_MUL
 
-### DEFINE
+### BINARY_NOT
 
-### LOAD\_GLOBAL
+### BINARY_OR
 
-### STORE\_GLOBAL
+### BINARY_SHIFTL
 
-### LOAD\_INDEX
+### BINARY_SHIFTR
 
-### STORE\_INDEX
-
-### BINARY\_ADD
-
-### BINARY\_SUB
-
-### BINARY\_MUL
-
-### BINARY\_DIVIDE
-
-### BINARY\_MOD
-
-### BINARY\_SHIFTL
-
-### BINARY\_SHIFTR
-
-### BINARY\_AND
-
-### BINARY\_OR
-
-### BINARY\_NOT
-
-### BINARY\_ANDNOT
-
-### UNARY\_NEG
-
-### UNARY\_NOT
-
-### COMPARE
-
-### CALL
-
-### RETURN
-
-### POP
-
-### MAKE\_ARRAY
-
-### MAKE\_MAP
-
-### MAKE\_FUNCTION
-
-### POP\_JUMP\_IF\_TRUE
-
-### POP\_JUMP\_IF\_FALSE
-
-### JUMP\_IF\_TRUE\_OR\_POP
-
-### JUMP\_IF\_FALSE\_OR\_POP
-
-### JUMP\_ABSOLUTE
-
-### JUMP\_FORWARD
-
-### OPEN\_SCOPE
-
-### CLOSE\_SCOPE
-
-### END\_BLOCK
-
-### START\_LOOP
-
-### CONTINUE
-
-### NEXT\_ITER
+### BINARY_SUB
 
 ### BREAK
 
-### START\_TRY
+### BUILD_CLASS
 
-### THROW
+### CALL
+
+### COMPARE
+
+### CONTINUE
+
+### DEFINE
+
+### DELETE_FAST
 
 ### DUP
 
-### GET\_ITER
+### END_BLOCK
+
+### GET_ITER
+
+### IMPLEMENTS
+
+### IMPORT
+
+### JUMP_ABSOLUTE
+
+### JUMP_FORWARD
+
+### JUMP_IF_FALSE_OR_POP
+
+### JUMP_IF_TRUE_OR_POP
+
+### LOAD_ATTRIBUTE
+
+### LOAD_CONST
+
+### LOAD_FAST
+
+### LOAD_GLOBAL
+
+### LOAD_INDEX
+
+### MAKE_ARRAY
+
+### MAKE_FUNCTION
+
+### MAKE_INSTANCE
+
+### MAKE_MAP
+
+### NEXT_ITER
+
+### NOOP
+
+### POP
+
+### POP_JUMP_IF_FALSE
+
+### POP_JUMP_IF_TRUE
+
+### RECOVER
+
+### RETURN
+
+### START_BLOCK
+
+### START_LOOP
+
+### STORE_ATTRIBUTE
+
+### STORE_CONST
+
+### STORE_FAST
+
+### STORE_GLOBAL
+
+### STORE_INDEX
+
+### UNARY_NEG
+
+### UNARY_NOT

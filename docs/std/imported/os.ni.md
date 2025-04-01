@@ -21,6 +21,6 @@ returned if the command failed to execute, nil otherwise.
 
 `argv` returns an array of command line arguments used when executing the application.
 
-## env: map
+## env(): map
 
-`env` is a hashmap of the environment variables.
+`env` returns a hashmap of the environment variables.

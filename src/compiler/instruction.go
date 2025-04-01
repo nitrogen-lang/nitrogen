@@ -11,6 +11,7 @@ type Instruction struct {
 	Args      []uint16 // len = 1 or 2
 	ArgLabels []string // len = 1 or 2, name of label for corresponding argument, prefix "~" means relative
 	Label     string   // Label names this instruction for linking later
+	Prev      *Instruction
 	Next      *Instruction
 	Line      uint
 }
@@ -71,6 +72,7 @@ func (i *InstSet) addInst(code opcode.Opcode, line uint, args ...uint16) {
 		Instr: code,
 		Args:  args,
 		Line:  line,
+		Prev:  i.Tail,
 	}
 
 	if i.Head == nil {
@@ -87,6 +89,7 @@ func (i *InstSet) addLabel(label string, line uint) {
 		Instr: opcode.Label,
 		Label: label,
 		Line:  line,
+		Prev:  i.Tail,
 	}
 
 	if i.Head == nil {
@@ -105,6 +108,7 @@ func (i *InstSet) addLabeledArgs(code opcode.Opcode, line uint, argLabels ...str
 		Args:      make([]uint16, len(argLabels)),
 		ArgLabels: argLabels,
 		Line:      line,
+		Prev:      i.Tail,
 	}
 
 	if i.Head == nil {

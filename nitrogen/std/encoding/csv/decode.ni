@@ -14,7 +14,7 @@ class lexer {
 
     const init = fn(file) {
         if ! file implements CharReader {
-            throw "f must be a CharReader"
+            return error("f must be a CharReader")
         }
 
         this.source = file
@@ -92,6 +92,27 @@ class lexer {
     }
 }
 
+class csvIter {
+    let idx
+    let reader
+
+    fn init(r) {
+        this.reader = r
+        this.idx = 0
+    }
+
+    const _next = fn() {
+        const nr = this.reader.readRecord()
+        if isNull(nr) {
+            nil
+        } else {
+            const n = [this.idx, nr]
+            this.idx += 1
+            n
+        }
+    }
+}
+
 class fileReader {
     let l
 
@@ -102,6 +123,8 @@ class fileReader {
     const readRecord = fn() {
         return this.l.readRecord()
     }
+
+    const _iter = fn() { new csvIter(this) }
 
     const readAllRecords = fn() {
         let records = [];
@@ -125,6 +148,6 @@ class fileReader {
 }
 
 return {
-    "fileReader": fileReader,
+    "reader": fileReader,
     "CharReader": CharReader,
 }
