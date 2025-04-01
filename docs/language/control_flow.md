@@ -57,6 +57,39 @@ statement. This form cannot be used with else or elif branches.
 if a == b: return c
 ```
 
+## Match Expressions
+
+The match syntax is an alternative to the if/else syntax that can make code
+cleaner and better express intent.
+
+```
+match expression {
+    "case1" => expression,
+    "case2" => {
+        do more
+    },
+    _ => "default case",
+}
+```
+
+Example:
+
+```
+const resp = http.get("")
+
+const message = match resp.status_code {
+    200 => "OK",
+    400 => "Bad client request",
+    500 => "Bad server request",
+    _ => "Uknown status",
+}
+
+println(message)
+```
+
+Case branches must be literal values (string, int, float, bool, nil). The match
+syntax does not support numeric conditionals or range checks.
+
 ## Loop Statements
 
 Nitrogen supports for and while loops:

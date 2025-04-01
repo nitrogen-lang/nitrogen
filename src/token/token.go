@@ -65,6 +65,8 @@ const (
 	Semicolon
 	Colon
 	Carrot
+	Fatarrow
+	Underscore
 
 	// Groups and blocks
 	LParen
@@ -108,6 +110,7 @@ const (
 	Interface
 	Implements
 	Breakpoint
+	Match
 	keywordEnd
 )
 
@@ -153,10 +156,12 @@ var tokens = [...]string{
 	ShiftRight: ">>",
 
 	// Delimiters
-	Comma:     ",",
-	Semicolon: ";",
-	Colon:     ":",
-	Carrot:    "^",
+	Comma:      ",",
+	Semicolon:  ";",
+	Colon:      ":",
+	Carrot:     "^",
+	Fatarrow:   "=>",
+	Underscore: "_",
 
 	// Groups and blocks
 	LParen:  "(",
@@ -198,6 +203,7 @@ var tokens = [...]string{
 	Interface:  "interface",
 	Implements: "implements",
 	Breakpoint: "breakpoint",
+	Match:      "match",
 }
 
 var keywords map[string]TokenType

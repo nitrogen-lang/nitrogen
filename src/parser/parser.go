@@ -104,6 +104,7 @@ func New(l *lexer.Lexer, settings *Settings) *Parser {
 	p.registerPrefix(token.Dash, p.parsePrefixExpression)
 	p.registerPrefix(token.LParen, p.parseGroupedExpression)
 	p.registerPrefix(token.If, p.parseIfExpression)
+	p.registerPrefix(token.Match, p.parseMatchExpression)
 	p.registerPrefix(token.Class, p.parseClassLiteral)
 	p.registerPrefix(token.Interface, p.parseInterfaceLiteral)
 	p.registerPrefix(token.New, p.parseMakeExpression)
@@ -202,6 +203,7 @@ func (p *Parser) nextToken() {
 	}
 
 	if p.settings.Debug {
+		fmt.Print("CUR TOKEN: ")
 		fmt.Println(p.curToken)
 	}
 }
@@ -323,6 +325,27 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 	return stmt
 }
 
+func (p *Parser) parseBaseLiteral() ast.BaseLiteral {
+	if p.settings.Debug {
+		fmt.Println("parseBaseLiteral")
+	}
+
+	switch p.curToken.Type {
+	case token.Integer:
+		return p.parseIntegerLiteral().(ast.BaseLiteral)
+	case token.Float:
+		return p.parseFloatLiteral().(ast.BaseLiteral)
+	case token.Nil:
+		return p.parseNullLiteral().(ast.BaseLiteral)
+	case token.String:
+		return p.parseStringLiteral().(ast.BaseLiteral)
+	case token.True, token.False:
+		return p.parseBoolean().(ast.BaseLiteral)
+	}
+
+	return nil
+}
+
 func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 	if p.settings.Debug {
 		fmt.Println("parseBlockStatements")
@@ -357,6 +380,28 @@ func (p *Parser) parseSingleStmtBlock() *ast.BlockStatement {
 	stmt := p.parseStatement()
 	if stmt != nil {
 		block.Statements[0] = stmt
+	}
+
+	return block
+}
+
+func (p *Parser) parseSingleOrBlockStatements() *ast.BlockStatement {
+	if p.settings.Debug {
+		fmt.Println("parseSingleOrBlockStatements")
+	}
+	block := &ast.BlockStatement{
+		Token:      p.curToken,
+		Statements: []ast.Statement{},
+	}
+
+	if p.peekTokenIs(token.LBrace) {
+		p.nextToken()
+		block.Statements = append(block.Statements, p.parseBlockStatements().Statements...)
+	} else {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
 	}
 
 	return block

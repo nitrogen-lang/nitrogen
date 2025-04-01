@@ -290,3 +290,99 @@ func (p *Parser) parseCompareExpression(left ast.Expression) ast.Node {
 		Right: p.parseExpression(priLowest).(ast.Expression),
 	}
 }
+
+func (p *Parser) parseMatchExpression() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseMatchExpression")
+	}
+
+	var matchExp ast.Expression
+
+	if p.curTokenIs(token.LParen) {
+		matchExp = p.parseGroupedExpressionE()
+		if !p.expectPeek(token.RParen) {
+			return nil
+		}
+	} else {
+		matchExp = p.parseGroupedExpressionE()
+	}
+
+	if !p.expectPeek(token.LBrace) {
+		return nil
+	}
+	p.nextToken()
+
+	cases := make([]*ast.IfExpression, 0, 5)
+
+	for {
+		var caseLiteral ast.Expression
+		if !p.curTokenIs(token.Underscore) {
+			caseLiteral = p.parseBaseLiteral()
+			if caseLiteral == nil {
+				p.addErrorWithCurPos("expected a literal, got %s", p.curToken.Type.String())
+				return nil
+			}
+		}
+
+		if !p.expectPeek(token.Fatarrow) {
+			return nil
+		}
+		p.nextToken()
+
+		caseConsequence := p.parseSingleOrBlockStatements()
+		if caseConsequence == nil {
+			p.addErrorWithCurPos("expected a statement, got %s", p.curToken.Type.String())
+			return nil
+		}
+
+		if !p.expectPeek(token.Comma) {
+			return nil
+		}
+
+		theCase := &ast.IfExpression{
+			Token:       p.curToken,
+			Consequence: caseConsequence,
+		}
+
+		if caseLiteral != nil {
+			theCase.Condition = &ast.InfixExpression{
+				Token:    token.Token{Type: token.Equal, Literal: "=="},
+				Left:     matchExp,
+				Operator: "==",
+				Right:    caseLiteral,
+			}
+		}
+
+		cases = append(cases, theCase)
+
+		if p.peekTokenIs(token.RBrace) {
+			p.nextToken()
+			break
+		}
+		p.nextToken()
+	}
+
+	var defaultCase *ast.BlockStatement
+
+	caseChain := cases[0]
+	currCase := caseChain
+
+	for _, c := range cases[1:] {
+		if c.Condition == nil {
+			defaultCase = c.Consequence
+			continue
+		}
+
+		currCase.Alternative = &ast.BlockStatement{
+			Token:      c.Token,
+			Statements: []ast.Statement{&ast.ExpressionStatement{Token: c.Token, Expression: c}},
+		}
+		currCase = c
+	}
+
+	if defaultCase != nil {
+		currCase.Alternative = defaultCase
+	}
+
+	return caseChain
+}
