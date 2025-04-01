@@ -156,7 +156,7 @@ func (bs *BlockStatement) String() string {
 	for i, s := range bs.Statements {
 		str := s.String()
 		out.WriteString(str)
-		if str[len(str)-1] != ';' {
+		if len(str) == 0 || str[len(str)-1] != ';' {
 			out.WriteByte(';')
 		}
 

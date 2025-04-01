@@ -8,10 +8,16 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
+type BaseLiteral interface {
+	Expression
+	baseLiteral()
+}
+
 type NullLiteral struct {
 	Token token.Token // the token.NULL token
 }
 
+func (n *NullLiteral) baseLiteral()         {}
 func (n *NullLiteral) expressionNode()      {}
 func (n *NullLiteral) TokenLiteral() string { return n.Token.Literal }
 func (n *NullLiteral) String() string       { return n.Token.Literal }
@@ -21,6 +27,7 @@ type IntegerLiteral struct {
 	Value int64
 }
 
+func (i *IntegerLiteral) baseLiteral()         {}
 func (i *IntegerLiteral) expressionNode()      {}
 func (i *IntegerLiteral) TokenLiteral() string { return i.Token.Literal }
 func (i *IntegerLiteral) String() string       { return i.Token.Literal }
@@ -30,6 +37,7 @@ type FloatLiteral struct {
 	Value float64
 }
 
+func (f *FloatLiteral) baseLiteral()         {}
 func (f *FloatLiteral) expressionNode()      {}
 func (f *FloatLiteral) TokenLiteral() string { return f.Token.Literal }
 func (f *FloatLiteral) String() string       { return f.Token.Literal }
@@ -39,6 +47,7 @@ type StringLiteral struct {
 	Value []rune
 }
 
+func (s *StringLiteral) baseLiteral()         {}
 func (s *StringLiteral) expressionNode()      {}
 func (s *StringLiteral) TokenLiteral() string { return s.Token.Literal }
 func (s *StringLiteral) String() string       { return string(s.Value) }
@@ -48,6 +57,7 @@ type Boolean struct {
 	Value bool
 }
 
+func (b *Boolean) baseLiteral()         {}
 func (b *Boolean) expressionNode()      {}
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
 func (b *Boolean) String() string       { return b.Token.Literal }

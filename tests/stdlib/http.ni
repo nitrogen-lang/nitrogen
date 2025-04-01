@@ -11,6 +11,7 @@ test.run("HTTP GET request", fn(assert, check) {
     check(assert.isTrue(contains(resp, "body")))
     check(assert.isTrue(contains(resp, "headers")))
     check(assert.isTrue(isString(resp.body)))
+    check(assert.isEq(resp.status_code, 200))
     check(assert.isNeq(resp.body, ""))
     check(assert.isEq(resp.headers["Content-Type"], "application/json; charset=utf-8"))
 })

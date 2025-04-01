@@ -206,6 +206,13 @@ func (l *Lexer) NextToken() token.Token {
 				Pos:     l.curPosition(),
 			}
 			l.readRune()
+		} else if l.peekChar() == '>' {
+			tok = token.Token{
+				Type:    token.Fatarrow,
+				Literal: "=>",
+				Pos:     l.curPosition(),
+			}
+			l.readRune()
 		} else {
 			tok = l.newToken(token.Assign, l.curCh)
 		}
@@ -306,6 +313,13 @@ func (l *Lexer) NextToken() token.Token {
 		}
 
 	default:
+		if l.curCh == '_' && l.isWhitespace(l.peekCh) {
+			tok = l.newToken(token.Underscore, l.curCh)
+			l.readRune()
+			l.lastToken = tok
+			return tok
+		}
+
 		if isLetter(l.curCh) {
 			tok.Pos = l.curPosition()
 			tok.Literal = l.readIdentifier()
