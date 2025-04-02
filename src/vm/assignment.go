@@ -11,6 +11,8 @@ func (vm *VirtualMachine) assignIndexedValue(indexed, index, val object.Object) 
 		return vm.assignHashMapIndex(i, index, val)
 	case *object.String:
 		return vm.assignStringIndex(i, index, val)
+	case *object.ByteString:
+		return vm.assignByteStringIndex(i, index, val)
 	}
 	return object.NullConst
 }
@@ -31,6 +33,28 @@ func (vm *VirtualMachine) assignStringIndex(
 	replace, ok := val.(*object.String)
 	if !ok {
 		return object.NewException("Invalid string index value type %s", val.Type())
+	}
+
+	str.Value[in.Value] = replace.Value[0]
+	return object.NullConst
+}
+
+func (vm *VirtualMachine) assignByteStringIndex(
+	str *object.ByteString,
+	index, val object.Object) object.Object {
+
+	in, ok := index.(*object.Integer)
+	if !ok {
+		return object.NewException("Invalid byte string index type %s", index.Type())
+	}
+
+	if in.Value < 0 || in.Value > int64(len(str.Value)-1) {
+		return object.NewException("Index out of bounds: %s", index.Inspect())
+	}
+
+	replace, ok := val.(*object.ByteString)
+	if !ok {
+		return object.NewException("Invalid byte string index value type %s", val.Type())
 	}
 
 	str.Value[in.Value] = replace.Value[0]

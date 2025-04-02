@@ -153,3 +153,51 @@ func makeStringIter(str *object.String) *VMInstance {
 		Fields: env,
 	}
 }
+
+var byteStringIterator = &BuiltinClass{
+	Fields: map[string]object.Object{
+		"str": object.NullConst,
+		"i":   object.MakeIntObj(0),
+	},
+	VMClass: &VMClass{
+		Name:   "ByteStringIterator",
+		Parent: nil,
+		Methods: map[string]object.ClassMethod{
+			"_next": MakeBuiltinMethod(byteStringIteratorNext, 0),
+		},
+	},
+}
+
+func byteStringIteratorNext(interpreter *VirtualMachine, self *VMInstance, env *object.Environment, args ...object.Object) object.Object {
+	selfStrObj, _ := self.Fields.Get("str")
+	selfIndexObj, _ := self.Fields.Get("i")
+
+	selfStr := selfStrObj.(*object.ByteString)
+	selfIndex := selfIndexObj.(*object.Integer)
+
+	if int(selfIndex.Value) == len(selfStr.Value) {
+		return object.NullConst
+	}
+
+	elem := selfStr.Value[selfIndex.Value]
+
+	self.Fields.Set("i", object.MakeIntObj(selfIndex.Value+1))
+
+	return &object.Array{
+		Elements: []object.Object{
+			object.MakeIntObj(selfIndex.Value),
+			object.MakeByteStringObjBytes([]byte{elem}),
+		},
+	}
+}
+
+func makeByteStringIter(str *object.ByteString) *VMInstance {
+	env := object.NewEnvironment()
+	env.SetForce("str", str, true)
+	env.SetForce("i", object.MakeIntObj(0), false)
+
+	return &VMInstance{
+		Class:  byteStringIterator.VMClass,
+		Fields: env,
+	}
+}

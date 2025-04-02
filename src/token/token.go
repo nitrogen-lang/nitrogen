@@ -29,6 +29,7 @@ const (
 	Integer
 	Float
 	String
+	ByteString
 
 	// Operators
 	Assign
@@ -125,6 +126,7 @@ var tokens = [...]string{
 	Integer:    "INT",
 	Float:      "FLOAT",
 	String:     "STRING",
+	ByteString: "BYTES",
 
 	// Operators
 	Assign:   "=",

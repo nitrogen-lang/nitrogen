@@ -320,13 +320,23 @@ func (l *Lexer) NextToken() token.Token {
 			return tok
 		}
 
+		if l.curCh == 'b' && l.peekChar() == '"' {
+			l.readRune()
+			tok = l.readByteString()
+			l.readRune()
+			l.lastToken = tok
+			return tok
+		}
+
 		if isLetter(l.curCh) {
 			tok.Pos = l.curPosition()
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
 			l.lastToken = tok
 			return tok
-		} else if isDigit(l.curCh) {
+		}
+
+		if isDigit(l.curCh) {
 			tok = l.readNumber()
 			l.lastToken = tok
 			return tok
@@ -375,6 +385,14 @@ func (l *Lexer) readIdentifier() string {
 	return ident.String()
 }
 
+func (l *Lexer) readByteString() token.Token {
+	tok := l.readString()
+	if tok.Type != token.Illegal {
+		tok.Type = token.ByteString
+	}
+	return tok
+}
+
 func (l *Lexer) readString() token.Token {
 	var ident bytes.Buffer
 	pos := l.curPosition()
@@ -391,6 +409,7 @@ func (l *Lexer) readString() token.Token {
 
 		if l.curCh == '\\' {
 			l.readRune()
+
 			switch l.curCh {
 			case '0': // null
 				ident.WriteRune(0)

@@ -10,6 +10,8 @@ func (vm *VirtualMachine) evalIndexExpression(left, index object.Object) object.
 		return vm.lookupHashIndex(left.(*object.Hash), index)
 	case left.Type() == object.StringObj && index.Type() == object.IntergerObj:
 		return vm.evalStringIndexExpression(left.(*object.String), index)
+	case left.Type() == object.ByteStringObj && index.Type() == object.IntergerObj:
+		return vm.evalByteStringIndexExpression(left.(*object.ByteString), index)
 	}
 	return object.NewException("Index operator not allowed on type %s", left.Type())
 }
@@ -66,6 +68,26 @@ func (vm *VirtualMachine) evalStringIndexExpression(str *object.String, index ob
 	}
 
 	return &object.String{Value: []rune{str.Value[idx]}}
+}
+
+func (vm *VirtualMachine) evalByteStringIndexExpression(str *object.ByteString, index object.Object) object.Object {
+	idx := index.(*object.Integer).Value
+	max := int64(len(str.Value))
+
+	if idx > max-1 { // Check upper bound
+		return object.NullConst
+	}
+
+	if idx < 0 { // Check lower bound
+		// Convert a negative index to positive
+		idx = max + idx
+
+		if idx < 0 { // Check lower bound again
+			return object.NullConst
+		}
+	}
+
+	return &object.ByteString{Value: []byte{str.Value[idx]}}
 }
 
 func (vm *VirtualMachine) lookupModuleAttr(module *object.Module, key string) object.Object {

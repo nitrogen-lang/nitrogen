@@ -63,6 +63,16 @@ func MakeStringLiteral(s string, pos token.Position) *StringLiteral {
 	}
 }
 
+type ByteStringLiteral struct {
+	Token token.Token
+	Value []byte
+}
+
+func (s *ByteStringLiteral) baseLiteral()         {}
+func (s *ByteStringLiteral) expressionNode()      {}
+func (s *ByteStringLiteral) TokenLiteral() string { return s.Token.Literal }
+func (s *ByteStringLiteral) String() string       { return string(s.Value) }
+
 type Boolean struct {
 	Token token.Token
 	Value bool

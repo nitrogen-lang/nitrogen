@@ -50,9 +50,14 @@ func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 		return arg
 	case *object.Float:
 		return object.MakeIntObj(int64(arg.Value))
+	case *object.ByteString:
+		if len(arg.Value) != 1 {
+			return object.NewException("BYTESTRING `toInt` must be length 1, got %d", len(arg.Value))
+		}
+		return object.MakeIntObj(int64(arg.Value[0]))
 	}
 
-	return object.NewException("Argument to `toInt` must be FLOAT or INT, got %s", args[0].Type())
+	return object.NewException("Argument to `toInt` must be FLOAT, INT, or BYTESTRING, got %s", args[0].Type())
 }
 
 func toFloatBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -125,10 +130,21 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		return object.NewException("toString expects 1 argument. Got %d", len(args))
 	}
 
+	bytes := toByteStringBuiltin(interpreter, env, args[0]).(*object.ByteString)
+	return object.ByteStringToString(bytes)
+}
+
+func toByteStringBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return object.NewException("toByteString expects 1 argument. Got %d", len(args))
+	}
+
 	converted := ""
 
 	switch arg := args[0].(type) {
 	case *object.String:
+		converted = arg.String()
+	case *object.ByteString:
 		converted = arg.String()
 	case *object.Float:
 		converted = strconv.FormatFloat(arg.Value, 'G', -1, 64)
@@ -142,7 +158,7 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		converted = arg.Inspect()
 	}
 
-	return object.MakeStringObj(converted)
+	return object.MakeByteStringObj(converted)
 }
 
 func parseIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

@@ -804,6 +804,8 @@ mainLoop:
 				vm.currentFrame.pushStack(makeArrayIter(obj))
 			case *object.String:
 				vm.currentFrame.pushStack(makeStringIter(obj))
+			case *object.ByteString:
+				vm.currentFrame.pushStack(makeByteStringIter(obj))
 			default:
 				vm.currentFrame.pushStack(object.NewException("Attribute lookup on non-object type %s", obj.Type()))
 				vm.throw()

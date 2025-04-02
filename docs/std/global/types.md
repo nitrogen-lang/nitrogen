@@ -2,7 +2,7 @@
 
 Type conversion and checking functions.
 
-## toInt(in: int|float): int
+## toInt(in: int|float|bytestring): int
 
 Convert a number to an int. Some information will be lost when converting from a float to an integer.
 
@@ -14,6 +14,10 @@ Convert a number to a float.
 
 Convert any value into its stringified form.
 
+## toByteString(in: T): bytestring
+
+Convert any value into its byte-stringified form.
+
 ## isFloat(in: T): bool
 
 ## isInt(in: T): bool
@@ -21,6 +25,8 @@ Convert any value into its stringified form.
 ## isBool(in: T): bool
 
 ## isString(in: T): bool
+
+## isByteString(in: T): bool
 
 ## isNull(in: T): bool (alias for isNil)
 

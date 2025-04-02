@@ -79,6 +79,24 @@ Strings may be indexed like an array using square brackets `"Hello, world"[0] ==
 "H"`. The value of an index expression is another string with the character at
 the index of the original string.
 
+## Byte Strings
+
+Byte strings are similar to normal strings except they are not stored as UTF-8
+code points. Byte strings allow for manipulation of individual bytes. Byte strings
+and normal strings can be converted between each other, but some conversion loss
+may happen due to UTF-8 conversion. Byte strings and normal strings are not
+comparable as they are separate types. One side of the comparison must be converted
+to the other type. Converting a String to a Byte String is preferred. All escape
+sequences are valid in byte strings.
+
+Byte strings can be creating using the "b" prefix before a string:
+
+```
+b"I'm a byte string"
+```
+
+Bytes can be concatenated, compared, and indexed like normal strings.
+
 ## Functions
 
 Functions are literals just like anything else but they have their own docs
