@@ -381,7 +381,7 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.env.IsConstLocal(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined local constant %s", name))
 				vm.throw()
 				break
 			}
@@ -404,8 +404,8 @@ mainLoop:
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+			if vm.currentFrame.env.IsConstLocal(name) {
+				vm.currentFrame.pushStack(object.NewException("Variable %s already defined as constant", name))
 				vm.throw()
 				break
 			}
@@ -438,7 +438,7 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined global constant %s", name))
 				vm.throw()
 				break
 			}
