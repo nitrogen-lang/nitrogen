@@ -133,6 +133,9 @@ func (vm *VirtualMachine) evalImplementsExpression(left, right object.Object) ob
 func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) object.Object {
 	switch {
 	case left.Type() != right.Type():
+		if op == opcode.CmpNotEq {
+			return object.TrueConst
+		}
 		return object.FalseConst
 	case object.ObjectsAre(object.IntergerObj, left, right):
 		return vm.evalIntegerInfixExpression(op, left, right)
