@@ -10,20 +10,20 @@ import (
 
 func init() {
 	// Register with virtual machine
-	vm.RegisterBuiltin("len", lenBuiltin)
-	vm.RegisterBuiltin("first", firstBuiltin)
-	vm.RegisterBuiltin("last", lastBuiltin)
-	vm.RegisterBuiltin("rest", restBuiltin)
-	vm.RegisterBuiltin("pop", popBuiltin)
-	vm.RegisterBuiltin("push", pushBuiltin)
-	vm.RegisterBuiltin("prepend", prependBuiltin)
-	vm.RegisterBuiltin("splice", spliceBuiltin)
-	vm.RegisterBuiltin("slice", sliceBuiltin)
-	vm.RegisterBuiltin("sort", sortArrayBuiltin)
-	vm.RegisterBuiltin("hashMerge", hashMergeBuiltin)
-	vm.RegisterBuiltin("hashKeys", hashKeysBuiltin)
-	vm.RegisterBuiltin("hasKey", hasKeyBuiltin)
-	vm.RegisterBuiltin("range", rangeIterBuiltin)
+	vm.RegisterNative("std.preamble.collection.len", lenBuiltin)
+	vm.RegisterNative("std.preamble.collection.first", firstBuiltin)
+	vm.RegisterNative("std.preamble.collection.last", lastBuiltin)
+	vm.RegisterNative("std.preamble.collection.rest", restBuiltin)
+	vm.RegisterNative("std.preamble.collection.pop", popBuiltin)
+	vm.RegisterNative("std.preamble.collection.push", pushBuiltin)
+	vm.RegisterNative("std.preamble.collection.prepend", prependBuiltin)
+	vm.RegisterNative("std.preamble.collection.splice", spliceBuiltin)
+	vm.RegisterNative("std.preamble.collection.slice", sliceBuiltin)
+	vm.RegisterNative("std.preamble.collection.sort", sortArrayBuiltin)
+	vm.RegisterNative("std.preamble.collection.hashMerge", hashMergeBuiltin)
+	vm.RegisterNative("std.preamble.collection.hashKeys", hashKeysBuiltin)
+	vm.RegisterNative("std.preamble.collection.hasKey", hasKeyBuiltin)
+	vm.RegisterNative("std.preamble.collection.range", rangeIterBuiltin)
 }
 
 func lenBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

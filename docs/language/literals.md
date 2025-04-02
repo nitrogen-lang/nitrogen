@@ -54,6 +54,7 @@ strings in Nitrogen, interpreted strings and raw strings.
 Interpreted strings are surrounded by double quotes and cannot contain any new
 lines (it can't span lines), but it can contain escape sequences:
 
+- \0 - Null
 - \b - Backspace
 - \e - Escape
 - \f - Form feed
@@ -63,6 +64,7 @@ lines (it can't span lines), but it can contain escape sequences:
 - \v - Vertical tab
 - \\\\ - Backspace
 - \\" - Double quote
+- \x00 - Byte in hex
 
 If any other escape sequence is found, the backslash and following character are
 left untouched. For example the string `"He\llo World"` would not change in its
@@ -76,6 +78,24 @@ quote. Raw strings can be helpful for templates or large bodies of inline text.
 Strings may be indexed like an array using square brackets `"Hello, world"[0] ==
 "H"`. The value of an index expression is another string with the character at
 the index of the original string.
+
+## Byte Strings
+
+Byte strings are similar to normal strings except they are not stored as UTF-8
+code points. Byte strings allow for manipulation of individual bytes. Byte strings
+and normal strings can be converted between each other, but some conversion loss
+may happen due to UTF-8 conversion. Byte strings and normal strings are not
+comparable as they are separate types. One side of the comparison must be converted
+to the other type. Converting a String to a Byte String is preferred. All escape
+sequences are valid in byte strings.
+
+Byte strings can be creating using the "b" prefix before a string:
+
+```
+b"I'm a byte string"
+```
+
+Bytes can be concatenated, compared, and indexed like normal strings.
 
 ## Functions
 

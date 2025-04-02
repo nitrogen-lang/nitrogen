@@ -7,8 +7,8 @@ import (
 )
 
 func init() {
-	vm.RegisterBuiltin("instanceOf", vmInstanceOf)
-	vm.RegisterBuiltin("classOf", vmClassOf)
+	vm.RegisterNative("std.preamble.main.instanceOf", vmInstanceOf)
+	vm.RegisterNative("std.preamble.main.classOf", vmClassOf)
 }
 
 func vmInstanceOf(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

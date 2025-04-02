@@ -10,32 +10,34 @@ import (
 
 func init() {
 	// Register with virual machine
-	vm.RegisterBuiltin("toInt", toIntBuiltin)
-	vm.RegisterBuiltin("toFloat", toFloatBuiltin)
-	vm.RegisterBuiltin("toString", toStringBuiltin)
+	vm.RegisterNative("std.preamble.main.toInt", toIntBuiltin)
+	vm.RegisterNative("std.preamble.main.toFloat", toFloatBuiltin)
+	vm.RegisterNative("std.preamble.main.toString", toStringBuiltin)
+	vm.RegisterNative("std.preamble.main.toByteString", toByteStringBuiltin)
 
-	vm.RegisterBuiltin("parseInt", parseIntBuiltin)
-	vm.RegisterBuiltin("parseFloat", parseFloatBuiltin)
+	vm.RegisterNative("std.preamble.main.parseInt", parseIntBuiltin)
+	vm.RegisterNative("std.preamble.main.parseFloat", parseFloatBuiltin)
 
-	vm.RegisterBuiltin("varType", varTypeBuiltin)
-	vm.RegisterBuiltin("isDefined", isDefinedBuiltin)
-	vm.RegisterBuiltin("isFloat", makeIsTypeBuiltin(object.FloatObj))
-	vm.RegisterBuiltin("isInt", makeIsTypeBuiltin(object.IntergerObj))
-	vm.RegisterBuiltin("isBool", makeIsTypeBuiltin(object.BooleanObj))
-	vm.RegisterBuiltin("isNull", makeIsTypeBuiltin(object.NullObj))
-	vm.RegisterBuiltin("isNil", makeIsTypeBuiltin(object.NullObj))
-	vm.RegisterBuiltin("isFunc", makeIsTypeBuiltin(object.FunctionObj))
-	vm.RegisterBuiltin("isString", makeIsTypeBuiltin(object.StringObj))
-	vm.RegisterBuiltin("isArray", makeIsTypeBuiltin(object.ArrayObj))
-	vm.RegisterBuiltin("isMap", makeIsTypeBuiltin(object.HashObj))
-	vm.RegisterBuiltin("isError", makeIsTypeBuiltin(object.ErrorObj))
-	vm.RegisterBuiltin("isException", makeIsTypeBuiltin(object.ExceptionObj))
-	vm.RegisterBuiltin("isResource", makeIsTypeBuiltin(object.ResourceObj))
-	vm.RegisterBuiltin("isClass", makeIsTypeBuiltin(object.ClassObj))
-	vm.RegisterBuiltin("isInstance", makeIsTypeBuiltin(object.InstanceObj))
+	vm.RegisterNative("std.preamble.main.varType", varTypeBuiltin)
+	vm.RegisterNative("std.preamble.main.isDefined", isDefinedBuiltin)
+	vm.RegisterNative("std.preamble.main.isFloat", makeIsTypeBuiltin(object.FloatObj))
+	vm.RegisterNative("std.preamble.main.isInt", makeIsTypeBuiltin(object.IntergerObj))
+	vm.RegisterNative("std.preamble.main.isBool", makeIsTypeBuiltin(object.BooleanObj))
+	vm.RegisterNative("std.preamble.main.isNull", makeIsTypeBuiltin(object.NullObj))
+	vm.RegisterNative("std.preamble.main.isNil", makeIsTypeBuiltin(object.NullObj))
+	vm.RegisterNative("std.preamble.main.isFunc", makeIsTypeBuiltin(object.FunctionObj))
+	vm.RegisterNative("std.preamble.main.isString", makeIsTypeBuiltin(object.StringObj))
+	vm.RegisterNative("std.preamble.main.isByteString", makeIsTypeBuiltin(object.ByteStringObj))
+	vm.RegisterNative("std.preamble.main.isArray", makeIsTypeBuiltin(object.ArrayObj))
+	vm.RegisterNative("std.preamble.main.isMap", makeIsTypeBuiltin(object.HashObj))
+	vm.RegisterNative("std.preamble.main.isError", makeIsTypeBuiltin(object.ErrorObj))
+	vm.RegisterNative("std.preamble.main.isException", makeIsTypeBuiltin(object.ExceptionObj))
+	vm.RegisterNative("std.preamble.main.isResource", makeIsTypeBuiltin(object.ResourceObj))
+	vm.RegisterNative("std.preamble.main.isClass", makeIsTypeBuiltin(object.ClassObj))
+	vm.RegisterNative("std.preamble.main.isInstance", makeIsTypeBuiltin(object.InstanceObj))
 
-	vm.RegisterBuiltin("errorVal", getErrorVal)
-	vm.RegisterBuiltin("resourceID", getResourceID)
+	vm.RegisterNative("std.preamble.main.errorVal", getErrorVal)
+	vm.RegisterNative("std.preamble.main.resourceID", getResourceID)
 }
 
 func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -48,9 +50,14 @@ func toIntBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 		return arg
 	case *object.Float:
 		return object.MakeIntObj(int64(arg.Value))
+	case *object.ByteString:
+		if len(arg.Value) != 1 {
+			return object.NewException("BYTESTRING `toInt` must be length 1, got %d", len(arg.Value))
+		}
+		return object.MakeIntObj(int64(arg.Value[0]))
 	}
 
-	return object.NewException("Argument to `toInt` must be FLOAT or INT, got %s", args[0].Type())
+	return object.NewException("Argument to `toInt` must be FLOAT, INT, or BYTESTRING, got %s", args[0].Type())
 }
 
 func toFloatBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
@@ -123,10 +130,21 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		return object.NewException("toString expects 1 argument. Got %d", len(args))
 	}
 
+	bytes := toByteStringBuiltin(interpreter, env, args[0]).(*object.ByteString)
+	return object.ByteStringToString(bytes)
+}
+
+func toByteStringBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return object.NewException("toByteString expects 1 argument. Got %d", len(args))
+	}
+
 	converted := ""
 
 	switch arg := args[0].(type) {
 	case *object.String:
+		converted = arg.String()
+	case *object.ByteString:
 		converted = arg.String()
 	case *object.Float:
 		converted = strconv.FormatFloat(arg.Value, 'G', -1, 64)
@@ -140,7 +158,7 @@ func toStringBuiltin(interpreter object.Interpreter, env *object.Environment, ar
 		converted = arg.Inspect()
 	}
 
-	return object.MakeStringObj(converted)
+	return object.MakeByteStringObj(converted)
 }
 
 func parseIntBuiltin(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

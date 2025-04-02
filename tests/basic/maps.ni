@@ -18,3 +18,14 @@ test.run("Maps", fn(assert, check) {
         check(assert.isTrue(col.contains(keys, v)))
     })
 })
+
+test.run("Map ident keys", fn(assert, check) {
+    const item1 = "Hello"
+
+    const hash = {
+        item1,
+    }
+
+    check(assert.isEq(hash.item1, item1))
+    check(assert.isEq(hash["item1"], item1))
+})

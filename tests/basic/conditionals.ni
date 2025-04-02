@@ -18,11 +18,6 @@ test.run("Single statement if expressions", fn(assert, check) {
 })
 
 test.run("Various if expressions", fn(assert, check) {
-    check(assert.shouldRecover(fn() {
-        if ["a"] == ["b"]: return
-        println("Hello")
-    }))
-
     check(assert.isTrue(fn() {
         if 42 == 42: return true
         return false

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -128,6 +129,14 @@ func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Enviro
 		unwind:     true,
 		module:     module,
 	}
+}
+
+func (vm *VirtualMachine) emptyFrame(env *object.Environment, module string) *Frame {
+	code := &compiler.CodeBlock{
+		Name:     module,
+		Filename: module,
+	}
+	return vm.MakeFrame(code, env, module)
 }
 
 func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.Object) {
@@ -372,7 +381,7 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
 			if vm.currentFrame.env.IsConstLocal(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined local constant %s", name))
 				vm.throw()
 				break
 			}
@@ -395,8 +404,8 @@ mainLoop:
 		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+			if vm.currentFrame.env.IsConstLocal(name) {
+				vm.currentFrame.pushStack(object.NewException("Variable %s already defined as constant", name))
 				vm.throw()
 				break
 			}
@@ -429,7 +438,7 @@ mainLoop:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Names[vm.getUint16()]
 			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+				vm.currentFrame.pushStack(object.NewException("Redefined global constant %s", name))
 				vm.throw()
 				break
 			}
@@ -795,6 +804,8 @@ mainLoop:
 				vm.currentFrame.pushStack(makeArrayIter(obj))
 			case *object.String:
 				vm.currentFrame.pushStack(makeStringIter(obj))
+			case *object.ByteString:
+				vm.currentFrame.pushStack(makeByteStringIter(obj))
 			default:
 				vm.currentFrame.pushStack(object.NewException("Attribute lookup on non-object type %s", obj.Type()))
 				vm.throw()
@@ -1089,4 +1100,25 @@ func (vm *VirtualMachine) CallFunction(argc uint16, fn object.Object, now bool, 
 		vm.currentFrame.pushStack(object.NewPanic("%s is not a function", fn.Type()))
 		vm.throw()
 	}
+}
+
+func (vm *VirtualMachine) ImportPreamble(name string) error {
+	if name == "" {
+		name = "std/preamble/main"
+	}
+
+	vm.currentFrame = vm.emptyFrame(vm.globalEnv, "__preamble__")
+
+	vm.importPackage(name)
+	module, ok := vm.PopStack().(*object.Hash)
+	if !ok {
+		return errors.New("preamble module did not return a hash")
+	}
+
+	for _, pair := range module.Pairs {
+		vm.globalEnv.SetForce(pair.Key.Inspect(), pair.Value, true)
+	}
+
+	vm.currentFrame = nil
+	return nil
 }

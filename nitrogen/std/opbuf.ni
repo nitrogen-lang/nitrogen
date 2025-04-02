@@ -7,11 +7,11 @@ fn native get()
 fn native stopAndGet()
 
 return {
-    "start": start,
-    "stop": stop,
-    "isStarted": isStarted,
-    "clear": clear,
-    "flush": flush,
-    "get": get,
-    "stopAndGet": stopAndGet,
+    start,
+    stop,
+    isStarted,
+    clear,
+    flush,
+    get,
+    stopAndGet,
 }

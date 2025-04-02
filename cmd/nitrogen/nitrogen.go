@@ -242,6 +242,10 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
 	machine.SetInstanceVar("os.env", getExternalEnv())
+	if err := machine.ImportPreamble(""); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	ret, err := machine.Execute(code, nil, "__main")
 	if err != nil {

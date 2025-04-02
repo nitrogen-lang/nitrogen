@@ -78,6 +78,11 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		str := &object.String{Value: node.Value}
 		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(str))
 
+	case *ast.ByteStringLiteral:
+		ccb.linenum = node.Token.Pos.Line
+		str := &object.ByteString{Value: node.Value}
+		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(str))
+
 	case *ast.FloatLiteral:
 		ccb.linenum = node.Token.Pos.Line
 		float := &object.Float{Value: node.Value}

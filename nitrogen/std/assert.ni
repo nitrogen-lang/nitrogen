@@ -22,13 +22,25 @@ exports.isFalse = isFalse
 
 fn isEq(a, b) {
     if a == b: return
-    return error(format("Assertion Failed: Expected `{}` and `{}` to be equal.", a, b))
+    return error(
+        format(
+            "Assertion Failed: Expected {} `{}` and {} `{}` to be equal.",
+            varType(a), a,
+            varType(b), b,
+        ),
+    )
 }
 exports.isEq = isEq
 
 fn isNeq(a, b) {
     if a != b: return
-    return error(format("Assertion Failed: Expected `{}` and `{}` to not be equal.", a, b))
+    return error(
+        format(
+            "Assertion Failed: Expected {} `{}` and {} `{}` to not be equal.",
+            varType(a), a,
+            varType(b), b,
+        ),
+    )
 }
 exports.isNeq = isNeq
 

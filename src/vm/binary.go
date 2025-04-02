@@ -16,6 +16,8 @@ func (vm *VirtualMachine) evalBinaryExpression(op string, left, right object.Obj
 		return vm.evalFloatBinaryExpression(op, left, right)
 	case object.ObjectsAre(object.StringObj, left, right):
 		return vm.evalStringBinaryExpression(op, left, right)
+	case object.ObjectsAre(object.ByteStringObj, left, right):
+		return vm.evalByteStringBinaryExpression(op, left, right)
 	case object.ObjectsAre(object.ArrayObj, left, right):
 		return vm.evalArrayBinaryExpression(op, left, right)
 	}
@@ -92,6 +94,17 @@ func (vm *VirtualMachine) evalStringBinaryExpression(op string, left, right obje
 	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
 }
 
+func (vm *VirtualMachine) evalByteStringBinaryExpression(op string, left, right object.Object) object.Object {
+	leftVal := left.(*object.ByteString).Value
+	rightVal := right.(*object.ByteString).Value
+
+	if op == "+" {
+		return &object.ByteString{Value: append(leftVal, rightVal...)}
+	}
+
+	return object.NewException("unknown operator: %s %s %s", left.Type(), op, right.Type())
+}
+
 func (vm *VirtualMachine) evalArrayBinaryExpression(op string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Array)
 	rightVal := right.(*object.Array)
@@ -99,7 +112,7 @@ func (vm *VirtualMachine) evalArrayBinaryExpression(op string, left, right objec
 	if op == "+" {
 		leftLen := len(leftVal.Elements)
 		rightLen := len(rightVal.Elements)
-		newElements := make([]object.Object, leftLen+rightLen, leftLen+rightLen)
+		newElements := make([]object.Object, leftLen+rightLen)
 		copy(newElements, leftVal.Elements)
 		copy(newElements[leftLen:], rightVal.Elements)
 		return &object.Array{Elements: newElements}

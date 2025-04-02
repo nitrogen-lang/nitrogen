@@ -5,7 +5,7 @@ const canonicalHeaderKey = fn native (header)
 
 const exports = {
     "req": doReq,
-    "canonicalHeaderKey": canonicalHeaderKey,
+    canonicalHeaderKey,
 }
 
 const getJSON = fn(url) {

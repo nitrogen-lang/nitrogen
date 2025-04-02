@@ -28,6 +28,7 @@ const (
 	ErrorObj
 	FunctionObj
 	StringObj
+	ByteStringObj
 	BuiltinObj
 	ArrayObj
 	HashObj
@@ -52,6 +53,7 @@ var objectTypeNames = map[ObjectType]string{
 	ErrorObj:         "ERROR",
 	FunctionObj:      "FUNCTION",
 	StringObj:        "STRING",
+	ByteStringObj:    "BYTESTRING",
 	BuiltinObj:       "BUILTIN",
 	ArrayObj:         "ARRAY",
 	HashObj:          "MAP",
@@ -144,6 +146,39 @@ func MakeStringObj(s string) *String {
 
 func MakeStringObjRunes(r []rune) *String {
 	return &String{Value: r}
+}
+
+func ByteStringToString(s *ByteString) *String {
+	return MakeStringObjRunes([]rune(string(s.Value)))
+}
+
+type ByteString struct {
+	Value []byte
+}
+
+func (s *ByteString) Inspect() string  { return string(s.Value) }
+func (s *ByteString) String() string   { return string(s.Value) } // Dedicated to the stringified value, no inspection
+func (s *ByteString) Type() ObjectType { return ByteStringObj }
+func (s *ByteString) Dup() Object {
+	dup := make([]byte, len(s.Value))
+	copy(dup, s.Value)
+	return &ByteString{Value: dup}
+}
+
+func MakeByteStringObj(s string) *ByteString {
+	return &ByteString{Value: []byte(s)}
+}
+
+func MakeByteStringObjRunes(r []rune) *ByteString {
+	return &ByteString{Value: []byte(string(r))}
+}
+
+func MakeByteStringObjBytes(r []byte) *ByteString {
+	return &ByteString{Value: r}
+}
+
+func StringToByteString(s *String) *ByteString {
+	return MakeByteStringObjRunes(s.Value)
 }
 
 type Boolean struct {
@@ -343,6 +378,12 @@ func (i *Integer) HashKey() HashKey {
 func (s *String) HashKey() HashKey {
 	h := fnv.New64a()
 	h.Write([]byte(string(s.Value)))
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
+
+func (s *ByteString) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write(s.Value)
 	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
 

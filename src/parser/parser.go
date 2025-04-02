@@ -95,6 +95,7 @@ func New(l *lexer.Lexer, settings *Settings) *Parser {
 	p.registerPrefix(token.Float, p.parseFloatLiteral)
 	p.registerPrefix(token.Nil, p.parseNullLiteral)
 	p.registerPrefix(token.String, p.parseStringLiteral)
+	p.registerPrefix(token.ByteString, p.parseByteStringLiteral)
 	p.registerPrefix(token.True, p.parseBoolean)
 	p.registerPrefix(token.False, p.parseBoolean)
 	p.registerPrefix(token.LSquare, p.parseArrayLiteral)
@@ -339,6 +340,8 @@ func (p *Parser) parseBaseLiteral() ast.BaseLiteral {
 		return p.parseNullLiteral().(ast.BaseLiteral)
 	case token.String:
 		return p.parseStringLiteral().(ast.BaseLiteral)
+	case token.ByteString:
+		return p.parseByteStringLiteral().(ast.BaseLiteral)
 	case token.True, token.False:
 		return p.parseBoolean().(ast.BaseLiteral)
 	}

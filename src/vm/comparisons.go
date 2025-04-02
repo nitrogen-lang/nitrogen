@@ -140,13 +140,17 @@ func (vm *VirtualMachine) compareObjects(left, right object.Object, op byte) obj
 		return vm.evalFloatInfixExpression(op, left, right)
 	case object.ObjectsAre(object.StringObj, left, right):
 		return vm.evalStringInfixExpression(op, left, right)
+	case object.ObjectsAre(object.ByteStringObj, left, right):
+		return vm.evalByteStringInfixExpression(op, left, right)
 	case object.ObjectsAre(object.BooleanObj, left, right):
 		return vm.evalBoolInfixExpression(op, left, right)
 	case object.ObjectsAre(object.NullObj, left, right):
 		return vm.evalNullInfixExpression(op)
+	case object.ObjectsAre(object.ArrayObj, left, right):
+		return vm.evalArrayInfixExpression(op, left, right)
 	}
 
-	return object.NewException("comparison not implemented for type %s", left.Type())
+	return object.NewException("comparison is not implemented for type %s", left.Type())
 }
 
 func (vm *VirtualMachine) evalIntegerInfixExpression(op byte, left, right object.Object) object.Object {
@@ -215,6 +219,28 @@ func (vm *VirtualMachine) evalStringInfixExpression(op byte, left, right object.
 	return object.NewException("unknown operator: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
 }
 
+func (vm *VirtualMachine) evalByteStringInfixExpression(op byte, left, right object.Object) object.Object {
+	leftVal := left.(*object.ByteString).String()
+	rightVal := right.(*object.ByteString).String()
+
+	switch op {
+	case opcode.CmpEq:
+		return object.NativeBoolToBooleanObj(leftVal == rightVal)
+	case opcode.CmpNotEq:
+		return object.NativeBoolToBooleanObj(leftVal != rightVal)
+	case opcode.CmpGT:
+		return object.NativeBoolToBooleanObj(leftVal > rightVal)
+	case opcode.CmpGTEq:
+		return object.NativeBoolToBooleanObj(leftVal >= rightVal)
+	case opcode.CmpLT:
+		return object.NativeBoolToBooleanObj(leftVal < rightVal)
+	case opcode.CmpLTEq:
+		return object.NativeBoolToBooleanObj(leftVal <= rightVal)
+	}
+
+	return object.NewException("unknown operator: %s %s %s", left.Type(), opcode.CmpOps[op], right.Type())
+}
+
 func (vm *VirtualMachine) evalBoolInfixExpression(op byte, left, right object.Object) object.Object {
 	leftVal := left.(*object.Boolean).Value
 	rightVal := right.(*object.Boolean).Value
@@ -238,4 +264,40 @@ func (vm *VirtualMachine) evalNullInfixExpression(op byte) object.Object {
 	}
 
 	return object.NewException("unknown operator: nil %c nil", op)
+}
+
+func (vm *VirtualMachine) evalArrayInfixExpression(op byte, left, right object.Object) object.Object {
+	leftVal := left.(*object.Array).Elements
+	rightVal := right.(*object.Array).Elements
+
+	switch op {
+	case opcode.CmpEq:
+		if len(leftVal) != len(rightVal) {
+			return object.FalseConst
+		}
+
+		for i, l := range leftVal {
+			r := rightVal[i]
+			res := vm.compareObjects(l, r, opcode.CmpEq)
+			if res != object.TrueConst {
+				return res
+			}
+		}
+		return object.TrueConst
+	case opcode.CmpNotEq:
+		if len(leftVal) != len(rightVal) {
+			return object.TrueConst
+		}
+
+		for i, l := range leftVal {
+			r := rightVal[i]
+			res := vm.compareObjects(l, r, opcode.CmpNotEq)
+			if res != object.FalseConst {
+				return res
+			}
+		}
+		return object.FalseConst
+	}
+
+	return object.NewException("unknown operator: array %c array", op)
 }

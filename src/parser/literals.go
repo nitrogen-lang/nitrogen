@@ -75,6 +75,16 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 	}
 }
 
+func (p *Parser) parseByteStringLiteral() ast.Expression {
+	if p.settings.Debug {
+		fmt.Println("parseByteStringLiteral")
+	}
+	return &ast.ByteStringLiteral{
+		Token: p.curToken,
+		Value: []byte(p.curToken.Literal),
+	}
+}
+
 func (p *Parser) parseBoolean() ast.Expression {
 	if p.settings.Debug {
 		fmt.Println("parseBoolean")
