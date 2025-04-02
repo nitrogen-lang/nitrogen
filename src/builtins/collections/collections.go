@@ -49,13 +49,24 @@ func firstBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
-	if args[0].Type() != object.ArrayObj {
-		return object.NewException("Argument to `first` must be ARRAY, got %s", args[0].Type())
-	}
 
-	arr := args[0].(*object.Array)
-	if len(arr.Elements) > 0 {
-		return arr.Elements[0]
+	switch arg := args[0].(type) {
+	case *object.String:
+		if len(arg.Value) > 0 {
+			return &object.String{Value: []rune{arg.Value[0]}}
+		}
+	case *object.ByteString:
+		if len(arg.Value) > 0 {
+			return &object.ByteString{Value: []byte{arg.Value[0]}}
+		}
+	case *object.Array:
+		if len(arg.Elements) > 0 {
+			return arg.Elements[0]
+		}
+	case *object.Null:
+		return object.NullConst
+	default:
+		return object.NewException("Argument to `first` must be ARRAY|STRING|BYTESTRING, got %s", args[0].Type())
 	}
 
 	return object.NullConst
@@ -65,14 +76,27 @@ func lastBuiltin(interpreter object.Interpreter, env *object.Environment, args .
 	if len(args) != 1 {
 		return object.NewException("Incorrect number of arguments. Got %d, expected 1", len(args))
 	}
-	if args[0].Type() != object.ArrayObj {
-		return object.NewException("Argument to `last` must be ARRAY, got %s", args[0].Type())
-	}
 
-	arr := args[0].(*object.Array)
-	length := len(arr.Elements)
-	if length > 0 {
-		return arr.Elements[length-1]
+	switch arg := args[0].(type) {
+	case *object.String:
+		length := len(arg.Value)
+		if length > 0 {
+			return &object.String{Value: []rune{arg.Value[length-1]}}
+		}
+	case *object.ByteString:
+		length := len(arg.Value)
+		if length > 0 {
+			return &object.ByteString{Value: []byte{arg.Value[length-1]}}
+		}
+	case *object.Array:
+		length := len(arg.Elements)
+		if length > 0 {
+			return arg.Elements[length-1]
+		}
+	case *object.Null:
+		return object.NullConst
+	default:
+		return object.NewException("Argument to `last` must be ARRAY|STRING|BYTESTRING, got %s", args[0].Type())
 	}
 
 	return object.NullConst
@@ -86,12 +110,28 @@ func restBuiltin(interpreter object.Interpreter, env *object.Environment, args .
 		return object.NewException("Argument to `rest` must be ARRAY, got %s", args[0].Type())
 	}
 
-	arr := args[0].(*object.Array)
-	length := len(arr.Elements)
-	if length > 0 {
-		newElements := make([]object.Object, length-1, length-1)
-		copy(newElements, arr.Elements[1:length])
-		return &object.Array{Elements: newElements}
+	switch arg := args[0].(type) {
+	case *object.String:
+		length := len(arg.Value)
+		if length > 0 {
+			return &object.String{Value: arg.Value[1:length]}
+		}
+	case *object.ByteString:
+		length := len(arg.Value)
+		if length > 0 {
+			return &object.ByteString{Value: arg.Value[1:length]}
+		}
+	case *object.Array:
+		length := len(arg.Elements)
+		if length > 0 {
+			newElements := make([]object.Object, length-1)
+			copy(newElements, arg.Elements[1:length])
+			return &object.Array{Elements: newElements}
+		}
+	case *object.Null:
+		return object.NullConst
+	default:
+		return object.NewException("Argument to `rest` must be ARRAY|STRING|BYTESTRING, got %s", args[0].Type())
 	}
 
 	return object.NullConst
@@ -108,7 +148,7 @@ func popBuiltin(interpreter object.Interpreter, env *object.Environment, args ..
 	arr := args[0].(*object.Array)
 	length := len(arr.Elements)
 	if length > 0 {
-		newElements := make([]object.Object, length-1, length-1)
+		newElements := make([]object.Object, length-1)
 		copy(newElements, arr.Elements[:length-1])
 		return &object.Array{Elements: newElements}
 	}
@@ -126,7 +166,7 @@ func pushBuiltin(interpreter object.Interpreter, env *object.Environment, args .
 
 	arr := args[0].(*object.Array)
 	length := len(arr.Elements)
-	newElements := make([]object.Object, length+1, length+1)
+	newElements := make([]object.Object, length+1)
 	copy(newElements, arr.Elements)
 	newElements[length] = args[1]
 
@@ -143,7 +183,7 @@ func prependBuiltin(interpreter object.Interpreter, env *object.Environment, arg
 
 	arr := args[0].(*object.Array)
 	length := len(arr.Elements)
-	newElements := make([]object.Object, length+1, length+1)
+	newElements := make([]object.Object, length+1)
 	copy(newElements[1:], arr.Elements)
 	newElements[0] = args[1]
 
@@ -186,7 +226,7 @@ func spliceBuiltin(interpreter object.Interpreter, env *object.Environment, args
 		return object.NewException("Argument 3 to `splice` must be positive, got %d", length)
 	}
 
-	newElements := make([]object.Object, orgLen-length, orgLen-length)
+	newElements := make([]object.Object, orgLen-length)
 	copy(newElements, arr.Elements[:offset])
 	copy(newElements[offset:], arr.Elements[offset+length:])
 
@@ -229,7 +269,7 @@ func sliceBuiltin(interpreter object.Interpreter, env *object.Environment, args 
 		return object.NewException("Argument 3 to `slice` must be positive, got %d", length)
 	}
 
-	newElements := make([]object.Object, length, length)
+	newElements := make([]object.Object, length)
 	copy(newElements, arr.Elements[offset:length+1])
 
 	return &object.Array{Elements: newElements}
