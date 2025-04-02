@@ -11,16 +11,16 @@ import (
 )
 
 func init() {
-	vm.RegisterBuiltin("print", printBuiltin)
-	vm.RegisterBuiltin("printlnb", printBinaryBuiltin)
-	vm.RegisterBuiltin("println", printlnBuiltin)
-	vm.RegisterBuiltin("printerr", printerrBuiltin)
-	vm.RegisterBuiltin("printerrln", printerrlnBuiltin)
-	vm.RegisterBuiltin("printenv", printEnvBuiltin)
-	vm.RegisterBuiltin("varDump", varDump)
-	vm.RegisterBuiltin("exit", exitScript)
+	vm.RegisterNative("std.preamble.io.print", printBuiltin)
+	vm.RegisterNative("std.preamble.io.printlnb", printBinaryBuiltin)
+	vm.RegisterNative("std.preamble.io.println", printlnBuiltin)
+	vm.RegisterNative("std.preamble.io.printerr", printerrBuiltin)
+	vm.RegisterNative("std.preamble.io.printerrln", printerrlnBuiltin)
+	vm.RegisterNative("std.preamble.io.printenv", printEnvBuiltin)
+	vm.RegisterNative("std.preamble.io.varDump", varDump)
+	vm.RegisterNative("std.preamble.os.exit", exitScript)
 
-	vm.RegisterBuiltin("readline", readLineBuiltin)
+	vm.RegisterNative("std.preamble.io.readline", readLineBuiltin)
 }
 
 func varDump(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

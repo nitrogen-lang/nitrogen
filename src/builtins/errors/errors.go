@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	vm.RegisterBuiltin("error", vmMakeError)
+	vm.RegisterNative("std.preamble.main.error", vmMakeError)
 }
 
 func vmMakeError(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

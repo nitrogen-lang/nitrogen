@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	vm.RegisterBuiltin("debugVal", debugBuiltin)
+	vm.RegisterNative("std.runtime.debugVal", debugBuiltin)
 	vm.RegisterNative("std.runtime.dis", disassemble)
 	vm.RegisterNative("std.runtime.dis_method", disassemble_method)
 	vm.RegisterNative("std.runtime.osName", osName)

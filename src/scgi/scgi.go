@@ -238,6 +238,11 @@ func (w *worker) run(conn net.Conn) {
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
 	machine.SetInstanceVar("os.env", scgiEnv)
+	if err := machine.ImportPreamble(""); err != nil {
+		os.Stderr.WriteString(err.Error())
+		os.Stderr.Write([]byte{'\n'})
+		return
+	}
 
 	result, _ := machine.Execute(code, nil, "__main")
 

@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	vm.RegisterBuiltin("modulesSupported", moduleSupport)
+	vm.RegisterNative("std.preamble.main.modulesSupported", moduleSupport)
 }
 
 // func evalScript(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
