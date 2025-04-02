@@ -412,6 +412,29 @@ func (l *Lexer) readString() token.Token {
 				ident.WriteRune('\\')
 			case '"': // double quote
 				ident.WriteRune('"')
+			case 'x': // hex
+				l.readRune()
+				c1 := l.curCh
+				l.readRune()
+				c2 := l.curCh
+
+				if !isHexDigit(c1) || !isHexDigit(c2) {
+					return token.Token{
+						Literal: "Invalid hex escape sequence: " + string(c1) + string(c2),
+						Type:    token.Illegal,
+						Pos:     l.curPosition(),
+					}
+				}
+
+				val := hexDigit(c1)*16 + hexDigit(c2)
+				if val > 0xFF {
+					return token.Token{
+						Literal: "Invalid hex escape sequence, > 0xFF",
+						Type:    token.Illegal,
+						Pos:     l.curPosition(),
+					}
+				}
+				ident.WriteByte(byte(val))
 			default:
 				ident.WriteByte('\\')
 				ident.WriteRune(l.curCh)
@@ -594,7 +617,7 @@ func isDigit(ch rune) bool {
 }
 
 func isHexDigit(ch rune) bool {
-	return ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F')
+	return ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F') || ('0' <= ch && ch <= '9')
 }
 
 func (l *Lexer) isWhitespace(ch rune) bool {
@@ -608,4 +631,17 @@ func (l *Lexer) lastTokenWas(types ...token.TokenType) bool {
 		}
 	}
 	return false
+}
+
+func hexDigit(ch rune) int {
+	if ch >= '0' && ch <= '9' {
+		return int(ch - '0')
+	}
+	if ch >= 'a' && ch <= 'f' {
+		return int(ch - 'a' + 10)
+	}
+	if ch >= 'A' && ch <= 'F' {
+		return int(ch - 'A' + 10)
+	}
+	return -1
 }

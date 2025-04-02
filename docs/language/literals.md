@@ -54,6 +54,7 @@ strings in Nitrogen, interpreted strings and raw strings.
 Interpreted strings are surrounded by double quotes and cannot contain any new
 lines (it can't span lines), but it can contain escape sequences:
 
+- \0 - Null
 - \b - Backspace
 - \e - Escape
 - \f - Form feed
@@ -63,6 +64,7 @@ lines (it can't span lines), but it can contain escape sequences:
 - \v - Vertical tab
 - \\\\ - Backspace
 - \\" - Double quote
+- \x00 - Byte in hex
 
 If any other escape sequence is found, the backslash and following character are
 left untouched. For example the string `"He\llo World"` would not change in its
