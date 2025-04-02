@@ -312,8 +312,15 @@ mainLoop:
 			}
 
 		case opcode.UnaryNeg:
-			l := vm.currentFrame.popStack().(*object.Integer)
-			vm.currentFrame.pushStack(object.MakeIntObj(-l.Value))
+			switch l := vm.currentFrame.popStack().(type) {
+			case *object.Integer:
+				vm.currentFrame.pushStack(object.MakeIntObj(-l.Value))
+			case *object.Float:
+				vm.currentFrame.pushStack(object.MakeFloatObj(-l.Value))
+			default:
+				vm.currentFrame.pushStack(object.NewException("Unary negation not supported for %s", l.Type()))
+				vm.throw()
+			}
 
 		case opcode.UnaryNot:
 			l := vm.currentFrame.popStack().(*object.Boolean)
