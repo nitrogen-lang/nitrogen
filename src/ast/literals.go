@@ -52,6 +52,17 @@ func (s *StringLiteral) expressionNode()      {}
 func (s *StringLiteral) TokenLiteral() string { return s.Token.Literal }
 func (s *StringLiteral) String() string       { return string(s.Value) }
 
+func MakeStringLiteral(s string, pos token.Position) *StringLiteral {
+	return &StringLiteral{
+		Token: token.Token{
+			Type:    token.String,
+			Literal: s,
+			Pos:     pos,
+		},
+		Value: []rune(s),
+	}
+}
+
 type Boolean struct {
 	Token token.Token
 	Value bool

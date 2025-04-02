@@ -17,11 +17,11 @@ class File {
 }
 
 return {
-    "readFile": readFile,
-    "remove": remove,
-    "exists": exists,
-    "rename": rename,
-    "dirlist": dirlist,
-    "isdir": isdir,
-    "File": File,
+    readFile,
+    remove,
+    exists,
+    rename,
+    dirlist,
+    isdir,
+    File,
 }

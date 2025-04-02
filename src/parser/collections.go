@@ -28,7 +28,23 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 		key := p.parseExpression(priLowest)
 		keyExp, ok := key.(ast.Expression)
 
-		if !ok || !p.expectPeek(token.Colon) {
+		if !ok {
+			return nil
+		}
+
+		if p.peekTokenIs(token.Comma) {
+			keyExpIdent, ok := keyExp.(*ast.Identifier)
+			if !ok {
+				p.addErrorWithCurPos("Compact hash key must be an identifier")
+				return nil
+			}
+
+			p.nextToken()
+			hash.Pairs[ast.MakeStringLiteral(keyExpIdent.String(), keyExpIdent.Token.Pos)] = keyExp
+			continue
+		}
+
+		if !p.expectPeek(token.Colon) {
 			return nil
 		}
 

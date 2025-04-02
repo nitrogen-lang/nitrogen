@@ -28,3 +28,22 @@ identifier. If the key is not a valid identifier, the normal index notation must
 with a string. The dot notation can also be used for assignment `myMap.key2 = "another value2"`.
 The dot notation is left associative meaning any map index will be resolved before calling a
 function. Example: `myMap.key2()` is syntactically the same as `(myMap.key2)()`.
+
+If the key name is the same as a variable, the name can used by itself.
+
+```
+let item1 = "Hello"
+let item2 = "World"
+
+map = {
+    item1,
+    item2
+}
+
+// Same as
+
+map = {
+    "item1": item1,
+    "item2": item2,
+}
+```

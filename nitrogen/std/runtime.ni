@@ -1,11 +1,13 @@
-const dis = fn native (obj)
-const dis_method = fn native (cl, name)
-const osName = fn native ()
-const osArch = fn native ()
+fn native dis(obj)
+fn native dis_method(cl, name)
+fn native osName()
+fn native osArch()
+fn native debugVal()
 
 return {
-    "dis": dis,
-    "dis_method": dis_method,
-    "osName": osName,
-    "osArch": osArch,
+    dis,
+    dis_method,
+    osName,
+    osArch,
+    debugVal,
 }
