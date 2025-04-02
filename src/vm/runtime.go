@@ -72,7 +72,7 @@ func (f *Frame) pushStack(obj object.Object) {
 	}
 
 	if f.sp == len(f.stack) {
-		panic(fmt.Sprintf("VM stack exhausted - %s (%d)", f.code.Name, f.pc))
+		panic(fmt.Sprintf("VM stack exhausted (%d) - %s (%d)", len(f.stack), f.code.Name, f.pc))
 	}
 	f.stack[f.sp] = obj
 	f.sp++

@@ -62,11 +62,11 @@ test.run("JSON decode", fn(assert, check) {
         const decoded = json.decode(el["out"])
 
         if isArray(el["in"]){
-            check(assert.isTrue(col.arrayMatch(decoded, el["in"])))
+            check(assert.isTrue(col.arrayMatch(decoded, el["in"])), el["out"])
         } elif isMap(el["in"]) {
-            check(assert.isTrue(col.mapMatch(decoded, el["in"])))
+            check(assert.isTrue(col.mapMatch(decoded, el["in"])), el["out"])
         } else {
-            check(assert.isEq(decoded, el["in"]))
+            check(assert.isEq(decoded, el["in"]), el["out"])
         }
     })
 
@@ -85,5 +85,5 @@ test.run("JSON decode", fn(assert, check) {
     }
 
     const decoded = json.decode(whitespaceTest)
-    check(assert.isTrue(col.mapMatch(decoded, wsExpected)))
+    check(assert.isTrue(col.mapMatch(decoded, wsExpected)), "map match")
 })

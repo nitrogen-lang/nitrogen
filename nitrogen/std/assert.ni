@@ -45,16 +45,23 @@ fn isNeq(a, b) {
 exports.isNeq = isNeq
 
 fn shouldRecover(func) {
+    let recoverMsg = nil
+    if len(arguments) > 0: recoverMsg = arguments[0]
+
     if !isFunc(func): return error("assertion must be a func to shouldRecover")
     const r = recover { func() }
-    if isNil(r): return error("Assertion Failed: Expected test to recove.")
+    if isNil(r): return error("Assertion Failed: Expected test to recover.")
+
+    if recoverMsg != nil and recoverMsg != toString(r) {
+        return error(format("Assertion Failed: Expected test to recover with message `{}` but got `{}`", recoverMsg, r))
+    }
 }
 exports.shouldRecover = shouldRecover
 
 fn shouldNotRecover(func) {
     if !isFunc(func): return error("assertion must be a func to shouldNotRecover")
     const r = recover { func() }
-    if !isNil(r): return error(format("Assertion Failed: Expected test not to recove. {}", e))
+    if !isNil(r): return error(format("Assertion Failed: Expected test not to recover. {}", r))
 }
 exports.shouldNotRecover = shouldNotRecover
 
