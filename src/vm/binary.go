@@ -99,7 +99,7 @@ func (vm *VirtualMachine) evalArrayBinaryExpression(op string, left, right objec
 	if op == "+" {
 		leftLen := len(leftVal.Elements)
 		rightLen := len(rightVal.Elements)
-		newElements := make([]object.Object, leftLen+rightLen, leftLen+rightLen)
+		newElements := make([]object.Object, leftLen+rightLen)
 		copy(newElements, leftVal.Elements)
 		copy(newElements[leftLen:], rightVal.Elements)
 		return &object.Array{Elements: newElements}

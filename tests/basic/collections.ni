@@ -65,3 +65,14 @@ test.run("array slice with offset and length", fn(assert, check) {
     check(assert.isEq(sliceArr[0], "two"))
     check(assert.isEq(sliceArr[1], "three"))
 })
+
+test.run("array equality", fn(assert, check) {
+    const arreq1 = ["one", "two"]
+    const arreq2 = ["one", "two"]
+    const arreq3 = ["one", "three"]
+
+    check(assert.isTrue(arreq1 == arreq2), "arreq1 == arreq2")
+    check(assert.isFalse(arreq1 == arreq3), "arreq1 == arreq3")
+    check(assert.isTrue(arreq1 != arreq3), "arreq1 != arreq3")
+    check(assert.isFalse(arreq1 != arreq2), "arreq1 != arreq2")
+})
