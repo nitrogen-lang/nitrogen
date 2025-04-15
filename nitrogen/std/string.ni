@@ -1,15 +1,15 @@
-fn native contains(s, substr)
-fn native count(s, substr)
-fn native dedup(s, char)
-fn native format(s)
-fn native hasPrefix(s, prefix)
-fn native hasSuffix(s, suffix)
-fn native replace(s, old, str, n)
-fn native split(s, sep)
-fn native splitN(s, sep, n)
-fn native trimSpace(s)
+export fn native contains(s, substr)
+export fn native count(s, substr)
+export fn native dedup(s, char)
+export fn native format(s)
+export fn native hasPrefix(s, prefix)
+export fn native hasSuffix(s, suffix)
+export fn native replace(s, old, str, n)
+export fn native split(s, sep)
+export fn native splitN(s, sep, n)
+export fn native trimSpace(s)
 
-class String {
+export class String {
     let str = ""
 
     fn init(s) {
@@ -26,18 +26,4 @@ class String {
     fn native split(sep)
     fn native splitN(sep, n)
     fn native trimSpace()
-}
-
-return {
-    "contains": contains,
-    "count": count,
-    "dedup": dedup,
-    "format": format,
-    "hasPrefix": hasPrefix,
-    "hasSuffix": hasSuffix,
-    "replace": replace,
-    "split": split,
-    "splitN": splitN,
-    "trimSpace": trimSpace,
-    "String": String,
 }

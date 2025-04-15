@@ -82,7 +82,11 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 	env := object.NewEnclosedEnv(vm.globalEnv)
 	env.CreateConst("_FILE", object.MakeStringObj(scriptPath))
 
-	res = vm.RunFrame(vm.MakeFrame(code, env, name), true)
+	vm.RunFrame(vm.MakeFrame(code, env, name), true)
+	res = &object.Module{
+		Name: name,
+		Vars: env.GetExported(),
+	}
 	included[scriptPath] = res
 	return res
 }

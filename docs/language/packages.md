@@ -33,8 +33,9 @@ needs for its public API.
 
 ## Exports
 
-Nothing is exported by a package by default. To export values, the package script must return
-the value to export. To export multiple values, the package can return a hash map.
+Nothing is exported by a package by default. To export values, definition statements
+can be tagged with the `export` keyword. Only exported values are accessible
+outside the module.
 
 ## Examples
 
@@ -43,7 +44,7 @@ the value to export. To export multiple values, the package can return a hash ma
 second.ni:
 
 ```
-fn() {
+export fn hello() {
     println("Hello from ", _FILE)
 }
 ```
@@ -53,8 +54,8 @@ main.ni:
 ```
 import './second.ni' as otherFile
 
-const main = fn() {
-    otherFile()
+fn main() {
+    otherFile.hello()
 }
 
 println("Calling main() from ", _FILE)
@@ -62,8 +63,8 @@ main()
 ```
 
 Executing `main.ni` will print two lines, the "Calling main..." string and the "Hello from ..." string.
-Notice that the included script returned a function which is saved in the main script to a variable.
-That variable is then called like any other function.
+Notice that the included script exports a function which can be used in the main script.
+That function is then called like any other function.
 
 # Binary Modules
 

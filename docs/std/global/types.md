@@ -40,6 +40,8 @@ Convert any value into its byte-stringified form.
 
 ## isResource(in: T): bool
 
+## isModule(in: T): bool
+
 ## isClass(in: T): bool
 
 ## isInstance(in: T): bool

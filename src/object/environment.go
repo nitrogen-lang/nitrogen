@@ -18,8 +18,9 @@ func IsConstErr(e error) bool {
 type eco struct {
 	name     string
 	v        Object
-	readonly bool
 	n        *eco
+	readonly bool
+	export   bool
 }
 
 type Environment struct {
@@ -265,4 +266,30 @@ func (e *Environment) Unset(name string) {
 	if e.parent != nil {
 		e.parent.Unset(name)
 	}
+}
+
+func (e *Environment) Export(name string) {
+	obj := e.find(name)
+	if obj == nil {
+		return
+	}
+	obj.export = true
+}
+
+func (e *Environment) GetExported() map[string]Object {
+	if e == nil {
+		return nil
+	}
+
+	exported := make(map[string]Object)
+
+	v := e.root
+	for v != nil {
+		if v.export {
+			exported[v.name] = v.v
+		}
+		v = v.n
+	}
+
+	return exported
 }

@@ -1,11 +1,4 @@
-const env = fn native ()
-const argv = fn native ()
-const exec = fn native (cmd, args)
-const system = fn native (cmd, args)
-
-return {
-	env,
-	argv,
-	exec,
-	system,
-}
+export fn native env()
+export fn native argv()
+export fn native exec(cmd, args)
+export fn native system(cmd, args)

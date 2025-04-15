@@ -1,4 +1,4 @@
-return {
+export const types = {
     "interger":      "INTEGER",
     "float":         "FLOAT",
     "boolean":       "BOOLEAN",

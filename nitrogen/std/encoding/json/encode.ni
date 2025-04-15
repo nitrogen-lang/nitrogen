@@ -1,4 +1,4 @@
-const encode = fn(buf, obj) {
+const encode2 = fn(buf, obj) {
     if isString(obj): return buf + '"' + obj + '"'
 
     if isInt(obj) or isFloat(obj) or isBool(obj): return buf + toString(obj)
@@ -18,7 +18,7 @@ const encodeArray = fn(buf, arr) {
     buf += '['
 
     for i = 0; i < ln; i += 1 {
-        buf = encode(buf, arr[i])
+        buf = encode2(buf, arr[i])
         if i < ln-1: buf += ','
     }
 
@@ -33,9 +33,9 @@ const encodeMap = fn(buf, obj) {
 
     for i = 0; i < ln; i += 1 {
         const key = keys[i]
-        buf = encode(buf, key)
+        buf = encode2(buf, key)
         buf += ':'
-        buf = encode(buf, obj[key])
+        buf = encode2(buf, obj[key])
 
         if i < ln-1: buf += ','
     }
@@ -43,6 +43,4 @@ const encodeMap = fn(buf, obj) {
     buf + '}'
 }
 
-return {
-    "encode": fn(obj) { encode("", obj) },
-}
+export fn encode(obj) { encode2("", obj) },

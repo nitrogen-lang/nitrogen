@@ -6,7 +6,7 @@ test.run("Import directory", fn(assert, check) {
         math
     }
 
-    if !isMap(math) {
+    if !isModule(math) {
         println("Import test failed: ", varType(math))
         exit(1)
     }

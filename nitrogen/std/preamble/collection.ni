@@ -1,31 +1,14 @@
-fn native len()
-fn native first()
-fn native last()
-fn native rest()
-fn native pop()
-fn native push()
-fn native prepend()
-fn native splice()
-fn native slice()
-fn native sort()
-fn native hashMerge()
-fn native hashKeys()
-fn native hasKey()
-fn native range()
-
-return {
-    "len": len,
-    "first": first,
-    "last": last,
-    "rest": rest,
-    "pop": pop,
-    "push": push,
-    "prepend": prepend,
-    "splice": splice,
-    "slice": slice,
-    "sort": sort,
-    "hashMerge": hashMerge,
-    "hashKeys": hashKeys,
-    "hasKey": hasKey,
-    "range": range,
-}
+export fn native len()
+export fn native first()
+export fn native last()
+export fn native rest()
+export fn native pop()
+export fn native push()
+export fn native prepend()
+export fn native splice()
+export fn native slice()
+export fn native sort()
+export fn native hashMerge()
+export fn native hashKeys()
+export fn native hasKey()
+export fn native range()

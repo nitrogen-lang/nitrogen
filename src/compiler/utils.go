@@ -37,3 +37,10 @@ func randStr(n int) string {
 func randomLabel(prefix string) string {
 	return prefix + randStr(10)
 }
+
+func boolToUint16(b bool) uint16 {
+	if b {
+		return 1
+	}
+	return 0
+}

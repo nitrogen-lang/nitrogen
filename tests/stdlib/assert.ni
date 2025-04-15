@@ -5,7 +5,6 @@ import "std/assert"
 
 const shouldFail = fn(name, func) {
     if isError(recover { func() }): return
-
     println("Assertion Failed: Expected " + name + " to fail.")
 }
 
@@ -54,6 +53,6 @@ shouldFail("009", fn() {
     assert.isNeq("hello", "hello")
 })
 
-shouldFail("010", fn() {
+shouldPass("010", fn() {
     assert.isNeq("hello", 42)
 })

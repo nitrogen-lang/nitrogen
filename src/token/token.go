@@ -112,6 +112,7 @@ const (
 	Implements
 	Breakpoint
 	Match
+	Export
 	keywordEnd
 )
 
@@ -206,6 +207,7 @@ var tokens = [...]string{
 	Implements: "implements",
 	Breakpoint: "breakpoint",
 	Match:      "match",
+	Export:     "export",
 }
 
 var keywords map[string]TokenType

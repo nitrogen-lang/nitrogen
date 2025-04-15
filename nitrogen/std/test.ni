@@ -4,13 +4,10 @@ import "std/os"
 
 const verbose = isString(os.env()['VERBOSE_TEST'])
 
-const exports = {
-    "fatal": true,
-    "assertLib": assert,
-}
+export let fatal = true
+export let assertLib = assert
 
-fn run(desc, func) {
-    let assertLib = exports.assertLib
+export fn run(desc, func) {
     let cleanup = nil
 
     if len(arguments) > 0: cleanup = arguments[0]
@@ -27,10 +24,9 @@ fn run(desc, func) {
 
     if isError(assertionError) or isException(assertionError) {
         printerrln(string.format("Test '{}' failed: {}", desc, assertionError))
-        if exports.fatal: exit(1)
+        if fatal: exit(1)
     }
 }
-exports.run = run
 
 fn check(desc) {
     return fn(val) {
@@ -40,9 +36,7 @@ fn check(desc) {
 
         if isError(val) {
             printerrln(string.format("Test '{}' failed: {}", desc, val))
-            if exports.fatal: exit(1)
+            if fatal: exit(1)
         }
     }
 }
-
-return exports
