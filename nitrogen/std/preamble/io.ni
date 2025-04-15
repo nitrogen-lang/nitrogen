@@ -1,19 +1,8 @@
-fn native print()
-fn native printlnb()
-fn native println()
-fn native printerr()
-fn native printerrln()
-fn native printenv()
-fn native varDump()
-fn native readline()
-
-return {
-    print,
-    printlnb,
-    println,
-    printerr,
-    printerrln,
-    printenv,
-    varDump,
-    readline,
-}
+export fn native print()
+export fn native printlnb()
+export fn native println()
+export fn native printerr()
+export fn native printerrln()
+export fn native printenv()
+export fn native varDump()
+export fn native readline()

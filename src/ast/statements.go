@@ -36,10 +36,11 @@ func (p *Program) String() string {
 }
 
 type DefStatement struct {
-	Token token.Token // the token.DEF token
-	Const bool
-	Name  *Identifier
-	Value Expression
+	Token  token.Token // the token.DEF token
+	Const  bool
+	Name   *Identifier
+	Value  Expression
+	Export bool
 }
 
 func (d *DefStatement) statementNode()       {}

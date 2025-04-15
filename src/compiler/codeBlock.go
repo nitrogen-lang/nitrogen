@@ -58,12 +58,13 @@ func (cb *CodeBlock) Print(indent string) {
 		case opcode.LoadConst, opcode.Import:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t%d (%s)", index, cb.Constants[index].Inspect())
-		case opcode.LoadFast, opcode.StoreFast, opcode.StoreConst, opcode.DeleteFast:
+		case opcode.LoadFast, opcode.StoreFast, opcode.DeleteFast:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t%d (%s)", index, cb.Locals[index])
 		case opcode.Define:
 			index := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
-			fmt.Printf("\t\t%d (%s)", index, cb.Locals[index])
+			flags := cb.Code[offset+2]
+			fmt.Printf("\t\t%d (%s) (%#.2x)", index, cb.Locals[index], flags)
 		case opcode.Call:
 			params := bytesToUint16(cb.Code[offset], cb.Code[offset+1])
 			fmt.Printf("\t\t%d (%d positional parameters)", params, params)
@@ -79,6 +80,8 @@ func (cb *CodeBlock) Print(indent string) {
 			offset++
 		case opcode.HasTwoByteArg[code]:
 			offset += 2
+		case opcode.HasThreeByteArg[code]:
+			offset += 3
 		case opcode.HasFourByteArg[code]:
 			offset += 4
 		}
@@ -105,6 +108,8 @@ func (cb *CodeBlock) LineNum(pc int) uint16 {
 			offset++
 		case opcode.HasTwoByteArg[code]:
 			offset += 2
+		case opcode.HasThreeByteArg[code]:
+			offset += 3
 		case opcode.HasFourByteArg[code]:
 			offset += 4
 		}

@@ -6,11 +6,11 @@ use collections.map
 use string.contains
 use string.replace
 
-interface Writer {
+export interface Writer {
     write(data)
 }
 
-class fileWriter {
+export class fileWriter {
     let cfile
     let delimiter = ','
     let quote = '"'
@@ -39,9 +39,4 @@ class fileWriter {
         }
         item
     }
-}
-
-return {
-    "fileWriter": fileWriter,
-    "Writer": Writer,
 }

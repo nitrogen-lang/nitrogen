@@ -205,11 +205,9 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		ccb.linenum = node.Token.Pos.Line
 		compile(ccb, node.Value)
 
-		if node.Const {
-			ccb.code.addInst(opcode.StoreConst, ccb.linenum, ccb.locals.indexOf(node.Name.Value))
-		} else {
-			ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(node.Name.Value))
-		}
+		ccb.code.addInst(opcode.Define, ccb.linenum,
+			ccb.locals.indexOf(node.Name.Value),
+			uint16(opcode.NewDefineFlag().WithConstant(node.Const).WithExport(node.Export)))
 
 	case *ast.AssignStatement:
 		ccb.linenum = node.Token.Pos.Line
@@ -253,7 +251,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		ccb.linenum = node.Token.Pos.Line
 		str := &object.String{Value: node.Path.Value}
 		ccb.code.addInst(opcode.Import, ccb.linenum, ccb.constants.indexOf(str))
-		ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(node.Name.Value))
+		ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(node.Name.Value), 0)
 
 	case *ast.FunctionLiteral:
 		compileFunction(ccb, node, false, false)

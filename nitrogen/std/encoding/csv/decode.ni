@@ -1,7 +1,7 @@
 const DEFAULT_DELIM = ','
 const DEFAULT_QUOTE = '"'
 
-interface CharReader {
+export interface CharReader {
     readChar()
 }
 
@@ -113,7 +113,7 @@ class csvIter {
     }
 }
 
-class fileReader {
+export class reader {
     let l
 
     const init = fn(f) {
@@ -145,9 +145,4 @@ class fileReader {
     const quote = fn(c) {
         this.l.setQuote(c)
     }
-}
-
-return {
-    "reader": fileReader,
-    "CharReader": CharReader,
 }

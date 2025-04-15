@@ -215,12 +215,8 @@ class parser {
     }
 }
 
-const decode = fn(str) {
+export const decode = fn(str) {
     const l = new lexer(str)
     const p = new parser(l)
     p.parse()
-}
-
-return {
-    "decode": decode,
 }

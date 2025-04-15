@@ -1,17 +1,7 @@
-fn native start()
-fn native stop()
-fn native isStarted()
-fn native clear()
-fn native flush()
-fn native get()
-fn native stopAndGet()
-
-return {
-    start,
-    stop,
-    isStarted,
-    clear,
-    flush,
-    get,
-    stopAndGet,
-}
+export fn native start()
+export fn native stop()
+export fn native isStarted()
+export fn native clear()
+export fn native flush()
+export fn native get()
+export fn native stopAndGet()

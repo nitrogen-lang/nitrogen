@@ -1,7 +1,5 @@
 import 'std/encoding/json/encode'
 import 'std/encoding/json/decode'
 
-return {
-    "encode": encode.encode,
-    "decode": decode.decode,
-}
+export const encode = encode.encode
+export const decode = decode.decode

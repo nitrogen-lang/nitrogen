@@ -1,3 +1,4 @@
+//go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
 
 package imports

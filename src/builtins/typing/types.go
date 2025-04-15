@@ -35,6 +35,7 @@ func init() {
 	vm.RegisterNative("std.preamble.main.isResource", makeIsTypeBuiltin(object.ResourceObj))
 	vm.RegisterNative("std.preamble.main.isClass", makeIsTypeBuiltin(object.ClassObj))
 	vm.RegisterNative("std.preamble.main.isInstance", makeIsTypeBuiltin(object.InstanceObj))
+	vm.RegisterNative("std.preamble.main.isModule", makeIsTypeBuiltin(object.ModuleObj))
 
 	vm.RegisterNative("std.preamble.main.errorVal", getErrorVal)
 	vm.RegisterNative("std.preamble.main.resourceID", getResourceID)

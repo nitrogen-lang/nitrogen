@@ -342,16 +342,36 @@ mainLoop:
 		case opcode.LoadConst:
 			vm.currentFrame.pushStack(vm.currentFrame.code.Constants[vm.getUint16()])
 
-		case opcode.StoreConst:
+		case opcode.Define:
 			// Ensure constant isn't redefined
 			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.env.IsConst(name) {
-				vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
-				vm.throw()
-				break
+			flags := opcode.DefineFlag(vm.fetchByte())
+
+			if flags.Constant() {
+				if vm.currentFrame.env.IsConst(name) {
+					vm.currentFrame.pushStack(object.NewException("Redefined constant %s", name))
+					vm.throw()
+					break
+				}
+				if _, err := vm.currentFrame.env.CreateConst(name, vm.currentFrame.popStack()); err != nil {
+					fmt.Println(err)
+				}
+			} else {
+				if vm.currentFrame.env.IsConstLocal(name) {
+					vm.currentFrame.pushStack(object.NewException("Variable %s already defined as constant", name))
+					vm.throw()
+					break
+				}
+				if _, exists := vm.currentFrame.env.GetLocal(name); exists {
+					vm.currentFrame.pushStack(object.NewException("Variable %s already defined", name))
+					vm.throw()
+					break
+				}
+				vm.currentFrame.env.Create(name, vm.currentFrame.popStack())
 			}
-			if _, err := vm.currentFrame.env.CreateConst(name, vm.currentFrame.popStack()); err != nil {
-				fmt.Println(err)
+
+			if flags.Export() {
+				vm.currentFrame.env.Export(name)
 			}
 
 		case opcode.Return:
@@ -407,21 +427,6 @@ mainLoop:
 				break
 			}
 			vm.currentFrame.env.UnsetLocal(name)
-
-		case opcode.Define:
-			// Ensure constant isn't redefined
-			name := vm.currentFrame.code.Locals[vm.getUint16()]
-			if vm.currentFrame.env.IsConstLocal(name) {
-				vm.currentFrame.pushStack(object.NewException("Variable %s already defined as constant", name))
-				vm.throw()
-				break
-			}
-			if _, exists := vm.currentFrame.env.GetLocal(name); exists {
-				vm.currentFrame.pushStack(object.NewException("Variable %s already defined", name))
-				vm.throw()
-				break
-			}
-			vm.currentFrame.env.Create(name, vm.currentFrame.popStack())
 
 		case opcode.LoadGlobal:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
@@ -1117,13 +1122,13 @@ func (vm *VirtualMachine) ImportPreamble(name string) error {
 	vm.currentFrame = vm.emptyFrame(vm.globalEnv, "__preamble__")
 
 	vm.importPackage(name)
-	module, ok := vm.PopStack().(*object.Hash)
+	module, ok := vm.PopStack().(*object.Module)
 	if !ok {
-		return errors.New("preamble module did not return a hash")
+		return errors.New("preamble module did not return a module")
 	}
 
-	for _, pair := range module.Pairs {
-		vm.globalEnv.SetForce(pair.Key.Inspect(), pair.Value, true)
+	for name, obj := range module.Vars {
+		vm.globalEnv.SetForce(name, obj, true)
 	}
 
 	vm.currentFrame = nil

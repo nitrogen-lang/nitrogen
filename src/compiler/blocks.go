@@ -444,13 +444,13 @@ func compileIterLoop(ccb *codeBlockCompiler, loop *ast.IterLoopStatement) {
 		ccb.code.addInst(opcode.Dup, ccb.linenum)
 		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(object.MakeIntObj(0)))
 		ccb.code.addInst(opcode.LoadIndex, ccb.linenum)
-		ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(loop.Key.Value))
+		ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(loop.Key.Value), 0)
 		bodyStrTable.indexOf(loop.Key.Value)
 	}
 
 	ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(object.MakeIntObj(1)))
 	ccb.code.addInst(opcode.LoadIndex, ccb.linenum)
-	ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(loop.Value.Value))
+	ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(loop.Value.Value), 0)
 	bodyStrTable.indexOf(loop.Value.Value)
 
 	bodyCCB := &codeBlockCompiler{

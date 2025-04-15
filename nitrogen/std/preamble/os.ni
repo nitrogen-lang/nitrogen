@@ -1,5 +1,1 @@
-fn native exit()
-
-return {
-    exit,
-}
+export fn native exit()

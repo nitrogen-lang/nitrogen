@@ -11,6 +11,37 @@ func (o Opcode) String() string {
 }
 
 /*
+DefineFlag is a bitmask used to define flags for the DEFINE opcode.
+The flags are defined as follows:
+- 0x01: Constant
+- 0x02: Export
+*/
+type DefineFlag byte
+
+func (f DefineFlag) Constant() bool {
+	return f&0x01 != 0
+}
+func (f DefineFlag) Export() bool {
+	return f&0x02 != 0
+}
+
+func NewDefineFlag() DefineFlag {
+	return 0
+}
+func (f DefineFlag) WithConstant(constant bool) DefineFlag {
+	if constant {
+		return f | 0x01
+	}
+	return f &^ 0x01
+}
+func (f DefineFlag) WithExport(export bool) DefineFlag {
+	if export {
+		return f | 0x02
+	}
+	return f &^ 0x02
+}
+
+/*
 When adding a new opcode, make sure to check and make any needed changes to the following places:
 
 - Add the opcode to the appropiate arg count map below.
@@ -23,7 +54,6 @@ When adding a new opcode, make sure to check and make any needed changes to the 
 const (
 	Noop Opcode = iota
 	LoadConst
-	StoreConst
 	LoadFast
 	StoreFast
 	DeleteFast
@@ -94,14 +124,17 @@ var HasFourByteArg = map[Opcode]bool{
 	StartLoop: true,
 }
 
+// 1 16-bit and 1 8-bit argument
+var HasThreeByteArg = map[Opcode]bool{
+	Define: true,
+}
+
 // 1 16-bit argument
 var HasTwoByteArg = map[Opcode]bool{
 	LoadConst:        true,
-	StoreConst:       true,
 	LoadFast:         true,
 	StoreFast:        true,
 	DeleteFast:       true,
-	Define:           true,
 	LoadGlobal:       true,
 	StoreGlobal:      true,
 	LoadAttribute:    true,
@@ -160,7 +193,6 @@ var HasNoArg = map[Opcode]bool{
 var Names = map[Opcode]string{
 	Noop:             "NOOP",
 	LoadConst:        "LOAD_CONST",
-	StoreConst:       "STORE_CONST",
 	LoadFast:         "LOAD_FAST",
 	StoreFast:        "STORE_FAST",
 	DeleteFast:       "DELETE_FAST",

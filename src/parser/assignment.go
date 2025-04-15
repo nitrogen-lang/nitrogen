@@ -12,6 +12,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		fmt.Println("parseStatment")
 	}
 	switch p.curToken.Type {
+	case token.Export:
+		return p.parseExportStatement()
 	case token.Let:
 		fallthrough
 	case token.Const:
@@ -173,11 +175,30 @@ func (p *Parser) parseImport() ast.Statement {
 	return stmt
 }
 
+func (p *Parser) parseExportStatement() ast.Statement {
+	if p.peekTokenIs(token.Function) {
+		return p.parseFuncDefStatement()
+	}
+	if p.peekTokenIs(token.Class) {
+		return p.parseClassDefStatement()
+	}
+	if p.peekTokenIs(token.Interface) {
+		return p.parseInterfaceDefStatement()
+	}
+	return p.parseDefStatement()
+}
+
 func (p *Parser) parseDefStatement() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseDefStatement")
 	}
+
 	stmt := &ast.DefStatement{Token: p.curToken}
+
+	if p.curTokenIs(token.Export) {
+		stmt.Export = true
+		p.nextToken()
+	}
 
 	stmt.Const = p.curTokenIs(token.Const)
 
@@ -265,6 +286,11 @@ func (p *Parser) parseFuncDefStatement() ast.Statement {
 	startToken := p.curToken
 	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
 
+	if p.curTokenIs(token.Export) {
+		stmt.Export = true
+		p.nextToken()
+	}
+
 	var ok bool
 	stmt.Value, ok = p.parseExpression(priLowest).(ast.Expression)
 	if !ok {
@@ -295,6 +321,13 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseClassDefStatement")
 	}
+	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
+
+	if p.curTokenIs(token.Export) {
+		stmt.Export = true
+		p.nextToken()
+	}
+
 	if !p.peekTokenIs(token.Identifier) {
 		return p.parseExpressionStatement()
 	}
@@ -304,7 +337,6 @@ func (p *Parser) parseClassDefStatement() ast.Statement {
 		return nil
 	}
 
-	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	p.insertToken(classToken)
@@ -331,6 +363,13 @@ func (p *Parser) parseInterfaceDefStatement() ast.Statement {
 	if p.settings.Debug {
 		fmt.Println("parseInterfaceDefStatement")
 	}
+	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
+
+	if p.curTokenIs(token.Export) {
+		stmt.Export = true
+		p.nextToken()
+	}
+
 	if !p.peekTokenIs(token.Identifier) {
 		return p.parseExpressionStatement()
 	}
@@ -340,7 +379,6 @@ func (p *Parser) parseInterfaceDefStatement() ast.Statement {
 		return nil
 	}
 
-	stmt := &ast.DefStatement{Token: createKeywordToken("let")}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	p.insertToken(InterfaceToken)

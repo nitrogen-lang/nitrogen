@@ -44,6 +44,8 @@ func (i *Instruction) Size() uint16 {
 		return 2
 	case opcode.HasTwoByteArg[i.Instr]:
 		return 3
+	case opcode.HasThreeByteArg[i.Instr]:
+		return 4
 	case opcode.HasFourByteArg[i.Instr]:
 		return 5
 	}
@@ -136,6 +138,8 @@ func AddOptimizer(o Optimization) {
 func checkArgLength(code opcode.Opcode, argLen int) {
 	if (opcode.HasOneByteArg[code] || opcode.HasTwoByteArg[code]) && argLen != 1 {
 		panic(fmt.Sprintf("opcode %s requires 1 16-bit argument, given %d", code.String(), argLen))
+	} else if opcode.HasThreeByteArg[code] && argLen != 2 {
+		panic(fmt.Sprintf("opcode %s requires 1 16-bit and 1 8-bit argument, given %d", code.String(), argLen))
 	} else if opcode.HasFourByteArg[code] && argLen != 2 {
 		panic(fmt.Sprintf("opcode %s requires 2 16-bit argument, given %d", code.String(), argLen))
 	}
@@ -218,6 +222,14 @@ func (i *InstSet) Assemble(ccb *codeBlockCompiler) ([]byte, []uint16) {
 			bytes[offset] = arg[0]
 			bytes[offset+1] = arg[1]
 			offset += 2
+		case opcode.HasThreeByteArg[in.Instr]:
+			arg := uint16ToBytes(in.Args[0])
+			bytes[offset] = arg[0]
+			bytes[offset+1] = arg[1]
+
+			bytes[offset+2] = byte(in.Args[1])
+
+			offset += 3
 		case opcode.HasFourByteArg[in.Instr]:
 			arg := uint16ToBytes(in.Args[0])
 			bytes[offset] = arg[0]
@@ -265,6 +277,12 @@ func (c *Code) NextInstruction() *Instruction {
 	case opcode.HasTwoByteArg[curr]:
 		i.Args = []uint16{bytesToUint16(c.code[c.i], c.code[c.i+1])}
 		c.i += 2
+	case opcode.HasThreeByteArg[curr]:
+		i.Args = []uint16{
+			bytesToUint16(c.code[c.i], c.code[c.i+1]),
+			uint16(c.code[c.i+2]),
+		}
+		c.i += 3
 	case opcode.HasFourByteArg[curr]:
 		i.Args = []uint16{
 			bytesToUint16(c.code[c.i], c.code[c.i+1]),
