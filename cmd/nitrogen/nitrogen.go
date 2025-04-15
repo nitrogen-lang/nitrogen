@@ -53,6 +53,7 @@ var (
 	cpuprofile   string
 	memprofile   string
 	outputFile   string
+	noPreamble   bool
 
 	infoCmd bool
 
@@ -73,6 +74,7 @@ func init() {
 	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
+	flag.BoolVar(&noPreamble, "nopreamble", false, "Disable std preamble")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
 	flag.StringVar(&memprofile, "memprofile", "", "File to write memory profile data")
 	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
@@ -242,9 +244,11 @@ func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.O
 	machine := vm.NewVM(vmsettings)
 	machine.SetGlobalEnv(env)
 	machine.SetInstanceVar("os.env", getExternalEnv())
-	if err := machine.ImportPreamble(""); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if !noPreamble {
+		if err := machine.ImportPreamble(""); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 
 	ret, err := machine.Execute(code, nil, "__main")
