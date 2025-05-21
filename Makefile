@@ -10,7 +10,7 @@ LDFLAGS := -X 'main.version=$(VERSION)' \
 			-X 'main.builtinModPaths=$(MODULE_PATHS)' \
 			-s -w
 
-.PHONY: go-test nitrogen-test build modules build-tools buildc buildrun
+.PHONY: go-test nitrogen-test build modules build-tools buildc buildrun clean
 
 all: build-tools
 
@@ -32,6 +32,11 @@ go-test:
 
 nitrogen-test:
 	./tests/run_tests.sh
+
+clean:
+	rm -rf ./bin/*
+	rm -rf ./built-modules/*
+	find . -name "*.nib" -delete
 
 modules:
 ifeq ($(CGO_ENABLED),1)
