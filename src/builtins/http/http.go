@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	vm.RegisterNative("std.http.doReq", doReq)
+	vm.RegisterNative("std.http.req", doReq)
 	vm.RegisterNative("std.http.canonicalHeaderKey", canonicalHeaderKey)
 }
 
