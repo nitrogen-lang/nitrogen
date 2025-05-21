@@ -1,5 +1,5 @@
-import 'std/encoding/json/encode'
-import 'std/encoding/json/decode'
+import 'std/encoding/json/encode' as e
+import 'std/encoding/json/decode' as d
 
-export const encode = encode.encode
-export const decode = decode.decode
+export const encode = e.encode
+export const decode = d.decode

@@ -43,4 +43,4 @@ const encodeMap = fn(buf, obj) {
     buf + '}'
 }
 
-export fn encode(obj) { encode2("", obj) },
+export fn encode(obj) { encode2("", obj) }
