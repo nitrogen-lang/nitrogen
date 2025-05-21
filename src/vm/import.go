@@ -60,7 +60,6 @@ func (vm *VirtualMachine) importPackage(path string) {
 		vm.throw()
 		return
 	}
-
 	vm.currentFrame.pushStack(module)
 }
 
@@ -82,7 +81,11 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 	env := object.NewEnclosedEnv(vm.globalEnv)
 	env.CreateConst("_FILE", object.MakeStringObj(scriptPath))
 
-	vm.RunFrame(vm.MakeFrame(code, env, name), true)
+	ret := vm.RunFrame(vm.MakeFrame(code, env, name), true)
+	if object.ObjectIs(ret, object.ExceptionObj) {
+		return ret
+	}
+
 	res = &object.Module{
 		Name: name,
 		Vars: env.GetExported(),
