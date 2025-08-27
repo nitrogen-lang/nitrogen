@@ -1,7 +1,7 @@
 package moduleutils
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 // CheckArgs is a convience function to check if the correct number of arguments were supplied

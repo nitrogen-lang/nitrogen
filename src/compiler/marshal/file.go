@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"time"
 
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
 )
 
 var (
@@ -25,7 +25,7 @@ func IsErrVersion(err error) bool {
 	return err == ErrVersion
 }
 
-func WriteFile(name string, cb *compiler.CodeBlock, ts time.Time, executable bool) error {
+func WriteFile(name string, cb *compile.CodeBlock, ts time.Time, executable bool) error {
 	marshaled, err := Marshal(cb)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ type FileInfo struct {
 	ModTime  time.Time
 }
 
-func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
+func ReadFile(name string) (*compile.CodeBlock, *FileInfo, error) {
 	file, err := os.Open(name)
 	if err != nil {
 		return nil, nil, err
@@ -104,7 +104,7 @@ func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
 	// fileTime is checked by caller if they care about it
 	fi.ModTime = time.Unix(int64(binary.BigEndian.Uint64(fileTime)), 0)
 
-	rest, err := ioutil.ReadAll(file)
+	rest, err := io.ReadAll(file)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -113,5 +113,5 @@ func ReadFile(name string) (*compiler.CodeBlock, *FileInfo, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return cb.(*compiler.CodeBlock), fi, nil
+	return cb.(*compile.CodeBlock), fi, nil
 }

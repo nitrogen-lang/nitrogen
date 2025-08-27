@@ -10,8 +10,8 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 var (

@@ -1,9 +1,9 @@
-package compiler
+package compile
 
 import (
 	"fmt"
 
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
 type Instruction struct {
@@ -61,14 +61,14 @@ func NewInstSet() *InstSet {
 	return &InstSet{}
 }
 
-func (i *InstSet) last() *Instruction {
+func (i *InstSet) Last() *Instruction {
 	if i.Tail == nil {
 		return &Instruction{}
 	}
 	return i.Tail
 }
 
-func (i *InstSet) addInst(code opcode.Opcode, line uint, args ...uint16) {
+func (i *InstSet) AddInst(code opcode.Opcode, line uint, args ...uint16) {
 	checkArgLength(code, len(args))
 	inst := &Instruction{
 		Instr: code,
@@ -86,7 +86,7 @@ func (i *InstSet) addInst(code opcode.Opcode, line uint, args ...uint16) {
 	}
 }
 
-func (i *InstSet) addLabel(label string, line uint) {
+func (i *InstSet) AddLabel(label string, line uint) {
 	inst := &Instruction{
 		Instr: opcode.Label,
 		Label: label,
@@ -103,7 +103,7 @@ func (i *InstSet) addLabel(label string, line uint) {
 	}
 }
 
-func (i *InstSet) addLabeledArgs(code opcode.Opcode, line uint, argLabels ...string) {
+func (i *InstSet) AddLabeledArgs(code opcode.Opcode, line uint, argLabels ...string) {
 	checkArgLength(code, len(argLabels))
 	inst := &Instruction{
 		Instr:     code,
@@ -122,12 +122,12 @@ func (i *InstSet) addLabeledArgs(code opcode.Opcode, line uint, argLabels ...str
 	}
 }
 
-func (i *InstSet) merge(j *InstSet) {
+func (i *InstSet) Merge(j *InstSet) {
 	i.Tail.Next = j.Head
 	i.Tail = j.Tail
 }
 
-type Optimization func(*InstSet, *codeBlockCompiler)
+type Optimization func(*InstSet, *CodeBlockCompiler)
 
 var optimizations = []Optimization{}
 
@@ -186,7 +186,7 @@ func (i *InstSet) Link() {
 	}
 }
 
-func (i *InstSet) Assemble(ccb *codeBlockCompiler) ([]byte, []uint16) {
+func (i *InstSet) Assemble(ccb *CodeBlockCompiler) ([]byte, []uint16) {
 	for _, o := range optimizations {
 		o(i, ccb)
 	}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
 )
 
 // CodeBlockCache is a global cache of Code Blocks keyed to a script filename
@@ -24,7 +25,7 @@ type codeBlockCache struct {
 }
 
 type cbCacheItem struct {
-	block   *compiler.CodeBlock
+	block   *compile.CodeBlock
 	modTime time.Time
 }
 
@@ -34,7 +35,7 @@ func newCodeBlockCache() *codeBlockCache {
 	}
 }
 
-func (c *codeBlockCache) GetBlock(file, name string) (*compiler.CodeBlock, error) {
+func (c *codeBlockCache) GetBlock(file, name string) (*compile.CodeBlock, error) {
 	fileinfo, err := os.Stat(file)
 	if err != nil {
 		return nil, err

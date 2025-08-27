@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
-	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func TestEval(input string) object.Object {

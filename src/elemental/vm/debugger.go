@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
 var debugPrintInstructionsAlways = false

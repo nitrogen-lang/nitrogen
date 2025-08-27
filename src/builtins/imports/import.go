@@ -1,7 +1,7 @@
 package imports
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/vm"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 )
 
 func init() {

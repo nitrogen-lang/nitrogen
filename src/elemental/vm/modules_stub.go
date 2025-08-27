@@ -5,7 +5,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 func importSharedModule(vm *VirtualMachine, scriptPath, name string) object.Object {

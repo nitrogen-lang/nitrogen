@@ -1,6 +1,9 @@
 package compiler
 
-import "github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+import (
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
+)
 
 type maxsizer struct {
 	max, current int
@@ -19,7 +22,7 @@ func (s *maxsizer) add(delta int) {
 	}
 }
 
-func calculateStackSize(c *InstSet) int {
+func calculateStackSize(c *compile.InstSet) int {
 	stackSize := &maxsizer{}
 
 	i := c.Head
@@ -51,7 +54,7 @@ func calculateStackSize(c *InstSet) int {
 	return stackSize.max
 }
 
-func calculateBlockSize(c *InstSet) int {
+func calculateBlockSize(c *compile.InstSet) int {
 	blockLen := &maxsizer{}
 
 	i := c.Head

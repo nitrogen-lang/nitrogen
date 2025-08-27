@@ -1,8 +1,8 @@
 package vm
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
 func (vm *VirtualMachine) evalImplementsExpression(left, right object.Object) object.Object {

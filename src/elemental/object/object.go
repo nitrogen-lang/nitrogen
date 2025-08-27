@@ -83,7 +83,7 @@ func init() {
 }
 
 type Interpreter interface {
-	Eval(node ast.Node, env *Environment) Object
+	// Eval(node ast.Node, env *Environment) Object
 	GetCurrentScriptPath() string
 	GetStdout() io.Writer
 	GetStderr() io.Writer

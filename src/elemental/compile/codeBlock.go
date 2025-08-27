@@ -1,11 +1,11 @@
-package compiler
+package compile
 
 import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
 type CodeBlock struct {
@@ -15,7 +15,7 @@ type CodeBlock struct {
 	MaxStackSize int
 	MaxBlockSize int
 	Constants    []object.Object // Created at compile time
-	Locals       []string        // Created by compile time
+	Locals       []string        // Created at compile time
 	Names        []string        // Created at compile time
 	Code         []byte
 	Native       bool
@@ -122,28 +122,28 @@ func bytesToUint16(a, b byte) uint16 {
 	return (uint16(a) << 8) + uint16(b)
 }
 
-type codeBlockCompiler struct {
-	constants      *constantTable
-	locals         *stringTable
-	names          *stringTable
-	code           *InstSet
-	filename, name string
-	inLoop         bool
-	linenum        uint
+type CodeBlockCompiler struct {
+	Constants      *ConstantTable
+	Locals         *StringTable
+	Names          *StringTable
+	Code           *InstSet
+	Filename, Name string
+	InLoop         bool
+	Linenum        uint
 }
 
-type constantTable struct {
-	table []object.Object
+type ConstantTable struct {
+	Table []object.Object
 }
 
-func newConstantTable() *constantTable {
-	return &constantTable{
-		table: make([]object.Object, 0, 5),
+func NewConstantTable() *ConstantTable {
+	return &ConstantTable{
+		Table: make([]object.Object, 0, 5),
 	}
 }
 
-func (t *constantTable) indexOf(v object.Object) uint16 {
-	for i, o := range t.table {
+func (t *ConstantTable) IndexOf(v object.Object) uint16 {
+	for i, o := range t.Table {
 		if o.Type() != v.Type() {
 			continue
 		}
@@ -174,42 +174,42 @@ func (t *constantTable) indexOf(v object.Object) uint16 {
 		}
 	}
 
-	t.table = append(t.table, v)
-	return uint16(len(t.table) - 1)
+	t.Table = append(t.Table, v)
+	return uint16(len(t.Table) - 1)
 }
 
-type stringTable struct {
-	table []string
+type StringTable struct {
+	Table []string
 }
 
-func newStringTable() *stringTable {
-	return &stringTable{
-		table: make([]string, 0, 5),
+func NewStringTable() *StringTable {
+	return &StringTable{
+		Table: make([]string, 0, 5),
 	}
 }
 
-func newStringTableOffset(offset int) *stringTable {
+func NewStringTableOffset(offset int) *StringTable {
 	if offset < 0 {
 		offset = 0
 	}
-	return &stringTable{
-		table: make([]string, offset, offset+5),
+	return &StringTable{
+		Table: make([]string, offset, offset+5),
 	}
 }
 
-func (t *stringTable) indexOf(v string) uint16 {
-	for i, s := range t.table {
+func (t *StringTable) IndexOf(v string) uint16 {
+	for i, s := range t.Table {
 		if s == v {
 			return uint16(i)
 		}
 	}
 
-	t.table = append(t.table, v)
-	return uint16(len(t.table) - 1)
+	t.Table = append(t.Table, v)
+	return uint16(len(t.Table) - 1)
 }
 
-func (t *stringTable) contains(s string) bool {
-	for _, v := range t.table {
+func (t *StringTable) Contains(s string) bool {
+	for _, v := range t.Table {
 		if v == s {
 			return true
 		}

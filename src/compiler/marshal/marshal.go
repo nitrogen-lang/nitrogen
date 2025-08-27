@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 func Marshal(o object.Object) ([]byte, error) {
@@ -71,7 +71,7 @@ func Marshal(o object.Object) ([]byte, error) {
 		copy(out[9:], buf.Bytes())
 		return out, nil
 
-	case *compiler.CodeBlock:
+	case *compile.CodeBlock:
 		buf := new(bytes.Buffer)
 		tmpStr := object.MakeStringObj(o.Name)
 		res, _ := Marshal(tmpStr)
@@ -193,7 +193,7 @@ func Unmarshal(in []byte) (object.Object, []byte, error) {
 	case 'c':
 		inslice := in[9:] // Length is bytes [1-8]
 
-		cb := &compiler.CodeBlock{}
+		cb := &compile.CodeBlock{}
 		name, inslice, _ := Unmarshal(inslice)
 		cb.Name = string(name.(*object.String).Value)
 

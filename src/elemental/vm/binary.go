@@ -3,7 +3,7 @@ package vm
 import (
 	"math"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 func (vm *VirtualMachine) evalBinaryExpression(op string, left, right object.Object) object.Object {

@@ -13,12 +13,12 @@ import (
 	"time"
 
 	builtinOs "github.com/nitrogen-lang/nitrogen/src/builtins/os"
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/scgi"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
@@ -92,7 +92,7 @@ func main() {
 	// Add Noble package manager path
 	homeDir, _ := os.UserHomeDir()
 	if homeDir != "" {
-		modulePaths = append(modulePaths, filepath.Join(homeDir, ".noble", "pkg"))
+		modulePaths = append(modulePaths, filepath.Join(homeDir, ".noble", "pkgs"))
 	}
 
 	if printVersion {
@@ -177,7 +177,7 @@ func main() {
 	}
 }
 
-func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.Object {
+func runCompiledCode(code *compile.CodeBlock, env *object.Environment) object.Object {
 	if fullDebug {
 		code.Print("")
 	}

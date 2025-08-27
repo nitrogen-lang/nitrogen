@@ -9,7 +9,8 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 func TestIntegerMarshal(t *testing.T) {
@@ -142,7 +143,7 @@ func TestCodeBlockMarshal(t *testing.T) {
 	bytes, _ := Marshal(code)
 
 	newcode, _, _ := Unmarshal(bytes)
-	newcodeObj := newcode.(*compiler.CodeBlock)
+	newcodeObj := newcode.(*compile.CodeBlock)
 	if !reflect.DeepEqual(code, newcodeObj) {
 		t.Fatal("Code objects are not the same")
 	}

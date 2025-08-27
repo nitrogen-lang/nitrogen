@@ -4,40 +4,41 @@ import (
 	"fmt"
 
 	"github.com/nitrogen-lang/nitrogen/src/ast"
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
-func Compile(tree *ast.Program, name string) *CodeBlock {
+func Compile(tree *ast.Program, name string) *compile.CodeBlock {
 	return compileFrame(&ast.BlockStatement{Statements: tree.Statements}, name, tree.Filename)
 }
 
-func compileFrame(node ast.Node, name, filename string) *CodeBlock {
-	ccb := &codeBlockCompiler{
-		constants: newConstantTable(),
-		locals:    newStringTable(),
-		names:     newStringTable(),
-		code:      NewInstSet(),
-		filename:  filename,
-		name:      name,
-		linenum:   0,
+func compileFrame(node ast.Node, name, filename string) *compile.CodeBlock {
+	ccb := &compile.CodeBlockCompiler{
+		Constants: compile.NewConstantTable(),
+		Locals:    compile.NewStringTable(),
+		Names:     compile.NewStringTable(),
+		Code:      compile.NewInstSet(),
+		Filename:  filename,
+		Name:      name,
+		Linenum:   0,
 	}
 
-	compile(ccb, node)
-	if !ccb.code.last().Is(opcode.Return) {
-		ccb.code.addInst(opcode.Return, ccb.linenum)
+	compileMain(ccb, node)
+	if !ccb.Code.Last().Is(opcode.Return) {
+		ccb.Code.AddInst(opcode.Return, ccb.Linenum)
 	}
 
-	code := ccb.code
+	code := ccb.Code
 	assembledCode, lineOffsets := code.Assemble(ccb)
-	c := &CodeBlock{
+	c := &compile.CodeBlock{
 		Name:         name,
 		Filename:     filename,
-		LocalCount:   len(ccb.locals.table),
+		LocalCount:   len(ccb.Locals.Table),
 		Code:         assembledCode,
-		Constants:    ccb.constants.table,
-		Names:        ccb.names.table,
-		Locals:       ccb.locals.table,
+		Constants:    ccb.Constants.Table,
+		Names:        ccb.Names.Table,
+		Locals:       ccb.Locals.Table,
 		MaxStackSize: calculateStackSize(code),
 		MaxBlockSize: calculateBlockSize(code),
 		LineOffsets:  lineOffsets,
@@ -46,7 +47,7 @@ func compileFrame(node ast.Node, name, filename string) *CodeBlock {
 	return c
 }
 
-func compile(ccb *codeBlockCompiler, node ast.Node) {
+func compileMain(ccb *compile.CodeBlockCompiler, node ast.Node) {
 	if node == nil {
 		compileLoadNull(ccb)
 		return
@@ -55,7 +56,7 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 	switch node := node.(type) {
 
 	case *ast.ExpressionStatement:
-		compile(ccb, node.Expression)
+		compileMain(ccb, node.Expression)
 
 	case *ast.BlockStatement:
 		compileBlock(ccb, node)
@@ -65,51 +66,51 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 
 	// Literals
 	case *ast.IntegerLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		i := object.MakeIntObj(node.Value)
-		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(i))
+		ccb.Code.AddInst(opcode.LoadConst, ccb.Linenum, ccb.Constants.IndexOf(i))
 
 	case *ast.NullLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		compileLoadNull(ccb)
 
 	case *ast.StringLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		str := &object.String{Value: node.Value}
-		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(str))
+		ccb.Code.AddInst(opcode.LoadConst, ccb.Linenum, ccb.Constants.IndexOf(str))
 
 	case *ast.ByteStringLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		str := &object.ByteString{Value: node.Value}
-		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(str))
+		ccb.Code.AddInst(opcode.LoadConst, ccb.Linenum, ccb.Constants.IndexOf(str))
 
 	case *ast.FloatLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		float := &object.Float{Value: node.Value}
-		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(float))
+		ccb.Code.AddInst(opcode.LoadConst, ccb.Linenum, ccb.Constants.IndexOf(float))
 
 	case *ast.Boolean:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		b := object.NativeBoolToBooleanObj(node.Value)
-		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(b))
+		ccb.Code.AddInst(opcode.LoadConst, ccb.Linenum, ccb.Constants.IndexOf(b))
 
 	case *ast.Array:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		for _, e := range node.Elements {
-			compile(ccb, e)
+			compileMain(ccb, e)
 		}
-		ccb.code.addInst(opcode.MakeArray, ccb.linenum, uint16(len(node.Elements)))
+		ccb.Code.AddInst(opcode.MakeArray, ccb.Linenum, uint16(len(node.Elements)))
 
 	case *ast.HashLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		for k, v := range node.Pairs {
-			compile(ccb, v)
-			compile(ccb, k)
+			compileMain(ccb, v)
+			compileMain(ccb, k)
 		}
-		ccb.code.addInst(opcode.MakeMap, ccb.linenum, uint16(len(node.Pairs)))
+		ccb.Code.AddInst(opcode.MakeMap, ccb.Linenum, uint16(len(node.Pairs)))
 
 	case *ast.InterfaceLiteral:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		iface := &object.Interface{
 			Name:    node.Name,
 			Methods: make(map[string]*object.IfaceMethodDef, len(node.Methods)),
@@ -122,107 +123,107 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			}
 		}
 
-		ccb.code.addInst(opcode.LoadConst, ccb.linenum, ccb.constants.indexOf(iface))
+		ccb.Code.AddInst(opcode.LoadConst, ccb.Linenum, ccb.Constants.IndexOf(iface))
 
 	// Expressions
 	case *ast.Identifier:
-		ccb.linenum = node.Token.Pos.Line
-		if ccb.locals.contains(node.Value) {
-			ccb.code.addInst(opcode.LoadFast, ccb.linenum, ccb.locals.indexOf(node.Value))
+		ccb.Linenum = node.Token.Pos.Line
+		if ccb.Locals.Contains(node.Value) {
+			ccb.Code.AddInst(opcode.LoadFast, ccb.Linenum, ccb.Locals.IndexOf(node.Value))
 		} else {
-			ccb.code.addInst(opcode.LoadGlobal, ccb.linenum, ccb.names.indexOf(node.Value))
+			ccb.Code.AddInst(opcode.LoadGlobal, ccb.Linenum, ccb.Names.IndexOf(node.Value))
 		}
 
 	case *ast.PrefixExpression:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Right)
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Right)
 
 		switch node.Operator {
 		case "!":
-			ccb.code.addInst(opcode.UnaryNot, ccb.linenum)
+			ccb.Code.AddInst(opcode.UnaryNot, ccb.Linenum)
 		case "-":
-			ccb.code.addInst(opcode.UnaryNeg, ccb.linenum)
+			ccb.Code.AddInst(opcode.UnaryNeg, ccb.Linenum)
 		}
 
 	case *ast.InfixExpression:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Left)
-		compile(ccb, node.Right)
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Left)
+		compileMain(ccb, node.Right)
 
 		switch node.Operator {
 		case "+":
-			ccb.code.addInst(opcode.BinaryAdd, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryAdd, ccb.Linenum)
 		case "-":
-			ccb.code.addInst(opcode.BinarySub, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinarySub, ccb.Linenum)
 		case "*":
-			ccb.code.addInst(opcode.BinaryMul, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryMul, ccb.Linenum)
 		case "/":
-			ccb.code.addInst(opcode.BinaryDivide, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryDivide, ccb.Linenum)
 		case "%":
-			ccb.code.addInst(opcode.BinaryMod, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryMod, ccb.Linenum)
 		case "<<":
-			ccb.code.addInst(opcode.BinaryShiftL, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryShiftL, ccb.Linenum)
 		case ">>":
-			ccb.code.addInst(opcode.BinaryShiftR, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryShiftR, ccb.Linenum)
 		case "&":
-			ccb.code.addInst(opcode.BinaryAnd, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryAnd, ccb.Linenum)
 		case "&^":
-			ccb.code.addInst(opcode.BinaryAndNot, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryAndNot, ccb.Linenum)
 		case "|":
-			ccb.code.addInst(opcode.BinaryOr, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryOr, ccb.Linenum)
 		case "^":
-			ccb.code.addInst(opcode.BinaryNot, ccb.linenum)
+			ccb.Code.AddInst(opcode.BinaryNot, ccb.Linenum)
 		case "<":
-			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpLT))
+			ccb.Code.AddInst(opcode.Compare, ccb.Linenum, uint16(opcode.CmpLT))
 		case ">":
-			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpGT))
+			ccb.Code.AddInst(opcode.Compare, ccb.Linenum, uint16(opcode.CmpGT))
 		case "==":
-			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpEq))
+			ccb.Code.AddInst(opcode.Compare, ccb.Linenum, uint16(opcode.CmpEq))
 		case "!=":
-			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpNotEq))
+			ccb.Code.AddInst(opcode.Compare, ccb.Linenum, uint16(opcode.CmpNotEq))
 		case "<=":
-			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpLTEq))
+			ccb.Code.AddInst(opcode.Compare, ccb.Linenum, uint16(opcode.CmpLTEq))
 		case ">=":
-			ccb.code.addInst(opcode.Compare, ccb.linenum, uint16(opcode.CmpGTEq))
+			ccb.Code.AddInst(opcode.Compare, ccb.Linenum, uint16(opcode.CmpGTEq))
 		case "implements":
-			ccb.code.addInst(opcode.Implements, ccb.linenum)
+			ccb.Code.AddInst(opcode.Implements, ccb.Linenum)
 		}
 
 	case *ast.CallExpression:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		for i := len(node.Arguments) - 1; i >= 0; i-- {
-			compile(ccb, node.Arguments[i])
+			compileMain(ccb, node.Arguments[i])
 		}
-		compile(ccb, node.Function)
-		ccb.code.addInst(opcode.Call, ccb.linenum, uint16(len(node.Arguments)))
+		compileMain(ccb, node.Function)
+		ccb.Code.AddInst(opcode.Call, ccb.Linenum, uint16(len(node.Arguments)))
 
 	case *ast.ReturnStatement:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Value)
-		ccb.code.addInst(opcode.Return, ccb.linenum)
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Value)
+		ccb.Code.AddInst(opcode.Return, ccb.Linenum)
 
 	case *ast.DefStatement:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Value)
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Value)
 
-		ccb.code.addInst(opcode.Define, ccb.linenum,
-			ccb.locals.indexOf(node.Name.Value),
+		ccb.Code.AddInst(opcode.Define, ccb.Linenum,
+			ccb.Locals.IndexOf(node.Name.Value),
 			uint16(opcode.NewDefineFlag().WithConstant(node.Const).WithExport(node.Export)))
 
 	case *ast.AssignStatement:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Value)
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Value)
 
 		if indexed, ok := node.Left.(*ast.IndexExpression); ok {
-			compile(ccb, indexed.Index)
-			compile(ccb, indexed.Left)
-			ccb.code.addInst(opcode.StoreIndex, ccb.linenum)
+			compileMain(ccb, indexed.Index)
+			compileMain(ccb, indexed.Left)
+			ccb.Code.AddInst(opcode.StoreIndex, ccb.Linenum)
 			break
 		}
 
 		if attrib, ok := node.Left.(*ast.AttributeExpression); ok {
-			compile(ccb, attrib.Left)
-			ccb.code.addInst(opcode.StoreAttribute, ccb.linenum, ccb.names.indexOf(attrib.Index.String()))
+			compileMain(ccb, attrib.Left)
+			ccb.Code.AddInst(opcode.StoreAttribute, ccb.Linenum, ccb.Names.IndexOf(attrib.Index.String()))
 			break
 		}
 
@@ -231,15 +232,15 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 			panic("Assignment to non ident or index")
 		}
 
-		if ccb.locals.contains(ident.Value) {
-			ccb.code.addInst(opcode.StoreFast, ccb.linenum, ccb.locals.indexOf(ident.Value))
+		if ccb.Locals.Contains(ident.Value) {
+			ccb.Code.AddInst(opcode.StoreFast, ccb.Linenum, ccb.Locals.IndexOf(ident.Value))
 		} else {
-			ccb.code.addInst(opcode.StoreGlobal, ccb.linenum, ccb.names.indexOf(ident.Value))
+			ccb.Code.AddInst(opcode.StoreGlobal, ccb.Linenum, ccb.Names.IndexOf(ident.Value))
 		}
 
 	case *ast.DeleteStatement:
-		ccb.linenum = node.Token.Pos.Line
-		ccb.code.addInst(opcode.DeleteFast, ccb.linenum, ccb.locals.indexOf(node.Name))
+		ccb.Linenum = node.Token.Pos.Line
+		ccb.Code.AddInst(opcode.DeleteFast, ccb.Linenum, ccb.Locals.IndexOf(node.Name))
 
 	case *ast.IfExpression:
 		compileIfStatement(ccb, node)
@@ -248,19 +249,19 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileCompareExpression(ccb, node)
 
 	case *ast.ImportStatement:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		str := &object.String{Value: node.Path.Value}
-		ccb.code.addInst(opcode.Import, ccb.linenum, ccb.constants.indexOf(str))
-		ccb.code.addInst(opcode.Define, ccb.linenum, ccb.locals.indexOf(node.Name.Value), 0)
+		ccb.Code.AddInst(opcode.Import, ccb.Linenum, ccb.Constants.IndexOf(str))
+		ccb.Code.AddInst(opcode.Define, ccb.Linenum, ccb.Locals.IndexOf(node.Name.Value), 0)
 
 	case *ast.FunctionLiteral:
 		compileFunction(ccb, node, false, false)
 
 	case *ast.IndexExpression:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Left)
-		compile(ccb, node.Index)
-		ccb.code.addInst(opcode.LoadIndex, ccb.linenum)
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Left)
+		compileMain(ccb, node.Index)
+		ccb.Code.AddInst(opcode.LoadIndex, ccb.Linenum)
 
 	case *ast.LoopStatement:
 		compileLoop(ccb, node)
@@ -269,43 +270,43 @@ func compile(ccb *codeBlockCompiler, node ast.Node) {
 		compileIterLoop(ccb, node)
 
 	case *ast.ContinueStatement:
-		ccb.linenum = node.Token.Pos.Line
-		if !ccb.inLoop {
+		ccb.Linenum = node.Token.Pos.Line
+		if !ccb.InLoop {
 			panic("continue used in non-loop block")
 		}
-		ccb.code.addInst(opcode.Continue, ccb.linenum)
+		ccb.Code.AddInst(opcode.Continue, ccb.Linenum)
 
 	case *ast.BreakStatement:
-		ccb.linenum = node.Token.Pos.Line
-		if !ccb.inLoop {
+		ccb.Linenum = node.Token.Pos.Line
+		if !ccb.InLoop {
 			panic("break used in non-loop block")
 		}
-		ccb.code.addInst(opcode.Break, ccb.linenum)
+		ccb.Code.AddInst(opcode.Break, ccb.Linenum)
 
 	case *ast.ClassLiteral:
 		compileClassLiteral(ccb, node)
 
 	case *ast.NewInstance:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		for i := len(node.Arguments) - 1; i >= 0; i-- {
-			compile(ccb, node.Arguments[i])
+			compileMain(ccb, node.Arguments[i])
 		}
-		compile(ccb, node.Class)
+		compileMain(ccb, node.Class)
 
-		ccb.code.addInst(opcode.MakeInstance, ccb.linenum, uint16(len(node.Arguments)))
+		ccb.Code.AddInst(opcode.MakeInstance, ccb.Linenum, uint16(len(node.Arguments)))
 
 	case *ast.AttributeExpression:
-		ccb.linenum = node.Token.Pos.Line
-		compile(ccb, node.Left)
-		ccb.code.addInst(opcode.LoadAttribute, ccb.linenum, ccb.names.indexOf(node.Index.String()))
+		ccb.Linenum = node.Token.Pos.Line
+		compileMain(ccb, node.Left)
+		ccb.Code.AddInst(opcode.LoadAttribute, ccb.Linenum, ccb.Names.IndexOf(node.Index.String()))
 
 	case *ast.PassStatement:
-		ccb.linenum = node.Token.Pos.Line
+		ccb.Linenum = node.Token.Pos.Line
 		// Ignore
 
 	case *ast.BreakpointStatement:
-		ccb.linenum = node.Token.Pos.Line
-		ccb.code.addInst(opcode.Breakpoint, ccb.linenum)
+		ccb.Linenum = node.Token.Pos.Line
+		ccb.Code.AddInst(opcode.Breakpoint, ccb.Linenum)
 
 	// Not implemented yet
 	case *ast.Program:

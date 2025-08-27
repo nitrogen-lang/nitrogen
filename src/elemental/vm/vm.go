@@ -9,10 +9,9 @@ import (
 	"runtime/debug"
 	"strconv"
 
-	"github.com/nitrogen-lang/nitrogen/src/ast"
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
 type ErrExitCode struct {
@@ -72,9 +71,6 @@ func (vm *VirtualMachine) SetGlobalEnv(env *object.Environment) {
 	vm.globalEnv = env
 }
 
-func (vm *VirtualMachine) Eval(node ast.Node, env *object.Environment) object.Object {
-	return object.NullConst
-}
 func (vm *VirtualMachine) GetCurrentScriptPath() string { return vm.currentFrame.code.Filename }
 func (vm *VirtualMachine) GetStdout() io.Writer         { return vm.Settings.Stdout }
 func (vm *VirtualMachine) GetStderr() io.Writer         { return vm.Settings.Stderr }
@@ -102,7 +98,7 @@ func (vm *VirtualMachine) RemoveInstanceVar(key string) {
 	delete(vm.instanceVars, key)
 }
 
-func (vm *VirtualMachine) Execute(code *compiler.CodeBlock, env *object.Environment, modulename string) (object.Object, error) {
+func (vm *VirtualMachine) Execute(code *compile.CodeBlock, env *object.Environment, modulename string) (object.Object, error) {
 	if env == nil {
 		env = object.NewEnvironment()
 	}
@@ -120,7 +116,7 @@ func (vm *VirtualMachine) Exit(code int) {
 	vm.unwind = true
 }
 
-func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Environment, module string) *Frame {
+func (vm *VirtualMachine) MakeFrame(code *compile.CodeBlock, env *object.Environment, module string) *Frame {
 	return &Frame{
 		code:       code,
 		stack:      make([]object.Object, code.MaxStackSize+1), // +1 to make room for a runtime exception if thrown
@@ -132,7 +128,7 @@ func (vm *VirtualMachine) MakeFrame(code *compiler.CodeBlock, env *object.Enviro
 }
 
 func (vm *VirtualMachine) emptyFrame(env *object.Environment, module string) *Frame {
-	code := &compiler.CodeBlock{
+	code := &compile.CodeBlock{
 		Name:     module,
 		Filename: module,
 	}
@@ -519,7 +515,7 @@ mainLoop:
 		case opcode.MakeFunction:
 			fnName := vm.currentFrame.popStack().(*object.String)
 			params := vm.currentFrame.popStack().(*object.Array)
-			codeBlock := vm.currentFrame.popStack().(*compiler.CodeBlock)
+			codeBlock := vm.currentFrame.popStack().(*compile.CodeBlock)
 
 			if codeBlock.Native {
 				var (
@@ -686,7 +682,7 @@ mainLoop:
 			if parent != object.NullConst {
 				class.Parent = parent.(*VMClass)
 			}
-			class.Fields = vm.currentFrame.popStack().(*compiler.CodeBlock)
+			class.Fields = vm.currentFrame.popStack().(*compile.CodeBlock)
 			class.Methods = make(map[string]object.ClassMethod, methodNum)
 			for i := methodNum; i > 0; i-- {
 				method := vm.currentFrame.popStack()

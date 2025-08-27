@@ -1,22 +1,23 @@
 package compiler
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm/opcode"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm/opcode"
 )
 
 func init() {
-	AddOptimizer(optimizeLoadPop)
-	AddOptimizer(optimizeNegativeNums)
-	AddOptimizer(optimizeDefineLoadFast)
+	compile.AddOptimizer(optimizeLoadPop)
+	compile.AddOptimizer(optimizeNegativeNums)
+	compile.AddOptimizer(optimizeDefineLoadFast)
 }
 
 // optimizeLoadPop removes the pattern LOAD_ followed by POP.
 // A Load Pop doesn't do anything since the value isn't being stored.
 // This function does not account for Labels which would require
 // calculating jump targets and blocks.
-func optimizeLoadPop(i *InstSet, ccb *codeBlockCompiler) {
-	var last *Instruction
+func optimizeLoadPop(i *compile.InstSet, ccb *compile.CodeBlockCompiler) {
+	var last *compile.Instruction
 	curr := i.Head
 	for curr != nil && curr.Next != nil {
 		if curr.IsLoad() && curr.Next.Is(opcode.Pop) && last != nil {
@@ -32,14 +33,14 @@ func optimizeLoadPop(i *InstSet, ccb *codeBlockCompiler) {
 
 // optimizeNegativeNums replaces a LoadConst -> UnaryNeg sequence with
 // a single LoadConst of the negative number.
-func optimizeNegativeNums(i *InstSet, ccb *codeBlockCompiler) {
+func optimizeNegativeNums(i *compile.InstSet, ccb *compile.CodeBlockCompiler) {
 	curr := i.Head
 
 	for curr != nil && curr.Next != nil {
 		if curr.Is(opcode.LoadConst) && curr.Next.Is(opcode.UnaryNeg) {
-			numObj, ok := ccb.constants.table[curr.Args[0]].(*object.Integer)
+			numObj, ok := ccb.Constants.Table[curr.Args[0]].(*object.Integer)
 			if ok {
-				curr.Args[0] = ccb.constants.indexOf(object.MakeIntObj(-numObj.Value))
+				curr.Args[0] = ccb.Constants.IndexOf(object.MakeIntObj(-numObj.Value))
 				curr.Next = curr.Next.Next
 			}
 		}
@@ -48,7 +49,7 @@ func optimizeNegativeNums(i *InstSet, ccb *codeBlockCompiler) {
 	}
 }
 
-func optimizeDefineLoadFast(i *InstSet, ccb *codeBlockCompiler) {
+func optimizeDefineLoadFast(i *compile.InstSet, ccb *compile.CodeBlockCompiler) {
 	curr := i.Head
 
 	for curr != nil && curr.Next != nil {
@@ -56,7 +57,7 @@ func optimizeDefineLoadFast(i *InstSet, ccb *codeBlockCompiler) {
 			if curr.Args[0] == curr.Next.Args[0] {
 				def := curr
 
-				dup := &Instruction{
+				dup := &compile.Instruction{
 					Instr: opcode.Dup,
 					Line:  curr.Line,
 					Next:  def,

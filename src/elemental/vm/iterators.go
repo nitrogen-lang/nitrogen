@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 var arrayIterator = &BuiltinClass{

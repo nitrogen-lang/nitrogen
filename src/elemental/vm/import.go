@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/object"
 )
 
 var included = make(map[string]object.Object)

@@ -3,8 +3,8 @@ package vm
 import (
 	"fmt"
 
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 type blockType byte
@@ -39,7 +39,7 @@ func (b *doBlock) blockType() blockType { return doBlockT }
 type Frame struct {
 	module     string
 	lastFrame  *Frame
-	code       *compiler.CodeBlock
+	code       *compile.CodeBlock
 	stack      []object.Object
 	sp         int
 	blockStack []block

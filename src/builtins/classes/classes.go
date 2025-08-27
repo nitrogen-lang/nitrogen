@@ -1,9 +1,9 @@
 package classes
 
 import (
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/object"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 )
 
 func init() {

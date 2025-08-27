@@ -18,12 +18,13 @@ import (
 	builtinOs "github.com/nitrogen-lang/nitrogen/src/builtins/os"
 	"github.com/nitrogen-lang/nitrogen/src/compiler"
 	"github.com/nitrogen-lang/nitrogen/src/compiler/marshal"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/object"
 	"github.com/nitrogen-lang/nitrogen/src/parser"
 	"github.com/nitrogen-lang/nitrogen/src/scgi"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
 )
@@ -111,7 +112,7 @@ func main() {
 	// Add Noble package manager path
 	homeDir, _ := os.UserHomeDir()
 	if homeDir != "" {
-		modulePaths = append(modulePaths, filepath.Join(homeDir, ".noble", "pkg"))
+		modulePaths = append(modulePaths, filepath.Join(homeDir, ".noble", "pkgs"))
 	}
 
 	if printVersion {
@@ -167,7 +168,7 @@ func main() {
 	env := makeEnv(sourceFile)
 	builtinOs.SetCmdArgs(getScriptArgs(sourceFile))
 
-	var code *compiler.CodeBlock
+	var code *compile.CodeBlock
 	var program *ast.Program
 	var err error
 	if filepath.Ext(sourceFile) == ".nib" {
@@ -231,7 +232,7 @@ func main() {
 	}
 }
 
-func runCompiledCode(code *compiler.CodeBlock, env *object.Environment) object.Object {
+func runCompiledCode(code *compile.CodeBlock, env *object.Environment) object.Object {
 	if fullDebug {
 		fmt.Println("DEBUG: Script bytecode:")
 		code.Print("  ")
@@ -312,7 +313,7 @@ func startRepl(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := makeEnv("")
 
-	var code *compiler.CodeBlock
+	var code *compile.CodeBlock
 	for {
 		fmt.Fprint(out, interactivePrompt)
 		scanned := scanner.Scan()

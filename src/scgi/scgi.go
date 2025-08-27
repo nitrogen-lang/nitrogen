@@ -15,10 +15,10 @@ import (
 	"time"
 
 	builtinOs "github.com/nitrogen-lang/nitrogen/src/builtins/os"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/vm"
 
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 var (

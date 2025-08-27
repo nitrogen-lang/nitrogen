@@ -1,6 +1,6 @@
 package vm
 
-import "github.com/nitrogen-lang/nitrogen/src/object"
+import "github.com/nitrogen-lang/nitrogen/src/elemental/object"
 
 func (vm *VirtualMachine) evalIndexExpression(left, index object.Object) object.Object {
 	switch {

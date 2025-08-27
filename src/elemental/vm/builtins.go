@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/nitrogen-lang/nitrogen/src/compiler"
-	"github.com/nitrogen-lang/nitrogen/src/object"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
+	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 )
 
 var (
@@ -103,7 +103,7 @@ type VMFunction struct {
 	Name       string
 	Parameters []string
 	Native     bool
-	Body       *compiler.CodeBlock
+	Body       *compile.CodeBlock
 	Env        *object.Environment
 	Class      *VMClass
 }
@@ -127,7 +127,7 @@ func (f *VMFunction) ClassMethod()            {}
 type VMClass struct {
 	Name    string
 	Parent  *VMClass
-	Fields  *compiler.CodeBlock
+	Fields  *compile.CodeBlock
 	Methods map[string]object.ClassMethod
 }
 
