@@ -87,11 +87,31 @@ func (p *Parser) parseCallExpression(left ast.Expression) ast.Node {
 	if p.settings.Debug {
 		fmt.Println("parseCallExpression")
 	}
-	return &ast.CallExpression{
-		Token:     p.curToken,
-		Function:  left,
-		Arguments: p.parseExpressionList(token.RParen),
+
+	args := p.parseExpressionList(token.RParen)
+
+	ce := &ast.CallExpression{
+		Token:    p.curToken,
+		Function: left,
 	}
+
+	if !p.peekTokenIs(token.LBrace) {
+		ce.Arguments = args
+		return ce
+	}
+
+	p.nextToken()
+	lit := &ast.FunctionLiteral{
+		Token:  p.curToken,
+		Name:   "(anonymous)",
+		FQName: "(anonymous)",
+		Body:   p.parseBlockStatements(),
+	}
+
+	args = append(args, lit)
+
+	ce.Arguments = args
+	return ce
 }
 
 func (p *Parser) parseDoExpression() ast.Expression {
