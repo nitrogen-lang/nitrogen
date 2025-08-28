@@ -9,18 +9,30 @@ import (
 )
 
 type CodeBlock struct {
-	Name         string
-	Filename     string
-	LocalCount   int
+	Name       string // Fully qualified name
+	Filename   string // Source file
+	LocalCount int    // len(.Locals), this is here for convience
+
+	// Maximum stack and block size can be calculated based on the instructions
+	// used. This is a memory optimzation measure and can be larger than the
+	// real maximum required to run this block. Each VM frame as a separate
+	// stack.
 	MaxStackSize int
 	MaxBlockSize int
-	Constants    []object.Object // Created at compile time
-	Locals       []string        // Created at compile time
-	Names        []string        // Created at compile time
-	Code         []byte
-	Native       bool
-	ClassMethod  bool
-	LineOffsets  []uint16
+
+	Constants []object.Object // Constant VM objects used in the code
+	Locals    []string        // Identifiers for local variables
+	Names     []string        // Identifiers for non-local variables
+	Code      []byte
+
+	// Line numbers for each instruction are encoded as pairs of code offsets
+	// and line numbers. See InstSet.Assemble for how it's created and .LineNum
+	// for how it's decoded.
+	LineOffsets []uint16
+
+	// This CodeBlock represents a native-implemented function. If this is true, len(Code) == 0.
+	Native      bool
+	ClassMethod bool
 }
 
 // Implement object.Object interface
@@ -123,13 +135,13 @@ func bytesToUint16(a, b byte) uint16 {
 }
 
 type CodeBlockCompiler struct {
-	Constants      *ConstantTable
-	Locals         *StringTable
-	Names          *StringTable
+	Constants      *ConstantTable // Constant VM objects used in the code
+	Locals         *StringTable   // Identifiers for local variables
+	Names          *StringTable   // Identifiers for non-local variables
 	Code           *InstSet
 	Filename, Name string
 	InLoop         bool
-	Linenum        uint
+	Linenum        uint // Absolute line number for the first line of this block in the source file
 }
 
 type ConstantTable struct {
