@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
@@ -111,7 +110,7 @@ func vmFileReadFullFile(interpreter *vm.VirtualMachine, self *vm.VMInstance, env
 		return object.NewException("writeFile expected a file resource, got %s", res.Type().String())
 	}
 
-	bytes, err := ioutil.ReadAll(file.file)
+	bytes, err := io.ReadAll(file.file)
 	if err != nil {
 		return object.NewException("Error reading file %s", err.Error())
 	}
@@ -142,7 +141,7 @@ func vmFileReadLine(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *ob
 			}
 			return object.NullConst
 		}
-		return object.NewException(err.Error())
+		return object.NewException("%s", err.Error())
 	}
 
 	return object.MakeStringObj(line[:len(line)-1])
@@ -171,7 +170,7 @@ func vmFileReadChar(interpreter *vm.VirtualMachine, self *vm.VMInstance, env *ob
 			}
 			return object.NullConst
 		}
-		return object.NewException(err.Error())
+		return object.NewException("%s", err.Error())
 	}
 
 	return object.MakeStringObjRunes([]rune{r})

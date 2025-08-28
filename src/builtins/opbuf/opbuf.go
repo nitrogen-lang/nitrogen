@@ -86,7 +86,7 @@ func flush(interpreter object.Interpreter, env *object.Environment, args ...obje
 	oldOut := oldWriter
 	_, err := io.Copy(oldOut, buf)
 	if err != nil {
-		return object.NewException(err.Error())
+		return object.NewException("%s", err.Error())
 	}
 
 	return nil

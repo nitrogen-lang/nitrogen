@@ -153,7 +153,7 @@ func (vm *VirtualMachine) RunFrame(f *Frame, immediateReturn bool) (ret object.O
 					frame = frame.lastFrame
 				}
 				vm.unwind = vm.currentFrame.unwind
-				exc := object.NewException(stackBuf.String())
+				exc := object.NewException("%s", stackBuf.String())
 				exc.HasStackTrace = true
 				ret = exc
 				vm.currentFrame = vm.currentFrame.lastFrame
@@ -700,7 +700,7 @@ mainLoop:
 			argLen := vm.getUint16()
 			class := vm.currentFrame.popStack()
 			if !object.ObjectIs(class, object.ClassObj) {
-				vm.currentFrame.pushStack(object.NewException("Cannot make instance from non-class object " + class.Type().String()))
+				vm.currentFrame.pushStack(object.NewException("Cannot make instance from non-class object %s", class.Type().String()))
 				vm.throw()
 			}
 			vm.makeInstance(argLen, class)
@@ -718,7 +718,7 @@ mainLoop:
 					if ok {
 						vm.currentFrame.pushStack(val)
 					} else {
-						vm.currentFrame.pushStack(object.NewException("Attribute " + name + " not found on object " + obj.Class.Name))
+						vm.currentFrame.pushStack(object.NewException("Attribute %s not found on object %s", name, obj.Class.Name))
 						vm.throw()
 						break
 					}
@@ -746,7 +746,7 @@ mainLoop:
 						Parent:   instance.Class.Parent,
 					})
 				} else {
-					vm.currentFrame.pushStack(object.NewException("Attribute " + name + " not found on object " + obj.Name))
+					vm.currentFrame.pushStack(object.NewException("Attribute %s not found on object %s", name, obj.Name))
 					vm.throw()
 					break
 				}
@@ -861,7 +861,7 @@ func (vm *VirtualMachine) PopStack() object.Object {
 func (vm *VirtualMachine) throw() object.Object {
 	exception := vm.currentFrame.popStack()
 	if exception.Type() != object.ExceptionObj {
-		exception = object.NewException(exception.Inspect())
+		exception = object.NewException("%s", exception.Inspect())
 	}
 
 	if ex := exception.(*object.Exception); !ex.Catchable {
@@ -883,14 +883,14 @@ func (vm *VirtualMachine) throw() object.Object {
 			}
 		}
 		if !vm.currentFrame.unwind {
-			exc := object.NewException(exception.Inspect())
+			exc := object.NewException("%s", exception.Inspect())
 			exc.HasStackTrace = exception.(*object.Exception).HasStackTrace
 			panic(exc)
 		}
 		vm.currentFrame = vm.currentFrame.lastFrame // This frame doesn't have a try block, unwind call stack
 		if vm.currentFrame == nil {                 // Call stack exhausted
 			// exc := object.NewException("Uncaught Exception: %s", exception.Inspect())
-			exc := object.NewException(exception.Inspect())
+			exc := object.NewException("%s", exception.Inspect())
 			exc.HasStackTrace = exception.(*object.Exception).HasStackTrace
 
 			if vm.Settings.ReturnExceptions {
