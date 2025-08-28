@@ -14,7 +14,7 @@ LDFLAGS := -X 'main.version=$(VERSION)' \
 
 all: build-tools
 
-build-tools: buildc buildrun build
+build-tools: buildc buildrun build buildscgi
 
 buildrun:
 	go build -o bin/nitrogenrun -ldflags="$(LDFLAGS)" ./cmd/nitrogenrun/...
@@ -24,6 +24,9 @@ buildc:
 
 build:
 	go build -o bin/nitrogen -ldflags="$(LDFLAGS)" ./cmd/nitrogen/...
+
+buildscgi:
+	go build -o bin/nitrogenscgi -ldflags="$(LDFLAGS)" ./cmd/nitrogenscgi/...
 
 test: go-test nitrogen-test
 

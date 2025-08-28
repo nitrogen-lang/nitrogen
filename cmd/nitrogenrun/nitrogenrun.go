@@ -35,7 +35,6 @@ func (s *strSliceFlag) Set(st string) error {
 }
 
 var (
-	startSCGI    bool
 	printVersion bool
 	fullDebug    bool
 	cpuprofile   string
@@ -54,7 +53,6 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "File to write CPU profile data")
@@ -112,11 +110,6 @@ func main() {
 		}
 	}
 
-	if startSCGI {
-		scgi.StartSCGIServer(getScriptArgs("nitrogen"), object.MakeStringArray(modulePaths), getServerEnv())
-		return
-	}
-
 	moduleutils.ParserSettings.Debug = fullDebug
 
 	if flag.NArg() == 0 {
@@ -135,7 +128,7 @@ func main() {
 
 	sourceFile := flag.Arg(0)
 
-	env := makeEnv(sourceFile)
+	env := makeEnv()
 	builtinOs.SetCmdArgs(getScriptArgs(sourceFile))
 
 	code, _, err := marshal.ReadFile(sourceFile)
@@ -203,7 +196,7 @@ func runCompiledCode(code *compile.CodeBlock, env *object.Environment) object.Ob
 	return ret
 }
 
-func makeEnv(filepath string) *object.Environment {
+func makeEnv() *object.Environment {
 	env := object.NewEnvironment()
 	env.CreateConst("_SERVER", getServerEnv())
 	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))

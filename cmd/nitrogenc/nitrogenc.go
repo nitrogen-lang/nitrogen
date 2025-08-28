@@ -15,10 +15,11 @@ import (
 )
 
 var (
-	printAst     bool
-	printVersion bool
-	fullDebug    bool
-	outputFile   string
+	printAst      bool
+	printAssembly bool
+	printVersion  bool
+	fullDebug     bool
+	outputFile    string
 
 	version   = "Unknown"
 	buildTime = ""
@@ -27,6 +28,7 @@ var (
 
 func init() {
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
+	flag.BoolVar(&printAssembly, "asm", false, "Print bytecode assembly and exit")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 	flag.StringVar(&outputFile, "o", "", "Output file of compiled bytecode")
@@ -66,6 +68,11 @@ func main() {
 	}
 
 	code := compiler.Compile(program, "__main")
+
+	if printAssembly {
+		code.Print("")
+		return
+	}
 
 	if outputFile == "" {
 		sourceFileDir := filepath.Dir(sourceFile)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -21,9 +20,7 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/elemental/compile"
 	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
-	"github.com/nitrogen-lang/nitrogen/src/lexer"
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
-	"github.com/nitrogen-lang/nitrogen/src/parser"
 	"github.com/nitrogen-lang/nitrogen/src/scgi"
 
 	_ "github.com/nitrogen-lang/nitrogen/src/builtins"
@@ -45,9 +42,7 @@ func (s *strSliceFlag) Set(st string) error {
 }
 
 var (
-	interactive  bool
 	printAst     bool
-	startSCGI    bool
 	printVersion bool
 	fullDebug    bool
 	disableNibs  bool
@@ -69,10 +64,8 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&interactive, "i", false, "Interactive mode")
 	flag.BoolVar(&disableNibs, "nonibs", false, "Disable creation of .nib files")
 	flag.BoolVar(&printAst, "ast", false, "Print AST and exit")
-	flag.BoolVar(&startSCGI, "scgi", false, "Start as an SCGI server")
 	flag.BoolVar(&printVersion, "version", false, "Print version information")
 	flag.BoolVar(&fullDebug, "debug", false, "Enable debug mode")
 	flag.BoolVar(&noPreamble, "nopreamble", false, "Disable std preamble")
@@ -136,18 +129,7 @@ func main() {
 		}
 	}
 
-	if startSCGI {
-		scgi.StartSCGIServer(getScriptArgs("nitrogen"), object.MakeStringArray(modulePaths), getServerEnv())
-		return
-	}
-
 	moduleutils.ParserSettings.Debug = fullDebug
-	if interactive {
-		fmt.Println("Nitrogen Programming Language")
-		fmt.Println("Type in commands at the prompt")
-		startRepl(os.Stdin, os.Stdout)
-		return
-	}
 
 	if flag.NArg() == 0 {
 		fmt.Println("No script given")
@@ -165,7 +147,7 @@ func main() {
 
 	sourceFile := flag.Arg(0)
 
-	env := makeEnv(sourceFile)
+	env := makeEnv()
 	builtinOs.SetCmdArgs(getScriptArgs(sourceFile))
 
 	var code *compile.CodeBlock
@@ -261,7 +243,7 @@ func runCompiledCode(code *compile.CodeBlock, env *object.Environment) object.Ob
 	return ret
 }
 
-func makeEnv(filepath string) *object.Environment {
+func makeEnv() *object.Environment {
 	env := object.NewEnvironment()
 	env.CreateConst("_SERVER", getServerEnv())
 	env.Create("_SEARCH_PATHS", object.MakeStringArray(modulePaths))
@@ -307,45 +289,6 @@ func getScriptArgs(filepath string) *object.Array {
 		newElements[i+1] = object.MakeStringObj(v)
 	}
 	return &object.Array{Elements: newElements}
-}
-
-func startRepl(in io.Reader, out io.Writer) {
-	scanner := bufio.NewScanner(in)
-	env := makeEnv("")
-
-	var code *compile.CodeBlock
-	for {
-		fmt.Fprint(out, interactivePrompt)
-		scanned := scanner.Scan()
-		if !scanned {
-			return
-		}
-
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" {
-			continue
-		}
-		if line == ".quit" || line == ".exit" {
-			return
-		}
-
-		l := lexer.NewString(line)
-		p := parser.New(l, moduleutils.ParserSettings)
-
-		program := p.ParseProgram()
-		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
-			continue
-		}
-
-		code = compiler.Compile(program, "__main")
-
-		result := runCompiledCode(code, env)
-		if result != nil && result != object.NullConst {
-			io.WriteString(out, result.Inspect())
-		}
-		io.WriteString(out, "\n")
-	}
 }
 
 func printParserErrors(out io.Writer, errors []string) {
