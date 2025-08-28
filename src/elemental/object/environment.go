@@ -30,27 +30,27 @@ type Environment struct {
 }
 
 func NewEnvironment() *Environment {
-	return NewSizedEnvironment(0, false)
+	return NewSizedEnvironment(false)
 }
 
 func NewLocalEnvironment() *Environment {
-	return NewSizedEnvironment(0, true)
+	return NewSizedEnvironment(true)
 }
 
-func NewSizedEnvironment(size int, localOnly bool) *Environment {
+func NewSizedEnvironment(localOnly bool) *Environment {
 	return &Environment{localOnly: localOnly}
 }
 
 func NewEnclosedEnv(outer *Environment) *Environment {
-	return NewSizedEnclosedEnv(outer, 0, false)
+	return NewSizedEnclosedEnv(outer, false)
 }
 
 func NewEnclosedLocalEnv(outer *Environment) *Environment {
-	return NewSizedEnclosedEnv(outer, 0, true)
+	return NewSizedEnclosedEnv(outer, true)
 }
 
-func NewSizedEnclosedEnv(outer *Environment, size int, localOnly bool) *Environment {
-	env := NewSizedEnvironment(size, localOnly)
+func NewSizedEnclosedEnv(outer *Environment, localOnly bool) *Environment {
+	env := NewSizedEnvironment(localOnly)
 	env.parent = outer
 	return env
 }
@@ -246,8 +246,9 @@ func (e *Environment) UnsetLocal(name string) {
 	p, el := e.findParentNode(name)
 	if p != nil {
 		p.n = p.n.n
+		return
 	}
-	if p == nil && el != nil {
+	if el != nil {
 		e.root = el.n
 	}
 }
@@ -258,7 +259,7 @@ func (e *Environment) Unset(name string) {
 		p.n = p.n.n
 		return
 	}
-	if p == nil && el != nil {
+	if el != nil {
 		e.root = el.n
 		return
 	}
