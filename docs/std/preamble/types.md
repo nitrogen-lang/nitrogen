@@ -80,3 +80,11 @@ Returns the name of the class that i is an instance of. Returns empty string if 
 ## resourceID(i: resource): string
 
 Return the internal ID name of a resource object.
+
+## errorVal(e: Error): string
+
+Get the message from an Error object.
+
+## strToArray(str: string): array
+
+Convert a string to an array of UTF-8 code points.

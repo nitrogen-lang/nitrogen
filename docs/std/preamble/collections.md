@@ -63,6 +63,10 @@ Creates and returns an array with the keys of the given map. **_NOTE_**:
 Programmers should NOT rely on the order of hash map keys. They are not
 guaranteed to be in a specific order.
 
+## hasKey(in: map, key: T): bool
+
+Returns if a map has a key named `key`.
+
 ## range([start: int, ]end: int[, step: int]): instance
 
 `range` returns an instance implementing an iterator over the integer range.

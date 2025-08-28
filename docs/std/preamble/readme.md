@@ -1,7 +1,9 @@
 # Globally Defined NSL Documentation
 
 This directory contains the documentation for globally defined Standard Library
-functions. They are separated by category.
+functions. They are separated by category for documentation purposes. The preamble
+is implemented as a standard Nitrogen package that is imported automatically before
+any user code.
 
 - [Collections](collections.md): Functions to manipulate arrays and maps.
 - [Errors](errors.md): Handle errors.

@@ -2,6 +2,7 @@ import "std/preamble/os"
 import "std/preamble/io"
 import "std/preamble/collection"
 
+// Types
 export fn native toInt()
 export fn native toFloat()
 export fn native toString()
@@ -28,8 +29,6 @@ export fn native isInstance()
 export fn native isModule()
 export fn native errorVal()
 export fn native resourceID()
-export fn native modulesSupported()
-export fn native error()
 export fn native instanceOf()
 export fn native classOf()
 
@@ -41,8 +40,8 @@ export fn strToArray(str) {
     return result
 }
 
-export const exit = os.exit
 
+// IO
 export const print = io.print
 export const printlnb = io.printlnb
 export const println = io.println
@@ -51,7 +50,15 @@ export const printerrln = io.printerrln
 export const printenv = io.printenv
 export const varDump = io.varDump
 export const readline = io.readline
+export const exit = os.exit
 
+// Imports
+export fn native modulesSupported()
+
+// Errors
+export fn native error()
+
+// Collections
 export const len = collection.len
 export const first = collection.first
 export const last = collection.last

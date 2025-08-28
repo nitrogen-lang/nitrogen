@@ -84,3 +84,15 @@ for record in records {
 
 file.close(csvFile)
 ```
+
+## interface WriterIfc
+
+### Fields
+
+#### write(data)
+
+## interface ReaderIfc
+
+### Fields
+
+#### readChar(): string

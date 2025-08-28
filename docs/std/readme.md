@@ -15,5 +15,5 @@ for stripping the library of extraneous modules when not needed. The prefix "std
 is reserved for use by the Nitrogen Standard Library and alternative implementations.
 It should not be used for user-defined code.
 
-- [Global](global): Globally defined NSL functions.
+- [Preamble](preamble): Functions and variables available to all scripts at all times.
 - [Imported](imported): NSL modules require import before use.

@@ -10,6 +10,10 @@ will be printed.
 
 Same as print() but will also output a newline after printing args.
 
+## printlnb(arg: int): null
+
+Print arg as binary.
+
 ## printerr(args...): null
 
 Same as `print` but writes to stderr.
@@ -23,6 +27,10 @@ Same as `println` but writes to stderr.
 For debugging. Prints the current symbol table as seen by the environment where
 printenv() was called.
 
+## varDump(v: T): null
+
+For debugging. Print the variable including all members, properties, keys, values, etc.
+
 ## readline([prompt: string]): string
 
 readline() will read a line from standard input. If a string argument is given, it
@@ -34,8 +42,3 @@ or with an argument that's not a string, will cause the interpreter to error.
 `exit()` terminates script execution and returns with the error code given.
 If the script is running in response to an SCGI request, the request is immediately
 returned.
-
-## debugVal(arg: T): T
-
-`debugVal()` will print its argument to standard out and return the argument unchanged.
-This is useful for debugging to check values without having to create a new variable.

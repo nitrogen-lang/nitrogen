@@ -2,6 +2,8 @@
 
 This directory contains the documentation for imported Standard Library Modules.
 
+## Base packages
+
 - [assert.ni](assert.ni.md): Simple assertion module.
 - [collections.ni](collections.ni.md): Utilities for working with collections.
 - [file.ni](file.ni.md): Exposes functions to open, close, and manipulate files and directories.
@@ -12,6 +14,8 @@ This directory contains the documentation for imported Standard Library Modules.
 - [runtime.ni](runtime.ni.md): Runtime information and utilities.
 - [string.ni](string.ni.md): String class.
 - [test.ni](test.ni.md): Simple test framework.
+- [time.ni](time.ni.md): Time functions.
+- [typing.ni](typing.ni.md): Type names
 
 ## Encoding module
 
