@@ -8,12 +8,10 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/moduleutils"
 )
 
-var included = make(map[string]object.Object)
-
 func pathToName(path string) string {
-	path = strings.Replace(path, "/", ".", -1)
-	path = strings.Replace(path, "\\", ".", -1)
-	path = strings.Replace(path, "..", ".", -1)
+	path = strings.ReplaceAll(path, "/", ".")
+	path = strings.ReplaceAll(path, "\\", ".")
+	path = strings.ReplaceAll(path, "..", ".")
 	if path[0] == '.' {
 		path = path[1:]
 	}
@@ -21,13 +19,18 @@ func pathToName(path string) string {
 }
 
 func (vm *VirtualMachine) importPackage(path string) {
-	mod := GetModule(path)
-	if mod != nil {
+	name := pathToName(path)
+	if mod, loaded := vm.loadedModules[name]; loaded {
 		vm.currentFrame.pushStack(mod)
 		return
 	}
 
-	name := pathToName(path)
+	mod := GetNativeModule(name)
+	if mod != nil {
+		vm.loadedModules[name] = mod
+		vm.currentFrame.pushStack(mod)
+		return
+	}
 
 	searchPaths, ok := vm.currentFrame.env.Get("_SEARCH_PATHS")
 	if !ok {
@@ -55,20 +58,18 @@ func (vm *VirtualMachine) importPackage(path string) {
 		module = importScriptFile(vm, includedFile, name)
 	}
 
-	if object.ObjectIs(module, object.ExceptionObj) {
+	switch module.Type() {
+	case object.ExceptionObj:
 		vm.currentFrame.pushStack(module)
 		vm.throw()
 		return
+	case object.ModuleObj:
+		vm.loadedModules[name] = module.(*object.Module)
 	}
 	vm.currentFrame.pushStack(module)
 }
 
 func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object {
-	res, imported := included[scriptPath]
-	if imported {
-		return res
-	}
-
 	code, err := moduleutils.CodeBlockCache.GetBlock(scriptPath, name)
 	if err != nil {
 		return object.NewException("importing %s failed:\n%s", name, err.Error())
@@ -86,12 +87,10 @@ func importScriptFile(vm *VirtualMachine, scriptPath, name string) object.Object
 		return ret
 	}
 
-	res = &object.Module{
+	return &object.Module{
 		Name: name,
 		Vars: env.GetExported(),
 	}
-	included[scriptPath] = res
-	return res
 }
 
 var extensions = []string{"", ".nib", ".ni", ".so"}

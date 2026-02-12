@@ -40,13 +40,14 @@ func NewSettings() *Settings {
 }
 
 type VirtualMachine struct {
-	callStack    *frameStack
-	currentFrame *Frame
-	returnValue  object.Object
-	returnErr    error
-	Settings     *Settings
-	globalEnv    *object.Environment
-	instanceVars map[string]object.Object
+	callStack     *frameStack
+	currentFrame  *Frame
+	returnValue   object.Object
+	returnErr     error
+	Settings      *Settings
+	globalEnv     *object.Environment
+	instanceVars  map[string]object.Object
+	loadedModules map[string]*object.Module
 
 	breakpoint bool
 	unwind     bool
@@ -61,9 +62,10 @@ func NewVM(settings *Settings) *VirtualMachine {
 		}
 	}
 	return &VirtualMachine{
-		callStack:    newFrameStack(),
-		Settings:     settings,
-		instanceVars: make(map[string]object.Object),
+		callStack:     newFrameStack(),
+		Settings:      settings,
+		instanceVars:  make(map[string]object.Object),
+		loadedModules: make(map[string]*object.Module),
 	}
 }
 
@@ -96,6 +98,10 @@ func (vm *VirtualMachine) HasInstanceVar(key string) bool {
 
 func (vm *VirtualMachine) RemoveInstanceVar(key string) {
 	delete(vm.instanceVars, key)
+}
+
+func (vm *VirtualMachine) GetLoadedModule(name string) *object.Module {
+	return vm.loadedModules[name]
 }
 
 func (vm *VirtualMachine) Execute(code *compile.CodeBlock, env *object.Environment, modulename string) (object.Object, error) {
@@ -703,7 +709,7 @@ mainLoop:
 				vm.currentFrame.pushStack(object.NewException("Cannot make instance from non-class object %s", class.Type().String()))
 				vm.throw()
 			}
-			vm.makeInstance(argLen, class)
+			vm.MakeInstance(argLen, class)
 
 		case opcode.LoadAttribute:
 			name := vm.currentFrame.code.Names[vm.getUint16()]
@@ -906,7 +912,7 @@ func (vm *VirtualMachine) throw() object.Object {
 	return nil
 }
 
-func (vm *VirtualMachine) makeInstance(argLen uint16, class object.Object) {
+func (vm *VirtualMachine) MakeInstance(argLen uint16, class object.Object) {
 	var instance *VMInstance
 
 	if class, ok := class.(*VMClass); ok {

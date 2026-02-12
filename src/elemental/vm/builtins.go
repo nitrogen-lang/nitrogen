@@ -12,7 +12,7 @@ import (
 
 var (
 	builtins      = map[string]*object.Builtin{}
-	modules       = map[string]*object.Module{}
+	nativeModules = map[string]*object.Module{}
 	nativeFn      = map[string]*object.Builtin{}
 	nativeMethods = map[string]*BuiltinMethod{}
 	identRegex    = regexp.MustCompile(`[a-zA-Z_][a-zA-Z0-9_]*`)
@@ -39,12 +39,12 @@ func RegisterModule(name string, m *object.Module) {
 		}
 	}
 
-	if _, defined := modules[name]; defined {
+	if _, defined := nativeModules[name]; defined {
 		// Panic because this should NEVER happen when built
 		panic("VM module " + name + " already defined")
 	}
 
-	modules[name] = m
+	nativeModules[name] = m
 }
 
 func RegisterNative(name string, fn object.BuiltinFunction) {
@@ -80,10 +80,10 @@ func getBuiltin(name string) object.Object {
 	return nil
 }
 
-// GetModule returns a Module object is a module with the given name is registered, otherwise nil.
-func GetModule(name string) *object.Module {
+// GetNativeModule returns a Module object is a module with the given name is registered, otherwise nil.
+func GetNativeModule(name string) *object.Module {
 	modulePath := strings.Split(name, "/")
-	module, defined := modules[modulePath[0]]
+	module, defined := nativeModules[modulePath[0]]
 	if !defined {
 		return nil
 	}

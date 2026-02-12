@@ -23,7 +23,7 @@ func importSharedModule(vm *VirtualMachine, scriptPath, name string) object.Obje
 		return object.NewException("Invalid module %s, no name declared", name)
 	}
 
-	if module := GetModule(*(moduleNameSym.(*string))); module != nil {
+	if module := GetNativeModule(*(moduleNameSym.(*string))); module != nil {
 		return module
 	}
 	return object.NullConst
