@@ -4,9 +4,13 @@ The time modules provide access to system time.
 
 To use: `import 'std/time'`
 
-## now(): int
+## now(): Time
 
-`now` returns the current Unix epoch time in seconds.
+`now` returns an instance of `time` which represents the clock time.
+
+## now_unix(): int
+
+`now_unix` returns the current Unix epoch time in seconds.
 
 ## now_ms(): int
 
@@ -15,3 +19,7 @@ To use: `import 'std/time'`
 ## now_ns(): int
 
 `now_ns` returns the current Unix epoch time in nanoseconds.
+
+## class Time()
+
+`Time` represents an instance of clock time. There are no public fields.
