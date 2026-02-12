@@ -3,6 +3,7 @@ package os
 import (
 	"bytes"
 	"os/exec"
+	"time"
 
 	"github.com/nitrogen-lang/nitrogen/src/elemental/object"
 	"github.com/nitrogen-lang/nitrogen/src/elemental/vm"
@@ -18,11 +19,26 @@ func init() {
 	vm.RegisterNative("std.os.argv", argv)
 	vm.RegisterNative("std.os.system", runSystem)
 	vm.RegisterNative("std.os.exec", runSystemPT)
+	vm.RegisterNative("std.os.sleep", sleep)
 }
 
 // SetCmdArgs sets the command line arguments array.
 func SetCmdArgs(args *object.Array) {
 	commandArgs = args
+}
+
+func sleep(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {
+	if ac := moduleutils.CheckMinArgs("sleep", 1, args...); ac != nil {
+		return ac
+	}
+
+	msec, ok := args[0].(*object.Integer)
+	if !ok {
+		return object.NewException("sleep expected an int, got %s", args[0].Type().String())
+	}
+
+	time.Sleep(time.Duration(msec.Value) * time.Millisecond)
+	return object.NullConst
 }
 
 func env(interpreter object.Interpreter, env *object.Environment, args ...object.Object) object.Object {

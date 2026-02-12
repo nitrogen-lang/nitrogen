@@ -24,3 +24,7 @@ returned if the command failed to execute, nil otherwise.
 ## env(): map
 
 `env` returns a hashmap of the environment variables.
+
+## sleep(msec: int): nil
+
+`sleep` pauses execution for `msec` milliseconds.
