@@ -277,6 +277,12 @@ func (p *Parser) parseExpression(precedence int) ast.Node {
 
 	var leftExp ast.Node
 	leftExp = prefix()
+	switch le := leftExp.(type) {
+	case *ast.FunctionLiteral:
+		if !le.Native && le.Body == nil {
+			p.addErrorWithCurPos("Non-native function missing body")
+		}
+	}
 
 	for !p.peekTokenIs(token.Semicolon) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
@@ -365,6 +371,21 @@ func (p *Parser) parseBlockStatements() *ast.BlockStatement {
 			block.Statements = append(block.Statements, stmt)
 		}
 		p.nextToken()
+	}
+
+	// This check ensures that a misspelled keyword is caught. This check disallowes bare identifiers
+	// within a code block. Bare identifiers only belong at the end of a block or immediately before a return.
+	ss := block.Statements
+	for i, s := range ss {
+		if s.SType() == ast.ExpressionStatementType {
+			se := s.(*ast.ExpressionStatement)
+			switch se.Expression.(type) {
+			case *ast.Identifier:
+				if i < len(ss)-1 && ss[i+1].SType() != ast.ReturnStatementType {
+					p.addErrorWithCurPos("Invalid expression")
+				}
+			}
+		}
 	}
 
 	return block

@@ -7,9 +7,28 @@ import (
 	"github.com/nitrogen-lang/nitrogen/src/token"
 )
 
+type StatementType = int
+
+const (
+	DefStatementType StatementType = iota
+	ImportStatementType
+	DeleteStatementType
+	AssignStatementType
+	ReturnStatementType
+	ExpressionStatementType
+	BlockStatementType
+	LoopStatementType
+	IterLoopStatementType
+	ContinueStatementType
+	BreakStatementType
+	PassStatementType
+	BreakpointStatementType
+)
+
 type Statement interface {
 	Node
 	statementNode()
+	SType() StatementType
 }
 
 type Program struct {
@@ -44,6 +63,7 @@ type DefStatement struct {
 }
 
 func (d *DefStatement) statementNode()       {}
+func (d *DefStatement) SType() StatementType { return DefStatementType }
 func (d *DefStatement) TokenLiteral() string { return d.Token.Literal }
 func (d *DefStatement) String() string {
 	if _, ok := d.Value.(*FunctionLiteral); ok {
@@ -74,6 +94,7 @@ type ImportStatement struct {
 }
 
 func (i *ImportStatement) statementNode()       {}
+func (d *ImportStatement) SType() StatementType { return ImportStatementType }
 func (i *ImportStatement) TokenLiteral() string { return i.Token.Literal }
 func (i *ImportStatement) String() string {
 	return fmt.Sprintf("import %s as %s;", i.Path.String(), i.Name.String())
@@ -85,6 +106,7 @@ type DeleteStatement struct {
 }
 
 func (d *DeleteStatement) statementNode()       {}
+func (d *DeleteStatement) SType() StatementType { return DeleteStatementType }
 func (d *DeleteStatement) TokenLiteral() string { return d.Token.Literal }
 func (d *DeleteStatement) String() string {
 	return fmt.Sprintf("delete %s;", d.Name)
@@ -97,6 +119,7 @@ type AssignStatement struct {
 }
 
 func (a *AssignStatement) statementNode()       {}
+func (d *AssignStatement) SType() StatementType { return AssignStatementType }
 func (a *AssignStatement) TokenLiteral() string { return a.Token.Literal }
 func (a *AssignStatement) String() string {
 	var out bytes.Buffer
@@ -117,6 +140,7 @@ type ReturnStatement struct {
 }
 
 func (r *ReturnStatement) statementNode()       {}
+func (d *ReturnStatement) SType() StatementType { return ReturnStatementType }
 func (r *ReturnStatement) TokenLiteral() string { return r.Token.Literal }
 func (r *ReturnStatement) String() string {
 	var out bytes.Buffer
@@ -136,6 +160,7 @@ type ExpressionStatement struct {
 }
 
 func (es *ExpressionStatement) statementNode()       {}
+func (es *ExpressionStatement) SType() StatementType { return ExpressionStatementType }
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 func (es *ExpressionStatement) String() string {
 	if es.Expression != nil {
@@ -150,6 +175,7 @@ type BlockStatement struct {
 }
 
 func (bs *BlockStatement) statementNode()       {}
+func (bs *BlockStatement) SType() StatementType { return BlockStatementType }
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
@@ -176,7 +202,8 @@ type LoopStatement struct {
 	Body      *BlockStatement
 }
 
-func (fl *LoopStatement) statementNode() {}
+func (fl *LoopStatement) statementNode()       {}
+func (fl *LoopStatement) SType() StatementType { return LoopStatementType }
 func (fl *LoopStatement) TokenLiteral() string {
 	if fl.Init == nil {
 		return "while"
@@ -211,6 +238,7 @@ type IterLoopStatement struct {
 }
 
 func (fl *IterLoopStatement) statementNode()       {}
+func (fl *IterLoopStatement) SType() StatementType { return IterLoopStatementType }
 func (fl *IterLoopStatement) TokenLiteral() string { return "for" }
 func (fl *IterLoopStatement) String() string {
 	var out bytes.Buffer
@@ -237,6 +265,7 @@ type ContinueStatement struct {
 }
 
 func (c *ContinueStatement) statementNode()       {}
+func (c *ContinueStatement) SType() StatementType { return ContinueStatementType }
 func (c *ContinueStatement) TokenLiteral() string { return "continue" }
 func (c *ContinueStatement) String() string       { return "continue" }
 
@@ -245,6 +274,7 @@ type BreakStatement struct {
 }
 
 func (b *BreakStatement) statementNode()       {}
+func (b *BreakStatement) SType() StatementType { return BreakStatementType }
 func (b *BreakStatement) TokenLiteral() string { return "break" }
 func (b *BreakStatement) String() string       { return "break" }
 
@@ -253,6 +283,7 @@ type PassStatement struct {
 }
 
 func (b *PassStatement) statementNode()       {}
+func (b *PassStatement) SType() StatementType { return PassStatementType }
 func (b *PassStatement) TokenLiteral() string { return "pass" }
 func (b *PassStatement) String() string       { return "pass" }
 
@@ -261,5 +292,6 @@ type BreakpointStatement struct {
 }
 
 func (b *BreakpointStatement) statementNode()       {}
+func (b *BreakpointStatement) SType() StatementType { return BreakpointStatementType }
 func (b *BreakpointStatement) TokenLiteral() string { return "breakpoint" }
 func (b *BreakpointStatement) String() string       { return "breakpoint" }
